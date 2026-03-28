@@ -1,0 +1,22 @@
+# Repo Scope
+
+This repo is for promoted LoL3 reverse-engineering material.
+
+Included:
+
+- promoted writeups
+- public checkpoint memos
+- evidence summaries
+- tooling notes
+
+Not included:
+
+- retail game files
+- large raw extraction dumps
+- private working ledgers
+- unverified model output
+
+Working rule:
+
+- promote only locally verified material
+- keep raw experiments and advisory drafts out of the public repo
