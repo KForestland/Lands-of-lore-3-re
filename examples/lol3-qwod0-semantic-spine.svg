@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+  <defs>
+    <style>
+      .bg { fill: #f7f3ea; }
+      .title { font: 700 28px Georgia, serif; fill: #1f2a1f; }
+      .label { font: 700 22px Georgia, serif; fill: #1f2a1f; }
+      .small { font: 400 15px Georgia, serif; fill: #314031; }
+      .box { stroke: #1f2a1f; stroke-width: 2; rx: 16; ry: 16; }
+      .arrow { stroke: #1f2a1f; stroke-width: 4; fill: none; marker-end: url(#m); }
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2a1f"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1200" height="520"/>
+  <text class="title" x="50" y="55">LoL3 QWOD0 Persistent Semantic Spine</text>
+  <text class="small" x="50" y="85">Repo-grade checkpoint: durable local spine, not one simple global takeover curve.</text>
+
+  <rect class="box" x="90" y="180" width="220" height="110" fill="#bad0f0"/>
+  <text class="label" x="165" y="225">ad</text>
+  <text class="small" x="125" y="255">entry_high_feeder</text>
+
+  <rect class="box" x="450" y="180" width="220" height="110" fill="#d6e3b8"/>
+  <text class="label" x="525" y="225">c5</text>
+  <text class="small" x="475" y="255">secondary_settled_carrier</text>
+
+  <rect class="box" x="810" y="180" width="220" height="110" fill="#c8ddb0"/>
+  <text class="label" x="885" y="225">a5</text>
+  <text class="small" x="845" y="255">settled_high_carrier</text>
+
+  <rect class="box" x="450" y="350" width="220" height="90" fill="#e7d2b9"/>
+  <text class="label" x="525" y="390">eb</text>
+  <text class="small" x="500" y="415">mixed_high_carrier</text>
+
+  <path class="arrow" d="M310 235 C380 235, 380 235, 450 235"/>
+  <path class="arrow" d="M670 235 C740 235, 740 235, 810 235"/>
+  <path class="arrow" d="M310 245 C380 245, 380 395, 450 395"/>
+
+  <text class="small" x="365" y="210">durable feeder</text>
+  <text class="small" x="720" y="210">cleanest settled edge</text>
+  <text class="small" x="335" y="370">mixed side branch</text>
+
+  <text class="small" x="90" y="470">Strict read: `ad -> c5 -> a5` is the strongest durable local spine; `eb` self-holds as the mixed stable-side member.</text>
+</svg>

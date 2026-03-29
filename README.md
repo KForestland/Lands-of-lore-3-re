@@ -23,6 +23,7 @@ If you are new to this repo, read these in order:
 6. [`repo-scope.md`](docs/repo-scope.md) — what this repo includes and excludes
 7. [`provenance.md`](docs/provenance.md) — where the current public claims came from
 8. [`tooling-catalog.md`](docs/tooling-catalog.md) — what tooling and workflows were actually used
+9. [`examples/README.md`](examples/README.md) — small visual aids for the current structural and semantic checkpoint
 
 ## Status
 
@@ -47,6 +48,7 @@ RE closure: late-stage semantic checkpoint
 ## Repository Layout
 
 - [`docs/`](docs) — promoted writeups and checkpoint notes
+- [`examples/`](examples) — explanatory diagrams for the current checkpoint
 - [`evidence/`](evidence) — evidence indexes and witness summaries
 - [`data/`](data) — machine-readable summaries and catalogs
 - [`tools/`](tools) — curated tooling notes and future public tools

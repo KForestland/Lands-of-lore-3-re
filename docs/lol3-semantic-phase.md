@@ -55,3 +55,8 @@ Strict read:
 - it does not cleanly land on the durable `QWOD0` semantic spine
 - it does not expose its own small persistent shared high-byte core across sampled windows
 - do not treat it as a third byte-level semantic anchor
+
+## Visual Aids
+
+- [`../examples/lol3-qwod0-semantic-spine.svg`](../examples/lol3-qwod0-semantic-spine.svg)
+- [`../examples/lol3-swod4-semantic-spine.svg`](../examples/lol3-swod4-semantic-spine.svg)

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+  <defs>
+    <style>
+      .bg { fill: #f7f3ea; }
+      .title { font: 700 28px Georgia, serif; fill: #1f2a1f; }
+      .label { font: 600 18px Georgia, serif; fill: #1f2a1f; }
+      .small { font: 400 14px Georgia, serif; fill: #314031; }
+      .box { stroke: #1f2a1f; stroke-width: 2; rx: 14; ry: 14; }
+      .arrow { stroke: #1f2a1f; stroke-width: 3; fill: none; marker-end: url(#m); }
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2a1f"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="700"/>
+  <text class="title" x="50" y="55">LoL3 Typed Region / Regime Path Checkpoint</text>
+  <text class="small" x="50" y="85">Shared outer layer, different witness paths.</text>
+
+  <rect class="box" x="70" y="150" width="230" height="90" fill="#dfe8d4"/>
+  <text class="label" x="100" y="190">mixed_transition</text>
+  <text class="small" x="100" y="215">shared outer regime</text>
+
+  <rect class="box" x="380" y="90" width="260" height="90" fill="#c9d8ef"/>
+  <text class="label" x="415" y="130">high_takeover_side</text>
+  <text class="small" x="415" y="155">QWOD0 side</text>
+
+  <rect class="box" x="380" y="225" width="260" height="90" fill="#eed7bc"/>
+  <text class="label" x="415" y="265">hybrid_feeder_zone</text>
+  <text class="small" x="415" y="290">CKEEP side</text>
+
+  <rect class="box" x="380" y="360" width="260" height="90" fill="#f0c6b8"/>
+  <text class="label" x="405" y="400">low_boundary_local</text>
+  <text class="small" x="405" y="425">SWOD4 side</text>
+
+  <rect class="box" x="760" y="90" width="320" height="90" fill="#bad0f0"/>
+  <text class="label" x="790" y="130">QWOD0 staged branch-owner</text>
+  <text class="small" x="790" y="155">high-family takeover driven</text>
+
+  <rect class="box" x="760" y="225" width="320" height="90" fill="#e8d6be"/>
+  <text class="label" x="790" y="265">CKEEP hybrid feeder</text>
+  <text class="small" x="790" y="290">support / transitional witness</text>
+
+  <rect class="box" x="760" y="360" width="320" height="90" fill="#f2c4b6"/>
+  <text class="label" x="790" y="400">SWOD4 immediate branch-owner</text>
+  <text class="small" x="790" y="425">ordering-first, later low-collapse</text>
+
+  <path class="arrow" d="M300 195 C340 195, 340 135, 380 135"/>
+  <path class="arrow" d="M300 195 C340 195, 340 270, 380 270"/>
+  <path class="arrow" d="M300 195 C340 195, 340 405, 380 405"/>
+  <path class="arrow" d="M640 135 C700 135, 700 135, 760 135"/>
+  <path class="arrow" d="M640 270 C700 270, 700 270, 760 270"/>
+  <path class="arrow" d="M640 405 C700 405, 700 405, 760 405"/>
+
+  <text class="small" x="85" y="520">Strongest public read:</text>
+  <text class="small" x="85" y="545">- one shared outer typed-region framework</text>
+  <text class="small" x="85" y="570">- small shared regime vocabulary</text>
+  <text class="small" x="85" y="595">- different driver paths through that vocabulary</text>
+  <text class="small" x="85" y="620">- QWOD0 and SWOD4 are the two true semantic anchors</text>
+</svg>
