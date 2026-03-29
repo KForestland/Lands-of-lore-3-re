@@ -21,6 +21,10 @@ Strict read:
 - `ad` is the strongest entry-side anchor
 - `c5 -> a5` is the cleanest settled-side durable edge
 - `eb` is not noise; it is the mixed self-holding branch
+- `QWOD0` does not show one simple global left-to-right takeover curve
+  - `a5` is already strong in early bins
+  - `c5` surges later in specific bins
+  - the durable checkpoint is the local persistent spine, not one monotonic full-body crossover
 
 ## SWOD4
 
@@ -42,6 +46,8 @@ Strict read:
 - `00` is the only durable mid-body lock hub
 - `06/02` are real, but early-body-local
 - `0b` is the useful resolver back into `00`
+- strongest coarse takeover span:
+  - `00` first clearly beats `02+06+0b` across `0768-1280`
 
 ## CKEEP
 

@@ -25,10 +25,14 @@ Strongest current semantic spine:
 - `QWOD0`
   - `ad -> c5 -> a5`
   - `eb` as mixed self-holding side member
+  - strongest durable settled edge:
+    - `c5 -> a5`
 - `SWOD4`
   - early `0b -> 02 -> 06`
   - later `0b -> 00`
   - `00 -> 00`
+  - strongest coarse takeover span:
+    - `00` dominance across `0768-1280`
 
 Practical read:
 

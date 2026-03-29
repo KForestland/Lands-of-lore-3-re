@@ -40,6 +40,9 @@ Driver types:
   - `eb` = mixed high carrier
   - persistent spine:
     - `ad -> c5 -> a5`
+  - strict note:
+    - `c5 -> a5` is the cleanest repo-grade settled edge
+    - the full body is not one simple monotonic takeover curve
 
 - `SWOD4`
   - `00` = broad lock hub
@@ -50,6 +53,9 @@ Driver types:
     - early `0b -> 02 -> 06`
     - later `0b -> 00`
     - `00 -> 00`
+  - strict note:
+    - `00` first clearly beats `02+06+0b` across `0768-1280`
+    - `06/02` are early-body-local, not durable mid-body anchors
 
 ## Still Open
 
