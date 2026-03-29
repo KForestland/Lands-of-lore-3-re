@@ -25,6 +25,22 @@ If you are new to this repo, read these in order:
 8. [`tooling-catalog.md`](docs/tooling-catalog.md) — what tooling and workflows were actually used
 9. [`examples/README.md`](examples/README.md) — small visual aids for the current structural and semantic checkpoint
 
+## Quick Start
+
+```bash
+git clone https://github.com/KForestland/Lands-of-lore-3-re.git
+cd Lands-of-lore-3-re
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Then read:
+
+1. [`docs/closure-summary.md`](docs/closure-summary.md)
+2. [`docs/lol3-current-status.md`](docs/lol3-current-status.md)
+3. [`docs/lol3-semantic-phase.md`](docs/lol3-semantic-phase.md)
+
 ## Status
 
 RE closure: late-stage semantic checkpoint
