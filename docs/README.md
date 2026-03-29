@@ -4,6 +4,12 @@ Promoted writeups documenting the current public LoL3 structural and semantic ch
 
 This folder is for promoted LoL3 reverse-engineering writeups only.
 
+Fast orientation:
+
+- start with `closure-summary.md` if you want the shortest truthful state read
+- read `lol3-structural-phase.md` before `lol3-semantic-phase.md`
+- use `lol3-current-status.md` if you want the strictest “what is proven vs still open” split
+
 Read order:
 
 - `closure-summary.md`
@@ -27,3 +33,4 @@ Working rule:
 
 - only move material here after it has been locally verified and cleaned
 - no raw advisory dumps
+- when in doubt, tighten the claim instead of widening the story
