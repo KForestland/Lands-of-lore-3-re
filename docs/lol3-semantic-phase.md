@@ -2,6 +2,12 @@
 
 This note captures the current public semantic checkpoint.
 
+Fast read:
+
+- the strongest durable `QWOD0` edge is `c5 -> a5`
+- the strongest durable `SWOD4` edges are `0b -> 00` and `00 -> 00`
+- everything else in this note should be read around those anchors
+
 ## QWOD0
 
 Promoted byte-level behavior labels:
@@ -48,6 +54,12 @@ Strict read:
 - `0b` is the useful resolver back into `00`
 - strongest coarse takeover span:
   - `00` first clearly beats `02+06+0b` across `0768-1280`
+
+## Repo-Grade Anchor Table
+
+See also:
+
+- [`../evidence/lol3-semantic-anchor-table.md`](../evidence/lol3-semantic-anchor-table.md)
 
 ## CKEEP
 

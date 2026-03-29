@@ -15,6 +15,12 @@ The strongest current results are:
     - `QWOD0`: `c5 -> a5`
     - `SWOD4`: `0b -> 00`, `00 -> 00`
 
+Strict limits on that checkpoint:
+
+- `QWOD0` does not expose one simple global left-to-right takeover curve across the full body
+- `SWOD4` early `06/02` behavior is real, but early-body-local rather than a durable mid-body lock state
+- `CKEEP` remains useful structurally, but is not promoted as a third byte-level semantic anchor
+
 What this means:
 
 - the LoL3 lane is no longer “just structurally constrained”
