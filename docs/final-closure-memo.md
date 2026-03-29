@@ -11,6 +11,9 @@ The strongest current results are:
 - the byte-level semantic checkpoint is now strong enough to promote:
   - `QWOD0`: `ad -> c5 -> a5`, with `eb` as mixed side branch
   - `SWOD4`: early `0b -> 02 -> 06`, then collapse into `0b -> 00` and `00 -> 00`
+  - strongest repo-grade durable edges:
+    - `QWOD0`: `c5 -> a5`
+    - `SWOD4`: `0b -> 00`, `00 -> 00`
 
 What this means:
 
