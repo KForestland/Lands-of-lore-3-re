@@ -43,6 +43,7 @@ Driver types:
   - strict note:
     - `c5 -> a5` is the cleanest repo-grade settled edge
     - the full body is not one simple monotonic takeover curve
+    - `ad` is still the best entry-side anchor, but it should not be overread as a full-body master switch
 
 - `SWOD4`
   - `00` = broad lock hub
@@ -56,6 +57,7 @@ Driver types:
   - strict note:
     - `00` first clearly beats `02+06+0b` across `0768-1280`
     - `06/02` are early-body-local, not durable mid-body anchors
+    - the durable lock result is `0b -> 00` and `00 -> 00`, not the full early local family by itself
 
 ## Still Open
 

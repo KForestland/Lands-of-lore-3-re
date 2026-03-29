@@ -37,3 +37,6 @@ Strongest current semantic spine:
 Practical read:
 
 - the remaining uncertainty is mostly meaning refinement, not structural uncertainty
+- the safest repo-grade anchors are:
+  - `QWOD0`: `c5 -> a5`
+  - `SWOD4`: `0b -> 00`, `00 -> 00`
