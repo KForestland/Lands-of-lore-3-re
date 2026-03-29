@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Repo Scope
+    url: https://github.com/KForestland/Lands-of-lore-3-re/blob/main/docs/repo-scope.md
+    about: Check the public repo boundaries before opening a broader feature or data request.
