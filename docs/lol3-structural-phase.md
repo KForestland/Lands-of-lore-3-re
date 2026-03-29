@@ -41,3 +41,7 @@ Useful regime states:
   - `QWOD0` semantic side
   - `SWOD4` semantic side
   - `CKEEP` as feeder/support
+
+## Visual Aid
+
+- see [`../examples/lol3-typed-region-regime-path.svg`](../examples/lol3-typed-region-regime-path.svg)

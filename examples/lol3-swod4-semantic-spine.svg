@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">
+  <defs>
+    <style>
+      .bg { fill: #f7f3ea; }
+      .title { font: 700 28px Georgia, serif; fill: #1f2a1f; }
+      .label { font: 700 22px Georgia, serif; fill: #1f2a1f; }
+      .small { font: 400 15px Georgia, serif; fill: #314031; }
+      .box { stroke: #1f2a1f; stroke-width: 2; rx: 16; ry: 16; }
+      .arrow { stroke: #1f2a1f; stroke-width: 4; fill: none; marker-end: url(#m); }
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2a1f"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1200" height="620"/>
+  <text class="title" x="50" y="55">LoL3 SWOD4 Persistent Semantic Spine</text>
+  <text class="small" x="50" y="85">Repo-grade checkpoint: early moving lock family, later hard collapse into `00`.</text>
+
+  <rect class="box" x="90" y="150" width="180" height="95" fill="#f0d2b2"/>
+  <text class="label" x="155" y="190">0b</text>
+  <text class="small" x="120" y="215">mixed_lock_member</text>
+
+  <rect class="box" x="390" y="150" width="180" height="95" fill="#efc59f"/>
+  <text class="label" x="455" y="190">02</text>
+  <text class="small" x="415" y="215">co-reinforcement_lane</text>
+
+  <rect class="box" x="690" y="150" width="180" height="95" fill="#efc097"/>
+  <text class="label" x="755" y="190">06</text>
+  <text class="small" x="720" y="215">early-body reinforcement</text>
+
+  <rect class="box" x="510" y="360" width="220" height="110" fill="#e6b39f"/>
+  <text class="label" x="590" y="405">00</text>
+  <text class="small" x="555" y="435">broad_lock_hub</text>
+
+  <path class="arrow" d="M270 197 C330 197, 330 197, 390 197"/>
+  <path class="arrow" d="M570 197 C630 197, 630 197, 690 197"/>
+  <path class="arrow" d="M180 245 C180 310, 570 310, 570 360"/>
+
+  <text class="small" x="320" y="175">early chain</text>
+  <text class="small" x="610" y="175">early reinforcement</text>
+  <text class="small" x="245" y="332">later resolver path into `00`</text>
+
+  <path class="arrow" d="M620 470 C620 525, 620 525, 620 525"/>
+  <text class="small" x="560" y="510">late: `00 -> 00`</text>
+
+  <text class="small" x="90" y="560">Strict read: early `0b -> 02 -> 06` is real, but later the lock family collapses into `0b -> 00` and `00 -> 00`.</text>
+</svg>
