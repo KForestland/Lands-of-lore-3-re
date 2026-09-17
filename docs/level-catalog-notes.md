@@ -14,3 +14,13 @@ Private Classic lane writes per-stem JSON catalogs under the local Godot project
 `assets/data/level_catalogs/` for UI and upcoming importers.
 
 Do not commit retail blobs.
+
+## Placement records (field2)
+
+Live object descriptors use sentinel `0xffffffff` then an inline name (Door, Gate, …)
+and packed `control/coord/state/value` words. Coord byte quads are exported into Classic
+`level_catalogs/*.json` as `placements[]` with scale still TBD.
+
+## Related
+
+See also `lmf-size-formula.md` for `.LMF` nested index geometry pools.
