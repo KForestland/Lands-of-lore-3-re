@@ -45,6 +45,8 @@ Then read:
 
 RE closure: late-stage semantic checkpoint
 
+- WSX peeling for witness families `QWOD0` / `SWOD4` / `RVOL0` / `CKEEP` is documented and toolable: [`docs/wsx-extraction.md`](docs/wsx-extraction.md), [`tools/extract_wsx_entries.py`](tools/extract_wsx_entries.py)
+
 - `LMF` containers and `WSX`/opaque blob extraction are structurally understood enough for public documentation
 - runtime provenance is solid:
   - LoL3 is `WSX`-driven at runtime
