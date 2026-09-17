@@ -42,3 +42,5 @@ Intentionally not shipped here:
 - raw large trace dumps
 - temporary one-off analysis drivers
 - uncensored retail asset material
+
+- level catalog notes: [`level-catalog-notes.md`](level-catalog-notes.md)
