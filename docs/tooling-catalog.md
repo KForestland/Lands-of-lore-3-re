@@ -11,7 +11,7 @@ Tooling classes used in practice:
 
 - extraction helpers
   - locate and peel `LMF` / `WSX` records into comparable opaque blobs
-  - public peeler: [`../tools/extract_wsx_entries.py`](../tools/extract_wsx_entries.py) (see [`wsx-extraction.md`](wsx-extraction.md))
+  - public peeler: [`../tools/extract_wsx_entries.py`](../tools/extract_wsx_entries.py) — general `u16`-count WSX family (51/52 DAT files; see [`wsx-extraction.md`](wsx-extraction.md))
 - local structural passes
   - band counts
   - transition matrices
