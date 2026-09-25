@@ -47,3 +47,7 @@ separate source format and should not be decoded with this row-span parser.
 
 This document does not claim trusted final-color PNGs or close the CKEEP door
 texture; those remain open.
+
+## CKEEP palette boundary (2026-09-25)
+
+`/home/bob/lol3_out/godot_import/assets/textures_ckeep/ckeep_palette.png` is a 256-entry VGA-style palette visualization. Its channels are predominantly 6-bit values expanded to 8-bit (`0..63` multiplied by four, with minor rounding/low-bit artifacts), matching the bank palette representation. It is therefore useful for indexed previews but is not the renderer's missing RGB555/u16 bake table. The final color stage remains a runtime lookup or remap path; substituting this PNG's colors cannot close that gap.
