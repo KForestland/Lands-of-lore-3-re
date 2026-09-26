@@ -29,3 +29,13 @@ Header (`u32@0=0`, `u32@4=38`, then fields):
 - `field[1]` / `field[2]` ≈ geometry-pool start
 - `field[3]` ≈ geometry-pool end / large payload bound
 - `field[4]` ≈ end of primary payload span
+
+
+## 2026-09-17 leaf probe (CKEEP)
+
+Full walk: **6173** non-directory leaves, **4576** directory indexes.
+Leaf bodies are **not** raw `i16` XYZ (channels span full `-32768..32767`, entropy ~5–6, frequent `0x2000` tags).
+Whole-leaf / body LZO1X via game `minilzo` tool: **0 hits**.
+Heuristic OBJs under `lol3_out/godot_import/meshes_lmf/` remain **untrusted**.
+
+Parallel MAP (`WSX entry1`) finding: `field0` is strong 2D `(0,x,0,z)` point runs; `field1` is 5066×8-byte records (`d` often 16, `c` often multiples of 128); `field2` has many `0xFFFF`-terminated headers — floor-poly decode still partial.

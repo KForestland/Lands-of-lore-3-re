@@ -2,6 +2,17 @@
 
 This file summarizes the current public LoL3 checkpoint.
 
+## Asset pipeline status (2026-09-26)
+
+- WSX peel: 51/52 DAT files ([wsx-extraction.md](wsx-extraction.md)).
+- Textures: CONVERT `028E`/`828E` row-span decode is exact (26/26 payloads; silhouettes
+  verified). Colour is open: indices address per-texture colour tables, not a shared
+  palette ([texture-028e-evidence.md](texture-028e-evidence.md)). LEVED `+1` packs are a
+  separate format ([tex-format.md](tex-format.md)).
+- Geometry: LMF directory and size ladder decoded ([lmf-size-formula.md](lmf-size-formula.md));
+  leaf vertex semantics unresolved. MAP `field0` outlines are usable for triage
+  ([map-format.md](map-format.md)).
+
 ## Proven
 
 - `LMF` uses a fixed record table at `0x100`

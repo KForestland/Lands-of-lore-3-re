@@ -51,3 +51,22 @@ texture; those remain open.
 ## CKEEP palette boundary (2026-09-25)
 
 `/home/bob/lol3_out/godot_import/assets/textures_ckeep/ckeep_palette.png` is a 256-entry VGA-style palette visualization. Its channels are predominantly 6-bit values expanded to 8-bit (`0..63` multiplied by four, with minor rounding/low-bit artifacts), matching the bank palette representation. It is therefore useful for indexed previews but is not the renderer's missing RGB555/u16 bake table. The final color stage remains a runtime lookup or remap path; substituting this PNG's colors cannot close that gap.
+
+## Per-texture palette order (2026-09-26)
+
+Adjacent-pixel measurements over all sampled witnesses show that the span
+indices are not ordered for any shared palette. The bank's own palette at
+`+0x6A2` gives a mean 6-bit colour step of 47–57. Every level art-pack
+palette gives about 12–15, and all levels score about the same, because they are
+ramp-ordered. Index differences between neighbours peak at 0 and then at
+texture-specific fixed jumps (for example ±40/±13/±17), not ±1. Each texture uses
+nearly every index in `2..N`. The indices therefore address a per-texture colour
+table in quantizer order. Substituting a bank, level, fade or shade palette cannot
+recover the original colours.
+
+The bank header regions after the palette are index tables, not colour: `+0x9A2`
+holds 66 × 256-byte light-level rows (`0x4200`), and `+0x4BA2` holds two 256×256
+byte tables (`0x20000`). Texture records are `u32 flags, u16 w, u16 h, u32 size`
+plus the payload, with no inline palette. The remaining task is to locate the
+per-texture table through the bank directory or capture the runtime
+`0x6601B8` u16 table for one known slot.
