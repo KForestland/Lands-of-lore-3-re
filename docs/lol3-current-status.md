@@ -2,6 +2,14 @@
 
 This file summarizes the current public LoL3 checkpoint.
 
+## Planning status (2026-11-06)
+
+LoL3 Classic in Godot comes after LoL2 Classic and LoL1 Classic (owner order). The planning research is done: full
+walkthroughs and guides per guild path, story cards for the main steps, a known-bugs and patches list (last official
+patch v1.07a, 9 May 1999; the volcano elevator can still stick after it), a longplay index, and a first build plan
+(engine first, then maps). The main open RE blocker for a Classic rebuild is still texture colour (above).
+How the overall project works: [METHOD.md](https://github.com/KForestland/lands-of-lore-ai-comms/blob/main/METHOD.md).
+
 ## Asset pipeline status (2026-09-26)
 
 - WSX peel: 51/52 DAT files ([wsx-extraction.md](wsx-extraction.md)).
