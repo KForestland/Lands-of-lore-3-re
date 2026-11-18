@@ -1,5 +1,7 @@
 # LoL3 texture bank witnesses
 
+> **History.** Kept as a record of an earlier pass. Current page: [formats/textures.md](formats/textures.md).
+
 The [format reference](formats/textures.md) gives the native
 reader, the compressed `.TE_` wrapper, and the row-span layout.
 The earlier interpretation of the packed CKEEP door-name

@@ -60,8 +60,8 @@ Driver types:
 
 - `SWOD4`
   - `00` = broad lock hub
-  - `06` = early-body reinforcement lane
-  - `02` = soft co-reinforcement lane
+  - `06` = early-body reinforcement band
+  - `02` = soft co-reinforcement band
   - `0b` = mixed lock member
   - persistent spine:
     - early `0b -> 02 -> 06`

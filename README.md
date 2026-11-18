@@ -20,7 +20,13 @@ LoL3 is less fully documented than the first two games. Every page says what was
 
 ## Quick start
 
-You need Python 3.8+ and your own copy of the game, the English GOG release (the script check pins `LOL3.DAT` by its hash). The tools read `DAT/` and, for `LOL3.DAT` and the texture cache, its parent folder. The game program is `LOL3.DAT` (a 1.6 MB Windows PE file); `LOL3.EXE` is a small launcher. The large `cdcache.wsx` in the game folder is a cache the game writes when it runs: the two texture checks report SKIP if it is missing.
+You need Python 3.8+ and your own copy of the game: the English GOG release (the script check pins `LOL3.DAT` by its hash). Optional: the system LZO library (`apt install liblzo2-2`) for the `--decode` checks.
+
+The tools read the `DAT/` folder and two files in the game folder above it:
+- `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
+- `cdcache.wsx`, a large cache the game writes when it runs. The two texture checks report SKIP if it is missing.
+
+`LOCAL.WSX` and `locallng.wsx` in the game folder are not used.
 
 ```bash
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
@@ -48,12 +54,12 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
-| Textures | Row-span records: all 854 in this installation's texture cache decode exactly and join to palette sources; the 18 `.TE_` wrappers decode (465 LZO1X chunks); a standalone editor format is unconfirmed (Q7) |
+| Textures | Row-span records: all 854 in this installation's texture cache decode exactly and join to palette sources; the 18 `.TE_` wrappers decode (465 LZO1X chunks); a standalone editor format is unconfirmed (Q1, Q6, Q7) |
 | Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced, RGB output open (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, effects marked CONFIRMED or UNCONFIRMED; per-level summaries (Q11) |
-| Items, spells, dialogue, combat | 343 item rows, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join) the creature hit resolver, item use, cast cost and mana debit traced in the program; per-item effects and mitigation names open (Q12) |
-| Saves | Header, directories and compression mapped on 47 original-program saves; payload meanings open (Q13) |
+| Items, spells, dialogue, combat | Traced in the program: 343 item rows, six item handlers, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: most per-item effects and mitigation names (Q12) |
+| Saves | Header, directories and compression mapped on 47 saves the original program wrote in our copy (player saves, not shipped; no tool here re-checks them); payload meanings open (Q13) |
 
 ## Repository layout
 

@@ -1,6 +1,6 @@
 # Start here, by goal
 
-You need Python 3.8+ and your own copy of *Lands of Lore III* (the English GOG release). Point the tools at its `DAT` folder once; some tools also read the program `LOL3.DAT` and the game-written `cdcache.wsx` from the folder above it:
+You need Python 3.8+ (optional: the system LZO library, `apt install liblzo2-2`) and your own copy of *Lands of Lore III* (the English GOG release). Point the tools at its `DAT` folder once; some tools also read the program `LOL3.DAT` and the game-written `cdcache.wsx` from the folder above it:
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
@@ -14,7 +14,7 @@ Follow the engine from startup to saving in [How Lands of Lore III works](HOW_TH
 ## I want to open the archives
 
 1. Read [formats/wsx.md](formats/wsx.md): the WSX layout, the name hash and a worked example.
-2. List and extract entries: `python3 tools/extract_wsx_entries.py --data $LOL3_DAT --out ../wsx-out`.
+2. Extract the entries of one archive: `python3 tools/extract_wsx_entries.py --data $LOL3_DAT --stems CKEEP --out ../wsx-out`. Without `--stems` it writes every archive (about 2.3 GB).
 3. How the program reads them: [lol3-wsx-reader.md](lol3-wsx-reader.md).
 
 ## I want to understand a level

@@ -31,3 +31,9 @@
 | Predicate | A five-byte MAP +0xBC row (operation, two typed operands) that the program evaluates before a script group runs ([events page](lol3-script-events.md)). |
 | Waypoint | An 8-byte MAP row (signed X/Z) that creature paths step through; paths are 4-byte records (base index, count, flag) ([readers](lol3-map-odf-readers.md#tail-after-the-vertices)). |
 | Surface | A 56-byte row of MAP section 2: four neighbour indices, four vertex indices and a height ([readers](lol3-map-odf-readers.md)). |
+| Field *n*, section *n* | Field *n* is the *n*-th dword after the format tag 38 in a MAP or ODF header; a section is a span of the entry those fields point to ([MAP and ODF](formats/map-odf.md)). "table38" is the older pages' name for this header. |
+| LCW | Westwood's byte-oriented compression ("format 80"), used inside VQA frames ([series formats](series-formats.md)). |
+| VQA | Westwood's vector-quantized movie format ([VQA](formats/vqa.md)). |
+| Miles | The Miles Sound System, the audio library the program imports ([audio](formats/audio.md)). |
+| Arm 3 | Palette-selector arm 3 (`0x44B6E0`), the one all cache textures use. |
+| Witness family | A group of byte samples from the older statistics pages that share one pattern ([history](lol3-semantic-phase.md)). |

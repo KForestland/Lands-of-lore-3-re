@@ -39,8 +39,8 @@ Strict read:
 Promoted byte-level behavior labels:
 
 - `00` = `broad_lock_hub`
-- `06` = `early-body reinforcement lane`
-- `02` = soft `co-reinforcement_lane`
+- `06` = `early-body reinforcement band`
+- `02` = soft `co-reinforcement_band`
 - `0b` = `mixed_lock_member`
 
 Current persistent spine:

@@ -24,6 +24,6 @@ Include the strongest concrete evidence only.
 - medium
 - high
 
-## Promotion Standard
+## What would make it a page
 
-Explain what would need to be true before this belongs in promoted public docs.
+Explain what would need to be checked against the original files before this belongs in the documentation.

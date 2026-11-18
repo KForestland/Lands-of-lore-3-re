@@ -8,9 +8,9 @@ Good contributions for this repo:
 
 - documentation fixes
 - wording/clarity improvements backed by evidence
-- public-safe tooling cleanup
+- tool fixes (tools read your own game files and write nothing into the repository)
 - machine-readable summaries that match the documentation
-- diagram or example improvements that clarify the current checkpoint
+- diagram or example improvements that clarify a page
 
 Out of scope for this repo:
 
@@ -26,7 +26,6 @@ Out of scope for this repo:
   - practical interpretation
   - still-open hypotheses
 - Prefer updating an existing format page over adding a new note.
-- If a result is phase-local, say so directly.
 - If a result only holds for one witness or one window, do not silently generalize it.
 
 ## Evidence Standard
@@ -34,11 +33,7 @@ Out of scope for this repo:
 Before adding a new LoL3 claim, try to include:
 
 1. the witness or witnesses involved
-2. the exact scale of the result:
-   - whole stream
-   - pre-body region
-   - body window
-   - local byte neighborhood
+2. the exact scope of the result: a whole file or entry, one region of it, or a few bytes
 3. whether the result replicated in another window or witness
 4. what competing readings were ruled out
 
@@ -48,7 +43,7 @@ Before adding a new LoL3 claim, try to include:
 - `examples/` holds diagrams and explanatory visuals.
 - `evidence/` holds short witness/evidence indexes.
 - `data/` holds machine-readable summaries once stable.
-- `tools/` holds public-safe helpers only.
+- `tools/` holds the readers and checks.
 
 ## Pull Requests
 

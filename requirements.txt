@@ -1,1 +1,1 @@
-# No required Python packages yet; current public docs/examples are dependency-free.
+# No required Python packages. Optional system library: liblzo2 (apt install liblzo2-2) for the --decode checks.

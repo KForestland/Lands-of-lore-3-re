@@ -208,6 +208,15 @@ def summarize(stem, walks, predicates):
     return "\n".join(lines) + "\n"
 
 
+def _inside(path, folder):
+    """True when path lies inside folder (Path.is_relative_to needs Python 3.9)."""
+    try:
+        path.relative_to(folder)
+        return True
+    except ValueError:
+        return False
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__, out_help="external directory for full listings")
     parser.add_argument("--summary", type=Path, help="write the small checked-in notes")
@@ -218,7 +227,7 @@ def main():
         data_dir = Path(args.data).resolve()
         root = Path(__file__).resolve().parents[1]
         output = Path(args.out).resolve() if args.out else args.summary
-        if args.out and (output.is_relative_to(root) or output.is_relative_to(data_dir.parent)):
+        if args.out and (_inside(output, root) or _inside(output, data_dir.parent)):
             raise ValueError("full listings require a directory outside this checkout and the game folder")
         if output:
             output.mkdir(parents=True, exist_ok=True)
