@@ -9,6 +9,7 @@ LoL3 is much less understood than the first two games. Many pages say what was m
 ## What you get
 
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
+- **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Tools** in [`tools/`](tools/README.md): a WSX reader, an LMF light-map checker, a texture-record checker, `check_all.py` and `repo_guard.py`.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -23,7 +24,7 @@ You need Python 3.8+ and your own copy of the game.
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 4 checks, ends with ALL 4 CHECKS PASSED
+python3 tools/check_all.py                  # 5 checks, ends with ALL 5 CHECKS PASSED
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 ```
 
