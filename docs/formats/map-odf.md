@@ -6,8 +6,8 @@ The two kinds differ in field 0 and size. The executable's strings name the leve
 
 | Kind | Field 0 | Size | Contents (older notes) |
 |---|---:|---|---|
-| MAP | 12,076 | large, 0.5–3.4 MB | point runs, 8-byte records, a stream with `0xFFFF` markers ([map-format](../map-format.md)) |
-| ODF | 516 | small, 47–127 KB | named material, prop and spawn lists and placement records ([level catalog notes](../level-catalog-notes.md)) |
+| MAP | 12,076 | 64,423 (RVOL0) to 3,413,407 bytes (BUPP1) | point runs, 8-byte records, a stream with `0xFFFF` markers ([map-format](../map-format.md)) |
+| ODF | 516 | 4,010 (RVOL0) to 126,985 bytes (DLOW1) | named material, prop and spawn lists and placement records ([level catalog notes](../level-catalog-notes.md)) |
 
 Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 - **Count:** 18 MAP and 18 ODF entries, one of each per level archive, next to its LMF.
