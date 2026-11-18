@@ -1,5 +1,7 @@
 # LoL3 level companion types (from LOL3.DAT strings)
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 Per-level assets referenced by the engine:
 
 | Ext | Role (working hypothesis) | CKEEP candidate |

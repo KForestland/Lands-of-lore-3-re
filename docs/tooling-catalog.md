@@ -1,5 +1,7 @@
 # Tooling Catalog
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 Current LoL3 public checkpoint was built mainly with:
 
 - local extraction / byte-inspection scripts
@@ -32,7 +34,7 @@ Main practical workflow:
 
 Public repo note:
 
-- this repo currently documents the workflow more than it ships the private working toolkit
+- this page describes the earlier workflow; the current tools are listed in tools/README.md
 - `tools/` is intentionally conservative until helpers are cleaned for public release
 - diagrams in `examples/` are the current public-facing output of that tooling
 

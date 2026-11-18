@@ -77,7 +77,8 @@ def main():
     try:
         path = cache_path(args.data)
         if path is None:
-            raise ValueError("no cdcache.wsx next to DAT")
+            print("CHECK texture_palettes: SKIP: no game-folder cdcache.wsx next to the DAT folder (the game writes this cache when it runs; the shipped DAT/cdcache.wsx holds no texture records)")
+            return 0
         rows = palette_sources(Path(path).read_bytes())
         if args.check:
             by_bank = Counter(row["bank_offset"] for row in rows.values())

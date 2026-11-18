@@ -1,40 +1,11 @@
 # Docs
 
-Start with [START_HERE.md](START_HERE.md), [STATUS.md](STATUS.md) and the format pages: [WSX](formats/wsx.md), [LMF](formats/lmf.md), [MAP and ODF](formats/map-odf.md), [textures](formats/textures.md). Native readers cover [WSX and cache](lol3-wsx-reader.md), [Light Map](lol3-lmf-reader.md), and [texture colour](lol3-texture-bake.md). The [native object page](lol3-object-dispatch.md) covers script dispatch. Read the [items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md) and [combat](lol3-combat-dispatch.md) and [saved state](lol3-native-saves.md) pages for their native entry points.
+Start with **[START_HERE.md](START_HERE.md)** (by goal), then:
 
-Promoted writeups documenting the current public LoL3 structural and semantic checkpoint.
+- [STATUS.md](STATUS.md): what is documented, which tool checks it, and what is open.
+- [formats/](formats/wsx.md): one page per file format, each with a worked example from the game files: [WSX](formats/wsx.md), [LMF light maps](formats/lmf.md), [MAP and ODF](formats/map-odf.md), [textures](formats/textures.md).
+- [levels/](levels/README.md): one generated sheet per level.
+- The game program `LOL3.DAT`: [WSX reader](lol3-wsx-reader.md), [LMF reader](lol3-lmf-reader.md), [texture bake](lol3-texture-bake.md), [texture palette sources](lol3-texture-palette-sources.md), [MAP and ODF readers](lol3-map-odf-readers.md), [script opcodes](lol3-script-opcodes.md), [object and script dispatch](lol3-object-dispatch.md), [items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md), [saves](lol3-native-saves.md), [dispatch search](lol3-dispatch-search.md).
+- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md), [GLOSSARY.md](GLOSSARY.md), and [what the three games share](series-formats.md).
 
-This folder is for promoted LoL3 reverse-engineering writeups only.
-
-Fast orientation:
-
-- start with `closure-summary.md` if you want the shortest truthful state read
-- read `lol3-structural-phase.md` before `lol3-semantic-phase.md`
-- use `lol3-current-status.md` if you want the strictest “what is proven vs still open” split
-
-Read order:
-
-- `closure-summary.md`
-  - Plain-English summary of the current closure state.
-- `final-closure-memo.md`
-  - Short final handoff memo for the current public repo state.
-- `lol3-current-status.md`
-  - Short state of the work, strongest proven results, and remaining open items.
-- `lol3-structural-phase.md`
-  - Shared typed-region, regime-path, branch-owner/feeder, and driver-type checkpoint.
-- `lol3-semantic-phase.md`
-  - Byte-level semantic checkpoint for the main witnesses.
-- `repo-scope.md`
-  - Explains what this repo includes and excludes.
-- `provenance.md`
-  - Explains where the current repo claims came from.
-- `tooling-catalog.md`
-  - Explains what tools and workflows were actually used.
-
-Working rule:
-
-- only move material here after it has been locally verified and cleaned
-- no raw advisory dumps
-- when in doubt, tighten the claim instead of widening the story
-
-Formats the three Lands of Lore games share, with links to all three repositories: [series-formats.md](series-formats.md).
+The other pages in this folder are older notes, kept as history. Where they disagree with the pages above, the pages above are current.

@@ -16,10 +16,9 @@ This folder should contain:
 Not included:
 
 - raw large trace dumps
-- private scratch ledgers
 - large unpublished analysis ledgers
 
 Working rule:
 
-- keep evidence notes short, scoped, and tied back to promoted docs
-- this folder should help readers navigate the checkpoint, not recreate the full private lab book
+- keep evidence notes short, scoped, and tied back to the pages in docs/
+- this folder helps readers navigate the earlier checkpoint

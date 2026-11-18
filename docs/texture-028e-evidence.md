@@ -1,5 +1,7 @@
 # LoL3 runtime texture evidence: CONVERT 028E
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 The runtime `CONVERT` art banks in `CDCACHE.WSX` use a row-span payload for
 flags `0x028E` and `0x828E`. The decoded record is:
 

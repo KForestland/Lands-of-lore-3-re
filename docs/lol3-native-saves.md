@@ -1,7 +1,7 @@
 # Native LoL3 save slots
 
 VAs refer to the [English retail PE](lol3-lmf-reader.md). The
-witnesses are 47 original-engine slots, including the autosave.
+witnesses are 47 slots written by the original program, including the autosave: a player's own saves in the game's `SAVEGAME` folder (2024–2026), not shipped game data. Another player's saves reproduce the layout, not these exact counts.
 
 ## Names and entry points
 

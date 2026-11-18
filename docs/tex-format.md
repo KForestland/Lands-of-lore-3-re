@@ -1,5 +1,7 @@
 # LoL3 level `.tex` / art blob (notes)
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 ## What the retail blob is
 - Per-level art packs from WSX peels (e.g. CKEEP entry3, SWOD4.TEX).
 - LEVED provenance paths (`Q:\PROJECTS\LOL3\LEVED\...`).

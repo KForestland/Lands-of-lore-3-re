@@ -8,7 +8,7 @@ Updated 2026-09-17.
 **General WSX peeler covers 51/52 retail `DAT/*.WSX` files.** Only `cdcache.wsx`
 fails the size check and needs a separate pass.
 
-Privately verified:
+Verified earlier:
 - Witness packed peels for `QWOD0` / `SWOD4` / `RVOL0` / `CKEEP` matched staged SHA1s
 - Full DAT peel produced thousands of entry blobs + 18 LMF candidates
 
@@ -39,4 +39,4 @@ other entries are `<STEM>.WSX_entryN_hHASH.bin`.
 ## Still open
 - `cdcache.wsx` framing
 - Decode entry payloads (geometry, textures, audio/video codecs)
-- Map stems to Gladstone / portal worlds for Classic coverage
+- Map stems to Gladstone and the portal worlds

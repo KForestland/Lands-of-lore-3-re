@@ -10,7 +10,8 @@ LoL3 is much less understood than the first two games. Many pages say what was m
 
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
-- **Tools** in [`tools/`](tools/README.md): a WSX reader, an LMF light-map checker, a texture-record checker, `check_all.py` and `repo_guard.py`.
+- **Executable pages** in [`docs/`](docs/README.md): the WSX, LMF, texture, MAP/ODF, script, item, spell, dialogue, combat and save readers in the game program `LOL3.DAT`.
+- **Tools** in [`tools/`](tools/README.md): seven checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record and palette checkers, a script framing check, the level-sheet writer and `repo_guard.py`.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
   - [glossary](docs/GLOSSARY.md)
@@ -18,7 +19,7 @@ LoL3 is much less understood than the first two games. Many pages say what was m
 
 ## Quick start
 
-You need Python 3.8+ and your own copy of the game.
+You need Python 3.8+ and your own copy of the game, the English GOG release (the script check pins `LOL3.DAT` by its hash). The tools read `DAT/` and, for `LOL3.DAT` and the texture cache, its parent folder. The game program is `LOL3.DAT` (a 1.6 MB Windows PE file); `LOL3.EXE` is a small launcher. The large `cdcache.wsx` in the game folder is a cache the game writes when it runs: the two texture checks report SKIP if it is missing.
 
 ```bash
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
@@ -37,9 +38,10 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header and one section layout measured on all 18 levels; the rest open (Q4, Q5) |
-| Textures | Row-span records: all 854 in the texture cache decode exactly; colour and the second format open (Q6, Q7) |
-| Movies, music, sound | Containers listed; formats open (Q9, Q10) |
-| Executable, items, spells, dialogue, saves, combat | Not yet documented (Q11, Q12) |
+| Textures | Row-span records: all 854 in this installation's texture cache decode exactly and join to palette sources; the second format open (Q7) |
+| Movies, music | Containers listed; formats open (Q9, Q10) |
+| Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
+| Executable, scripts, items, spells, dialogue, combat, saves | Native readers and dispatch traced; scripts frame exactly with the native size table; many effects open (Q11–Q13, [STATUS](docs/STATUS.md)) |
 
 ## Repository layout
 

@@ -61,12 +61,12 @@ def main():
     a = ap.parse_args()
     path = cache_path(a.data)
     if path is None:
-        print("CHECK texture_spans: no cdcache.wsx next to the DAT folder")
-        return 1
+        print("CHECK texture_spans: SKIP: no game-folder cdcache.wsx next to the DAT folder (the game writes this cache when it runs; the shipped DAT/cdcache.wsx holds no texture records)")
+        return 0
     blob = open(path, "rb").read()
     recs = list(records(blob))
     if a.list:
-        for r in recs[:a.list]:
+        for r in sorted(recs)[:a.list]:
             print(f"offset {r[0]:,}  flags 0x{r[1]:04X}  {r[2]}x{r[3]}  size {r[4]:,}  exact {r[5]}")
     exact = sum(1 for r in recs if r[5])
     by = Counter(f"0x{r[1]:04X}" for r in recs if r[5])

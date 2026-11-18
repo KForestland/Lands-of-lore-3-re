@@ -49,4 +49,6 @@ zero handling and indexed writes. The [palette inventory](../lol3-texture-palett
 
 ## The cache file
 
+The texture records live in the game-folder `cdcache.wsx`, a cache the game writes when it runs (our copy: last written 2026-03-27). The counts on this page (854 records, 4 banks) describe this installation's cache; the two texture checks report SKIP if it is absent.
+
 The `cdcache.wsx` in the game folder has a WSX header for 9 entries and 52,663,679 bytes of data. The file is 104,896,114 bytes, and its storage is laid out by a second, 40-row allocation index at +0x76 ([WSX cache rows](wsx.md#cdcachewsx)): the 854 records lie inside the four occupied texture spans (191, 243, 395 and 25 records), 420 of them past file offset 52,663,793. The `cdcache.wsx` in `DAT/` is a different, 3,264,114-byte file with the same kind of header, and it holds no span records. The allocator and its rows are documented on the WSX page; the origin of the smaller `DAT/` copy is open ([Q1](../OPEN_QUESTIONS.md)).

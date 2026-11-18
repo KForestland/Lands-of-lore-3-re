@@ -13,55 +13,12 @@ Run examples outside the repository.
 | Tool | Reads | `--check` |
 |---|---|---|
 | `check_all.py` | all checks below | prints each line, then `ALL 7 CHECKS PASSED` |
-| `repo_guard.py` | the repository | no game files, media, stray images, machine paths, private or assistant names, or foreign commit identities |
+| `repo_guard.py` | the repository | no game files, media, stray images, machine paths, private or assistant names; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header. |
-| `lol3_level_report.py` | the 18 level archives and their sound sidecars | writes `docs/levels/`; checks the four named entries per level, the MAP section-1 rule and that every sidecar entry is WAVE |
-| `lol3_texture_spans.py` | `cdcache.wsx` in the game folder | every row-span texture record consumes exactly (854 of 854); writes nothing |
+| `lol3_level_report.py` | the 18 level archives and their sound sidecars | with `--out DIR` writes the sheets (the repository's are in `docs/levels/`); checks the four named entries per level, the MAP section-1 rule and that every sidecar entry is WAVE |
+| `lol3_texture_spans.py` | the game-written `cdcache.wsx` in the game folder | every row-span texture record consumes exactly (854 of 854 in our cache); SKIP if the cache is missing |
+| `lol3_texture_palettes.py` | the same cache | every texture joins one palette source through selector arm 3; prints offsets only; SKIP if the cache is missing |
+| `lol3_script_framing.py` | `LOL3.DAT` and the 18 MAP entries | all script streams frame exactly with the native size table; counts only |
 
-Curated public tooling notes for LoL3.
-
-Current public state:
-
-- no standalone public helper has been promoted yet
-- the repo is still documentation-first
-- the current visible outputs of the tooling are summarized in:
-  - [`../docs/tooling-catalog.md`](../docs/tooling-catalog.md)
-  - [`../examples/README.md`](../examples/README.md)
-
-This folder is reserved for:
-
-- public extraction helpers
-- analysis helpers that are clean enough to publish
-- short workflow wrappers
-
-Expected first candidates for promotion:
-
-- small witness-window comparison helpers
-- diagram-generation helpers for the public checkpoint visuals
-- safe extraction wrappers that do not require shipping retail assets
-
-Why it is still empty:
-
-- the private LoL3 workflow still contains too many one-off passes and scratch drivers
-- the public repo should prefer a smaller, cleaner tool surface over a noisy dump
-
-## Promoted helpers
-
-### `extract_wsx_entries.py`
-
-Peels retail `.WSX` containers into entry blobs and LMF candidates.
-
-- Format notes: [`../docs/wsx-extraction.md`](../docs/wsx-extraction.md)
-- Container map: [`../docs/container-inventory.md`](../docs/container-inventory.md)
-
-```bash
-python3 tools/extract_wsx_entries.py \
-  --game-dat /path/to/retail/DAT \
-  --out /path/to/out \
-  --manifest /path/to/manifest.json
-```
-
-Verified against private staged peels for `QWOD0` / `SWOD4` / `RVOL0` / `CKEEP` (16/16 SHA1).
-Does not bundle retail assets.
-
+`lol3_cli.py` is a shared library for the options above, not a command.

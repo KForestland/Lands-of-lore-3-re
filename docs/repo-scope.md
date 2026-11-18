@@ -1,5 +1,7 @@
 # Repo Scope
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 This repo is for promoted LoL3 reverse-engineering material.
 
 Included:
@@ -15,7 +17,6 @@ Not included:
 
 - retail game files
 - large raw extraction dumps
-- private working ledgers
 - unverified model output
 - private scratch scripts and one-off analysis drivers
 - copyrighted full asset redistributions

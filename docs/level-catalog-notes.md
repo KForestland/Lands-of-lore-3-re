@@ -1,5 +1,7 @@
 # Level catalog notes (table38 metadata)
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 Updated 2026-09-17.
 
 Compact WSX entry payloads with `table38` headers expose named level content:

@@ -110,8 +110,8 @@ def sheet(L):
     else:
         lines.append("No sidecar archive.")
     lines += ["", "## Open", "",
-              "- What the level's scripts and objects do: no script reader is known yet "
-              "([dispatch search](../lol3-dispatch-search.md), Q11).",
+              "- What each script group does: the streams frame with the native size table "
+              "([script opcodes](../lol3-script-opcodes.md)), many command effects are open (Q11).",
               "- MAP sections 0 and 2 and the ODF layout (Q4, Q5); what the renderer does with the light map (Q3).", ""]
     return "\n".join(lines)
 

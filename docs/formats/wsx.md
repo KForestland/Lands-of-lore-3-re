@@ -57,6 +57,8 @@ Entries 0 and 1 begin with dword 38. The tool marks an LMF by its first three dw
 
 ## cdcache.wsx
 
+The large game-folder copy measured here was last written by the game when it ran (file date 2026-03-27; the install files date from 2024-01-09). The figures below describe this installation's cache, which the game's initializer creates and fills; another installation may differ.
+
 **CONFIRMED.** `DAT/cdcache.wsx`, game-folder `cdcache.wsx` and
 `cdcache.hdr` share bytes +0x00–+0x71. Their ordinary WSX index
 declares 9 rows and 52,663,679 data bytes at +0/+2. The

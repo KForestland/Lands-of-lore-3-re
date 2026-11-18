@@ -7,11 +7,22 @@
 | `DAT/` | The game folder's data directory, holding the WSX archives. Tools take it as `--data` or `$LOL3_DAT`. |
 | WSX | The game's archive format: a `u16` entry count, 12-byte records (hash, payload offset, size) and payload data. [Native lookup](lol3-wsx-reader.md). |
 | Entry | One payload inside a WSX archive. |
-| LMF | The level light maps (the executable calls the asset "Light Map"): a 38-row directory at `0x100` and LZO1X-compressed groups of members of 44 + 2 × w × h bytes ([LMF page](formats/lmf.md)). |
+| LMF | The level light maps (the executable calls the asset "Light Map"): a header (dword 0 = 0, dword +4 = 38), a directory of 16-byte rows at `0x100` (12,176 rows in CKEEP; the count is a header field) and LZO1X-compressed groups of members of 44 + 2 × w × h bytes ([LMF page](formats/lmf.md)). |
 | LMF storage group | One LZO1X range expanding to consecutive light-map members. See the [native reader](lol3-lmf-reader.md). |
 | Light-map member | One decoded LMF member: a 44-byte head (u32 +0 = 0 or 1, u16 +4 and +6, u32 +8) and 2 × u16(+4) × u16(+6) more bytes; field meanings beyond the length rule are open ([reader page](lol3-lmf-reader.md)). |
 | MAP, ODF | Level files named by the executable's strings; MAP holds 2D point runs and records, ODF object definitions (partly decoded). |
 | `0x028E` / `0x828E` | Flags of the row-span texture records decoded on the [texture page](tex-format.md). |
 | QWOD0, SWOD4 | Two level archives used as reference samples for byte-pattern statistics. |
 | Byte-pattern label | A name for a recurring byte sequence found by statistics, without a known game meaning (Q8). |
-| `LOL3.EXE`, `LOL3.DAT` | The game program; addresses in the pages are its virtual addresses unless a file offset is named. |
+| `LOL3.DAT`, `LOL3.EXE` | `LOL3.DAT` is the game program (a 1.6 MB Windows PE file); addresses in the pages are its virtual addresses (VA) unless a file offset is named, and the pages give the VA-to-file conversion. `LOL3.EXE` is a 77 KB launcher. |
+| Witness | A concrete sample (a record, file or capture) used to test a claim. |
+| Sidecar | The `<STEM>S.WSX` archive next to a level archive; it holds the level's sounds. |
+| `.TE_` | The name under which a level's texture pack is stored in its WSX (`.tex` with the last letter replaced, `0x4E45D1–0x4E463A`). |
+| table38 | The header shared by the MAP and ODF entries: dword 38, then 38 dword fields. |
+| LZO1X | A standard fast compressor; the game calls its decoder at `0x4ECDB0`. |
+| MIX | Westwood's archive format in Lands of Lore II; WSX uses the same layout ([series page](series-formats.md)). |
+| Arm (palette selector) | One branch of the texture palette selector `0x44B6E0`; the cache textures all use arm 3 ([palette sources](lol3-texture-palette-sources.md)). |
+| Mip | A smaller copy of a texture (half the width and height of the one before). |
+| 16.16 | A fixed-point number: a 32-bit value whose high 16 bits are the whole part. |
+| PE, VA | PE is the Windows program format of `LOL3.DAT`; a VA is an address in the loaded program. |
+| LEVED | The name in the original level-editor paths stored in the art packs (`Q:\PROJECTS\LOL3\LEVED\...`). |

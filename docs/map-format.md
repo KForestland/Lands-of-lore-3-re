@@ -1,5 +1,7 @@
 # LoL3 `.map` (WSX entry1) notes
 
+> **History.** Kept as a record of an earlier pass. Current pages: [STATUS.md](STATUS.md) and [formats/](formats/wsx.md); where they differ, the current pages are right.
+
 CKEEP candidate: `CKEEP.WSX_entry1_h637A230E.bin` (~504KB).
 
 ## Header
