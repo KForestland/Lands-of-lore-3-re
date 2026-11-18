@@ -17,7 +17,7 @@ Read order:
 - `final-closure-memo.md`
   - Short final handoff memo for the current public repo state.
 - `lol3-current-status.md`
-  - Short state of the lane, strongest proven results, and remaining open items.
+  - Short state of the work, strongest proven results, and remaining open items.
 - `lol3-structural-phase.md`
   - Shared typed-region, regime-path, branch-owner/feeder, and driver-type checkpoint.
 - `lol3-semantic-phase.md`

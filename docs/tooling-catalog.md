@@ -34,7 +34,7 @@ Public repo note:
 
 - this repo currently documents the workflow more than it ships the private working toolkit
 - `tools/` is intentionally conservative until helpers are cleaned for public release
-- diagrams in `examples/` are the current public-facing output of that tooling lane
+- diagrams in `examples/` are the current public-facing output of that tooling
 
 Intentionally not shipped here:
 

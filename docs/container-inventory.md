@@ -1,6 +1,6 @@
 # LoL3 retail container inventory
 
-Source: `/media/bob/Arikv/REFERENCE/game_files/lol3` (linked as `lol3_out/game`).
+Source: the English GOG release (the game folder that holds `DAT/`).
 
 ## Top-level
 | Path | Role |

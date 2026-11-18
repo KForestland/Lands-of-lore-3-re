@@ -100,10 +100,43 @@ def write_entries(parsed: dict, out_dir: Path, stem: str, max_blob_write: int | 
     return manifest
 
 
+# The one DAT file whose header does not match its size (docs/OPEN_QUESTIONS.md).
+KNOWN_OPEN = {"CDCACHE.WSX"}
+
+USAGE = """
+  extract_wsx_entries.py --data DAT --out DIR [--stems CKEEP ...]   # write entry blobs and a manifest
+  extract_wsx_entries.py --data DAT --check                         # parse every WSX, write nothing
+"""
+
+
+def check(data_dir: Path) -> int:
+    import lol3_cli
+    files = lol3_cli.wsx_files(data_dir)
+    ok, lmf, entries, failed = 0, 0, 0, []
+    for f in files:
+        try:
+            p = parse_wsx(f)
+        except ValueError as exc:
+            failed.append((f.name, str(exc).split(": ", 1)[-1]))
+            continue
+        ok += 1
+        entries += len(p["entries"])
+        lmf += sum(e["is_lmf"] for e in p["entries"])
+    unexpected = [n for n, _ in failed if n.upper() not in KNOWN_OPEN]
+    print(f"CHECK wsx: {ok}/{len(files)} WSX files parse (count, 12-byte records, payload sizes sum to the file); "
+          f"{entries} entries, {lmf} of them LMF (dword +4 = 38); failing: "
+          f"{'; '.join(f'{n} ({m})' for n, m in failed) or 'none'}; unexpected failures: {unexpected or 'none'}")
+    return 0 if not unexpected else 1
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--game-dat", type=Path, required=True)
-    ap.add_argument("--out", type=Path, required=True)
+    import os, sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    ap = argparse.ArgumentParser(description=(__doc__ or "") + USAGE, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--data", "--game-dat", dest="game_dat", type=Path, default=os.environ.get("LOL3_DAT"),
+                    help="the game's DAT folder (default: $LOL3_DAT)")
+    ap.add_argument("--out", type=Path)
+    ap.add_argument("--check", action="store_true", help="parse every WSX of --data, print one CHECK line, write nothing")
     ap.add_argument("--stems", nargs="*", default=None, help="If omitted, peel every *.WSX in DAT")
     ap.add_argument("--manifest", type=Path)
     ap.add_argument(
@@ -113,6 +146,12 @@ def main() -> int:
         help="Skip writing blobs larger than this many bytes (still listed in manifest)",
     )
     args = ap.parse_args()
+    if args.game_dat is None:
+        ap.error("give --data (the game's DAT folder) or set LOL3_DAT")
+    if args.check:
+        return check(args.game_dat)
+    if args.out is None:
+        ap.error("--out is required unless --check is given")
 
     if args.stems:
         stems = args.stems

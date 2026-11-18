@@ -9,9 +9,7 @@ Compact WSX entry payloads with `table38` headers expose named level content:
 - Entity chunk: spawn / NPC-style names (`Jeron`, `Luther`, `Richard`, `Dash`, `Dawn`, …)
 - Field 2: sentinel `0xffffffff` placement records with packed control/coord words
 
-Public tooling still documents structure more than a full placement importer.
-Private Classic lane writes per-stem JSON catalogs under the local Godot project’s
-`assets/data/level_catalogs/` for UI and upcoming importers.
+The tools here document the structure; no placement reader is published yet.
 
 Do not commit retail blobs.
 

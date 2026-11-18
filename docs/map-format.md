@@ -24,7 +24,6 @@ Repeating 8-byte records that decode cleanly as `(u16 0, i16 x, u16 0, i16 z)`.
 
 CKEEP yields ~341 points; main cluster roughly `x∈[-2000,3000]`, `z∈[-5600,-500]`.
 
-Artifacts: `lol3_out/analysis/ckeep_map_f0_only.png`, `meshes_map/ckeep_map_f0_points.obj`.
 
 ## field1
 
@@ -36,4 +35,4 @@ Large stream with frequent `u16 0xFFFF`. Candidate polygon header `(n, a, b, 0xF
 
 ## Relation to `.lmf`
 
-`.lmf` remains the nested size-ladder index + opaque leaf pool. Prefer MAP/ODF for walk scaffolding until leaf records are bound in the PE.
+`.lmf` remains the nested size-ladder index + opaque leaf pool. MAP/ODF carry the walkable layout facts known so far; the LMF leaf records are not yet bound to a reader in the executable.

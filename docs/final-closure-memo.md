@@ -1,5 +1,7 @@
 # Final Closure Memo
 
+> **History (September 2026).** Kept as a record of an earlier pass. The current state, with the check behind each claim, is in [STATUS.md](STATUS.md); open points are in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
 This repo captures the current public LoL3 semantic checkpoint.
 
 The strongest current results are:
@@ -23,6 +25,6 @@ Strict limits on that checkpoint:
 
 What this means:
 
-- the LoL3 lane is no longer “just structurally constrained”
+- the LoL3 work is no longer “just structurally constrained”
 - it now has durable byte-level semantic footholds
 - the remaining work is mostly meaning refinement above those footholds

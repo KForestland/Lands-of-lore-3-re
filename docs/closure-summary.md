@@ -1,6 +1,8 @@
 # Closure Summary
 
-The LoL3 lane is no longer blocked on setup or broad structure.
+> **History (September 2026).** Kept as a record of an earlier pass. The current state, with the check behind each claim, is in [STATUS.md](STATUS.md); open points are in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
+The LoL3 work is no longer blocked on setup or broad structure.
 
 What is effectively closed:
 
@@ -18,7 +20,6 @@ What is not fully closed:
 
 - higher in-engine meaning above the byte-behavior level
 - full unification of all witness families at the semantic layer
-- patch/rebuild implications
 
 Strongest current semantic spine:
 

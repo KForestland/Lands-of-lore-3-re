@@ -1,5 +1,7 @@
 # LoL3 Semantic Phase
 
+> **History (September 2026).** Kept as a record of an earlier pass. The current state, with the check behind each claim, is in [STATUS.md](STATUS.md); open points are in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
 This note captures the current public semantic checkpoint.
 
 Fast read:

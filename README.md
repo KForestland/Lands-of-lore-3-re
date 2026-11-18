@@ -1,90 +1,59 @@
-# Lands of Lore III RE
+# Lands of Lore III: file formats and game data
 
-Reverse-engineering and documentation for *Lands of Lore III*.
+*Lands of Lore III* is a first-person role-playing game by Westwood Studios (1999). This repository documents what is known about its original data files and gives you Python tools that read them from your own copy of the game.
 
-This repository contains:
+It contains documentation, tools and small diagrams. It contains no game files and no extracted game pictures, sounds, movies or text.
 
-- promoted reverse-engineering writeups
-- structural and semantic checkpoint documentation
-- evidence indexes and witness notes
-- curated tooling notes
+LoL3 is much less understood than the first two games. Many pages say what was measured, what was tried, and what would settle the rest. That is a result too.
 
-It does not aim to redistribute raw game data.
+## What you get
 
-## Start Here
+- **Format pages** in [`docs/`](docs): the WSX archives, the LMF geometry index, the MAP and ODF level files, and textures.
+- **Tools** in [`tools/`](tools/README.md): a WSX reader, an LMF walker, `check_all.py` and `repo_guard.py`.
+- **Guides:**
+  - [Start here, by goal](docs/START_HERE.md)
+  - [glossary](docs/GLOSSARY.md)
+  - [open questions](docs/OPEN_QUESTIONS.md)
 
-If you are new to this repo, read these in order:
+## Quick start
 
-1. [`closure-summary.md`](docs/closure-summary.md) — plain-English summary of what is closed and what remains open
-2. [`final-closure-memo.md`](docs/final-closure-memo.md) — short public handoff memo for the current LoL3 state
-3. [`lol3-current-status.md`](docs/lol3-current-status.md) — what is currently proven, what is still open, and where the LoL3 lane stands now
-4. [`lol3-structural-phase.md`](docs/lol3-structural-phase.md) — the shared typed-region, regime-path, and driver-type result
-5. [`lol3-semantic-phase.md`](docs/lol3-semantic-phase.md) — the current byte-level semantic checkpoint
-6. [`repo-scope.md`](docs/repo-scope.md) — what this repo includes and excludes
-7. [`provenance.md`](docs/provenance.md) — where the current public claims came from
-8. [`tooling-catalog.md`](docs/tooling-catalog.md) — what tooling and workflows were actually used
-9. [`examples/README.md`](examples/README.md) — small visual aids for the current structural and semantic checkpoint
-
-## Quick Start
+You need Python 3.8+ and your own copy of the game.
 
 ```bash
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
+export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
+python3 tools/check_all.py                  # 3 checks, ends with ALL 3 CHECKS PASSED
+python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 ```
-
-Then read:
-
-1. [`docs/closure-summary.md`](docs/closure-summary.md)
-2. [`docs/lol3-current-status.md`](docs/lol3-current-status.md)
-3. [`docs/lol3-semantic-phase.md`](docs/lol3-semantic-phase.md)
 
 ## Status
 
-RE closure: late-stage semantic checkpoint
+Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 
-- WSX peeling for witness families `QWOD0` / `SWOD4` / `RVOL0` / `CKEEP` is documented and toolable: [`docs/wsx-extraction.md`](docs/wsx-extraction.md), [`tools/extract_wsx_entries.py`](tools/extract_wsx_entries.py)
+| Area | State |
+|------|-------|
+| WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
+| LMF geometry index | Record table and size ladder documented; all 18 LMF entries walk; leaf contents open (Q3) |
+| MAP, ODF | Partly decoded (Q4, Q5) |
+| Textures | Row-span records decoded on samples; colour open (Q6, Q7) |
+| Movies, music, sound | Containers listed; formats open (Q9, Q10) |
+| Executable, items, spells, dialogue, saves, combat | Not yet documented (Q11, Q12) |
 
-- `LMF` containers and `WSX`/opaque blob extraction are structurally understood enough for public documentation
-- runtime provenance is solid:
-  - LoL3 is `WSX`-driven at runtime
-  - `QWOD0` and `SWOD4` are quiet baseline families
-  - `QWOD0S` is a higher-activity sidecar
-- shared outer typed-region / regime-path model is promoted
-- current semantic anchors are promoted:
-  - `QWOD0`: `ad`, `c5`, `a5`, `eb`
-  - `SWOD4`: `00`, `0b`, with `06/02` as earlier reinforcement-side locals
-- strongest current persistent spine:
-  - `QWOD0`: `ad -> c5 -> a5`, with `eb` as mixed side branch
-  - `SWOD4`: early `0b -> 02 -> 06`, then collapse into `0b -> 00` and `00 -> 00`
-- strongest durable repo-grade edges:
-  - `QWOD0`: `c5 -> a5`
-  - `SWOD4`: `0b -> 00`, `00 -> 00`
+## Repository layout
 
-## Repository Layout
+- [`docs/`](docs): format pages, status, open questions, glossary. Older checkpoint notes are kept as history.
+- [`tools/`](tools/README.md): readers and checks.
+- [`evidence/`](evidence): evidence indexes for the byte-pattern statistics.
+- [`examples/`](examples/README.md): three diagrams of those statistics, drawn without game pixels.
 
-- [`docs/`](docs) — promoted writeups and checkpoint notes
-- [`examples/`](examples) — explanatory diagrams for the current checkpoint
-- [`evidence/`](evidence) — evidence indexes and witness summaries
-- [`data/`](data) — machine-readable summaries and catalogs
-- [`tools/`](tools) — curated tooling notes and future public tools
-- [`future-patches/`](future-patches) — future patch planning kept separate from RE canon
+## Asset policy
 
-## Asset Policy
+No game files and no dumps of extracted game media are included; short byte excerpts appear in the documentation as examples. `tools/check_all.py` includes `repo_guard.py`, which fails on:
+- a committed game file, media file or stray image;
+- a machine path;
+- any commit identity other than the project's.
 
-This repo intentionally avoids shipping full copyrighted asset dumps.
+## Sources
 
-Included:
-
-- documentation
-- evidence maps
-- workflow/tooling notes
-- structured summaries
-
-Not included:
-
-- raw retail game files
-- full extracted media dumps
-- raw private working ledgers
+Facts are checked against the original files and the original program (`LOL3.EXE`), with addresses or file offsets cited on each page. This is independent documentation.

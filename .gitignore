@@ -9,3 +9,20 @@ __pycache__/
 # Large local scratch outputs
 tmp/
 scratch/
+
+# Game files and media: never commit (tools/repo_guard.py enforces this)
+*.wsx
+*.WSX
+*.lmf
+*.LMF
+*.tex
+*.TEX
+*.pht
+*.PHT
+*.wav
+*.webm
+*.mp3
+*.mid
+# default tool output folders
+peels/
+out/

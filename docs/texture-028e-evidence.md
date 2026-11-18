@@ -29,16 +29,7 @@ show that applying the bank's own 6-bit palette produces coherent silhouettes
 but does not recover the final gold/color appearance. Cross-bank palettes are
 not an accepted fix.
 
-Evidence and reproduction:
-
-- `/home/bob/lol3_out/tools/probe_028e_resume_atlas.py` — exact-consume and
-  mode-separated atlas
-- `/home/bob/lol3_out/tools/probe_028e_palette.py` — own/cross/fade palette
-  comparisons
-- `/home/bob/lol3_out/tools/probe_028e_bake_pal.py` — synthetic RGB555 probe
-- `/home/bob/lol3_out/analysis/028e_resume_atlas_view/report_20260921T0048.json`
-  — 26 witness statistics
-- `/home/bob/lol3_out/analysis/028e_palette_view/report.json` — palette metrics
+Evidence and reproduction: the probe scripts and their reports used for these measurements are not part of this repository. The measurements stay UNCONFIRMED until a tool here re-runs them.
 
 The remaining texture task is to capture or reconstruct the runtime u16 bake
 lookup used by `0x6601B8`/`0x44B6E0`, or obtain a runtime `CONVERT` bank dump
@@ -47,10 +38,6 @@ separate source format and should not be decoded with this row-span parser.
 
 This document does not claim trusted final-color PNGs or close the CKEEP door
 texture; those remain open.
-
-## CKEEP palette boundary (2026-09-25)
-
-`/home/bob/lol3_out/godot_import/assets/textures_ckeep/ckeep_palette.png` is a 256-entry VGA-style palette visualization. Its channels are predominantly 6-bit values expanded to 8-bit (`0..63` multiplied by four, with minor rounding/low-bit artifacts), matching the bank palette representation. It is therefore useful for indexed previews but is not the renderer's missing RGB555/u16 bake table. The final color stage remains a runtime lookup or remap path; substituting this PNG's colors cannot close that gap.
 
 ## Per-texture palette order (2026-09-26)
 

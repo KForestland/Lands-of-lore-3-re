@@ -1,5 +1,7 @@
 # LoL3 Current Status
 
+> **History (September 2026).** Kept as a record of an earlier pass. The current state, with the check behind each claim, is in [STATUS.md](STATUS.md); open points are in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
 This file summarizes the current public LoL3 checkpoint.
 
 ## Asset pipeline status (2026-09-26)
@@ -74,4 +76,3 @@ Driver types:
 
 - higher in-engine meaning above the byte-behavior layer
 - broader semantic naming without overclaiming
-- future patch/rebuild consequences
