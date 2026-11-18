@@ -29,3 +29,5 @@
 | Map region | A 56-byte region row in the level; script opcode 0xCC writes its +0x22. See the [opcode page](lol3-script-opcodes.md). |
 | Region descriptor (region-group row) | A 44-byte row selected by script events and opcode 0xD1; the [events page](lol3-script-events.md) and the [opcode page](lol3-script-opcodes.md) use both names for it. |
 | Predicate | A five-byte MAP +0xBC row (operation, two typed operands) that the program evaluates before a script group runs ([events page](lol3-script-events.md)). |
+| Waypoint | An 8-byte MAP row (signed X/Z) that creature paths step through; paths are 4-byte records (base index, count, flag) ([readers](lol3-map-odf-readers.md#tail-after-the-vertices)). |
+| Surface | A 56-byte row of MAP section 2: four neighbour indices, four vertex indices and a height ([readers](lol3-map-odf-readers.md)). |

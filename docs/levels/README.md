@@ -2,6 +2,8 @@
 
 One sheet per level, written by `tools/lol3_level_report.py --data DAT --out docs/levels` from the original archives: named entries, light-map groups, MAP/ODF headers and the sound sidecar. File roles and counts only.
 
+The [script summaries](notes/README.md) cover triggers and script groups for each level.
+
 | Level | Archive | Entries | Light-map members | MAP size | ODF size | Sounds |
 |---|---|---:|---:|---:|---:|---:|
 | [BUPP1](BUPP1.md) | `BUPP1.WSX` | 4 | 30,415 | 3,413,407 | 100,488 | 1684 |
@@ -22,5 +24,3 @@ One sheet per level, written by `tools/lol3_level_report.py --data DAT --out doc
 | [QWOD0](QWOD0.md) | `QWOD0.WSX` | 4 | 5,364 | 289,385 | 14,211 | 26 |
 | [RVOL0](RVOL0.md) | `rvol0.wsx` | 4 | 1,220 | 64,423 | 4,010 | 208 |
 | [SWOD4](SWOD4.md) | `swod4.wsx` | 4 | 10,232 | 497,535 | 8,208 | 33 |
-
-See [script summaries](notes/README.md) for the separate event pools, per-level counts and a worked script excerpt.

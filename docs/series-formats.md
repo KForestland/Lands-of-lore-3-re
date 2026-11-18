@@ -28,8 +28,8 @@ This page lines up the formats that recur across them. Every row only restates w
 | | LoL1 | LoL2 | LoL3 |
 |---|---|---|---|
 | Sound | Creative VOC, 8-bit PCM ([voc](https://github.com/KForestland/lands-of-lore-1-re/blob/main/docs/formats/voc.md)) | Westwood AUD, IMA ADPCM, codec 99 ([sound](https://github.com/KForestland/lands-of-lore-2-re/blob/main/docs/formats/sound.md)) | RIFF WAVE, format 17 (IMA ADPCM), in the level sound archives ([level sheets](https://github.com/KForestland/Lands-of-lore-3-re/blob/main/docs/levels/README.md)) |
-| Music | XMIDI, AdLib and other driver files ([music](https://github.com/KForestland/lands-of-lore-1-re/blob/main/docs/formats/music.md)) | AUD tracks in `DMUSIC.MIX`; HMI MIDI songs in `LOCAL.MIX` ([sound](https://github.com/KForestland/lands-of-lore-2-re/blob/main/docs/formats/sound.md)) | open |
-| Movies and animation | WSA delta animations ([wsa](https://github.com/KForestland/lands-of-lore-1-re/blob/main/docs/formats/wsa.md)) | VQA version 2 ([vqa](https://github.com/KForestland/lands-of-lore-2-re/blob/main/docs/formats/vqa.md)) | open |
+| Music | XMIDI, AdLib and other driver files ([music](https://github.com/KForestland/lands-of-lore-1-re/blob/main/docs/formats/music.md)) | AUD tracks in `DMUSIC.MIX`; HMI MIDI songs in `LOCAL.MIX` ([sound](https://github.com/KForestland/lands-of-lore-2-re/blob/main/docs/formats/sound.md)) | 38 RIFF WAVE tracks with MPEG Layer 3 data (tag 0x55) in `MUSIC1..4`, streamed through Miles ([audio](https://github.com/KForestland/Lands-of-lore-3-re/blob/main/docs/formats/audio.md)) |
+| Movies and animation | WSA delta animations ([wsa](https://github.com/KForestland/lands-of-lore-1-re/blob/main/docs/formats/wsa.md)) | VQA version 2 ([vqa](https://github.com/KForestland/lands-of-lore-2-re/blob/main/docs/formats/vqa.md)) | 19 named VQA movies in `MOVIES1..4` read by `0x50DF70`; pixel decode open ([vqa](https://github.com/KForestland/Lands-of-lore-3-re/blob/main/docs/formats/vqa.md)) |
 
 ## Pictures and palettes
 

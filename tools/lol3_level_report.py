@@ -41,6 +41,35 @@ def level_stems(data_dir):
     return out
 
 
+def geometry_check(data, fields):
+    """Validate the table joins read by LOL3.DAT at 0x43EAB2–0x43EC92."""
+    vertex_count, attached_count, surface_count = fields[19:22]
+    start = fields[2]
+    end = start + 56 * surface_count
+    point_count, point_start = struct.unpack_from("<II", data, 0xC4)
+    path_count, path_start = struct.unpack_from("<II", data, 0xD8)
+    if not (end <= fields[16] <= len(data)
+            and point_start == fields[0] + 8 * vertex_count
+            and path_start == point_start + 34 * point_count
+            and fields[1] == path_start + 35 * path_count):
+        return False
+    for offset in range(start, end, 56):
+        neighbors = struct.unpack_from("<4H", data, offset + 8)
+        vertices = struct.unpack_from("<4H", data, offset + 0x10)
+        attached, = struct.unpack_from("<H", data, offset + 0x1E)
+        count = data[offset + 0x32]
+        if (any(index != 0xFFFF and index >= surface_count for index in neighbors)
+                or any(index >= vertex_count for index in vertices)
+                or (count and attached + count > attached_count)
+                or (not count and attached != 0xFFFF)):
+            return False
+    for _, _, surface, _ in struct.iter_unpack("<hhHH", data[point_start:point_start + 8 * point_count]):
+        if surface != 0xFFFF and surface >= surface_count:
+            return False
+    return all(first + count <= point_count
+               for first, count, _ in struct.iter_unpack("<HBB", data[path_start:path_start + 4 * path_count]))
+
+
 def read_level(stem, main, side):
     p = parse_wsx(main)
     names = {wsx_name_hash(f"LEVELS\\{stem}\\{stem}{r}"): r for r in ROLES}
@@ -54,11 +83,15 @@ def read_level(stem, main, side):
     groups = list(lmf_groups(blobs[".LMF"])) if ".LMF" in blobs else []
     lm = dict(groups=len(groups), members=sum(len(g["lengths"]) for g in groups))
     hdr = {}
+    geometry_ok = False
     for role in (".MAP", ".ODF"):
         b = blobs.get(role)
         if b and len(b) >= 156 and struct.unpack_from("<I", b, 0)[0] == 38:
             f = struct.unpack_from("<38I", b, 4)
             hdr[role] = dict(size=len(b), f0=f[0], f1=f[1], f2=f[2], f20=f[20])
+            if role == ".MAP" and len(b) >= 0xDC:
+                geometry_ok = geometry_check(b, f)
+                hdr[role]["surfaces"] = f[21]
     sounds = Counter()
     side_count = 0
     if side is not None:
@@ -74,7 +107,8 @@ def read_level(stem, main, side):
             else:
                 sounds["other"] += 1
     return dict(stem=stem, main=main.name, size=main.stat().st_size, rows=rows, roles=sorted(blobs),
-                lm=lm, hdr=hdr, side=side.name if side else None, side_count=side_count, sounds=sounds)
+                lm=lm, hdr=hdr, geometry_ok=geometry_ok, side=side.name if side else None,
+                side_count=side_count, sounds=sounds)
 
 
 def sheet(L):
@@ -99,8 +133,11 @@ def sheet(L):
         h = L["hdr"].get(role)
         if h:
             lines.append(f"| `{role[1:]}` | {h['size']:,} | {h['f0']:,} | {h['f1']:,} | {h['f2']:,} | {h['f20']:,} |")
-    lines += ["", "For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).", "",
-              "## Sounds", ""]
+    lines += ["", "For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes)."]
+    if L["geometry_ok"]:
+        lines.append(f"Field 21 counts {L['hdr']['.MAP']['surfaces']:,} surface rows in section 2 "
+                     "([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).")
+    lines += ["", "## Sounds", ""]
     if L["side"]:
         fmt = ", ".join(
             (f"{n} × format {k[0]} ({'IMA ADPCM, ' if k[0] == 17 else ''}{'mono' if k[1] == 1 else 'stereo' if k[1] == 2 else str(k[1]) + ' ch'}, "
@@ -109,10 +146,10 @@ def sheet(L):
         lines.append(f"`{L['side']}` holds {L['side_count']} entries: {fmt}.")
     else:
         lines.append("No sidecar archive.")
-    lines += ["", "## Open", "",
-              "- What each script group does: the streams frame with the native size table "
-              "([script opcodes](../lol3-script-opcodes.md)), many command effects are open (Q11).",
-              "- MAP sections 0 and 2 and the ODF layout (Q4, Q5); what the renderer does with the light map (Q3).", ""]
+    lines += ["", "## Related notes", "",
+              f"- [Script summary](notes/{s}.md) gives trigger and effect counts from the original MAP.",
+              "- [MAP and ODF readers](../lol3-map-odf-readers.md) describe the remaining open fields.",
+              "- [Light maps](../formats/lmf.md) describes the stored data and remaining renderer questions.", ""]
     return "\n".join(lines)
 
 
@@ -120,6 +157,7 @@ def readme(levels):
     lines = ["# Level sheets", "",
              "One sheet per level, written by `tools/lol3_level_report.py --data DAT --out docs/levels` from the original "
              "archives: named entries, light-map groups, MAP/ODF headers and the sound sidecar. File roles and counts only.", "",
+             "The [script summaries](notes/README.md) cover triggers and script groups for each level.", "",
              "| Level | Archive | Entries | Light-map members | MAP size | ODF size | Sounds |", "|---|---|---:|---:|---:|---:|---:|"]
     for L in levels:
         lines.append(f"| [{L['stem']}]({L['stem']}.md) | `{L['main']}` | {len(L['rows'])} | {L['lm']['members']:,} | "
@@ -139,10 +177,12 @@ def main():
         for L in levels:
             snd.update(L["sounds"])
         map_ok = sum(1 for L in levels if ".MAP" in L["hdr"] and L["hdr"][".MAP"]["f2"] - L["hdr"][".MAP"]["f1"] == 8 * L["hdr"][".MAP"]["f20"])
+        geometry_ok = sum(L["geometry_ok"] for L in levels)
         print(f"CHECK level_report: {len(levels)} level archives; all four level names (.LMF .MAP .ODF .TE_) found by hash in "
-              f"{named}; MAP section-1 rule holds in {map_ok}; {sum(L['lm']['members'] for L in levels):,} light-map members; "
+              f"{named}; MAP section-1 rule holds in {map_ok}, surface and waypoint joins in {geometry_ok}; "
+              f"{sum(L['lm']['members'] for L in levels):,} light-map members; "
               f"{sum(snd.values()):,} sidecar sounds, non-WAVE: {snd.get('other', 0)}")
-        return 0 if levels and named == len(levels) and map_ok == len(levels) and not snd.get("other") else 1
+        return 0 if len(levels) and named == map_ok == geometry_ok == len(levels) and not snd.get("other") else 1
     if not a.out:
         ap.print_help(); return 2
     out = Path(a.out)

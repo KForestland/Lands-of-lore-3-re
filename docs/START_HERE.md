@@ -4,7 +4,7 @@ You need Python 3.8+ and your own copy of *Lands of Lore III* (the English GOG r
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
-python3 tools/check_all.py         # 9 checks; the last line should read ALL 9 CHECKS PASSED
+python3 tools/check_all.py         # 10 checks; the last line should read ALL 10 CHECKS PASSED
 ```
 
 Words you do not know are in the [glossary](GLOSSARY.md). What is known and what is open: [STATUS](STATUS.md) and [open questions](OPEN_QUESTIONS.md). Write tool output outside the repository.

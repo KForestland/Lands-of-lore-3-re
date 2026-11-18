@@ -94,7 +94,7 @@ visible before further class-specific branches.
 
 | Mode | Mode entry | First operation |
 |---:|---|---|
-| 0, 12 | `0x4B4D7E` | Indexes the 8-byte point table `[0x5701A4]` with actor u16 +0xD4. |
+| 0, 12 | `0x4B4D7E` | Indexes the 8-byte waypoint table `[0x5701A4]` with actor u16 +0xD4. |
 | 1, 11 | `0x4B5C19` | Common return. |
 | 2 | `0x4B4DFC` | Tests shared byte `[0x7D75E4]`, object +0x118 bit 0x200 and target +0x68. |
 | 3 | `0x4B4BF7` | Takes the point path when +0x110 bit 0x800 is set or +0x68 is null. |

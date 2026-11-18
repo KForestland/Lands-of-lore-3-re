@@ -5,6 +5,7 @@ The retail level archives wrap texture banks in a compressed `.TE_` stream. The 
 | Format | Where | State |
 |---|---|---|
 | Row-span records, flags `0x028E` / `0x828E` | the texture banks in `cdcache.wsx` in the game folder | layout and palette source CONFIRMED on all 854 records |
+| Shared global and spell banks | `DAT/LOCAL.WSX` | native arms 1 and 2 confirmed |
 | LZO1X-wrapped level banks | `LEVELS\<STEM>\<STEM>.TE_` inside the 18 WSX level archives | all 465 chunks decoded. The older LEVED `+1` witness was inside the compressed wrapper. |
 
 Older notes: [tex-format](../tex-format.md), [texture 028E evidence](../texture-028e-evidence.md). Tools: `tools/lol3_texture_spans.py` (cache records) and `tools/lol3_texture_archive.py` (the 18 `.TE_` wrappers). They write nothing and make no pictures.
@@ -34,7 +35,7 @@ to repeat the test with liblzo2. The tool emits counts.
 
 **CONFIRMED.** The older CKEEP door-name witness at file
 +0x869BA is inside a compressed packet. It expands to a
-name in the ordinary bank, with another name following
+name in the ordinary bank, with alphabetic bytes following
 at expanded bank +0xE8A8F. The supposed `+1` subtype and
 size fields are an interpretation of byte positions in the
 packed stream. A standalone LEVED `+1` texture layout
@@ -77,7 +78,7 @@ The next records follow directly, each half the size of the one before: 64 × 12
 **CONFIRMED.** The executable selects a per-descriptor source through
 `0x44B6E0` and builds 256 output words at `0x4826D0`. The native
 [texture colour bake](../lol3-texture-bake.md) gives the source selector,
-zero handling and indexed writes. The [palette inventory](../lol3-texture-palette-sources.md) gives the source file offsets for all 854 records.
+zero handling and indexed writes. The [palette inventory](../lol3-texture-palette-sources.md) gives source file offsets for all 854 cache spans and verifies the palette selector and key across all 20 original banks. Its shared-reader section traces the editor filenames to the same header parser.
 
 ## The cache file
 

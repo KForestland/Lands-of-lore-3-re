@@ -25,12 +25,14 @@ Made by `tools/lol3_level_report.py` from `DAT/jundr.wsx` and `DAT/JUNDRs.wsx`. 
 | `ODF` | 107,552 | 516 | 1,574 | 13,044 | 106,447 |
 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
+Field 21 counts 6,973 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
 ## Sounds
 
 `JUNDRs.wsx` holds 292 entries: 292 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
 
-## Open
+## Related notes
 
-- What each script group does: the streams frame with the native size table ([script opcodes](../lol3-script-opcodes.md)), many command effects are open (Q11).
-- MAP sections 0 and 2 and the ODF layout (Q4, Q5); what the renderer does with the light map (Q3).
+- [Script summary](notes/JUNDR.md) gives trigger and effect counts from the original MAP.
+- [MAP and ODF readers](../lol3-map-odf-readers.md) describe the remaining open fields.
+- [Light maps](../formats/lmf.md) describes the stored data and remaining renderer questions.

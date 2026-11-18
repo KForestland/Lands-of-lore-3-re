@@ -19,20 +19,21 @@ Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 |---|---|---|
 | 0 | start of section 0 | CONFIRMED value (12,076 in all 18) |
 | 1 | start of section 1 | CONFIRMED: in all 18 MAP entries, field 2 − field 1 = 8 × field 20 |
-| 2 | start of section 2 | as above |
-| 20 | number of 8-byte records in section 1 | CONFIRMED (same check) |
+| 2 | start of section 2 | **CONFIRMED** resident surface table, `LOL3.DAT` VA `0x43EADF–0x43EB04` |
+| 20 | number of 8-byte records in section 1 | **CONFIRMED** (same check) |
+| 21 | number of 56-byte surface records in section 2 | **CONFIRMED** `LOL3.DAT` VA `0x43EAE6–0x43EAF7` |
 
 **Section 0. CONFIRMED.** Field 19 counts eight-byte signed 16.16
 X/Z pairs at field 0. A 34–8,399-byte tail follows the vertices
-before field 1. The native +0xC8 seek binds its 8-byte point rows and the file partitions into points, name slots and a final counted span. The final record roles are **UNCONFIRMED**. This explains the earlier
+before field 1. The native +0xC8 seek binds its 8-byte waypoint rows (positions that creature paths step through, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)) and the file partitions into points, name slots and a final counted span. The first 4 bytes per path are a native path record. The name slots and remaining 31 bytes per path are **UNCONFIRMED**. This explains the earlier
 measurement that only 88% of the section's 8-byte slots look like points: 110,373 of 124,764 slots
 have that shape, 108,043 of them whole-number vertices; the rest of the 114,483 vertices have a
 fraction, and 2,330 point-like slots lie in the tails.
 [Native readers](../lol3-map-odf-readers.md).
 
-**Section 1.** 8-byte records. The older notes report that the last u16 is often 16 and the third clusters on multiples of 128. Their meaning is open.
+**Section 1. CONFIRMED.** Eight-byte rows referenced by contiguous ranges on individual surfaces. The native matcher tests row +5 low five bits (`0x4A74C0–0x4A74F7`). Other fields are **UNCONFIRMED**.
 
-**Section 2.** A stream with frequent `0xFFFF` words; layout open.
+**Section 2. CONFIRMED.** Field-21 56-byte surfaces. Four neighbor indices, four vertex indices, waypoint height and the attached section-1 range are mapped in the [native reader](../lol3-map-odf-readers.md#map-sections-1-and-2).
 
 ## Worked example
 
@@ -58,6 +59,6 @@ The first vertices of section 0, read as 16.16 dwords, are X 1370, Z −5530 (by
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))
 
-- The remaining fields of the MAP point-table tail, section 2 and the meaning of the section-1 fields.
-- The header fields not yet bound by the [native readers](../lol3-map-odf-readers.md) (MAP field 19 and ODF fields 0–4 and 14–20 are bound).
+- The remaining MAP waypoint and surface fields and the individual section-1 record fields.
+- The header fields not yet bound by the [native readers](../lol3-map-odf-readers.md) (MAP fields 19–21 and ODF fields 0–4 and 14–20 are bound).
 - The ODF per-row meanings, the section-0 companions and what follows the field-2 252-byte rows.

@@ -37,6 +37,12 @@ a live count and reads the rows into world +0x34
 s16 +0/+2 as X/Z and shifts each left 16
 (`0x4B4D7E–0x4B4DA9`).
 
+These 8-byte rows are **waypoints**: the path consumer at
+`0x4B5AF8–0x4B5B5E` takes the path base `[0x5701A8]` plus
+|actor +0xF9|, copies the row's X/Z to actor +0x94/+0x98, then
+advances the index with loop or ping-pong (`0x4B5B95–0x4B5BCF`).
+A **surface** is a 56-byte row of section 2 (below).
+
 **CONFIRMED.** After those 8-byte rows are the same number of
 26-byte NUL-terminated name slots, then 35 × u32(MAP+0xD8)
 bytes. The exact partition is
@@ -47,14 +53,85 @@ in all 18 archives. There are 2,384 point and name rows and
 next section begins at +0xCC5B2C. Its count at MAP +0xD8
 is zero.
 
-**UNCONFIRMED.** The full roles of point offsets +4–+7 and
-the readers for the two remaining spans are open. The 26-byte
-slots all have a NUL. A provisional +4 region-index test
-has exceptions, notably JUNDR, so a region interpretation
-needs a native consumer. Follow the point's later word
-loads after `0x4B4DA9`, and search for a reader whose
-initial position starts after `8 * u32(+0xC4)` for the names
-and after `34 * u32(+0xC4)` for the 35-byte rows.
+**CONFIRMED.** Waypoint u16 +4 is the surface index into world
++0x24, the 56-byte table below. For `0xFFFF` the creature uses
+zero for its height and takes the out-of-range branch. For a valid
+index it reads signed surface +0x18 as the waypoint height, shifted
+left 16, and sets the selected surface pointer
+(`0x4B4DAD–0x4B4DF7, 0x4B4E7E–0x4B4EA6`). All 2,186
+non-sentinel indices fit field 21, including JUNDR's first
+waypoint +4 = 6,867, which exceeds its field-20 count 5,725
+(`JUNDR.WSX+0xEB88B3`). The other 198 use `0xFFFF`.
+CKEEP's first waypoint is (188, −495) at `CKEEP.WSX+0xCC592E`;
+its surface 3,242 is the row at `+0xCFBEAC`, with height 0 at
+`+0xCFBEC4` (surface +0x18).
+
+**CONFIRMED.** Waypoint byte +7 filters the nearest-point
+search. The search skips an absent surface, requires at least one
+shared bit between caller mask and byte +7, and skips surfaces
+with byte +4 bit 1 set. It keeps the point with the lowest integer
+X/Z Euclidean distance (`0x4FD6C0–0x4FD751`,
+`0x44AAB0–0x44AADF`). Across the same 2,384 waypoint rows,
+the byte has values 0, 4 and 5 with counts 304, 2,067 and 13.
+
+**CONFIRMED.** The last span starts at the offset in header
++0xDC. Native `0x43EC4D–0x43EC92` reads +0xD8 × 4 bytes
+from there to world +0x38. Each four-byte path record supplies
+a base u16 waypoint index, a byte count and a flag byte. The
+creature indexes the path by its +0xF8 byte and uses
+base + abs(signed actor +0xF9) for the point
+(`0x4B5AF8–0x4B5B5E`). At the upper end, path +3 bit 0
+resets the actor index to zero when set. Otherwise the engine
+sets it to `2 − count`, reversing traversal through the absolute
+value on the next lookup (`0x4B5B95–0x4B5BCF`). The 36
+path ranges all fit their waypoint table. The first two
+BUPP1 path rows at `BUPP1.WSX+0x181E8E0, +0x181E8E4`
+are (0, 4, 1) and (4, 11, 0).
+
+**UNCONFIRMED.** Waypoint byte +6 and the consumers of the
+26-byte name slots remain open. The low byte of the last
+waypoint word has 15 values in the original corpus. None of
+the six direct references to world +0x34 established a use for
+it. The space after the four-byte path records partitions into
+36 31-byte slots across the 18 MAPs, each with an early NUL.
+For example, they start at `BUPP1.WSX+0x181E90C` and
+end at field 1. These remaining bytes may be editor metadata.
+A native reader starting at each of those spans, or a file
+writer that identifies their serialized fields, would settle them.
+
+## MAP sections 1 and 2
+
+**CONFIRMED.** Field 1 (header +0x08) points to field-20
+eight-byte rows, copied to world +0x20 by
+`0x43EB7C–0x43EBA1 → 0x4EFDC0`. Field 2 (header +0x0C)
+points to field-21 56-byte surface rows. The loader reads the
+rows to world +0x24 (`0x43EADF–0x43EB04 → 0x4A65F0`).
+It stores field 21 at world +0x44 (`0x5701B4`), the count
+tested against waypoints above. The surface reader then
+initializes live bytes +0x24–+0x27 and +0x2D and applies a
+type-specific rule to +0x2C
+(`0x4A6653–0x4A66DF`, dispatch `0x4A671C`).
+
+| Surface offset | Confirmed field or consumer |
+|---|---|
+| +0x08–+0x0F | Four u16 neighboring surface indices. The neighbor search compares the target surface index, stops a chain on `0xFFFF` and can move to the next 56-byte row when +0x35 is set (`0x4A67D0–0x4A685A`). |
+| +0x10–+0x17 | Four u16 vertex indices into world +0x1C. The geometry helper walks the four vertices and computes X/Z coordinate bounds (`0x4A7500–0x4A7566`). |
+| +0x18 | Signed height read alongside the waypoint's X/Z (`0x4B4DD2–0x4B4DDA`). |
+| +0x1E, +0x32 | Start u16 and count u8 in the section-1 table. Lookup checks each row's byte +5 masked with `0x1F` against the requested selector, returning the first match (`0x4A74C0–0x4A74F7`). |
+
+**CONFIRMED.** All 118,951 surfaces in the 18 MAP entries
+have in-bounds vertices and either in-bounds neighbors or
+the sentinel. All 85,221 attached section-1 spans are in
+range. The remaining 33,730 have count 0 and index `0xFFFF`.
+For example, `CKEEP.WSX+0xCCF97C` starts the first
+surface with vertices 334, 376, 377 and 335. Its section-1
+span starts at 0 with count 2, at `CKEEP.WSX+0xCC5B2C`.
+The remaining section-1 fields and the additional 0–304 bytes
+between the surface table end and field 16 are **UNCONFIRMED**.
+The first CKEEP byte of that span is `CKEEP.WSX+0xD0368C`.
+The measured spans are multiples of eight. A load or seek
+between the 56-byte surface read and the field-16 reader
+would identify their consumer.
 
 ## ODF header and primary tables
 
@@ -78,7 +155,7 @@ begins at entry +0x5DC with a NUL-terminated identifier and padding.
 The companion reader is **UNCONFIRMED**. Section 4 ends at the
 start of section 3 in all 18 entries.
 
-### Type-tagged definitions in field 3 (creature reading UNCONFIRMED)
+### Creature definitions in field 3
 
 | Disk offset | Native operation |
 |---|---|
@@ -93,8 +170,9 @@ start of section 3 in all 18 entries.
 **CONFIRMED.** The first CKEEP creature record starts at
 `CKEEP.WSX+0xD40705`, in the eight-row table. Its words +0x59/+0x5B
 are 750 and 500. The runtime stride is 139 (`0x4F0E83`).
-The meanings of untouched body bytes and consumers of the other
-table fields remain **UNCONFIRMED**. The section-1 and section-3
+The [combat reader](lol3-combat-dispatch.md) traces the creature
+consumers, including HP and behavior. Unused definition
+bytes remain **UNCONFIRMED**. The section-1 and section-3
 subtables share reader `0x4FD560`. It assigns each 16-byte row
 a pointer into the subsequent 12-byte array (`0x4FD5DC–0x4FD617`).
 Follow that pointer into the first consumer to identify the subtable.

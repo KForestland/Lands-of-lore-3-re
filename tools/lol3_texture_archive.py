@@ -8,7 +8,7 @@ from pathlib import Path
 from struct import error as struct_error, iter_unpack, unpack_from
 
 import lol3_cli
-from extract_wsx_entries import wsx_name_hash
+from extract_wsx_entries import parse_wsx, wsx_name_hash
 from lol3_texture_spans import cache_path
 from walk_lmf_leaves import lzo_decoder
 
@@ -67,6 +67,43 @@ def cache_rows(data_dir):
     return Path(path), rows
 
 
+def joined_palettes(data, expected_arm):
+    """Count descriptors whose native arm and u16 key select an in-bank palette."""
+    if unpack_from("<I", data)[0] != 38 or len(data) < 0x6A2:
+        raise ValueError("bad texture bank header")
+    directory, payload = unpack_from("<II", data, 0x10)
+    palettes, = unpack_from("<I", data, 0x34)
+    directory_size, = unpack_from("<I", data, 0x4C)
+    palette_bytes, = unpack_from("<I", data, 0x70)
+    count, = unpack_from("<I", data, 0x2A8)
+    palette_count, remainder = divmod(palette_bytes, 512)
+    if not (0x6A2 <= directory <= directory + count * 58 <= payload <= palettes
+            and count * 58 <= directory_size and not remainder
+            and palettes + palette_bytes <= len(data)):
+        raise ValueError("texture bank sections exceed their declared ranges")
+    if count == 0 or any(data[directory:directory + 14]):
+        raise ValueError("missing arm-0 texture sentinel")
+    for index in range(1, count):
+        at = directory + 58 * index
+        key, = unpack_from("<H", data, at + 2)
+        if data[at + 0xD] != expected_arm or key >= palette_count:
+            raise ValueError(f"unbound native palette at descriptor {at:#x}")
+    return count - 1
+
+
+def shared_joins(data_dir):
+    local = next(path for path in lol3_cli.wsx_files(data_dir) if path.stem.upper() == "LOCAL")
+    names = {wsx_name_hash(f"GLOBAL\\{name}.TEX"): arm for name, arm in (("GLOBAL", 1), ("SPELL", 2))}
+    counts = {}
+    for entry in parse_wsx(local)["entries"]:
+        arm = names.get(entry["hash"])
+        if arm is not None:
+            counts[arm] = joined_palettes(entry["blob"], arm)
+    if counts != {1: 692, 2: 4635}:
+        raise ValueError("missing or altered shared texture banks")
+    return counts
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
     parser.add_argument("--decode", action="store_true", help="expand each bank and compare the installed copies")
@@ -79,15 +116,14 @@ def main():
         path, cache = None, None
         if decode and cache_path(data_dir) is not None:
             path, cache = cache_rows(data_dir)
-        files = blocks = matches = 0
+        files = blocks = matches = descriptors = 0
         for name, packed in texture_entries(data_dir):
             sections = list(chunks(packed))
             files += 1
             blocks += len(sections)
             if decode:
                 expanded = b"".join(decode(data, size) for data, size in sections)
-                if unpack_from("<I", expanded)[0] != 38 or unpack_from("<I", expanded, 0x40)[0] != 0x300:
-                    raise ValueError(f"{name}: unexpected expanded texture header")
+                descriptors += joined_palettes(expanded, 3)
                 key = wsx_name_hash(f"LEVELS\\{name}\\{name}.TEX")
                 if cache is not None and key in cache:
                     offset, length = cache[key]
@@ -102,11 +138,15 @@ def main():
             raise ValueError("texture aggregate counts do not match the English retail corpus")
         detail = ""
         if decode:
+            if descriptors != 44357:
+                raise ValueError("retail level texture descriptor count disagrees")
+            counts = shared_joins(data_dir)
             detail = (f", all decoded and {matches} byte-identical cache banks" if cache is not None
                       else ", all decoded; cache comparison SKIPPED (no game-folder cdcache.wsx, which the game writes when it runs)")
+            detail += f"; palette joins {counts[1]:,}/{counts[2]:,}/{descriptors:,} for arms 1/2/3"
         print(f"CHECK texture_archive: {files} .TE_ entries, {blocks} packed chunks{detail}")
         return 0
-    except (OSError, ValueError, struct_error) as error:
+    except (OSError, ValueError, struct_error, StopIteration) as error:
         parser.exit(1, f"texture archive: {error}\n")
 
 

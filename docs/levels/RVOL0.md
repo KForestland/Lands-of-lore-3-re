@@ -25,12 +25,14 @@ Made by `tools/lol3_level_report.py` from `DAT/rvol0.wsx` and `DAT/RVOL0s.wsx`. 
 | `ODF` | 4,010 | 516 | 700 | 2,486 | 3,665 |
 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
+Field 21 counts 398 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
 ## Sounds
 
 `RVOL0s.wsx` holds 208 entries: 158 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit), 50 × format 17 (IMA ADPCM, stereo, 22,050 Hz, 4-bit).
 
-## Open
+## Related notes
 
-- What each script group does: the streams frame with the native size table ([script opcodes](../lol3-script-opcodes.md)), many command effects are open (Q11).
-- MAP sections 0 and 2 and the ODF layout (Q4, Q5); what the renderer does with the light map (Q3).
+- [Script summary](notes/RVOL0.md) gives trigger and effect counts from the original MAP.
+- [MAP and ODF readers](../lol3-map-odf-readers.md) describe the remaining open fields.
+- [Light maps](../formats/lmf.md) describes the stored data and remaining renderer questions.

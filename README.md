@@ -11,7 +11,7 @@ LoL3 is less fully documented than the first two games. Every page says what was
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Executable pages** in [`docs/`](docs/README.md): the WSX, LMF, texture, MAP/ODF, script, item, spell, dialogue, combat and save readers in the game program `LOL3.DAT`.
-- **Tools** in [`tools/`](tools/README.md): nine checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
+- **Tools** in [`tools/`](tools/README.md): ten checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a movie and audio check, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -26,7 +26,7 @@ You need Python 3.8+ and your own copy of the game, the English GOG release (the
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 9 checks, ends with ALL 9 CHECKS PASSED
+python3 tools/check_all.py                  # 10 checks, ends with ALL 10 CHECKS PASSED
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```
@@ -47,7 +47,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 |------|-------|
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
-| MAP, ODF | Header, section 1, the point table and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
+| MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
 | Textures | Row-span records: all 854 in this installation's texture cache decode exactly and join to palette sources; the 18 `.TE_` wrappers decode (465 LZO1X chunks); a standalone editor format is unconfirmed (Q7) |
 | Movies, music | Containers listed; formats open (Q9, Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
