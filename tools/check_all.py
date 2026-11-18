@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 
-TOOLS = ["repo_guard", "extract_wsx_entries", "walk_lmf_leaves"]
+TOOLS = ["repo_guard", "extract_wsx_entries", "walk_lmf_leaves", "lol3_texture_spans"]
 
 
 def main():

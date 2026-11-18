@@ -4,7 +4,7 @@ You need Python 3.8+ and your own copy of the game. Set `LOL3_DAT` to the game's
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
-python3 tools/check_all.py         # the last line should read ALL 3 CHECKS PASSED
+python3 tools/check_all.py         # the last line should read ALL 4 CHECKS PASSED
 ```
 
 | I want to… | Read | Run |

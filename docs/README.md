@@ -1,5 +1,7 @@
 # Docs
 
+Start with [START_HERE.md](START_HERE.md), [STATUS.md](STATUS.md) and the format pages: [WSX](formats/wsx.md), [LMF](formats/lmf.md), [MAP and ODF](formats/map-odf.md), [textures](formats/textures.md). The other pages here are older notes, kept as history.
+
 Promoted writeups documenting the current public LoL3 structural and semantic checkpoint.
 
 This folder is for promoted LoL3 reverse-engineering writeups only.

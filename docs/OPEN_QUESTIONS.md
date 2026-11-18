@@ -4,7 +4,7 @@ Numbered so pages and the [STATUS table](STATUS.md) can point to them. Each says
 
 | # | Question | Where |
 |---|---|---|
-| Q1 | `cdcache.wsx`: its header (9 entries) promises 52,663,793 bytes of payload, but the file is 3,264,114 bytes. Is it a cache written at run time, like LoL2's `CDCACHE.MIX`, and how is it indexed? | [wsx-extraction.md](wsx-extraction.md) |
+| Q1 | `cdcache.wsx`: two different files carry this name. The one in `DAT/` (3,264,114 bytes) and the one in the game folder (104,896,114 bytes) both have a 9-entry header covering 52,663,793 bytes. The game-folder copy holds the 854 texture records, 420 of them after the area the header covers ([formats/textures.md](formats/textures.md)). How the game writes and indexes this cache is open | [wsx-extraction.md](wsx-extraction.md) |
 | Q2 | WSX keys: which name hash and which names produce them (not the LoL2 MIX hashes). **Partly answered:** the second `u32` of a row is the entry offset ([formats/wsx.md](formats/wsx.md)) | [formats/wsx.md](formats/wsx.md) |
 | Q3 | LMF leaf blocks: what a leaf holds (not raw i16 vertices, not LZO1X as a whole); needs the reader in the executable | [lmf-size-formula.md](lmf-size-formula.md) |
 | Q4 | MAP fields 1 and 2: the 8-byte records and the `0xFFFF`-terminated placement headers | [map-format.md](map-format.md) |

@@ -8,7 +8,7 @@ LoL3 is much less understood than the first two games. Many pages say what was m
 
 ## What you get
 
-- **Format pages** in [`docs/`](docs): the WSX archives, the LMF geometry index, the MAP and ODF level files, and textures.
+- **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Tools** in [`tools/`](tools/README.md): a WSX reader, an LMF walker, `check_all.py` and `repo_guard.py`.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -23,7 +23,7 @@ You need Python 3.8+ and your own copy of the game.
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 3 checks, ends with ALL 3 CHECKS PASSED
+python3 tools/check_all.py                  # 4 checks, ends with ALL 4 CHECKS PASSED
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 ```
 
@@ -35,8 +35,8 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 |------|-------|
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF geometry index | Record table and size ladder documented; all 18 LMF entries walk; leaf contents open (Q3) |
-| MAP, ODF | Partly decoded (Q4, Q5) |
-| Textures | Row-span records decoded on samples; colour open (Q6, Q7) |
+| MAP, ODF | Header and one section layout measured on all 18 levels; the rest open (Q4, Q5) |
+| Textures | Row-span records: all 854 in the texture cache decode exactly; colour and the second format open (Q6, Q7) |
 | Movies, music, sound | Containers listed; formats open (Q9, Q10) |
 | Executable, items, spells, dialogue, saves, combat | Not yet documented (Q11, Q12) |
 

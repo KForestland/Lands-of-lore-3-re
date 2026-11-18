@@ -16,8 +16,7 @@ Do not commit retail blobs.
 ## Placement records (field2)
 
 Live object descriptors use sentinel `0xffffffff` then an inline name (Door, Gate, …)
-and packed `control/coord/state/value` words. Coord byte quads are exported into Classic
-`level_catalogs/*.json` as `placements[]` with scale still TBD.
+and packed `control/coord/state/value` words. The coordinate scale is open.
 
 ## Related
 
