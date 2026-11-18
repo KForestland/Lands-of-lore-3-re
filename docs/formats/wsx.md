@@ -54,4 +54,9 @@ Entries 0 and 1 begin with dword 38. The tool marks an entry as LMF when its dwo
 
 ## cdcache.wsx
 
-`cdcache.wsx` has the same header form: 9 rows, data size 52,663,679. But the file is 3,264,114 bytes, so the rows describe more data than the file holds. LoL2's `CDCACHE.MIX` behaves the same way: there the game appends decoded data after the index at run time. Whether LoL3 does the same is open ([Q1](../OPEN_QUESTIONS.md)).
+**CONFIRMED.** At +0/+2 both cache copies declare 9 rows and
+52,663,679 data bytes. The `DAT/` copy is 3,264,114 bytes and the
+game-folder copy is 104,896,114 bytes. The header implies 52,663,793
+bytes, so both copies fail the ordinary archive equality check.
+The [native WSX and cache reader](../lol3-wsx-reader.md) traces the
+header copy, expansion, marker and separate cache index.

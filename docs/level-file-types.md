@@ -6,7 +6,7 @@ Per-level assets referenced by the engine:
 |-----|---------------------------|-----------------|
 | `.map` | Level map / sector layout | WSX entry1 (~504KB table38) |
 | `.odf` | Object/descriptor catalog | WSX entry2 (~48KB table38 names+placements) |
-| `.lmf` | Nested geometry index + pool | `CKEEP.LMF` |
+| `.lmf` | Light-map storage groups, via `0x440B40` | WSX entry 0, file `0xC19084` |
 | `.tex` | Level texture package | WSX entry3 art blob (~12.7MB, `palette.pcx`, `*.pcx` names) |
 
 Also: `global\\global.tex`, `global\\spell.tex`, `global\\*.odf`.

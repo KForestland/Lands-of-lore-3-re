@@ -34,7 +34,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | Area | State |
 |------|-------|
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
-| LMF light maps | Reader traced in the executable; all 5,256 stored groups decode to 424,288 light-map members; how the renderer uses them is open (Q3) |
+| LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header and one section layout measured on all 18 levels; the rest open (Q4, Q5) |
 | Textures | Row-span records: all 854 in the texture cache decode exactly; colour and the second format open (Q6, Q7) |
 | Movies, music, sound | Containers listed; formats open (Q9, Q10) |

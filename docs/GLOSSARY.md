@@ -8,6 +8,7 @@
 | WSX | The game's archive format: a `u16` entry count, 12-byte records (hash, a second `u32`, size) and the payloads, largest first. |
 | Entry | One payload inside a WSX archive. |
 | LMF | The level light maps (the executable calls the asset "Light Map"): a 38-row directory at `0x100` and LZO1X-compressed groups of members of 44 + 2 × w × h bytes ([LMF page](formats/lmf.md)). |
+| LMF storage group | One LZO1X range expanding to consecutive light-map members. See the [native reader](lol3-lmf-reader.md). |
 | Light-map member | One decoded LMF member: a 44-byte head (u32 +0 = 0 or 1, u16 +4 and +6, u32 +8) and 2 × u16(+4) × u16(+6) more bytes; field meanings beyond the length rule are open ([reader page](lol3-lmf-reader.md)). |
 | MAP, ODF | Level files named by the executable's strings; MAP holds 2D point runs and records, ODF object definitions (partly decoded). |
 | `0x028E` / `0x828E` | Flags of the row-span texture records decoded on the [texture page](tex-format.md). |

@@ -42,11 +42,11 @@ The next records follow directly, each half the size of the one before: 64 × 12
 
 ## Colour
 
-The indices address a colour table that is not known. The [older evidence page](../texture-028e-evidence.md) reports these findings:
-- Neither the bank's own palette nor any level palette gives the original colours.
-- The renderer bakes colours through a 16-bit lookup at `0x6601B8` / `0x44B6E0`.
-
-Those findings are UNCONFIRMED here ([Q6](../OPEN_QUESTIONS.md)).
+**CONFIRMED.** The executable selects a per-descriptor source through
+`0x44B6E0` and builds 256 output words at `0x4826D0`. The native
+[texture colour bake](../lol3-texture-bake.md) gives the source selector,
+zero handling and indexed writes. The source record for a specific
+archived texture remains **UNCONFIRMED**.
 
 ## The cache file
 

@@ -15,7 +15,7 @@ Run examples outside the repository.
 | `check_all.py` | all checks below | prints each line, then `ALL 4 CHECKS PASSED` |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, private or assistant names, or foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
-| `walk_lmf_leaves.py` | the LMF light maps inside the WSX files | decodes all 5,256 stored LZO1X groups of the 18 LMF entries and checks every member against `44 + 2 × w × h` |
+| `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header. |
 | `lol3_texture_spans.py` | `cdcache.wsx` in the game folder | every row-span texture record consumes exactly (854 of 854); writes nothing |
 
 Curated public tooling notes for LoL3.
