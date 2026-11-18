@@ -4,7 +4,15 @@
 
 It contains documentation, tools and small diagrams. It contains no game files and no extracted game pictures, sounds, movies or text.
 
-LoL3 is less fully documented than the first two games. Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest.
+## At a glance
+
+- **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
+- **What you can do today:** unpack every archive, read level geometry, light maps and scripts, export textures to PNG, check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
+- **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
+- **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md): 2 of 13 answered, 2 mostly, 9 partly; open points include movie pixels, most item effects and save contents. Some need a [running game](docs/NEEDS_A_RUNNING_GAME.md).
+- **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md)).
+
+Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest.
 
 ![Overhead QWOD0 schematic from MAP surface edges](docs/images/qwod0-schematic.svg)
 
