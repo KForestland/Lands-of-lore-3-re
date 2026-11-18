@@ -1,6 +1,6 @@
 # Docs
 
-Start with [START_HERE.md](START_HERE.md), [STATUS.md](STATUS.md) and the format pages: [WSX](formats/wsx.md), [LMF](formats/lmf.md), [MAP and ODF](formats/map-odf.md), [textures](formats/textures.md). Native readers cover [WSX and cache](lol3-wsx-reader.md), [Light Map](lol3-lmf-reader.md), and [texture colour](lol3-texture-bake.md). The [dispatch search](lol3-dispatch-search.md) records the open script question.
+Start with [START_HERE.md](START_HERE.md), [STATUS.md](STATUS.md) and the format pages: [WSX](formats/wsx.md), [LMF](formats/lmf.md), [MAP and ODF](formats/map-odf.md), [textures](formats/textures.md). Native readers cover [WSX and cache](lol3-wsx-reader.md), [Light Map](lol3-lmf-reader.md), and [texture colour](lol3-texture-bake.md). The [native object page](lol3-object-dispatch.md) covers script dispatch. Read the [items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md) and [combat](lol3-combat-dispatch.md) and [saved state](lol3-native-saves.md) pages for their native entry points.
 
 Promoted writeups documenting the current public LoL3 structural and semantic checkpoint.
 

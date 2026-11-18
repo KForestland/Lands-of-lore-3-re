@@ -14,5 +14,6 @@ Numbered so pages and the [STATUS table](STATUS.md) can point to them. Each says
 | Q8 | What the QWOD0 and SWOD4 byte-pattern labels mean in the game; needs an executable reader | [lol3-semantic-phase.md](lol3-semantic-phase.md) |
 | Q9 | Movies: the format of the `MOVIES1..4` entries and the 10 unidentified entries | [container-inventory.md](container-inventory.md) |
 | Q10 | Music and sound: the format of the `MUSIC1..4` and sound entries | [container-inventory.md](container-inventory.md) |
-| Q11 | The native WSX, LMF and texture bake readers are mapped. Archive-backed script or event dispatch remains open | [Dispatch search](lol3-dispatch-search.md) |
-| Q12 | Items, spells, dialogue, saves and combat: not yet searched in the data or the executable | — |
+| Q11 | The original MAP stream, predicate evaluator and low/high command dispatch are mapped. Full opcode effects remain open | [Object and script dispatch](lol3-object-dispatch.md) |
+| Q12 | Items, spells, dialogue and combat have native entry points. End-to-end item and spell effects remain open | [Items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md) |
+| Q13 | Native save header, global and level directories, and compression are mapped. Remaining payload meanings are open | [Native saves](lol3-native-saves.md) |

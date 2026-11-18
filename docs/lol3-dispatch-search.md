@@ -4,6 +4,11 @@ The addresses in this page refer to the English retail `LOL3.DAT`
 PE32. Subtract `0x400C00` for an instruction's file offset. The
 [PE identification](lol3-lmf-reader.md) gives the executable hash.
 
+The search resumed from the MAP and object readers. The
+[native object page](lol3-object-dispatch.md) now binds the MAP
+command stream, predicate table and both command switches. The
+initial search below records excluded leads.
+
 ## Measured candidates
 
 - **CONFIRMED.** The level-load call at `0x43E304` passes the name
@@ -37,14 +42,3 @@ PE32. Subtract `0x400C00` for an instruction's file offset. The
   the difference of +0x2C from the old amount through an object method.
   This switch establishes a live-object calculation. Its input has no
   demonstrated link to an archive script record.
-
-## What would settle script dispatch
-
-**UNCONFIRMED.** A program counter, a script record frame and a table
-whose selector comes from the original level stream remain unbound.
-The checks above followed the obvious file-extension lead, bounded
-one native indexed dispatch and found the CSV reader. The level map
-loader is the best next input source. Use a known CKEEP object/action
-pair, follow its load through the section directory at
-`0x43E884–0x43E89A`, then match an archive byte offset to the native
-load of a selector and to a handler or a virtual event method.

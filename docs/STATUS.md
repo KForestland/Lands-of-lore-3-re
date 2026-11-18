@@ -16,6 +16,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (6 checks; all pass on
 | Level sheets | [levels/](levels/README.md) | `lol3_level_report`: 18 level archives, each with its four named entries (.LMF .MAP .ODF .TE_ by hash); 6,696 sidecar sounds, all RIFF WAVE format 17 (IMA ADPCM) | Q11 |
 | Movies, music, sound | [container inventory](container-inventory.md) | — | Q9, Q10 |
 | Executable (`LOL3.DAT`) | [MAP and ODF readers](lol3-map-odf-readers.md), [texture palette sources](lol3-texture-palette-sources.md), [WSX](lol3-wsx-reader.md), [LMF](lol3-lmf-reader.md), [texture bake](lol3-texture-bake.md), [dispatch search](lol3-dispatch-search.md) | — | Q11 |
-| Items, spells, dialogue, saves, combat | not documented | — | Q12 |
+| Game logic: script dispatch, objects, items, spells, dialogue, combat | [object and script dispatch](lol3-object-dispatch.md), [items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md) | measured: all 18 MAP command streams (54,966 offsets) frame exactly with the native size decoder; native entry points traced | Q11, Q12 |
+| Saves | [native saves](lol3-native-saves.md) | measured on the 47 files of the original SAVEGAME folder: 417 level blocks, every section and LZO chunk decodes to its stated length | Q13 |
 
 A row is done when it has a page, a working reader, a passing check and no open point. Today none of the rows meets that; WSX, LMF and the row-span textures have readers with checks.
