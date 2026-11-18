@@ -1,5 +1,7 @@
 # Start here, by goal
 
+[Format quick reference](QUICK_REFERENCE.md) pairs each documented game format with a command and its evidence.
+
 You need Python 3.8+ (optional: the system LZO library, `apt install liblzo2-2`) and your own copy of *Lands of Lore III* (the English GOG release). Point the tools at its `DAT` folder once; some tools also read the program `LOL3.DAT` and the game-written `cdcache.wsx` from the folder above it:
 
 ```bash
