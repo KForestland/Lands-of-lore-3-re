@@ -75,7 +75,7 @@ are light maps.
 |---|---|---:|
 | Raw indexed rows | 0x008B, 0x00A9, 0x00C3, 0x00E1, 0x808B, 0x80A9, 0x80C3, 0x80E1 | 4,194 |
 | Indexed row spans | 0x028E, 0x02C6, 0x828E | 6,475 |
-| Unconfirmed pixel route | 0x021A, 0x021E, 0x0252, 0x0256 | 4,429 |
+| SMD slice frame references | 0x021A, 0x021E, 0x0252, 0x0256 | 4,429 |
 | Unconfirmed copy branch | 0x02AC, 0x82AC | 20 |
 
 **CONFIRMED.** The raw records contain exactly width × height bytes.
@@ -96,12 +96,8 @@ yielding 0x9C67. The exported 128×256 PNG reads
 (56, 24, 56, 255) at (71, 33). The transparent gap at (0, 0)
 has an all-zero scratch word.
 
-**UNCONFIRMED.** The 4,429 entries in the first open group fail
-the bounds or length rule for the generic row route. For example,
-`cdcache.wsx+0x9D0F4B` starts a 49×31 record with a 1,380-byte
-payload. Trace its resource type from the descriptor to the first
-consumer that uses its +0xC word. The 20 entries in the second
-group have a structurally valid span at +0xC, for example the
+**UNCONFIRMED.** The 20 entries in the last group have a
+structurally valid span at +0xC, for example the
 128×128 record at +0x10E53A. Flag bit 0x20 instead selects the
 fixed-width helper at `0x4E0BAC–0x4E0BB5`. Trace the higher-level
 branch that admits this class before treating those bytes as rows.
@@ -119,6 +115,55 @@ python3 tools/lol3_texture_png.py --data DAT --offset 0x12C6E2 --out ../texture.
 python3 tools/lol3_texture_png.py --data DAT --check
 ```
 
-The check decodes supported records in memory. It reports the palette
-arm and bank count, all unconfirmed flags and individual malformed
-records. It writes no files.
+The check decodes indexed records in memory and verifies linked SMD
+frame headers. It reports the palette arm and bank count, the remaining
+open flags and malformed records. It writes no files.
+
+## SMD slice frame references
+
+**CONFIRMED.** In the game-folder `cdcache.wsx` (written by the game
+when it runs), the 4,429 short payloads describe frames from the
+slice archives. All carry bit 0x10 in bank descriptor +8. The
+consumer at `0x44B3B6–0x44B3D8` tests that bit and supplies record
++0xC to the SMD resolver at `0x4E12D0`, subject to the caller and
+renderer gates at `0x44B39D–0x44B3C8`. The remap dispatcher
+`0x421320` masks the flags with 0x211 and calls `0x4E1660` when the result
+is 0x210, unless bit 0x100 is already set (`0x421326–0x42135C`). That routine adds 0xC before the
+same resolver and invokes the slice remapper at `0x4E16AA`.
+See the [WSX hash and lookup](lol3-wsx-reader.md#resource-name-key).
+
+| Offset from record +0xC | Field and native use |
+|---|---|
+| +0x00 | Type 3, tested by the remapper at `0x4E3341`. |
+| +0x04/+0x08 | Identity and frame. The resolver compares both with a loaded SMD header and combines them for the frame cache (`0x4E130C–0x4E134D`). |
+| +0x10 | NUL-terminated SMD filename. The reader formats `slice\\%s` through the string at `0x549744` (`0x4E1389–0x4E13A7`). |
+| +0x20 | Offset within the named archive member (`0x4E1549`, `0x4E15FB`). |
+| +0x24 | Expanded byte count for allocation at `0x4E14D7–0x4E14E3`. |
+| +0x28 | Stored byte count. Zero uses the direct read. A nonzero value carries a 16-byte header before the compressed bytes, with LZO at `0x4E1588–0x4E159F`. |
+| +0x2C | Number of slice directory entries visited by the colour remap (`0x4E3330–0x4E333B`, `0x4E33CB–0x4E3419`). |
+
+**CONFIRMED.** All 4,429 records (game-written cache) join 53 names via the WSX
+`slice\\` path in `SLICECD1..4.WSX`. Each linked source has
+the matching first three frame dwords and a span inside its
+entry. The first example, game-folder `cdcache.wsx+0x9D0F4B`, refers to
+frame 0 of `cqb4.smd`, identity 0x3625618E. Its 30,260-byte
+stored span starts at `SLICECD1.WSX+0x1A2CEF`; the 16-byte
+prefix and the LZO expansion give 45,314 bytes. Slice table
+entry 0 at expanded +0x10 points to +0x130, and entry 71
+points to +0xB0A0. The 4,428 other sources consist of 4,427
+compressed references and one direct reference. The direct
+case is the first frame of `rbrbbush.smd` at
+game-folder `cdcache.wsx+0x22C26D8`, expanded length 44,484 with stored
+length zero, matching `SLICECD1.WSX+0x82A082`.
+
+**UNCONFIRMED.** End-to-end slice PNG export still needs the
+projection and colour stages. The original constructs an
+8-bit destination and calls the slice drawer
+(`0x4E32CB–0x4E3301`). The renderer selects callbacks from
+`0x4E2E20–0x4E2E7A`; the 0x20 arm traverses the referenced
+slice table and projected positions at `0x4E3E30–0x4E3E8C`.
+To reproduce one frame, expand the `cqb4.smd` example, apply
+the original projection inputs, follow its colour remap at
+`0x4E33DA–0x4E3419`, and compare the output buffer at
+`0x4E3306`. The cache check verifies each source join and
+header. The output of this draw path is still open.

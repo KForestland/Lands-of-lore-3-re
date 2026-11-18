@@ -5,15 +5,17 @@
   lol3_texture_png.py --data DAT --check
 
 An offset is an absolute texture-record position in the game-folder cdcache.wsx.
---check counts every occupied bank's populated mip records and reports classes
-whose native pixel route is still unconfirmed. It writes no images.
+--check counts every occupied bank's populated mip records, checks linked SMD
+frame headers, and reports classes whose pixel route is open. It writes no images.
 """
 import struct
 import zlib
-from collections import Counter
+from collections import Counter, defaultdict
+from contextlib import ExitStack
 from pathlib import Path
 
 import lol3_cli
+from extract_wsx_entries import wsx_name_hash
 from lol3_texture_archive import cache_rows
 from lol3_texture_palettes import bank_directory, u32
 from lol3_texture_spans import cache_path
@@ -21,7 +23,8 @@ from lol3_texture_spans import cache_path
 RAW_FLAGS = frozenset((0x008B, 0x00A9, 0x00C3, 0x00E1,
                        0x808B, 0x80A9, 0x80C3, 0x80E1))
 SPAN_FLAGS = frozenset((0x028E, 0x02C6, 0x828E))
-UNCONFIRMED_FLAGS = frozenset((0x021A, 0x021E, 0x0252, 0x0256, 0x02AC, 0x82AC))
+SLICE_FLAGS = frozenset((0x021A, 0x021E, 0x0252, 0x0256))
+UNCONFIRMED_FLAGS = frozenset((0x02AC, 0x82AC))
 
 
 def cache_textures(data, allocations):
@@ -65,12 +68,56 @@ def texture_payload(record):
     return flags, width, height, record[12:]
 
 
+def slice_directory(data_dir, stack):
+    entries = defaultdict(list)
+    for path in lol3_cli.wsx_files(data_dir):
+        if path.stem.upper() not in ("SLICECD1", "SLICECD2", "SLICECD3", "SLICECD4"):
+            continue
+        source = stack.enter_context(path.open("rb"))
+        count, size = struct.unpack("<HI", source.read(6))
+        base = 6 + 12 * count
+        if base + size != path.stat().st_size:
+            raise ValueError(f"{path.name}: incorrect WSX length")
+        for key, start, length in struct.iter_unpack("<III", source.read(12 * count)):
+            if start + length > size:
+                raise ValueError(f"{path.name}: entry outside WSX data")
+            entries[key].append((source, base + start, length))
+    return entries
+
+
+def slice_reference(payload):
+    if len(payload) not in (344, 1380):
+        raise ValueError("unexpected SMD reference length")
+    kind, identity, frame = struct.unpack_from("<III", payload)
+    name = payload[0x10:0x20].split(b"\x00", 1)[0].decode("ascii")
+    start, expanded, stored = struct.unpack_from("<III", payload, 0x20)
+    if kind != 3 or not name.lower().endswith(".smd") or expanded < 16 or 0 < stored < 16:
+        raise ValueError("invalid SMD frame reference")
+    return name, (kind, identity, frame), start, stored or expanded
+
+
+def check_slice_reference(payload, directory):
+    name, header, start, length = slice_reference(payload)
+    candidates = directory.get(wsx_name_hash(f"slice\\{name}"), ())
+    if not candidates:
+        raise ValueError(f"slice\\{name} is absent from SLICECD archives")
+    for source, base, size in candidates:
+        if start + length <= size:
+            source.seek(base + start)
+            if struct.unpack("<III", source.read(12)) == header:
+                return name
+    raise ValueError(f"no matching SMD frame header in slice\\{name}")
+
+
 def decode_texture(record, palette):
     flags, width, height, payload = texture_payload(record)
     if flags in RAW_FLAGS:
         if len(payload) != width * height:
             raise ValueError("indexed texture length differs from width × height")
         return width, height, b"".join(map(palette.__getitem__, payload))
+    if flags in SLICE_FLAGS:
+        name, (_, _, frame), _, _ = slice_reference(payload)
+        raise ValueError(f"SMD reference to slice\\{name} frame {frame}; slice rendering is open")
     if flags not in SPAN_FLAGS:
         raise ValueError(f"pixel route for flags {flags:#06x} is unconfirmed")
 
@@ -105,7 +152,7 @@ def png_bytes(width, height, rgba):
     return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", zlib.compress(scanlines)) + chunk(b"IEND", b"")
 
 
-def main():
+def main(stack):
     parser = lol3_cli.tool_args(__doc__, out_help="write one PNG outside the repository and game tree")
     parser.add_argument("--offset", type=lambda value: int(value, 0))
     args = parser.parse_args()
@@ -122,10 +169,12 @@ def main():
         path, allocations = cache_rows(args.data)
         cache = path.read_bytes()
         decoded = Counter()
+        slice_frames = Counter()
         unconfirmed = Counter()
         seen = set()
         banks = set()
         errors = 0
+        slices = slice_directory(args.data, stack) if args.check else {}
         for offset, size, bank, descriptor, mip, key, source in cache_textures(cache, allocations.values()):
             if offset in seen:
                 raise ValueError(f"duplicate texture record at {offset:#x}")
@@ -134,8 +183,11 @@ def main():
                 continue
             record = cache[offset:offset + size]
             try:
-                flags, _, _, _ = texture_payload(record)
+                flags, _, _, payload = texture_payload(record)
                 banks.add(bank)
+                if args.check and flags in SLICE_FLAGS:
+                    slice_frames[check_slice_reference(payload, slices)] += 1
+                    continue
                 if args.check and flags in UNCONFIRMED_FLAGS:
                     unconfirmed[flags] += 1
                     continue
@@ -162,12 +214,14 @@ def main():
             raise ValueError(f"{args.offset:#x} is not a cached texture-record offset")
         counts = ", ".join(f"{flag:#06x}={count}" for flag, count in sorted(unconfirmed.items()))
         print(f"CHECK texture_png: {len(seen)} records, {sum(decoded.values())} decoded, "
+              f"{sum(slice_frames.values())} SMD references verified ({len(slice_frames)} names), "
               f"{sum(unconfirmed.values())} unconfirmed ({counts or 'none'}), {errors} failures; "
-              f"arm 3 source palettes in {len(banks)} banks")
+              f"arm 3 source palettes in {len(banks)} banks; in the game-written game-folder cdcache.wsx")
         return int(not seen or errors > 0)
     except (OSError, ValueError, struct.error) as error:
         parser.exit(1, f"texture PNG: {error}\n")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    with ExitStack() as stack:
+        raise SystemExit(main(stack))
