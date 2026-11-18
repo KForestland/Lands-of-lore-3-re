@@ -4,7 +4,7 @@ You need Python 3.8+ (optional: the system LZO library, `apt install liblzo2-2`)
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
-python3 tools/check_all.py         # 10 checks; the last line should read ALL 10 CHECKS PASSED
+python3 tools/check_all.py         # 12 checks; the last line should read ALL 12 CHECKS PASSED
 ```
 
 Words you do not know are in the [glossary](GLOSSARY.md). What is known and what is open: [STATUS](STATUS.md) and [open questions](OPEN_QUESTIONS.md). Write tool output outside the repository.
@@ -38,6 +38,7 @@ Follow the engine from startup to saving in [How Lands of Lore III works](HOW_TH
 1. [formats/textures.md](formats/textures.md): the `.TE_` wrapper and the row-span records.
 2. `python3 tools/lol3_texture_archive.py --check --data $LOL3_DAT` (the 18 wrappers) and `python3 tools/lol3_texture_spans.py --check --data $LOL3_DAT` (the cache records; skipped if the game has not written its cache).
 3. Colours: [texture palette sources](lol3-texture-palette-sources.md) and the [texture bake](lol3-texture-bake.md).
+4. Export one texture with `python3 tools/lol3_texture_png.py --data "$LOL3_DAT" --offset 0x12C6E2 --out ../texture.png`. The offset is from the worked cache example. Use `--check` for the records and flags in your own cache.
 
 ## I want to read save files
 

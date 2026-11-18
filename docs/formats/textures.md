@@ -10,6 +10,8 @@ The retail level archives wrap texture banks in a compressed `.TE_` stream. The 
 
 Older notes: [tex-format](../tex-format.md), [texture 028E evidence](../texture-028e-evidence.md). Tools: `tools/lol3_texture_spans.py` (cache records) and `tools/lol3_texture_archive.py` (the 18 `.TE_` wrappers). They write nothing and make no pictures.
 
+The [native colour bake and PNG exporter](../lol3-texture-bake.md#cache-record-to-png) walk the complete cache directory. They cover raw indexed rows and three span flags, including 0x02C6. The 854-record scan below concerns flags 0x028E and 0x828E.
+
 ## Compressed level wrapper
 
 **CONFIRMED.** The cache preparation path changes `.TEX` to

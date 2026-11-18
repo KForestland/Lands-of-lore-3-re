@@ -130,7 +130,7 @@ def main():
             bad.append(f"{f} (generated script listing)")
         elif ext in GAME:
             bad.append(f"{f} (game file type)")
-        elif ext in (".png", ".jpg", ".gif", ".bmp") and not f.startswith(PNG_OK):
+        elif ext in (".png", ".jpg", ".gif", ".bmp", ".svg") and not f.startswith(PNG_OK):
             bad.append(f"{f} (image outside examples/ and docs/images/)")
         elif os.path.isfile(p) and os.path.getsize(p) > SIZE_LIMIT and f not in SIZE_ALLOWED:
             bad.append(f"{f} (larger than 300 KB)")

@@ -6,12 +6,16 @@ It contains documentation, tools and small diagrams. It contains no game files a
 
 LoL3 is less fully documented than the first two games. Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest.
 
+![Overhead QWOD0 schematic from MAP surface edges](docs/images/qwod0-schematic.svg)
+
+QWOD0 seen from above. Dark edges occur once in the surface table and pale edges are shared. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
+
 ## What you get
 
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Executable pages** in [`docs/`](docs/README.md): the WSX, LMF, texture, MAP/ODF, script, item, spell, dialogue, combat and save readers in the game program `LOL3.DAT`.
-- **Tools** in [`tools/`](tools/README.md): ten checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a movie and audio check, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
+- **Tools** in [`tools/`](tools/README.md): twelve checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -24,7 +28,7 @@ You need Python 3.8+ and your own copy of the game: the English GOG release (the
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
-- `cdcache.wsx`, a large cache the game writes when it runs. The two texture checks report SKIP if it is missing.
+- `cdcache.wsx`, a large cache the game writes when it runs. The three cache texture checks report SKIP if it is missing.
 
 `LOCAL.WSX` and `locallng.wsx` in the game folder are not used.
 
@@ -32,7 +36,7 @@ The tools read the `DAT/` folder and two files in the game folder above it:
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 10 checks, ends with ALL 10 CHECKS PASSED
+python3 tools/check_all.py                  # 12 checks, ends with ALL 12 CHECKS PASSED
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```
@@ -54,7 +58,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
-| Textures | Row-span records: all 854 in this installation's texture cache decode exactly and join to palette sources; the 18 `.TE_` wrappers decode (465 LZO1X chunks); a standalone editor format is unconfirmed (Q1, Q6, Q7) |
+| Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values need further work. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
 | Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced, RGB output open (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, effects marked CONFIRMED or UNCONFIRMED; per-level summaries (Q11) |

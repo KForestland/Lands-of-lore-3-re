@@ -21,24 +21,34 @@ def u32(data, at):
     return struct.unpack_from("<I", data, at)[0]
 
 
+def bank_directory(data, begin, end):
+    if begin < 0 or begin + 0x6A2 > end or end > len(data):
+        raise ValueError(f"truncated texture bank at {begin:#x}")
+    if (u32(data, begin) != 38 or u32(data, begin + 0x40) != 0x300
+            or struct.unpack_from("<II", data, begin + 0x54) != (0x4200, 0x20000)):
+        raise ValueError(f"invalid texture bank header at {begin:#x}")
+    directory, pixels = struct.unpack_from("<II", data, begin + 0x10)
+    palettes, palette_size = u32(data, begin + 0x34), u32(data, begin + 0x70)
+    directory_size, count = u32(data, begin + 0x4C), u32(data, begin + 0x2A8)
+    if not (0x6A2 <= directory <= pixels < palettes
+            and count * 58 <= directory_size
+            and directory + count * 58 <= pixels
+            and palette_size % 512 == 0
+            and begin + palettes + palette_size <= end):
+        raise ValueError(f"invalid texture bank ranges at {begin:#x}")
+    return begin, directory, pixels, palettes, palette_size // 512, count
+
+
 def banks(data):
-    """Locate and verify the retail loader's bank header and indexed ranges."""
+    """Find texture-bank candidates in file data."""
     for match in re.finditer(rb"\x26\x00\x00\x00", data):
         begin = match.start()
-        if begin + 0x6A2 > len(data):
+        if begin + 0x6A2 > len(data) or u32(data, begin + 0x40) != 0x300:
             continue
-        if u32(data, begin + 0x40) != 0x300 or struct.unpack_from("<II", data, begin + 0x54) != (0x4200, 0x20000):
+        try:
+            yield bank_directory(data, begin, len(data))
+        except ValueError:
             continue
-        directory, pixels = struct.unpack_from("<II", data, begin + 0x10)
-        palettes, palette_size = u32(data, begin + 0x34), u32(data, begin + 0x70)
-        directory_size, count = u32(data, begin + 0x4C), u32(data, begin + 0x2A8)
-        if not (0x6A2 <= directory <= pixels < palettes
-                and count * 58 <= directory_size
-                and directory + count * 58 <= pixels
-                and palette_size % 512 == 0
-                and begin + palettes + palette_size <= len(data)):
-            continue
-        yield begin, directory, pixels, palettes, palette_size // 512, count
 
 
 def palette_sources(data):
