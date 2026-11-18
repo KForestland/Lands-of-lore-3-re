@@ -1,5 +1,7 @@
 # LMF chunk size ladder
 
+> Historical probe. The [native reader](lol3-lmf-reader.md) and [LMF format](formats/lmf.md) establish the actual directory count, storage groups and decoded member lengths.
+
 Observed discrete blob sizes in LoL3 `.LMF` files:
 
 | size | n | payload records | payload bytes |

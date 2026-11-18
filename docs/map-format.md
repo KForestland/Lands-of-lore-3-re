@@ -35,4 +35,4 @@ Large stream with frequent `u16 0xFFFF`. Candidate polygon header `(n, a, b, 0xF
 
 ## Relation to `.lmf`
 
-`.lmf` remains the nested size-ladder index + opaque leaf pool. MAP/ODF carry the walkable layout facts known so far; the LMF leaf records are not yet bound to a reader in the executable.
+MAP and ODF carry the walkable layout data. The native [LMF reader](lol3-lmf-reader.md) loads light-map members separately.

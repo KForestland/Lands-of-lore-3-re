@@ -11,7 +11,7 @@ python3 tools/check_all.py         # the last line should read ALL 4 CHECKS PASS
 |---|---|---|
 | see what is known and what is open | [STATUS](STATUS.md), [open questions](OPEN_QUESTIONS.md) | `tools/check_all.py` |
 | read the archives | [WSX](wsx-extraction.md) | `tools/extract_wsx_entries.py --data $LOL3_DAT --out <folder outside the repo>` |
-| look at level geometry | [LMF](lmf-size-formula.md), [MAP](map-format.md) | `tools/walk_lmf_leaves.py <peeled .LMF>` |
+| look at level layout and light maps | [MAP and ODF](formats/map-odf.md), [LMF light maps](formats/lmf.md) | `tools/walk_lmf_leaves.py --check --data $LOL3_DAT` |
 | look at textures | [texture format](tex-format.md) | — |
 | understand a term | [glossary](GLOSSARY.md) | — |
 
