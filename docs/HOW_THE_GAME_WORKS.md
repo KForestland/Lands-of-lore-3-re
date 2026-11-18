@@ -24,7 +24,7 @@ A level has separate lists of region and object events. Each entry describes the
 
 An object can also have a timer that counts down as the frame clock advances. When a command group runs, the first byte of each command tells the engine what operation to perform and how long the command is. For example, an object command can grant an item. The original command lengths account for the script streams in all 18 levels.
 
-Details and evidence. [Event lists, shared state and frame clock](lol3-script-events.md) · [Opcode table](lol3-script-opcodes.md)
+Details and evidence. [Event lists, shared state and frame clock](lol3-script-events.md) · [Opcode table](lol3-script-opcodes.md) · [Follow one event](tutorial-one-event.md)
 
 ## Picking up and using items
 

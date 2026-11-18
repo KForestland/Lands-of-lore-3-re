@@ -28,6 +28,7 @@ Follow the engine from startup to saving in [How Lands of Lore III works](HOW_TH
 1. The level's [script summary](levels/notes/README.md): counts of triggers, effects and targets, and one worked excerpt.
 2. Every opcode with its native effect: [lol3-script-opcodes.md](lol3-script-opcodes.md); events, predicates and timers: [lol3-script-events.md](lol3-script-events.md); dispatch: [lol3-object-dispatch.md](lol3-object-dispatch.md).
 3. Full per-record listings for your own copy: `python3 tools/lol3_script_notes.py --data $LOL3_DAT --out ../lol3-notes`.
+4. [Follow one region event](tutorial-one-event.md) from entry to a moving floor.
 
 ## I want to know how items, spells, dialogue and combat work
 
