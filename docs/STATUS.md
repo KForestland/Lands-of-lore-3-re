@@ -8,7 +8,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (3 checks; all pass on
 
 | Area | Pages | Tool check (re-run 2026-11-18) | Open |
 |---|---|---|---|
-| WSX archives | [wsx-extraction](wsx-extraction.md), [container inventory](container-inventory.md) | `extract_wsx_entries`: 51 of 52 `DAT/*.WSX` parse (count, 12-byte records, payload sizes sum to the file), 7,549 entries; `cdcache.wsx` does not | Q1, Q2 |
+| WSX archives | [format page](formats/wsx.md), [wsx-extraction](wsx-extraction.md), [container inventory](container-inventory.md) | `extract_wsx_entries`: 51 of 52 `DAT/*.WSX` parse (count, 12-byte records, payload sizes sum to the file), 7,549 entries; `cdcache.wsx` does not | Q1, Q2 |
 | LMF geometry index | [lmf-size-formula](lmf-size-formula.md) | `walk_lmf_leaves`: 18 LMF entries, 45,836 index blocks, 311,934 leaf blocks, every block size on the `(2^n + 2) * 16 + 12` ladder | Q3 |
 | MAP and ODF level files | [map-format](map-format.md), [level catalog notes](level-catalog-notes.md), [level file types](level-file-types.md) | — | Q4, Q5 |
 | Textures | [tex-format](tex-format.md), [texture 028E evidence](texture-028e-evidence.md) | — (26-payload exact consume to be re-run by a repo tool) | Q6, Q7 |

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Peel LoL3 .WSX containers into entry blobs + LMF candidates.
 
-WSX layout (verified 2026-09-17):
-  - u16 count at offset 0 (little-endian)
-  - 6-byte prefix total (count + 4 bytes)
-  - count × 12-byte records: <u32 hash><u32 unk><u32 size>
-  - concatenated payloads in size-descending order
-  - sum(sizes) == file_size - payload_base
+WSX layout (docs/formats/wsx.md; the same as Westwood MIX):
+  - u16 count, u32 data size (bytes after the index)
+  - count x 12-byte rows: u32 key, u32 offset from the start of the data, u32 size
+  - the entries; rows are sorted by signed key
 
 Works for witness families (count=4) and most DAT/*.WSX including *S sidecars,
 GLOBAL, movies, music, and slice CDs. cdcache.wsx is a known exception.
@@ -47,16 +45,21 @@ def parse_wsx(path: Path) -> dict:
         raise ValueError(
             f"{path}: size mismatch header_sum={payload_base + total} file={len(data)} count={count}"
         )
-    ordered = sorted(records, key=lambda r: r["size"], reverse=True)
-    cursor = payload_base
+    data_size = struct.unpack_from("<I", data, 2)[0]
+    if payload_base + data_size != len(data):
+        raise ValueError(f"{path}: data size field {data_size} does not match the file ({len(data) - payload_base})")
     entries = []
-    for rec in ordered:
-        blob = data[cursor : cursor + rec["size"]]
+    for rec in sorted(records, key=lambda r: r["unk"]):
+        # The second u32 of a row is the entry's offset from the start of the data (docs/formats/wsx.md).
+        start = payload_base + rec["unk"]
+        blob = data[start : start + rec["size"]]
         if len(blob) != rec["size"]:
-            raise ValueError(f"{path}: truncated entry {rec['hash_hex']}")
+            raise ValueError(f"{path}: entry {rec['hash_hex']} runs past the end of the file")
         is_lmf = len(blob) >= 8 and struct.unpack_from("<I", blob, 4)[0] == 38
-        entries.append({**rec, "offset": cursor, "sha1": sha1(blob), "is_lmf": is_lmf, "blob": blob})
-        cursor += rec["size"]
+        entries.append({**rec, "offset": start, "sha1": sha1(blob), "is_lmf": is_lmf, "blob": blob})
+    spans = [(e["offset"], e["offset"] + e["size"]) for e in entries]
+    if any(a[1] > b[0] for a, b in zip(spans, spans[1:])):
+        raise ValueError(f"{path}: overlapping entries")
     return {
         "path": str(path),
         "file_size": len(data),
