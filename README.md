@@ -9,7 +9,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
 - **What you can do today:** unpack every archive, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
-- **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md): 2 of 13 answered, 2 mostly, 9 partly; open points include movie pixels, most item effects and save contents. Some need a [running game](docs/NEEDS_A_RUNNING_GAME.md).
+- **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md): 3 of 13 answered (two of them for one display or renderer), 2 mostly, 8 partly; open points include most item effects, a floor pickup in a save, and other display modes. Some were tried in the [running game](docs/NEEDS_A_RUNNING_GAME.md) (the texture and movie colour formats are answered there); the rest need later-game saves.
 - **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md)).
 
 Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest.
@@ -67,11 +67,11 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
 | Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values need further work. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
-| Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced, RGB output open (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
+| Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced; under Wine on a 16-bit display the intro converts 5-5-5 codebook words to 5-6-5 (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, effects marked CONFIRMED or UNCONFIRMED; per-level summaries (Q11) |
 | Items, spells, dialogue, combat | Traced in the program: 343 item rows, six item handlers, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: most per-item effects and mitigation names (Q12) |
-| Saves | Header, directories and compression mapped on 47 saves the original program wrote in our copy (player saves, not shipped; no tool here re-checks them); payload meanings open (Q13) |
+| Saves | Header, directories and compression mapped on 47 saves the original program wrote in our copy (player saves, not shipped; no tool here re-checks them); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
 
 ## Repository layout
 

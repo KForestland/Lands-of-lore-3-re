@@ -6,6 +6,8 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (12 checks; all pass o
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
+**Running-game results** (original program under Wine with a debugger and a silent audio device, one run each; [procedures and results](NEEDS_A_RUNNING_GAME.md)): the texture format (Q6) and the movie colour conversion (Q9) are answered for one display; a spell that spends an item charge instead of mana (Q12) and the save fields of a turn, a step and an item move (Q13) are partly answered.
+
 | Area | Pages | Tool check (re-run 2026-11-18) | Open |
 |---|---|---|---|
 | WSX archives | [format page](formats/wsx.md), [wsx-extraction](wsx-extraction.md) (history), [container inventory](container-inventory.md) (history) | `extract_wsx_entries`: 51 of 52 `DAT/*.WSX` parse (count, 12-byte records, payload sizes sum to the file), 7,549 entries and 76 native names match their keys. Both cache copies fail the ordinary exact-size check (`check_all` tests the shipped `DAT/` copy). The game-folder copy, written by the game when it runs, has a separate directory of 40 allocation rows | Q1 |
