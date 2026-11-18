@@ -63,52 +63,6 @@ A negative debit at `0x40FFE0` and changed player +0x1B8
 are the ordinary mana control. Keep any run where admission
 fails separate from a successful alternate payment.
 
-### Q13. Which original save bytes follow one controlled action?
-
-Question: [Q13 in OPEN_QUESTIONS](OPEN_QUESTIONS.md).
-
-**CONFIRMED.** The header writes the active level at +0x498
-and position-associated fields at +0x49C–+0x4B7
-(`0x43766F–0x43776D`, `0x4377EB–0x4377F8`).
-The global writer uses the table at `0x438848`; the level
-writer uses `0x438940`. [Slot layout and chunk reader](lol3-native-saves.md)
-
-**CONFIRMED, setup result.** The native loader reached the progress
-sound wait with its flag still 1 (set unconditionally at `0x46F55B`;
-clearing `[0x65BD64]` in the debugger is the route past it). `-NOSFX` and `-NOMUSIC` left
-the `0x46F59F` return at −1 under the audio-disabled Wine setup.
-F10, turn right and forward produced no new writer hit and the
-source slot retained its hash.
-[Original header and live setup](lol3-native-saves.md#controlled-save-setup)
-
-**CONFIRMED, position group layout.** Both 14-byte groups hold two
-16.16 horizontal coordinates, a zero-extended 16-bit heading and
-a u16 region index. Readers `0x40AD80` and `0x48B690` apply the
-position and heading to their respective objects.
-[Header layout and readback](lol3-native-saves.md#slot-header-and-stream)
-
-**UNCONFIRMED.** Which fields and payload rows change independently
-after one input. Start from one local slot and make three fresh saves at a stable point,
-reloading that starting slot for each trial. In the first save
-make no movement. In the second press only turn right. In the
-third take one forward step while staying on the same surface.
-At `0x43766F`, record the live player and second position-object fields,
-then compare both groups of three saved dwords to those inputs.
-Turning alone isolates an orientation input; moving alone
-isolates horizontal coordinates. If an alleged orientation
-moves with a step and stays fixed while turning, the trial
-rejects that label. Record the surface index in each save as
-a control.
-
-Repeat with one pickup and no movement. At
-`0x4378C0–0x437928` and `0x437F0E–0x437F55` log the
-affected selector and source record before compression. Compare
-the decoded sections with the no-action save, adding back a
-base image by XOR where that selector requests it. A changed
-item-instance row and reference to the same identity tie the
-fields to the pickup. A change present also in the no-action
-trial is background state and needs its own observation.
-
 ## Answered probes
 
 ### Q6. Which packed format does the live device select?
@@ -153,3 +107,30 @@ surfaces used the same masks.
 **UNCONFIRMED.** Exact full-frame correspondence with the host
 window capture and behavior of other renderer or display formats
 (the surface takes the display mode's format, so a 555 desktop would select a different conversion mode at `0x409D27`).
+
+### Q13. Which original save bytes follow one controlled action?
+
+Question: [Q13 in OPEN_QUESTIONS](OPEN_QUESTIONS.md).
+
+**CONFIRMED, turn, step and quick-slot transfer.** A private null sink
+let the progress sound return 0 at `0x46F59F` and the copied level-5
+slot (a player save written by the game) restore at `0x436F7F`. Four F10 saves reached `0x43766F`, each
+from the same source. A right turn changed player heading `+0x4A4`
+from `0x8000` to `0x8D7D`. A forward input changed player Z at
+`+0x4A0` from `0xF6F20000` to `0xF6EF7335`. The second position group
+and both region words stayed fixed. Clicking the first quick slot
+moved its reference from global selector 11 +0 to selector 7 +0x44,
+leaving both position groups unchanged.
+[Autosave offsets, hashes and writer traces](lol3-native-saves.md#controlled-saves-with-a-null-sink)
+
+**UNCONFIRMED, pickup from the world.** Attempts to drop the held item
+on the level-5 bridge left the same cursor reference or produced no
+visible loose item. The new-game route to a tutorial item stopped at
+the video-memory error. Start from an original slot within reach of
+one visible loose item, with space in the player's inventory. Save a
+no-action control and one pickup from the same source. At `0x4378C0`
+and `0x437F79`, compare the old and new item by definition identity.
+A removed world-pool row and a new reference to that identity would
+isolate the pickup. Compare the decoded sections after accounting
+for the base XOR and pointer relocations.
+[Measured controls and remaining pickup procedure](lol3-native-saves.md#controlled-saves-with-a-null-sink)

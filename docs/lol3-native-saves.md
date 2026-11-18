@@ -123,9 +123,67 @@ before and after the turn and forward inputs left the slot
 identical by SHA-256. The meter's completion routine at
 `0x46F8A0` clears the wait flag.
 
-**UNCONFIRMED.** The isolated save changes from one action, including
-which item sections change on a pickup. A run
-(The load waits on a flag the progress sound's completion callback clears: `0x46F55B` sets `[0x65BD64]` to 1 whatever the sound result, so without audio the loader hangs. With the debugger attached, set `[0x65BD64]` to 0, or force the `0x46F512` skip, and label the run as patched in memory.) that finishes the progress meter can restore the same starting
-slot and produce the no-action, turn, step and pickup comparisons.
-Record both sets of live source fields and region pointers at the
-writer before comparing the slot bytes.
+## Controlled saves with a null sink
+
+**CONFIRMED.** In Wine 9.0 with `winepulse` directed to a private
+44.1 kHz stereo PulseAudio null sink, the original progress sound
+returned 0 at `0x46F59F`. The loader reached `0x436F7F` on each
+reload of the copied level-5 source slot. F10 reached `0x43766F`
+and wrote the following game-generated autosaves (written in this run; not shipped, not tracked). Each trial started
+by restoring source `df50eda48c27` through Load Autosave.
+
+| One input before saving | Slot SHA-256 prefix | Player X +0x49C | Player Z +0x4A0 | Player heading +0x4A4 | Region +0x4A8 |
+|---|---|---|---|---|---|
+| None | `c7d8e3130393` | `08970000` | `F6F20000` | `00008000` | `18FD` |
+| Turn right | `19278fe2eca8` | `08970000` | `F6F20000` | `00008D7D` | `18FD` |
+| Forward | `be9c5bc25543` | `08970000` | `F6EF7335` | `00008000` | `18FD` |
+| Move the first quick-slot item to the cursor | `f755ae73e2ea` | `08970000` | `F6F20000` | `00008000` | `18FD` |
+
+**CONFIRMED.** The dwords and headings match the live values from
+`0x5D4EE0` and `0x5860F0` at `0x43766F–0x43776D`. The second group
+`+0x4AA–+0x4B7` held `08970000 F6F20000 00008000 18FD` in all four
+outputs. The right turn changed only the player's heading in the two
+groups. The forward input changed only the player's Z coordinate in
+those groups.
+
+**CONFIRMED.** The quick-slot action moved the live item reference
+`0x01BF5DD8` from `[0x546A58]` to the cursor at `[0x585488]`.
+The first address is the start of global selector 11 (80 raw bytes,
+`0x4382C6–0x4382EE`). The second is +0x44 of global selector 7
+(104 raw bytes, `0x43821F–0x438247`). At `0x4378C0` both selectors
+used flags 1. In both slots `+0x3C8` held the same player-item
+pool base `0x01BF5DD8`, so the nonzero reference points to its row 0.
+
+| Field | No-action slot offset and value | Quick-slot click offset and value |
+|---|---|---|
+| Selector 11 +0, first quick-slot reference | `+0x2204C` = `01BF5DD8` | `+0x21ECC` = `00000000` |
+| Selector 11 +4, adjacent dword | `+0x22050` = `00000001` | `+0x21ED0` = `00000000` |
+| Selector 7 +0x44, cursor reference | `+0x21E01` = `00000000` | `+0x21C81` = `01BF5DD8` |
+| Selector 7 +0x64, dword | `+0x21E21` = `00000000` | `+0x21CA1` = `00000001` |
+
+Selectors 7 and 11 in the turn and forward slots are byte-identical
+to the no-action slot. Those two controls and the four table entries
+account for all changes in selectors 7 and 11 in the quick-slot trial.
+
+**UNCONFIRMED, pickup from the world.** Left clicks on the bridge
+while holding that item did not create a loose item to pick up again.
+For example, the crouch-and-click slot `f0289d9cc607` still has the
+same cursor reference at `+0x21CA5`. A right click released the
+cursor (`a4504f10d6d5`, zero at `+0x21CC5`), but produced no
+witness of the item in the world. A new-game attempt to reach the
+tutorial's loose item displayed the video-memory error whose text
+is at `LOCALLNG.WSX+0x598770B`. The level-5 autosaves above can
+be used for position and inventory controls.
+
+**CONFIRMED, pickup test boundary.** In level 5 the writer reports
+21,888 bytes in 72-byte rows for level selector 25, from the pool at
+`[0x7D7824]` (`0x438CDE`, `0x438DBE–0x438DE6`). Global selectors
+2 and 3 use the player-item pool at `[0x6626BC]`
+(`0x4381AA–0x4381B9`, `0x438773–0x43879B`,
+`0x4387A1–0x4387C4`). To settle the floor pickup, use one original
+slot within reach of a visible loose item, restore it for both
+trials, and save after clicking only the item in the second trial.
+At `0x4378C0` and `0x437F79`, identify the outgoing and incoming
+rows by definition identity before decompression and file comparison.
+Account for the selector's base XOR and pointer relocations before
+attributing the decoded differences to the pickup.
