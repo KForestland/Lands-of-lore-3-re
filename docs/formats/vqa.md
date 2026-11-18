@@ -174,8 +174,7 @@ confirmed in the native callback.
 
 The tile callback writes packed u16 words. See the
 [live offscreen format and test word](#live-introduction-opener).
-**UNCONFIRMED.** End-to-end RGB and native uses of the trailing
-reserved header words.
+**UNCONFIRMED.** Native uses of the trailing reserved header words.
 
 ## Live introduction opener
 
@@ -203,17 +202,43 @@ then the decoder setup would store it at decoder +0x1AA at `0x50EE38`.
 The RGB565 movie surface and the [RGB5551 texture copy](../lol3-texture-bake.md#live-direct3d-texture-format)
 are separate measurements.
 
-**CONFIRMED, frame input.** Tile 0 in the first decoded book is
-all zero. For a colour comparison, frame 16 selects tile 1 at
-the first VPTR word (`MOVIES1.WSX+0x1E60E`). The fourth pixel
-of that tile, at expanded book +0x26 from CBFZ `+0x2754`, is
-`0x0421`. If the callback copies it unchanged, the slot at pixel
-(3, 0) reads as native channel integers `(0, 33, 1)` with the
-measured masks. The same input gives `(1, 1, 1)` in RGB555
-and `(4, 2, 1)` in RGB444.
+**CONFIRMED, original playback with a null sink.** Wine 9.0 used
+a private PulseAudio 16.1 server exposing only `module-null-sink`.
+The English retail executable opened the archive clip with status
+−1 and a populated decoder at `0x470048`. It presented the
+640 × 480 movie through Direct3D. The locked movie surface,
+intermediate DirectDraw surface and primary surface all had depth 16
+and masks `F800/07E0/001F`. The movie lock reported a 1,280-byte
+pitch (`0x50377F`, `0x5046E0`, `0x470078`).
 
-**UNCONFIRMED.** The word that the movie actually writes and the
-final presented RGB output. Neither `0x512AAF` nor `0x512AA7`
-was reached. The block comes from `0x513338–0x513342`: the audio-stream handle at +0x78A is null, so the opener returns −13. Audio stays disabled on this machine; instead, in the debugger, clear bit 0 of `[EBX+0x48]` before `0x50E39E`, which skips audio initialisation (`je 0x50E44E`), and label the run as patched in memory. Then follow
-frame 16 at `0x512AAF` and compare its word and format after the
-presentation calls at `0x470109` and `0x47011B`.
+**CONFIRMED.** Decoder callback `0x46FDB0` reaches renderer slot
++0x8C through `0x46FDD8`. With renderer table `0x538730`, the
+slot is `0x47ABE0`, which calls the format reader `0x409C70`.
+It counts the contiguous bits in the reported channel masks.
+For 5/6/5, `0x409D27` selects conversion mode 2, whose table
+arm at `0x46F93C` uses shifts 11, 6 and 0 for the original
+five-bit red, green and blue. `0x46FA48–0x46FA53` replaces
+each word through that table before the tile callback. For a 15-bit
+word `w`, this mode yields `((w & 0x7FE0) << 1) | (w & 0x1F)`.
+
+**CONFIRMED, frame 16.** The frame number came from frame
+node +0x1C (read by `0x513212`). The first raw VPTR word
+`0x2101` (`MOVIES1.WSX+0x1E60E`) selects tile 1. The fourth
+word of that tile, at expanded book +0x26 from CBFZ `+0x2754`,
+is `0x0421`. The corresponding live book word at `0x512AAF`
+was `0x0841`. The callback selected `0x516A40` and copied
+that word at pixel (3, 0), as measured before and after the call
+(`0x512AAF` and `0x512AB5`). The same word remained in the
+movie surface after submission through `0x470109` and `0x47011B`.
+The measured RGB565 mask triple gives channel integers `(1, 2, 1)`.
+
+**CONFIRMED, DirectDraw submission.** The original renderer copies
+the movie to its intermediate surface in tiles at `0x476275` and
+submits the frame via its display callback at `0x47011B`. Wine
+logged those blits and the primary-buffer update. At frame 60,
+for example, the decoder word `0x4351` at (439, 97) also appeared
+in the low 16 bits of the separate Xvfb window capture. The
+post-submit capture matched 248,455 of 307,200 low words.
+**UNCONFIRMED.** The cause of the remaining capture differences,
+full-frame synchronization with the window surface and other
+renderer or display formats.

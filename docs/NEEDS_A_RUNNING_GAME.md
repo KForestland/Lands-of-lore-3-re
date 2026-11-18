@@ -21,36 +21,6 @@ coefficients, the predicted indexed output rows. The
 first-pixel predictions for the two unresolved row flags. Use those tests to
 identify the source buffer and output words before testing display conversion.
 
-### Q9. What colours does the VQA frame callback present?
-
-Question: [Q9 in OPEN_QUESTIONS](OPEN_QUESTIONS.md).
-
-**CONFIRMED.** The first raw VPTR in `mintro01.vqa`
-(`MOVIES1.WSX+0x42`, pointer words at `+0x1768E`) fills
-its first block row with tile 0. The output dispatch at
-`0x512AAF` calls the tile routine, which writes packed
-pixel words. [Movie and callback evidence](formats/vqa.md#44-block-pointers)
-
-**CONFIRMED, offscreen format.** The native allocation and lock for
-this introduction run returned RGB565 (`F800/07E0/001F`): the request
-asks for no pixel format (flags 7), so the surface takes the display
-mode's format, here a 16-bit Wine display; a native 555 desktop would
-give 555. Depth 16
-and pitch 1,280. The decoder opener reached FINF but the audio
-initialization call at `0x50E404` returned −13, leaving a null
-decoder at `0x470048`. Both archive and exact loose-entry trials
-stopped before the output callback. To get past it with audio still
-disabled, see the [debugger route](formats/vqa.md#live-introduction-opener).
-[Offscreen surface and live opener evidence](formats/vqa.md#live-introduction-opener)
-
-**UNCONFIRMED.** The actual tile word and its final conversion.
-Frame 16 supplies a nonzero input at pixel (3, 0), tile 1, word
-`0x0421` (`MOVIES1.WSX+0x1E60E`, bank `+0x2754`). Let the
-intro play and stop at `0x512AAF`. Record the invoked function,
-destination and pitch, then compare that pixel after `0x470109`
-and `0x47011B`. Follow any change in the word or masks to the
-copy which performed it.
-
 ### Q12. Which live cast consumes an alternate resource?
 
 Question: [Q12 in OPEN_QUESTIONS](OPEN_QUESTIONS.md).
@@ -161,3 +131,18 @@ extraction with the second. A different upload descriptor or
 pixel word identifies a conversion between selection and display.
 If the path enumerates several candidates, keep the upload
 descriptor separate from those candidates.
+
+### Q9. What colours does the VQA frame callback present?
+
+Question: [Q9 in OPEN_QUESTIONS](OPEN_QUESTIONS.md).
+
+**ANSWERED, CONFIRMED for the Wine Direct3D run on a 16-bit display.** A private audio
+null sink (no sound reaches the host) let the original intro play. The RGB565 surface received
+`0x0841` at frame 16 pixel (3, 0), converted from archive word
+`0x0421`. The offscreen, intermediate and primary DirectDraw
+surfaces used the same masks.
+[Native conversion and live presentation evidence](formats/vqa.md#live-introduction-opener)
+
+**UNCONFIRMED.** Exact full-frame correspondence with the host
+window capture and behavior of other renderer or display formats
+(the surface takes the display mode's format, so a 555 desktop would select a different conversion mode at `0x409D27`).
