@@ -9,6 +9,8 @@ python3 tools/check_all.py         # 10 checks; the last line should read ALL 10
 
 Words you do not know are in the [glossary](GLOSSARY.md). What is known and what is open: [STATUS](STATUS.md) and [open questions](OPEN_QUESTIONS.md). Write tool output outside the repository.
 
+Follow the engine from startup to saving in [How Lands of Lore III works](HOW_THE_GAME_WORKS.md).
+
 ## I want to open the archives
 
 1. Read [formats/wsx.md](formats/wsx.md): the WSX layout, the name hash and a worked example.

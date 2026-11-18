@@ -1,6 +1,6 @@
 # Docs
 
-Start with **[START_HERE.md](START_HERE.md)** (by goal), then:
+Start with **[START_HERE.md](START_HERE.md)** (by goal) or **[How Lands of Lore III works](HOW_THE_GAME_WORKS.md)** (a walkthrough), then:
 
 - [STATUS.md](STATUS.md): what is documented, which tool checks it, and what is open.
 - [formats/](formats/wsx.md): one page per file format, each with a worked example from the game files: [WSX](formats/wsx.md), [LMF light maps](formats/lmf.md), [MAP and ODF](formats/map-odf.md), [textures](formats/textures.md), [movies (VQA)](formats/vqa.md), [music and sound](formats/audio.md).
