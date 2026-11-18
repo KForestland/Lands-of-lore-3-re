@@ -74,3 +74,30 @@ See also:
 
 - [`../examples/lol3-qwod0-semantic-spine.svg`](../examples/lol3-qwod0-semantic-spine.svg)
 - [`../examples/lol3-swod4-semantic-spine.svg`](../examples/lol3-swod4-semantic-spine.svg)
+
+## Native MAP and ODF cross-check
+
+**CONFIRMED.** The two archives contain distinct MAP and ODF resources.
+The native loader at `0x43EAB2–0x43EC92` reads the MAP's vertices,
+waypoints and surfaces from separate sections. The ODF loader at
+`0x43FDE2 → 0x4F0CE0` reads the field-3 definitions. Joining the actual
+entries by their native name keys gives these original file offsets.
+
+| Archive | MAP start | Vertex rows | Attached rows | Surface rows | ODF field-3 definitions |
+|---|---:|---:|---:|---:|---|
+| `QWOD0.WSX` | `0x72E28B` | 1,308 at `0x7311B7` | 2,368 at `0x733AB9` | 1,430 at `0x7384B9` | `SPIDER` at row `0x778124` |
+| `swod4.wsx` | `0x5A79CA` | 2,526 at `0x5AA8F6` | 4,892 at `0x5B1124` | 2,636 at `0x5BAA04` | `JERON` and `BOAR_M` beginning at `0x622AD9` |
+
+The vertex, neighbor and attached-row indices pass their bounds checks
+in both MAP entries. The repeated QWOD0 values `AD/C5/A5/EB`
+never occur in surface byte +4 in these two files. SWOD4 has 2,393
+surface rows with +4 equal to zero, 14 equal to 2, 29 equal to 6 and
+zero equal to 0x0B. These counts come from the 56-byte surface
+stride at `0x43EADF–0x43EB04`.
+
+**UNCONFIRMED.** The old pattern labels above lack original byte
+positions tied to the input window and its grouping rule. A settling
+test needs the underlying window start and record stride for one
+claimed edge, then a mapping of both endpoint bytes to the native
+sections. A gameplay interpretation would require a native consumer
+using those fields to make that transition. See [native readers](lol3-map-odf-readers.md).

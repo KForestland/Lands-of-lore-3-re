@@ -176,3 +176,30 @@ bytes remain **UNCONFIRMED**. The section-1 and section-3
 subtables share reader `0x4FD560`. It assigns each 16-byte row
 a pointer into the subsequent 12-byte array (`0x4FD5DC–0x4FD617`).
 Follow that pointer into the first consumer to identify the subtable.
+
+### Type tags and AI resources
+
+**CONFIRMED.** The lookup at `0x4FDEF0` searches cached objects by
+the original tag at runtime +0x2764. On a miss `0x4FD8F0`
+copies that tag and formats `global\ai\%s` at
+`0x4FD932–0x4FD963`. The next calls build the resources
+`stat.csv`, `goals.csv`, `actions.csv` and `effector.csv`
+(`0x4FD986–0x4FDA0D`; leaf strings at VAs `0x551BE4`,
+`0x551BD8`, `0x551BCC`, `0x551BBC`). The lookup increments
+the cached object's count at +0x2774 (`0x4FDF4E–0x4FDF56`).
+
+**CONFIRMED.** The 18 original ODFs contain 334 field-3 rows and
+68 distinct tags. Hashing the four paths against `GLOBAL.WSX`
+joins all four for 60 tags, three for one, two for one and
+zero for six. In QWOD0, the tag `SPIDER` starts at
+`QWOD0.WSX+0x7781AB`. Its four resource payload starts in the
+order above are `GLOBAL.WSX+0x1FDBA3`, `+0x1FBE73`,
+`+0x1FB11F` and `+0x1FB568`. This establishes a use of the type
+tag without assigning gameplay meaning to every tag.
+
+**UNCONFIRMED.** The role of the 22-byte section-0 companions
+and the missing leaf files remains open. For the former,
+follow another read or a writer for the exact span, beginning
+at `CKEEP.WSX` ODF entry +0x5DC. For the latter, follow the
+failed resource branch from `0x420300 → 0x4FD780`, using a
+missing input such as the tag `NONE`.

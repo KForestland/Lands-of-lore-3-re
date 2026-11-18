@@ -22,10 +22,22 @@ imported Miles `AIL_open_stream` at `0x50B142`
 The caller passes a filename and configures the playback volume
 and pan before starting the stream (`0x50B135–0x50B1FA`).
 
-**UNCONFIRMED.** The native path templates above do not identify
-all of the MUSIC archive keys. The stem pointer array at
-`0x629070` has no on-disk image. A trace of its initializer or
-a resolved score-resource name at `0x44A7F5` would settle that join.
+**CONFIRMED.** Initializer `0x44A290–0x44A454` copies 40
+stem pointers from `0x549980` to `0x629070`. The source occupies
+`LOL3.DAT+0x148180–0x14821F`. The builder bypasses index 0 at
+`0x44A763–0x44A767`. Hashing the template `MUSIC\%s.aud` (`0x549BC4`, case-normalized) from slots
+1–39 joins 37 of the 38 directory entries across `MUSIC1–4`,
+using 31 distinct keys. Several discs carry the same key. For
+example, index 14 resolves to `uewoods0` and key `0xBD4CB6E0`,
+at `MUSIC1.WSX+0x36`.
+
+**UNCONFIRMED.** The remaining entry is key `0x1D4F73DA` at
+`music4.wsx+0x11FD49A`. It matches the candidate
+`MUSIC\uhfroze1.aud`. The executable's slot 11 instead holds
+`uhfroze2` at `LOL3.DAT+0x148330`, whose key `0x1D4F74DA`
+is absent from the four music archives. Establishing a spelling
+for the remaining key requires a second original name witness,
+or a captured resolved name at `0x44A7F5` for that key.
 
 ## Level sample data
 
