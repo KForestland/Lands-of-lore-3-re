@@ -9,7 +9,8 @@ files git tracks and fails on:
     .LST .LS_ .ICF .ICI .TRR .LCF .BIN, and converted media .WAV .OGG .MP3
     .MID .MIDI .FLAC .WEBM .MP4 .AVI .VQA .SMK .BIK
   - PNG files outside examples/ and docs/images/
-  - any file larger than 1 MiB
+  - any file larger than 300 KB, except the existing data tables in SIZE_ALLOWED
+    (generated listings of game content are tool output, not tracked files)
   - in the git history: any author or committer address not in ALLOWED_AUTHORS
     (committers may also be GitHub's noreply@github.com); the address is not printed
   - in text files: machine paths (/home/, /media/, /mnt/, C:\\Users\\) and
@@ -82,6 +83,10 @@ def identity_findings(root):
     return bad
 
 
+# No tracked file over 300 KB, except these existing data tables (listed by name).
+SIZE_LIMIT = 300_000
+SIZE_ALLOWED = set()  # none
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true")
@@ -100,12 +105,12 @@ def main():
             bad.append(f"{f} (game file type)")
         elif ext in (".png", ".jpg", ".gif", ".bmp") and not f.startswith(PNG_OK):
             bad.append(f"{f} (image outside examples/ and docs/images/)")
-        elif os.path.isfile(p) and os.path.getsize(p) > 1 << 20:
-            bad.append(f"{f} (larger than 1 MiB)")
+        elif os.path.isfile(p) and os.path.getsize(p) > SIZE_LIMIT and f not in SIZE_ALLOWED:
+            bad.append(f"{f} (larger than 300 KB)")
         if os.path.isfile(p):
             bad.extend(text_findings(root, f))
     bad.extend(identity_findings(root))
-    print(f"CHECK repo_guard: {len(files)} tracked files; game files, media, stray images, files over 1 MiB, machine paths, private or assistant names, or commit identities: "
+    print(f"CHECK repo_guard: {len(files)} tracked files; game files, media, stray images, files over 300 KB, machine paths, private or assistant names, or commit identities: "
           f"{bad[:5] or 'none'}{' ...' if len(bad) > 5 else ''} ({len(bad)})")
     return 0 if not bad else 1
 
