@@ -1,13 +1,45 @@
 # Textures
 
-LoL3 has two texture formats. Only the first is decoded.
+The retail level archives wrap texture banks in a compressed `.TE_` stream. The installed cache stores expanded texture banks.
 
 | Format | Where | State |
 |---|---|---|
 | Row-span records, flags `0x028E` / `0x828E` | the texture banks in `cdcache.wsx` in the game folder | layout and palette source CONFIRMED on all 854 records |
-| LEVED `+1` packs | the per-level art entries named with `.pcx` names | not decoded ([Q7](../OPEN_QUESTIONS.md)) |
+| LZO1X-wrapped level banks | `LEVELS\<STEM>\<STEM>.TE_` inside the 18 WSX level archives | all 465 chunks decoded. The older LEVED `+1` witness was inside the compressed wrapper. |
 
 Older notes: [tex-format](../tex-format.md), [texture 028E evidence](../texture-028e-evidence.md). Tool: `tools/lol3_texture_spans.py`. It writes nothing and makes no pictures.
+
+## Compressed level wrapper
+
+**CONFIRMED.** The cache preparation path changes `.TEX` to
+`.TE_` at `0x4E462C–0x4E463A`. At
+`0x4E4775–0x4E4793` it reads the u32 decoded file length
+and first u32 packed length. For each positive packed length it
+reads that many bytes and calls LZO1X decoder `0x4ECDB0`
+(`0x4E47E9–0x4E4839`), writes the decoded bytes
+(`0x4E4850–0x4E4861`), and reads the next packed length.
+Zero terminates the stream (`0x4E4896–0x4E48C1`). Each
+full chunk decodes to 1 MiB, with a shorter final chunk.
+The executable allocates 0x104010 and 0x100000 bytes for
+the input and output buffers (`0x4E46FB–0x4E4712`).
+
+**CONFIRMED.** The original `CKEEP.WSX+0x36` texture
+entry starts with decoded length 20,463,678 and first packed
+length 604,394. Its 20 blocks expand into a bank with dword
+38 at +0 and 0x300 at +0x40. The same layout validates in
+all 18 entries. The expanded QWOD0, BUPP1, EWOD1 and RVOL0
+banks match the 40-row cache directory payloads byte for byte.
+Use `python3 tools/lol3_texture_archive.py --data DAT --check --decode`
+to repeat the test with liblzo2. The tool emits counts.
+
+**CONFIRMED.** The older CKEEP door-name witness at file
++0x869BA is inside a compressed packet. It expands to a
+name in the ordinary bank, with another name following
+at expanded bank +0xE8A8F. The supposed `+1` subtype and
+size fields are an interpretation of byte positions in the
+packed stream. A standalone LEVED `+1` texture layout
+in original retail data remains **UNCONFIRMED**. A separate
+source entry and a native reader for its header would settle it.
 
 ## Row-span record
 

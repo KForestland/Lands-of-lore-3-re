@@ -24,7 +24,7 @@ Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 
 **Section 0. CONFIRMED.** Field 19 counts eight-byte signed 16.16
 X/Z pairs at field 0. A 34–8,399-byte tail follows the vertices
-before field 1. Its role remains **UNCONFIRMED**. This explains the earlier
+before field 1. The native +0xC8 seek binds its 8-byte waypoint rows and the file partitions into points, name slots and a final counted span. The final record roles are **UNCONFIRMED**. This explains the earlier
 measurement that only 88% of the section's 8-byte slots look like points: 110,373 of 124,764 slots
 have that shape, 108,043 of them whole-number vertices; the rest of the 114,483 vertices have a
 fraction, and 2,330 point-like slots lie in the tails.
@@ -58,6 +58,6 @@ The first vertices of section 0, read as 16.16 dwords, are X 1370, Z −5530 (by
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))
 
-- The MAP section-0 tail, section 2 and the meaning of the section-1 fields.
+- The remaining fields of the MAP waypoint tail, section 2 and the meaning of the section-1 fields.
 - The header fields not yet bound by the [native readers](../lol3-map-odf-readers.md) (MAP field 19 and ODF fields 0–4 and 14–20 are bound).
 - The ODF per-row meanings, the section-0 companions and what follows the field-2 252-byte rows.

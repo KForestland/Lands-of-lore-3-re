@@ -26,9 +26,35 @@ starts at +0xA9AA. All 18 hashed MAP entries have a 34–8,399-byte
 gap between the counted vertices and field 1. Among 114,483 vertices,
 6,440 have a nonzero fractional halfword in at least one coordinate.
 
-**UNCONFIRMED.** The vertex reader stops before the inter-section
-tail. Its role would be settled by a native seek to field 0
-plus 8*field 19, or a reader using that range indirectly.
+### Tail after the vertices
+
+**CONFIRMED.** All 18 MAP headers at +0xC8 give exactly field 0
+plus 8 × field 19. Native `0x43EBD9–0x43EBF4` seeks to +0xC8
+and reads the +0xC4 count. It allocates 4 + 8 × count, prepends
+a live count and reads the rows into world +0x34
+(`0x43EBF9–0x43EC45`). Mode 0/12 creature behavior obtains an
+8-byte row from that table using actor u16 +0xD4. It takes signed
+s16 +0/+2 as X/Z and shifts each left 16
+(`0x4B4D7E–0x4B4DA9`).
+
+**CONFIRMED.** After those 8-byte rows are the same number of
+26-byte NUL-terminated name slots, then 35 × u32(MAP+0xD8)
+bytes. The exact partition is
+`field1 - u32(+0xC8) = 34 * u32(+0xC4) + 35 * u32(+0xD8)`
+in all 18 archives. There are 2,384 point and name rows and
+36 final 35-byte records. In CKEEP, 15 points begin at
+`CKEEP.WSX+0xCC592E`, 15 names at +0xCC59A6, and the
+next section begins at +0xCC5B2C. Its count at MAP +0xD8
+is zero.
+
+**UNCONFIRMED.** The full roles of point offsets +4–+7 and
+the readers for the two remaining spans are open. The 26-byte
+slots all have a NUL. A provisional +4 region-index test
+has exceptions, notably JUNDR, so a region interpretation
+needs a native consumer. Follow the point's later word
+loads after `0x4B4DA9`, and search for a reader whose
+initial position starts after `8 * u32(+0xC4)` for the names
+and after `34 * u32(+0xC4)` for the 35-byte rows.
 
 ## ODF header and primary tables
 
