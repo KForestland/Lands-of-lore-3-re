@@ -4,9 +4,9 @@ This guide follows the original Windows game from opening its archives to saving
 
 ## Starting up and finding files
 
-The game opens its shared `GLOBAL.WSX` archive during startup. A WSX archive has a directory that describes where each file starts and how long it is. The directory uses a numeric key made from the file's name. To find a resource, the engine calculates that key and searches the sorted directory.
+Shared resources live in `GLOBAL.WSX`. A WSX archive has a directory that describes where each file starts and how long it is. The directory uses a numeric key made from the file's name. To find a resource, the engine calculates that key and searches the sorted directory.
 
-The game uses the same kind of directory in the level archives. When loading a level, it builds resource names from that level's name. For example, the CKEEP light map has a known name key and a matching entry in `CKEEP.WSX`.
+The game uses the same kind of directory in the level archives. For example, the path for the CKEEP light map produces a key that matches the directory entry in `CKEEP.WSX`.
 
 Details and evidence. [Archive reader](lol3-wsx-reader.md#wsx-directory) · [How names become keys](lol3-wsx-reader.md#resource-name-key)
 
@@ -36,7 +36,7 @@ Details and evidence. [Definitions and script grants](lol3-item-dispatch.md#defi
 
 ## Casting spells
 
-Each of the five spell keys sends a cast request, using the same path as using an item, with the special handler taking spell requests. The definition supplies the initial mana cost. Some equipped items can reduce that cost for certain spells.
+Each of the five spell slots (two key bindings each) sends a request through the item-use routine, and spell definitions reach its special handler. The definition supplies the initial mana cost. Some equipped items can reduce that cost for certain spells.
 
 The normal cast path checks the adjusted cost against the player's mana. After a successful effect, the game subtracts the debit and updates the display. The effect itself can create an object that applies a hit, which then enters the combat routines.
 
