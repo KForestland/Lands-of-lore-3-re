@@ -24,7 +24,7 @@ You need Python 3.8+ and your own copy of the game.
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 6 checks, ends with ALL 6 CHECKS PASSED
+python3 tools/check_all.py                  # 7 checks, ends with ALL 7 CHECKS PASSED
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 ```
 

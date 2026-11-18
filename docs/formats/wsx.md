@@ -101,6 +101,7 @@ the actual cached payload. The four texture row offsets are
 +0x76, +0xA6, +0xD6 and +0x106, and their payloads start at
 +0x436, +0xAA5138, +0x3239974 and +0x52D6662. The free row
 at +0x136 covers +0x5666ED3 through +0x6400000, exclusive.
-The other 31 rows have zero span. Compare the
+The other 31 rows have zero span. The 38,514 trailing bytes
+lie outside the indexed spans in this witness. Compare the
 [texture palette sources](../lol3-texture-palette-sources.md)
 for the reader evidence within the four banks.

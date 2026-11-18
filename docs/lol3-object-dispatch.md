@@ -52,6 +52,8 @@ The group at +0xD036F4 has six-byte header 0xF0 and one child. The
 child at +0xD036FA is opcode 9, byte +1 = 3, u16 +2 = 53, +4 = 21.
 Its table slot calls `0x447680` at `0x447E84`.
 
+The [opcode table and corpus check](lol3-script-opcodes.md) identify all framing lengths, object and map dispatch cases, and the array operations.
+
 **UNCONFIRMED.** The full set of command effects, producer meanings,
 and the concrete object implementations of the virtual slots still
 need separate traces. Begin with the low switch above and follow each
