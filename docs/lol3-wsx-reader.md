@@ -47,24 +47,43 @@ can read `CDCACHE.hdr` and write its bytes to the cache
 (`0x4E4D44–0x4E4DC2`). The expansion loop seeks to end at `0x4E4E0A`
 and writes blocks of 0xFA00 bytes at `0x4E4E78`.
 
-**CONFIRMED.** The native cache has bookkeeping after the 9-row directory.
-At `0x4E50F6–0x4E510F` it seeks to the stored archive data base and
-reads a dword. If that differs from `0xF1E2D3C4`, it writes the marker
-at `0x4E5141–0x4E5157`. The game-folder copy has that marker at
-file +0x72. The DAT copy instead has dword `0xD0BCD8BE` there.
-The cache initializer at `0x4FE480` captures this start position and
-can read or write 0x3C0 bytes there (`0x4FE4C2–0x4FE4FA`,
-`0x4FE5BE–0x4FE5D7`). The lookup at `0x4FE7A3–0x4FE7B5`
-walks 24-byte rows, comparing each candidate's offsets +0 and +8
-against its arguments. The append path at `0x4E4854–0x4E487F`
-writes payload bytes on the cache handle and updates it.
+## Cache index lifecycle
 
-**UNCONFIRMED.** The lifecycle of every one of the 40 cache slots and
-the origin of the compact DAT seed were not established. The marker,
-shared header, append path and cache row stride were verified. To
-settle individual cache entries, pair a file-position write at
-`0x4E4861` with its normalized name key and the matching cache row
-before and after `0x4FE6E0`.
+**CONFIRMED.** At `0x4E50F6–0x4E510F` the reader seeks to the
+archive data base and consumes a four-byte marker. If the marker
+differs, it seeks back and writes `0xF1E2D3C4` at
+`0x4E5141–0x4E5157`. Both paths leave the cursor after the
+marker when they call `0x4FE480` at `0x4E516E` or
+`0x4E5194`. The game-folder marker is at +0x72 and the
+allocator index starts at +0x76. The DAT copy has dword
+`0xD0BCD8BE` at +0x72. See the [cache rows](formats/wsx.md#cdcachewsx)
+for the original sizes, fields and offsets.
+
+**CONFIRMED.** `0x4FE480` records the index position and
+loads 0x3C0 bytes (`0x4FE4C2–0x4FE4FA`). On reset it
+can create a free span directly after the index
+(`0x4FE56C–0x4FE58A`) and persist the rows
+(`0x4FE5BE–0x4FE5D7`). The allocation routine at
+`0x4FE870` first looks up an existing valid name key, then
+checks spare spans by length (`0x4FE884–0x4FE8E3`). The
+lookup at `0x4FE7A3–0x4FE81F` checks position and key and
+invalidates a row when its generation token changes. The
+release path at `0x4FE690–0x4FE6D8` clears the occupied
+flag and `0x4FE6E0–0x4FE738` merges neighboring free
+spans. Shutdown writes the index back to its stored position
+(`0x4FE667–0x4FE680`). Payload writes have their own path
+(`0x4E4854–0x4E487F`).
+
+**UNCONFIRMED.** The compact DAT seed's production process and
+the role of index row byte +0x17 are open. The installed
+eight occupied rows all carry 0x67 at +0x17, while rows with
+zero span vary. The native allocator writes +0x14–+0x16
+individually and copies whole rows at `0x4FE9BA`. To
+settle +0x17, trace reads of that byte after a write-backed
+allocation and check whether the byte is ever initialized
+apart from the whole-index clear at `0x4FE4AF`. For the
+seed, the next static check is to compare its first data
+ranges against the installer's input media.
 
 ## Resource name key
 

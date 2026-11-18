@@ -4,7 +4,7 @@ Numbered so pages and the [STATUS table](STATUS.md) can point to them. Each says
 
 | # | Question | Where |
 |---|---|---|
-| Q1 | `cdcache.wsx`: two different files carry this name. The one in `DAT/` (3,264,114 bytes) and the one in the game folder (104,896,114 bytes) both have a 9-entry header covering 52,663,793 bytes. The game-folder copy holds the 854 texture records, 420 of them after the area the header covers ([formats/textures.md](formats/textures.md)). Native expansion, marker and secondary row stride confirmed. Individual slot lifecycle remains open | [Native WSX reader](lol3-wsx-reader.md) |
+| Q1 | `cdcache.wsx`: two different files carry this name. The one in `DAT/` (3,264,114 bytes) and the one in the game folder (104,896,114 bytes) both have a 9-entry header covering 52,663,793 bytes. The game-folder copy holds the 854 texture records, 420 of them after the area the header covers ([formats/textures.md](formats/textures.md)). Native expansion and the secondary allocator directory are confirmed, including eight occupied spans. The compact seed’s origin and row byte +0x17 remain open | [Native WSX reader](lol3-wsx-reader.md) |
 | Q2 | **Answered.** Native rotate-right name hash, case normalization and 76 exact name/key joins. Names of other entries remain unconfirmed | [Native WSX reader](lol3-wsx-reader.md#resource-name-key) |
 | Q3 | LMF light maps: native directory, grouped LZO1X and decoded member sizes confirmed. Member flags, header +8 and the extra 32 bytes remain open | [Native LMF reader](lol3-lmf-reader.md) |
 | Q4 | MAP field 0 confirmed as counted 16.16 X/Z coordinates. Its tail and fields 1 and 2 remain open | [Native MAP reader](lol3-map-odf-readers.md) |

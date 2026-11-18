@@ -76,7 +76,7 @@ to the required size.
 monotonic global and level directories, and consistent level lengths.
 Their 1,786 preview chunks decode to 640×480 bytes per slot. The
 417 nonempty level blocks contain 27,038 nonempty sections, whose
-ends and expanded lengths match the block directory. For the slot
+stored spans and declared expanded lengths are in the block directory. For the slot
 with SHA-256 prefix `704994e52a84`, its preview starts at +0x64C and
 its first global section at +0x2214E. The 38 preview chunks expand
 to 0x4B000 bytes. Its first level block begins at +0x2493A and
