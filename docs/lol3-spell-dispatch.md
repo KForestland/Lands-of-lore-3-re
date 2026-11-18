@@ -133,11 +133,58 @@ calls `0x4329C0(-1)` on success. The other bypass tests
 (`0x4A46C1–0x4A46F3`, `0x4A5BB0–0x4A5BCE`,
 `0x4A5A0D–0x4A5A54`).
 
-**UNCONFIRMED.** The gameplay names of those two alternate
-resources and the final cost-discount selectors are open.
-To distinguish the resources, take the 0x54 or 0x59 row
-through `0x4A5BB0`, then identify the initializer and HUD
-consumer of the counter that `0x4329C0` changes. On an
-ordinary successful cast, log the two `0x433C80` results
-and the corresponding level byte before `0x4A59A1` or
-`0x4A59EF` to name the discount conditions.
+### Producers of the alternate counters
+
+**CONFIRMED.** Both selector values are the counters themselves.
+The two debit callers pass ECX `0x570900`. `0x4329C8–0x4329D8`
+adds its argument to `ECX+0x1B9` (`0x570AB9`), and
+`0x432AD8–0x432AE8` adds to `ECX+0x11121` (`0x581A21`).
+Both then refresh HUD groups 3–7 via `0x432CC0–0x432CD5`.
+
+| Selector and debit | Original item that supplies a charge | Producer |
+|---|---|---|
+| `0x570AB9`, `0x4A5A20` | Ancient's Stone (ID `0x36`, `GLOBAL.WSX+0x5692`, name at `locallng.wsx+0x596B2C8`) and Force Pod (ID `0xE7`, `GLOBAL.WSX+0xB597`, name at `+0x5977225`) | Both use regular index 6 (`0x54B930 → 0x49FB10`). Operation 1 adds one at `0x49FB23`. |
+| `0x581A21`, `0x4A5A3A` | Mana Cluster (ID `0x110`, `GLOBAL.WSX+0xCB4F`, name at `locallng.wsx+0x597A8A0`) | Regular index 112 (`0x54BAD8 → 0x4A6120`). Operation 1 adds one at `0x4A6133`. |
+
+The item numeric key is at definition +0x73. The original name reader
+uses that key at `0x4AD169–0x4AD1B4`. For a positive second-counter
+addition, `0x432AF1–0x432B06` also gets the player's mana ceiling
+via `0x40FF00` (player vtable +0xB0 at `0x538438`) and passes it
+as an increase to `0x40FFE0`. A negative
+argument skips that refill (`0x432AE8–0x432AEF`).
+
+**CONFIRMED.** The `0x54` and `0x59` admission arm requires a
+nonzero first counter. Zero queues message `0x5B` and goes to the
+failure return (`0x4A5BB0–0x4A5BCE`, `0x4A470A–0x4A4727`).
+When the same successful cast has that charge selected, the first
+debit takes priority at `0x4A5A0D–0x4A5A25`. The ordinary path
+can check the second counter at `0x4A46DE–0x4A46F3` and spend
+one charge at `0x4A5A27–0x4A5A3F`.
+
+**UNCONFIRMED.** A live cast after either consumable and the final
+cost-discount selector names. On an ordinary successful cast, log
+the two `0x433C80` results and the corresponding level byte at
+`0x4A59A1` or `0x4A59EF`.
+
+## Live cast setup
+
+**CONFIRMED.** Loading the level-5 autosave (SHA-256 prefix
+`df50eda48c27`) on the original English executable with the Wine
+audio drivers disabled produced `[0x5D5098] = 20` and zero at
+`0x570AB9` and `0x581A21`. The five slots used by the key casts
+were empty. The pointer at `0x583151+0x80` was `0x5469B8`,
+and the slot pointers at +0x50, +0x60, +0x70, +0x80 and +0x90
+were zero, matching the use-slot reader at `0x4282FA–0x42830C`.
+The game displayed the level during load. The loader waited in
+`0x46F68F–0x46F69B` with `[0x65BD64] = 1`. The audio service was
+disabled (`[0x7F4DF8] = 0` at the check in `0x506F70`). The progress
+path installs its completion callback `0x46F8A0` at `0x46F573` and
+waits for it to clear that cell.
+
+**UNCONFIRMED.** Runtime cast selection or payment. Pressing the
+five configured cast keys during the blocked load did not reach
+`0x4A46C1`. No negative debit was seen at `0x410014` or at either
+alternate function. (The load waits on a flag the progress sound's completion callback clears: `0x46F55B` sets `[0x65BD64]` to 1 whatever the sound result, so without audio the loader hangs. With the debugger attached, set `[0x65BD64]` to 0, or force the `0x46F512` skip, and label the run as patched in memory.) A load that completes the progress sound and
+a slot with an equipped spell provide the ordinary control. Log a
+cast of 0x54 or 0x59 with a nonzero selector and read the debit
+arguments to witness alternate payment.

@@ -40,9 +40,22 @@ the level reader with the saved current ID
 | +0x9C | 768 bytes (a preview palette: UNCONFIRMED) copied by `0x437804–0x43782C`. Their palette role is **UNCONFIRMED** from this writer alone. |
 | +0x39C/+0x3A0/+0x3A4 | Preview width, height, and data offset. Writer fills these fields and compresses the source at `0x4377FF–0x437854`. |
 | +0x498 | Current level ID from `[0x5708DB]` (`0x4377EB–0x4377F8`, restored through `0x436CC1–0x436CD4`). |
-| +0x49C–+0x4B7 | Two sets of dwords (X/Z coordinates and an orientation: UNCONFIRMED readings) and a region u16. Writer fills these from object bases `0x5D4EE0` and `0x5860F0`, dividing the region-pointer difference by 56 (`0x43766F–0x43776D`). |
+| +0x49C, +0x4AA | Two 14-byte position groups, for the player at `0x5D4EE0` and the object at `0x5860F0`. Writer `0x43766F–0x43776D` reads two horizontal dwords at object +4/+8, zero-extends the heading word at object +0x26 into a dword, and writes a u16 region index. |
 | +0x4B8 | 61 u32 absolute offsets, global selectors 0–60 (`0x437881–0x4378AF`, `0x4379C3–0x4379CA`). The next offset gives the end of each section. The first level offset ends the last global section. |
 | +0x5B0, +0x600 | 18 u32 start offsets and 18 u32 byte lengths, indexed by level ID minus 2. The writer records the start and copies a per-level `.lsv` if available (`0x437A2B–0x437A68`, `0x43C660–0x43C72B`). |
+
+**CONFIRMED.** Each group is two signed 16.16 horizontal
+coordinates, a u32 holding a 16-bit turn angle, and a u16 region
+index. `0x436F7F–0x436FC5` and `0x436FF3–0x437039` restore the
+first and second groups. The placement routines store the first two
+dwords at object +4/+8 and the low 16 angle bits at +0x26
+(`0x40AD8D–0x40AD9D`, `0x48B6AA–0x48B6C5`).
+`0x4070E6–0x407111` shifts both second-object coordinates by 16
+before drawing. `0x40E19F–0x40E1C7` updates the first object's
+heading, and `0x42C658–0x42C68B` subtracts the second heading from
+a bearing computed from the two position pairs. The native loader
+uses `region_base + 56 × index`, with `0xFFFF` selecting a null
+pointer (`0x436F86–0x436FA5`, `0x436FFA–0x437019`).
 
 **CONFIRMED.** Global selector 0 uses object `0x5D4EE0`, size
 0x464 and flags 7 (`0x438154–0x43817C`). Selector 1 uses the
@@ -89,3 +102,30 @@ remaining header fields. The native selector entry points and
 archive boundaries above give the starting sites. Name the saved
 state from the individual selector's writers and confirm it on two
 slots with a comparable state change.
+
+## Controlled save setup
+
+**CONFIRMED.** The level-5 source slot (SHA-256 prefix
+`df50eda48c27`, 406,041 bytes) holds the following values in
+both saved groups (`+0x49C` and `+0x4AA`): dwords `08970000`,
+`F6F20000`, `00008000`, then region word `18FD`. This is the
+game-written player autosave used as the source, before the trials.
+
+**CONFIRMED.** With audio disabled under Wine, the original
+program opened that slot and started its progress meter. On
+a fresh launch with the original `-NOSFX` and `-NOMUSIC` options,
+the progress-sound call returned −1 at `0x46F59F` with
+`[0x7F4DF8] = 0`. `[0x65BD64]` was still 1 at `0x46F68B`
+and the thread stayed in the wait at `0x46F68F–0x46F69B`. The
+loader did not reach `0x436F7F` and the save writer did not
+reach `0x43766F`. Pressing the configured F10 autosave key
+before and after the turn and forward inputs left the slot
+identical by SHA-256. The meter's completion routine at
+`0x46F8A0` clears the wait flag.
+
+**UNCONFIRMED.** The isolated save changes from one action, including
+which item sections change on a pickup. A run
+(The load waits on a flag the progress sound's completion callback clears: `0x46F55B` sets `[0x65BD64]` to 1 whatever the sound result, so without audio the loader hangs. With the debugger attached, set `[0x65BD64]` to 0, or force the `0x46F512` skip, and label the run as patched in memory.) that finishes the progress meter can restore the same starting
+slot and produce the no-action, turn, step and pickup comparisons.
+Record both sets of live source fields and region pointers at the
+writer before comparing the slot bytes.

@@ -172,10 +172,48 @@ The only observed pointer modes were 0x0000, 0x2000,
 0x4000, 0x6000 and 0xA000. The other rows above are
 confirmed in the native callback.
 
-**UNCONFIRMED.** Display pixel-format masks and end-to-end RGB
-output are open. The tile callback writes packed u16 words.
-To verify displayed colour, follow the destination pointer
-passed at `0x512A9F–0x512AAF` to the surface format
-negotiation and compare its masks with a known nonzero
-word from the first CBFZ tile. The native uses of the
-trailing reserved header words also remain open.
+The tile callback writes packed u16 words. See the
+[live offscreen format and test word](#live-introduction-opener).
+**UNCONFIRMED.** End-to-end RGB and native uses of the trailing
+reserved header words.
+
+## Live introduction opener
+
+**CONFIRMED.** On the original English executable under Wine 9.0,
+the Extras menu requested `outtakes\mintro01.vqa` at `0x50DF70`.
+With Direct3D and the audio drivers disabled, the path opened
+`MOVIES1.WSX` and returned a null decoder, which faulted at the
+`[ECX+0x80]` read at `0x50ECA7`. A second launch supplied the exact
+original `MOVIES1.WSX+0x42` entry as a loose file in the test copy
+(57,064,834 bytes, SHA-256 prefix `db4ed8d3b7cf`). This exercised
+file reads through VQHD, LIND, CIND and FINF. The call at `0x50E404`
+returned −13 at `0x50E409`. The opener then returned −13 with the
+decoder pointer still zero at `0x470048`. The [audio initialization
+path](#frame-and-audio-chunks) therefore failed before the tile callback.
+
+**CONFIRMED.** The caller requests a 640 × 480 movie object with
+nominal depth 16 at `0x46FEAA–0x46FEB9`. The DirectDraw path
+allocates its offscreen surface through `0x50365B` and reads back its
+descriptor at `0x50377F`. The creation descriptor's flags are 7
+(`0x50361D`), so it requests dimensions and caps. In this run
+`GetSurfaceDesc` and the subsequent `Lock` both returned depth 16,
+pitch 1,280 and masks `F800/07E0/001F` for that same offscreen surface.
+The original call to `0x5046E0` at `0x470078` takes its pixel pointer,
+then the decoder setup would store it at decoder +0x1AA at `0x50EE38`.
+The RGB565 movie surface and the [RGB5551 texture copy](../lol3-texture-bake.md#live-direct3d-texture-format)
+are separate measurements.
+
+**CONFIRMED, frame input.** Tile 0 in the first decoded book is
+all zero. For a colour comparison, frame 16 selects tile 1 at
+the first VPTR word (`MOVIES1.WSX+0x1E60E`). The fourth pixel
+of that tile, at expanded book +0x26 from CBFZ `+0x2754`, is
+`0x0421`. If the callback copies it unchanged, the slot at pixel
+(3, 0) reads as native channel integers `(0, 33, 1)` with the
+measured masks. The same input gives `(1, 1, 1)` in RGB555
+and `(4, 2, 1)` in RGB444.
+
+**UNCONFIRMED.** The word that the movie actually writes and the
+final presented RGB output. Neither `0x512AAF` nor `0x512AA7`
+was reached. The block comes from `0x513338–0x513342`: the audio-stream handle at +0x78A is null, so the opener returns −13. Audio stays disabled on this machine; instead, in the debugger, clear bit 0 of `[EBX+0x48]` before `0x50E39E`, which skips audio initialisation (`je 0x50E44E`), and label the run as patched in memory. Then follow
+frame 16 at `0x512AAF` and compare its word and format after the
+presentation calls at `0x470109` and `0x47011B`.

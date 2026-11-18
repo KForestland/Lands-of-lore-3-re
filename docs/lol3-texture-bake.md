@@ -104,9 +104,7 @@ those records as **UNCONFIRMED**.
 masks 0x7C00/0x03E0/0x001F and an alternate RGB444 mask set
 0x0F00/0x00F0/0x000F (`0x495040–0x4950C6`).
 The returned masks affect transfer choice at
-`0x49518F–0x4951BA` and `0x495E8D–0x495ECA`. This gives
-the program's accepted formats. The selected device and final
-composited colour remain **UNCONFIRMED** without a runtime witness.
+`0x49518F–0x4951BA` and `0x495E8D–0x495ECA`.
 
 ```bash
 python3 tools/lol3_texture_png.py --data DAT --offset 0x12C6E2 --out ../texture.png
@@ -119,6 +117,32 @@ linked SMD frame headers. Add `--decode-slices` with liblzo2 to
 expand the SMD frames and validate every run. The tool reports the
 palette arm, bank count, open flags and malformed records. Both
 checks write no files.
+
+## Live Direct3D texture format
+
+**CONFIRMED.** On Wine 9.0 with the built-in DirectDraw library and a
+16-bit Xvfb display, the English retail `LOL3.DAT` (SHA-256 prefix
+`9a9eb04c8f40`) reached its menu with the native `-WINDOW -MIJAS`
+options. `-WINDOW` sets the flag at `0x4083CE`. `-MIJAS` skips the
+logo call at `0x407574`. In Video Controls, choose `Direct3D: display`
+and accept the `1024x768x32` mode offered in that run. Then load the
+game-written player autosave (not shipped, not tracked) with SHA-256 prefix `df50eda48c27` (slot +0x498 = 5).
+
+| Native observation | Measured value |
+|---|---|
+| Enumeration call `0x4950F7` and callback `0x495040` | The first two RGB candidates had masks `7C00/03E0/001F`. Flags and alpha were `0x40/0` and `0x41/0x8000`. |
+| Return at `0x495199` and selected descriptor `0x661608` | Result 1 (an alpha-capable RGB format was found and copied: ctx+0x20 at `0x49508F`), pixel size 16, mask quartet `7C00/03E0/001F/8000`; selector 0 (R mask bit 15 clear and not `0xF00`, i.e. 555; 1 would be 565, 2 = 444). |
+| Loaded level, selector at `0x66163C` and result at `0x661640` | Selector 0 and result 1 persisted, with a live device pointer in `0x65F434`. |
+| Texture copy in Wine's DirectDraw trace | `IDirect3DTexture2::Load` copied between two 32×32 surfaces. Both `CreateSurface` descriptors requested the same 16-bit `7C00/03E0/001F/8000` format. |
+
+This is one device: Wine's DirectDraw translation layer enumerates its own format list. A native Windows driver may omit the 1555 format (result 0) or offer only 4444 (selector 2).
+
+This selects an RGB555 texture word with one alpha bit for this
+device. **UNCONFIRMED.** The individual uploaded pixel words, final
+composited screen colour and the choice on other devices remain open.
+To check a content conversion, capture the same texture's locked source
+and destination around `IDirect3DTexture2::Load`. The SMD raster and row
+flags below have their own input and output comparisons.
 
 ## SMD slice frame references
 

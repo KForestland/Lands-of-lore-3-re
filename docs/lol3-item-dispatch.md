@@ -132,7 +132,7 @@ still needs an original action that reaches it.
 
 ### Regular handler examples
 
-**CONFIRMED.** The following six indexes cover 138 of the 258 regular
+**CONFIRMED.** The following eight indexes cover 141 of the 258 regular
 definitions in the original table at `GLOBAL.WSX+0x3A56`. The counts
 come from definition +0x4B on rows with +0x3F bit 1 clear. An index
 here identifies a destination after the common dispatch gates.
@@ -141,10 +141,12 @@ here identifies a destination after the common dispatch gates.
 |---|---:|---|
 | 0, `GLOBAL.WSX+0x3A56` | 117 | `0x49EA40–0x49EA42` returns 0 without changing state. The common guard at `0x49E9AC–0x49EA01` runs before this handler, so the stub result alone describes only the handler. |
 | 2, `GLOBAL.WSX+0x571D` | 1 | Operation 1 checks the target and can request an effect through template 0x78 (`0x49F6D0–0x49F766`). An admitted instance +8 above 3 becomes 2. Otherwise a positive value decrements by one, and zero stays zero. A resulting zero selects definition lookup key 0x38, calls `0x432A90` and returns 3. A positive result returns 4 (`0x49F76B–0x49F7AA`). |
+| 6, `GLOBAL.WSX+0x5692` and `+0xB597` | 2 | Operation 1 adds one alternate spell charge at `0x49FB23 → 0x4329C0` and returns 2 at `0x49FB51`. |
 | 9, `GLOBAL.WSX+0x8F95` | 3 | Operation 1 can submit the u16 resource ID from `[0x58C6F4]+0xD6`, applies the player +0x32D update and adds 10 to player dword +0x224. Returns 2 (`0x49FD20–0x49FD71`). |
 | 10, `GLOBAL.WSX+0x9FDF` | 2 | Operation 1 can submit the same resource ID. It sends a self-sourced player hit with mask 0x80, flags 0x20, kind 2, subtype 0x44 and dword +0x1C = 1 (`0x49FDBC–0x49FE05`) to `0x40AED0`, then returns 2 (`0x49FD80–0x49FE13`). |
 | 54, `GLOBAL.WSX+0x5E2C` | 4 | Operations 6, 13 and 14 enter separate branches. After the `0x44AAB0` distance calculation, each requires a result above 0x800000. An available template 0x7C is passed to `0x4E96A0` along with the source and target position. The variant depends on operation and definition +0x73. These branches return 4 even when the lookup returns null (`0x4A1A30–0x4A1C6D`). |
 | 87, `GLOBAL.WSX+0x9362` | 11 | Operation 1 applies the player +0x32D update, can submit the same resource ID (`0x4A38E5–0x4A3909`), and returns 2. Definition +0x73 = 0xA7 also sends the same hit as index 10 when the random result from the inclusive range 0–95 is below 32 (`0x4A3872–0x4A3921`, helper `0x44AA40`). |
+| 112, `GLOBAL.WSX+0xCB4F` | 1 | Operation 1 adds one second-counter charge at `0x4A6133 → 0x432AD0` and returns 2 at `0x4A6161`. [Alternate charge and mana effects](lol3-spell-dispatch.md#producers-of-the-alternate-counters) |
 
 **CONFIRMED.** The shared update at `0x418AE0–0x418B15`
 maps the previous unsigned player +0x32D value to 0 below 900,
@@ -160,5 +162,5 @@ of the player +0x32D and +0x224 values and the class-specific effect
 of the template 0x7C variants remain open. Follow the update slot
 on the object generated at `0x49F766` or `0x4A1C5E`. Trace the
 readers of `0x5D520D` and `0x5D5104` to their first display or
-gameplay use. The other 108 regular indexes still need their own
+gameplay use. The other 106 regular indexes still need their own
 witnesses and destinations.
