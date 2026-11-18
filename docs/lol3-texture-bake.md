@@ -192,19 +192,48 @@ starts one run of four steps at (15, 152). The step bytes are
 `20 0E E0 02` and the colour indexes are `37 B2 B2 1C`.
 The next slice starts at +0x142.
 
-**UNCONFIRMED.** Exact rasterization still needs the per-draw
-projection, palette remap and depth comparisons. For any of
-the four witnesses, match its filename and frame number in the
-resolve call at `0x4E1149`. At `0x4E3118` record the
-projection inputs. When the callback executes at `0x4E3161`
-or `0x4E3242`, record its source slice, destination row and
-the active tables at `0x7D7950`, `0x7D7D50`,
-`0x7D8D98`, `0x7D8150` and `0x7D8F98`.
-For the first visible run, compare its stored indexes to those
-after remap at `0x4E3409` and the writes at `0x4E3F22`.
-At `0x4E3306`, compare the completed destination to the
-projection from those inputs. The recorded tables and output
-settle which projected pixels and colours a renderer must reproduce.
+### Projection and depth within one slice
+
+**CONFIRMED.** The step table at `0x7D8D98` stores two signed bytes per
+code. The low nibble is the delta added to the first coordinate byte (x,
+used with `a` and `d`) and the high nibble the delta added to the
+second (y, used with `b` and `e`). Each nibble uses the signed range −8 through 7
+(`0x4E2DB0–0x4E2DEB`). The callback adds the deltas to the initial
+unsigned byte coordinates using dword addition (`0x4E3E63–0x4E3E7A`,
+`0x4E3EAD–0x4E3EC8`). In the four frames above and the direct-read frame
+at `SLICECD1.WSX+0x82A082`, all 148,320 steps stayed within the
+0–255 range of both tables (a one-off measurement; not part of `--check`). At expanded `cqb4.smd` frame +0x130 the four
+steps reach (15, 154), (13, 154), (13, 152) and (15, 152).
+
+**CONFIRMED.** The projection setup stores six dwords `a` through `f`
+at `0x7D8550` through `0x7D8564`, using the x87 conversion that truncates
+toward zero (`0x4E3947–0x4E399E`, `0x518450–0x518476`). Four 256-entry
+tables store `i*a`, `i*b`, `i*d` and `i*e` at `0x7D7950`, `0x7D7D50`,
+`0x7D8150` and `0x7D8F98`, respectively
+(`0x4E39A3–0x4E3A0A`). The callback treats dword sums modulo 2³².
+
+| Quantity | Computation | Native witness |
+|---|---|---|
+| Column of initial or updated endpoint | `signed32(a*x + b*y + c) >> 16` | `0x4E3E72–0x4E3E8C`, `0x4E3ECA–0x4E3EFA` |
+| Depth of updated endpoint | `unsigned32(d*x + e*y + f)` | `0x4E3EDC–0x4E3EF6` |
+| Columns visited by each step | `max(0, previous_column)` up to but excluding `current_column`. The next step uses the unclamped current column. | `0x4E3EFD–0x4E3F0D`, `0x4E3F29–0x4E3F35` |
+| Index and depth write | The step's palette index and endpoint depth replace the corresponding cells only if the new depth is strictly lower. Depth cells start at `0xFFFFFFFF` for each row. | `0x4E3F14–0x4E3F2F`, `0x4E311D–0x4E313A`, `0x4E316B–0x4E3183`, `0x4E324C–0x4E3264` |
+
+With constructed coefficients `(65536, 0, 0, 0, 1, 0)` and a clear depth
+row, the first `cqb4.smd` run alone projects to columns 15, 15, 13, 13,
+15 in order. Only the last step writes. Columns 13 and 14 both receive
+index `0x1C` from the stored second vector and depth 152. This is a worked example of the mapped formula on original run bytes; the coefficients are constructed, not captured from the game.
+
+**UNCONFIRMED.** A complete original raster still needs a matched runtime
+witness. At `0x4E1149`, use the reference pointer at `[ESP]` to match the
+filename and frame. Capture the six coefficient dwords at `0x4E39A3`.
+Before the callback call at `0x4E3161` or `0x4E3242`, record the slice
+index at `[ESP]` and row pointer at `[ESP+4]`. Compare the stored index,
+the remapped index at `0x4E3409` if that path ran, and the write at
+`0x4E3F22` (index `DL`, depth `ECX`, column `ESI`, row base `EBX`).
+At `0x4E3306`, compare the indexed bytes at `ESI+0xC` with the predicted
+rows. This would verify the selected frame, remap and row placement
+together, before the later display conversion.
 
 ## Two ambiguous row flags
 
@@ -234,16 +263,23 @@ palette bake maps these to `0x8000` and `0x83C0`
 (`0x4826DB–0x482720`). The two alternatives therefore
 give different output even at the first pixel.
 
+**CONFIRMED.** In the remap dispatcher, both words masked with 0x211
+give 0x200, selecting `0x42136E` (`0x421326–0x421345`). This path
+selects the same fixed-width helper, then uses its pointer and count
+to replace each indexed byte through a remap table (`0x42136E–0x4213C1`).
+The final flag write sets 0x100 and preserves 0x20
+(`0x4213C3–0x4213CA`). Whether this runs on the live texture instances
+before the bake remains **UNCONFIRMED**.
+
 **UNCONFIRMED.** Which bytes reach a draw or upload for this
 resource class. Load QWOD0 and BUPP1 separately. Break on
 `0x44B130` for the arm-3 descriptor whose initial key word is
 1 or 11, respectively. Record the resource pointer after the
-vtable lookup at `0x44B2B2`, then its flag word and row-0
-address at `0x4E0BA0` and the first output word of the
-type-11 bake at `0x48253E–0x48254A`. A draw that keeps bit
-0x20 and returns +0xC should produce `0x8000`. A draw
-that passes the span bytes should produce `0x83C0`.
-If the returned pointer or flags change before the row helper,
-record that writer and re-evaluate the first stored index.
-This distinguishes the two storage interpretations from an intervening
-conversion before enabling PNG export for these flags.
+vtable lookup at `0x44B2B2`. At `0x482311` record the record pointer
+passed to `0x4E0BA0` and its flags. For row 0, capture the helper and
+the pointer it returns at `0x48238C–0x48238F`. Follow the first index
+into the type-11 bake at `0x48253E–0x48254A`. With the original
+indexes and palette, a return of +0xC predicts `0x8000` and a return
+of +0x10 predicts `0x83C0`. If the bytes change first, check the
+remap write at `0x4213AD` and use the observed index with the active
+palette before comparing the output word.

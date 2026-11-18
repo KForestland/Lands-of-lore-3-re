@@ -34,10 +34,13 @@ descriptor separate from those candidates.
 
 ### Q6. Which bytes does the texture renderer consume?
 
-The [SMD test](lol3-texture-bake.md#slice-directory-and-run-decoder) and [row-flag test](lol3-texture-bake.md#two-ambiguous-row-flags)
-give shipped frame offsets for all four slice flags and the first-pixel
-predictions for the two unresolved row flags. Use those tests to identify
-the source buffer and output words before testing display conversion.
+The [SMD test](lol3-texture-bake.md#slice-directory-and-run-decoder) and
+[projection test](lol3-texture-bake.md#projection-and-depth-within-one-slice)
+give shipped frame offsets for all four slice flags and, from six captured
+coefficients, the predicted indexed output rows. The
+[row-flag test](lol3-texture-bake.md#two-ambiguous-row-flags) gives the
+first-pixel predictions for the two unresolved row flags. Use those tests to
+identify the source buffer and output words before testing display conversion.
 
 ## Q9. What colours does the VQA frame callback present?
 
