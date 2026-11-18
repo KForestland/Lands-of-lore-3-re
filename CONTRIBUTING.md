@@ -70,7 +70,6 @@ Every commit that reaches a public branch carries the project's noreply identity
 git -c user.name=KForestland -c user.email=261564562+KForestland@users.noreply.github.com commit ...
 ```
 
-1. Contributor work is squash-merged (`git merge --squash`) and committed with the identity above.
-2. Never merge, cherry-pick or push from `refs/original`, a reflog entry or a commit hash from before a history rewrite.
-3. In a fresh clone of the release branch, with `$LOL3_DAT` set, `python3 tools/check_all.py` must end with `ALL ... CHECKS PASSED`, and `python3 tools/repo_guard.py --check --release` must pass (it also checks every commit identity). Contributors do not need `--release`.
-4. The tree must be clean after the checks; tools write nothing into the repository.
+1. Contributor work is squash-merged and committed with the identity above.
+2. In a fresh clone of the release branch, with `$LOL3_DAT` set, `python3 tools/check_all.py` must end with `ALL ... CHECKS PASSED`, and `python3 tools/repo_guard.py --check --release` must pass (it also checks every commit identity). Contributors do not need `--release`.
+3. The tree must be clean after the checks; tools write nothing into the repository.
