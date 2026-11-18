@@ -36,3 +36,5 @@ Working rule:
 - only move material here after it has been locally verified and cleaned
 - no raw advisory dumps
 - when in doubt, tighten the claim instead of widening the story
+
+Formats the three Lands of Lore games share, with links to all three repositories: [series-formats.md](series-formats.md).
