@@ -44,7 +44,14 @@ add one to `0x570AB9` through `0x49FB23`. Mana Cluster adds one to
 `0x581A21` through `0x4A6133`.
 [Original item definitions and counters](lol3-spell-dispatch.md#producers-of-the-alternate-counters)
 
-**UNCONFIRMED.** Live charges, HUD feedback and debits. Save with
+**CONFIRMED, live first-counter debit.** With a private null sink,
+spell `0x59` spent one charge (35 → 34) via `0x4329D0`, with mana
+still 437. A separate cast of `0x57` spent 22 mana via `0x410014`.
+The DLOW1 placement was constructed live, but the counter trial from
+the lower floor left the cursor and `0x581A21` at zero.
+[Live casts and original Mana Cluster locations](lol3-spell-dispatch.md#casts-with-a-null-sink)
+
+**UNCONFIRMED.** Live second-counter debit and HUD feedback. Save with
 fixed equipment, sufficient mana and spell 0x54 or 0x59 selected.
 Watch `0x570AB9` while using a first-counter item, then cast. For
 the second counter use Mana Cluster and a spell whose admission

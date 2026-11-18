@@ -188,3 +188,45 @@ alternate function. (The load waits on a flag the progress sound's completion ca
 a slot with an equipped spell provide the ordinary control. Log a
 cast of 0x54 or 0x59 with a nonzero selector and read the debit
 arguments to witness alternate payment.
+
+
+### Casts with a null sink
+
+**CONFIRMED.** The private software-only PulseAudio sink let the
+original loader finish. With the level-2 player slot (a save written by the game, not shipped)
+whose SHA-256 prefix is `5ae559b2cabe`, the save restore at `0x43703E` had
+437 mana and alternate counters 35 and 0. The journal's spell
+storage contains IDs `0x59` and `0x54` at rows 11 and 12 of
+`0x548568`. The native save reader's selector 14 covers that
+25-row table (`0x438341–0x438369`). The original journal moved
+`0x59` into the first quick spell slot.
+
+| Cast through `0x4A46C1` | Live debit |
+|---|---|
+| `0x57` ordinary control | `0x410014` changed mana 437 → 415 (−22), returning to `0x4A5A52`. |
+| `0x59` with first counter 35 | Call `0x4A5A20` reached the store at `0x4329D0` with −1. Counter 35 → 34, and mana was 437 both before and after. |
+
+**CONFIRMED, second-counter setup.** The original placement
+reader reads 37 bytes at `0x4D74B0` and passes the row to
+`0x4D7380` at `0x4D74D0`. The constructor takes its item
+identity at `+0x20` via `0x4D7390–0x4D73AA`. The original
+Mana Cluster (`0x110`, key `0xE2F77FE7`) occurs at
+`DLOW1.WSX+0x155A349` and `FLAIR.WSX+0x15CB594`. The native
+level descriptors for DLOW1 and FLAIR are at `LOL3.DAT+0x1471A4`
+and `+0x1471DA` (level IDs 4 and 6).
+
+The copied level-4 player slot (game-written, `df378d294f42`) loaded the DLOW1
+item at X −635, Z 4913, height 110, surface 1287. The positions
+are converted by `0x4411FB–0x441215`. The loaded player started
+on surface 5106, at floor height 10 (`DLOW1.WSX+0x15385BD`).
+After turning, advancing to the counter and clicking, the cursor
+cell `0x585488` and counter `0x581A21` stayed zero. No tested
+player slot held the item in save sections 10–14. The section-2
+player item pool (`0x4381AA → 0x438773`) and old pointers at
+save `+0x3B4` (definitions) and `+0x3C8` (pool) gave the lookup
+for the 47 available player slots (written by the game, not shipped).
+
+**UNCONFIRMED.** The live second-counter debit. Reach the DLOW1
+item from surface 1287 or get the FLAIR placement, use it, then
+cast an ordinary spell that reaches `0x4A46E2`. Watch the grant
+and debit at `0x432AE0` and record the HUD before and after.
