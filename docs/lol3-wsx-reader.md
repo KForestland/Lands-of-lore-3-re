@@ -65,3 +65,48 @@ shared header, append path and cache row stride were verified. To
 settle individual cache entries, pair a file-position write at
 `0x4E4861` with its normalized name key and the matching cache row
 before and after `0x4FE6E0`.
+
+## Resource name key
+
+**CONFIRMED.** The lookup obtains a resource name, counts the bytes up
+to its first NUL, normalizes it through `0x531E30` and calls the hash
+at `0x4352BF → 0x509EC3`. The ASCII path in `0x531E61–0x531E81`
+uppercases letters a–z. With an initial word of zero, update it once
+per uppercase ASCII byte `b` as follows.
+
+```text
+key = (rotate_right_32(key, 6) + ((b - 0x30) & 0x3F)) mod 2^32
+```
+
+That is the native loop at `0x509ECD–0x509EE2`. Lookup compares the
+result as a signed dword at `0x4E41AC–0x4E41B8`.
+
+**CONFIRMED.** The level stems include `levels\ckeep\ckeep` at
+`LOL3.DAT+0x147EAC` and `levels\qwod0\qwod0` at `+0x147D94`.
+The cache preparation path passes level texture requests to
+`0x4E4580` (call at `0x43E047`). It finds the `.tex` substring at
+`0x4E45D1–0x4E45E7` and replaces its final character with an underscore
+in the source name at `0x4E462C` and the cache name at `0x4E463A`.
+All 18 four-entry level directories contain the keys of the
+`LEVELS\<STEM>\<STEM>.LMF`, `.MAP`, `.ODF` and `.TE_` names.
+
+| Resource name | Original directory row | Key |
+|---|---|---|
+| `LEVELS\CKEEP\CKEEP.LMF` | `CKEEP.WSX+0x06` | `0x936A2304` |
+| `LEVELS\CKEEP\CKEEP.MAP` | `CKEEP.WSX+0x12` | `0x637A230E` |
+| `LEVELS\CKEEP\CKEEP.ODF` | `CKEEP.WSX+0x1E` | `0x6F9A2304` |
+| `LEVELS\CKEEP\CKEEP.TE_` | `CKEEP.WSX+0x2A` | `0x73EA231D` |
+| `GLOBAL\GLOBAL.ODF` | `GLOBAL.WSX+0x8A` | `0x8B25F239` |
+| `GLOBAL\SPELL.ODF` | `GLOBAL.WSX+0x7B6` | `0xFCA1140B` |
+| `GLOBAL\GLOBAL.TEX` | `LOCAL.WSX+0x06` | `0x8F75F24B` |
+| `GLOBAL\SPELL.TEX` | `LOCAL.WSX+0xBA` | `0x00F1141E` |
+
+The original global names occur at `LOL3.DAT+0x147FD0–0x14801D`.
+`python3 tools/extract_wsx_entries.py --data DAT --check` verifies the
+76 name/key pairs in the installed archive directories.
+
+**UNCONFIRMED.** A complete list of names for the many entries outside
+these 76 witnesses remains open. The hash is only 32 bits. A matching
+hash is a useful test for executable resource names and offsets of
+the expected format. To recover names for other archives, follow each
+resource-opening caller back to the filename construction.

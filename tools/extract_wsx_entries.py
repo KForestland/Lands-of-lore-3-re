@@ -25,6 +25,15 @@ def sha1(data: bytes) -> str:
     return hashlib.sha1(data).hexdigest()
 
 
+def wsx_name_hash(name: str) -> int:
+    """Hash an ASCII resource name as the retail WSX lookup does."""
+    value = 0
+    for char in name.encode("ascii").upper():
+        rotated = ((value >> 6) | (value << 26)) & 0xFFFFFFFF
+        value = (rotated + ((char - 0x30) & 0x3F)) & 0xFFFFFFFF
+    return value
+
+
 def parse_wsx(path: Path) -> dict:
     data = path.read_bytes()
     if len(data) < HEADER_PREFIX + RECORD_SIZE:
@@ -55,7 +64,7 @@ def parse_wsx(path: Path) -> dict:
         blob = data[start : start + rec["size"]]
         if len(blob) != rec["size"]:
             raise ValueError(f"{path}: entry {rec['hash_hex']} runs past the end of the file")
-        is_lmf = len(blob) >= 8 and struct.unpack_from("<I", blob, 4)[0] == 38
+        is_lmf = len(blob) >= 0x100 and struct.unpack_from("<3I", blob) == (0, 38, 0x100)
         entries.append({**rec, "offset": start, "sha1": sha1(blob), "is_lmf": is_lmf, "blob": blob})
     spans = [(e["offset"], e["offset"] + e["size"]) for e in entries]
     if any(a[1] > b[0] for a, b in zip(spans, spans[1:])):
@@ -115,7 +124,12 @@ USAGE = """
 def check(data_dir: Path) -> int:
     import lol3_cli
     files = lol3_cli.wsx_files(data_dir)
-    ok, lmf, entries, failed = 0, 0, 0, []
+    ok = lmf = entries = matched_names = 0
+    failed = []
+    global_names = {
+        "GLOBAL.WSX": ("GLOBAL\\GLOBAL.ODF", "GLOBAL\\SPELL.ODF"),
+        "LOCAL.WSX": ("GLOBAL\\GLOBAL.TEX", "GLOBAL\\SPELL.TEX"),
+    }
     for f in files:
         try:
             p = parse_wsx(f)
@@ -124,12 +138,26 @@ def check(data_dir: Path) -> int:
             continue
         ok += 1
         entries += len(p["entries"])
-        lmf += sum(e["is_lmf"] for e in p["entries"])
+        level_maps = [entry for entry in p["entries"] if entry["is_lmf"]]
+        lmf += len(level_maps)
+        keys = {entry["hash"] for entry in p["entries"]}
+        names = global_names.get(f.name.upper(), ())
+        if level_maps:
+            stem = f.stem.upper()
+            prefix = f"LEVELS\\{stem}\\{stem}."
+            names = tuple(prefix + ext for ext in ("LMF", "MAP", "ODF", "TE_"))
+            if wsx_name_hash(names[0]) not in {entry["hash"] for entry in level_maps}:
+                failed.append((f.name, "LMF key does not identify a Light Map entry"))
+        for name in names:
+            if wsx_name_hash(name) in keys:
+                matched_names += 1
+            else:
+                failed.append((f.name, f"missing key for {name}"))
     unexpected = [n for n, _ in failed if n.upper() not in KNOWN_OPEN]
     print(f"CHECK wsx: {ok}/{len(files)} WSX files parse (count, 12-byte records, payload sizes sum to the file); "
-          f"{entries} entries, {lmf} of them LMF (dword +4 = 38); failing: "
+          f"{entries} entries, {lmf} Light Maps; {matched_names}/76 native resource names match; failing: "
           f"{'; '.join(f'{n} ({m})' for n, m in failed) or 'none'}; unexpected failures: {unexpected or 'none'}")
-    return 0 if not unexpected else 1
+    return int(bool(unexpected) or matched_names != 76)
 
 
 def main() -> int:

@@ -5,7 +5,7 @@
 | Original | The released game's own files and program. Every fact in this repository is about the original game. |
 | CONFIRMED / UNCONFIRMED | Checked on the game files or in the program / not yet. |
 | `DAT/` | The game folder's data directory, holding the WSX archives. Tools take it as `--data` or `$LOL3_DAT`. |
-| WSX | The game's archive format: a `u16` entry count, 12-byte records (hash, a second `u32`, size) and the payloads, largest first. |
+| WSX | The game's archive format: a `u16` entry count, 12-byte records (hash, payload offset, size) and payload data. [Native lookup](lol3-wsx-reader.md). |
 | Entry | One payload inside a WSX archive. |
 | LMF | The level light maps (the executable calls the asset "Light Map"): a 38-row directory at `0x100` and LZO1X-compressed groups of members of 44 + 2 × w × h bytes ([LMF page](formats/lmf.md)). |
 | LMF storage group | One LZO1X range expanding to consecutive light-map members. See the [native reader](lol3-lmf-reader.md). |

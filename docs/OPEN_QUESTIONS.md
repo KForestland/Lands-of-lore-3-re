@@ -5,7 +5,7 @@ Numbered so pages and the [STATUS table](STATUS.md) can point to them. Each says
 | # | Question | Where |
 |---|---|---|
 | Q1 | `cdcache.wsx`: two different files carry this name. The one in `DAT/` (3,264,114 bytes) and the one in the game folder (104,896,114 bytes) both have a 9-entry header covering 52,663,793 bytes. The game-folder copy holds the 854 texture records, 420 of them after the area the header covers ([formats/textures.md](formats/textures.md)). Native expansion, marker and secondary row stride confirmed. Individual slot lifecycle remains open | [Native WSX reader](lol3-wsx-reader.md) |
-| Q2 | WSX keys: which name hash and which names produce them (not the LoL2 MIX hashes). **Partly answered:** the second `u32` of a row is the entry offset ([formats/wsx.md](formats/wsx.md)) | [formats/wsx.md](formats/wsx.md) |
+| Q2 | **Answered.** Native rotate-right name hash, case normalization and 76 exact name/key joins. Names of other entries remain unconfirmed | [Native WSX reader](lol3-wsx-reader.md#resource-name-key) |
 | Q3 | LMF light maps: native directory, grouped LZO1X and decoded member sizes confirmed. Member flags, header +8 and the extra 32 bytes remain open | [Native LMF reader](lol3-lmf-reader.md) |
 | Q4 | MAP fields 1 and 2: the 8-byte records and the `0xFFFF`-terminated placement headers | [map-format.md](map-format.md) |
 | Q5 | ODF and table38: field meanings and how levels use them | [level-catalog-notes.md](level-catalog-notes.md) |

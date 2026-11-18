@@ -23,7 +23,10 @@ Two corrections to the [older page](../wsx-extraction.md):
 - The second u32 of a row is the entry's offset. It was listed as unknown.
 - Payloads are not stored largest first. That holds in only 18 of the 52 files; the earlier peel order only happened to match there.
 
-The name hash is not the LoL2 one. Names the executable uses, such as `global\spell.tex`, `global\global.odf` and `ckeep\ckeep.lmf`, match no key in `GLOBAL.WSX` or `CKEEP.WSX` with any of the four Westwood hash variants in the LoL2 tools ([Q2](../OPEN_QUESTIONS.md)).
+**CONFIRMED.** Native `0x509EC3` rotates a 32-bit accumulator right six
+and adds a six-bit contribution from each uppercase ASCII filename byte.
+The [native reader](../lol3-wsx-reader.md#resource-name-key) gives the
+formula, name normalization and 76 exact name/key witnesses.
 
 ## Worked example
 
@@ -50,7 +53,7 @@ The four entries are:
 | 2 | 0xE128E119 | 54 | 6,871,261 | — |
 | 3 | 0x00A8E101 | 6,871,315 | 657,784 | 0, 38: the LMF |
 
-Entries 0 and 1 begin with dword 38. The tool marks an entry as LMF when its dword +4 is 38. For the roles of the entries see [level file types](../level-file-types.md).
+Entries 0 and 1 begin with dword 38. The tool marks an LMF by its first three dwords, 0, 38 and 0x100. For the roles of the entries see [level file types](../level-file-types.md).
 
 ## cdcache.wsx
 
