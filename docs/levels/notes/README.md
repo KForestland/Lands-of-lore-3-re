@@ -13,7 +13,7 @@ file is written for each level and stream to a directory outside the
 checkout and the game.
 
 ```text
-python3 tools/lol3_script_notes.py --data DAT --out /tmp/lol3-script-notes
+python3 tools/lol3_script_notes.py --data DAT --out DIR    # a folder outside the repository
 python3 tools/lol3_script_notes.py --data DAT --check
 ```
 

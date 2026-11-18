@@ -40,8 +40,9 @@ NUL-terminate the four-character search key
 (`0x4340E3–0x4340F7`, `0x4344C6–0x4344D9`).
 Thus the tag is command bytes +8–+0x0B.
 
-**CONFIRMED.** `0x4340D0` searches the `devent.trr` tags
-by numeric ID (`0x434110–0x434146`), using the
+**CONFIRMED.** `0x4340D0` binary-searches the `devent.trr` tags
+(stored in case-insensitive order, IDs 0 to count−1; rows probed
+by ID through `0x409440`; `0x434110–0x434146`), using the
 case-insensitive comparator at `0x51A160–0x51A1AE`. On a
 match it submits the row ID as event type 10 through
 `0x434180` and sends the same ID to `0x455250`
@@ -62,7 +63,10 @@ tag table matches 2,641 of the 2,642 stored opcode-0x16
 records from MAP +0x44/+0x8C. For example,
 `CKEEP.WSX+0xD039F0` joins to dialogue ID 2711.
 The one unmatched record is `HWHIT.WSX+0x111423D`.
-Its source or intent is **UNCONFIRMED**.
+Its source or intent is **UNCONFIRMED**. The region stream holds
+one more opcode-0x16 record, `PWOD3.WSX+0x1BC8883`, whose
+three-character tag also matches no dialogue tag. Archive names
+are case-insensitive; the files are stored in lower case.
 
 **CONFIRMED.** Opcode 0x19, with dword +0xC equal to 5,
 sends u32 +4 as the quest row ID and +8 as the associated

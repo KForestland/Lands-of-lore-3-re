@@ -76,7 +76,8 @@ def main():
     try:
         data_dir = Path(args.data)
         decode = lzo_decoder() if args.decode else None
-        if decode:
+        path, cache = None, None
+        if decode and cache_path(data_dir) is not None:
             path, cache = cache_rows(data_dir)
         files = blocks = matches = 0
         for name, packed in texture_entries(data_dir):
@@ -88,7 +89,7 @@ def main():
                 if unpack_from("<I", expanded)[0] != 38 or unpack_from("<I", expanded, 0x40)[0] != 0x300:
                     raise ValueError(f"{name}: unexpected expanded texture header")
                 key = wsx_name_hash(f"LEVELS\\{name}\\{name}.TEX")
-                if key in cache:
+                if cache is not None and key in cache:
                     offset, length = cache[key]
                     with path.open("rb") as source:
                         source.seek(offset)
@@ -97,9 +98,12 @@ def main():
                     matches += 1
             if not args.check:
                 print(f"{name}: {len(sections)} chunks")
-        if (files, blocks) != (18, 465) or (decode and matches != 4):
+        if (files, blocks) != (18, 465) or (decode and cache is not None and matches != 4):
             raise ValueError("texture aggregate counts do not match the English retail corpus")
-        detail = f", all decoded and {matches} byte-identical cache banks" if decode else ""
+        detail = ""
+        if decode:
+            detail = (f", all decoded and {matches} byte-identical cache banks" if cache is not None
+                      else ", all decoded; cache comparison SKIPPED (no game-folder cdcache.wsx, which the game writes when it runs)")
         print(f"CHECK texture_archive: {files} .TE_ entries, {blocks} packed chunks{detail}")
         return 0
     except (OSError, ValueError, struct_error) as error:

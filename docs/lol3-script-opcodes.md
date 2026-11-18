@@ -22,6 +22,8 @@ Each observed opcode has one original WSX offset. The six absent
 opcodes have an original executable witness. Those operands are
 not observed in the 18 MAP ranges.
 
+In the witness column, "size selector" means the opcode's index byte in the length table at `0x4E5790` (the opcode never occurs in a MAP, so the program itself is the witness). Archive names are case-insensitive; some files are stored in lower case.
+
 | Opcode | Bytes | Native case VA | Stored records in 18 MAPs | File witness | Native effect |
 |---|---:|---|---:|---|---|
 | 0x01 | 6 | `0x447F31` | 1,175 | `BUPP1.WSX+0x18C8633` | Calls target vtable +0xC0 with the command and retains the return (0x447F31–0x447F3C). The class-specific result is **UNCONFIRMED**. |
@@ -31,7 +33,7 @@ not observed in the 18 MAP ranges.
 | 0x06 | 6 | `0x447E59` | 1,204 | `BUPP1.WSX+0x18C9F4B`, +4=1 | Runs the object action switch on +4 through 0x446290, table 0x446438 (0x447E59–0x447E5C). |
 | 0x07 | 6 | `0x447E66` | 1,494 | `BUPP1.WSX+0x18CF98D` | Calls target virtual +0xCC with u8 +4/+5 (0x447E66–0x447E76). |
 | 0x08 | 8 | no case (`0x4499EB` is the object switch's default exit, the `ja` target at `0x447E31`) | 0 | `LOL3.DAT+0xE4B97`, size selector | The object table slot reaches the common exit without a command body (0x4499EB). |
-| 0x09 | 6 | `0x447E81` | 10,110 | `BUPP1.WSX+0x18C7EB1`, +4=21 | Dispatches object property u8 +4 through 0x447680 and table 0x447AE0. For instance selector 1 sets object +0x18 bit 0x4000 (0x4476B3–0x4476B9). |
+| 0x09 | 6 | `0x447E81` | 10,110 | `BUPP1.WSX+0x18C7EB1`, +4=21 | Dispatches object property u8 +4 through 0x447680 and table 0x447AE0. The selector byte indexes the table directly: selector 17 (0x11) sets object +0x18 bit 0x4000 (0x4476B3–0x4476B9); selectors 0 and 1 return 0 (0x4477BB). |
 | 0x0B | 8 | `0x448298` | 0 | `LOL3.DAT+0xE4B9A`, size selector | Passes u16 +4 to 0x4EED60 at 0x44829F. Effects beyond the call are **UNCONFIRMED**. |
 | 0x0D | 8 | `0x447F31` | 5,269 | `BUPP1.WSX+0x18C8A95` | Calls target virtual +0xC0 with the complete command (0x447F31–0x447F3C). |
 | 0x0E | 8 | `0x447E8E` | 1,588 | `BUPP1.WSX+0x18C85F3`, +4=4 | Selects kind-2 timer by u8 +6, then uses u8 +4 as the operation 0–6 and +5 as its argument (0x44676C–0x4467CD). |
@@ -41,7 +43,7 @@ not observed in the 18 MAP ranges.
 | 0x12 | 18 | `0x447E9B` | 288 | `BUPP1.WSX+0x18C8A71` | Uses a sequence slot at 0x600828. With flag +0xA bit 0x20, resets progress, clears the slot and sends value 6 to the object matcher (0x447EA1–0x447ED8). |
 | 0x13 | 10 | `0x449905` | 15 | `EWOD1.WSX+0x1894F72` | Fills and submits a hit request using two mask words, magnitude u8 +8 and mode +9 (0x449908 → 0x4E7290). |
 | 0x14 | 10 | `0x448055` | 2,773 | `BUPP1.WSX+0x18C7EF9` | Passes u16 resource ID +4, current object and a pointer to +6 to 0x422C40 (0x44806A–0x44807D). |
-| 0x15 | 6 | `0x447F97` | 25 | `CKEEP.WSX+0xD0546C` | Passes unsigned bytes +4 and +5 to the same indexed function 0x46FA60 called by the map-side arm (0x447F97–0x447FA3). Its full resource effect is **UNCONFIRMED** here. |
+| 0x15 | 6 | `0x447F97` | 25 | `CKEEP.WSX+0xD0546C` | Passes unsigned bytes +4 and +5 to the same indexed function 0x46FA60 (0x447F97–0x447FA3). The high table also has a 0x15 slot (0x4E59EF → 0x4E5D10 → 0x46FA60), but the group runner sends every command below 0xC3 to the object queue (0x4E58F4–0x4E58F6), so that slot is not reached for 0x15. Its full resource effect is **UNCONFIRMED** here. |
 | 0x16 | 18 | `0x4480A4` | 2,642 | `BUPP1.WSX+0x18CA0FD` | Compares the identifier at +4 against active object/queue identifiers in branch-specific paths (0x4480C5–0x448110, 0x44819D–0x448212). The admitted branch uses command +8–+0x0B as a dialogue tag (0x448237–0x448287). See the [native dialogue lookup](lol3-dialogue-dispatch.md). |
 | 0x17 | 6 | `0x447F51` | 80 | `BUPP1.WSX+0x18C7EED` | Writes the low byte of 0x44AA40(0, (u8(+4) << 5) + 31) shifted right five to object +0x31 (0x447F51–0x447F6C). |
 | 0x18 | 10 | `0x448033` | 2 | `BUPP1.WSX+0x18D148A` | Checks flag 4 in byte 0x58C562 and current object 0x5896F4, then normally calls 0x422FA0 with +4/+6. The flag branch enters the continuation of 0x1C (0x448033–0x44809A). |
@@ -61,7 +63,7 @@ not observed in the 18 MAP ranges.
 | 0xCF | 6 | `0x4E5A19` | 149 | `BUPP1.WSX+0x18CFAB5`, +4=29 | Adds s8 +5 at level-array index +4 and clamps to 0–255 (0x4E5BF0–0x4E5C17). |
 | 0xD0 | 8 | `0x4E5A51` | 111 | `BUPP1.WSX+0x18C7F4F`, +4=3 | Selects one of five branches by +4. Arm 0 extends a duration to at least u8(+6) × 60 × 65536 and raises byte 0x55D3A6 to at least +5, or clears both when +5 is zero (0x4E66D0–0x4E6758). |
 | 0xD1 | 10 | `0x4E5A5F` | 0 | `LOL3.DAT+0xE4C60`, size selector | Uses u16 +2 to find a 44-byte region-group row, directly or via selector 0x90 and the 56-byte region table (0x4E69BD–0x4E6A08). |
-| 0xD2 | 6 | `0x4E5A6D` | 127 | `BUPP1.WSX+0x18C7E3F`, +4=0 | Uses +4 to dispatch through the settings table 0x4E6CD8, reading u8 +5 in the admitted arms (0x4E6A80–0x4E6BDE). |
+| 0xD2 | 6 | `0x4E5A6D` | 127 | `BUPP1.WSX+0x18C7E3F`, +4=0 | Uses +4 to dispatch through the settings table 0x4E6CD8, reading u8 +5 in the arms that +4 selects (0x4E6A80–0x4E6BDE). |
 | 0xF0 | 6 | `0x4E5880` | 12,306 | `BUPP1.WSX+0x18C7E39`, +4=3 | At group entry, byte +4 counts following records for the native size walker (0x4E58A2–0x4E58B6). |
 
 ## Array commands

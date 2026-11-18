@@ -9,6 +9,8 @@ files git tracks and fails on:
     .LST .LS_ .ICF .ICI .TRR .LCF .BIN, and converted media .WAV .OGG .MP3
     .MID .MIDI .FLAC .WEBM .MP4 .AVI .VQA .SMK .BIK
   - PNG files outside examples/ and docs/images/
+  - generated script listings (*.script-list.md) written by tools/lol3_script_notes.py --out:
+    they are tool output for the user's own copy
   - any file larger than 300 KB, except the existing data tables in SIZE_ALLOWED
     (generated listings of game content are tool output, not tracked files)
   - with --release only: in the git history, any author or committer address not in ALLOWED_AUTHORS

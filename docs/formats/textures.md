@@ -7,7 +7,7 @@ The retail level archives wrap texture banks in a compressed `.TE_` stream. The 
 | Row-span records, flags `0x028E` / `0x828E` | the texture banks in `cdcache.wsx` in the game folder | layout and palette source CONFIRMED on all 854 records |
 | LZO1X-wrapped level banks | `LEVELS\<STEM>\<STEM>.TE_` inside the 18 WSX level archives | all 465 chunks decoded. The older LEVED `+1` witness was inside the compressed wrapper. |
 
-Older notes: [tex-format](../tex-format.md), [texture 028E evidence](../texture-028e-evidence.md). Tool: `tools/lol3_texture_spans.py`. It writes nothing and makes no pictures.
+Older notes: [tex-format](../tex-format.md), [texture 028E evidence](../texture-028e-evidence.md). Tools: `tools/lol3_texture_spans.py` (cache records) and `tools/lol3_texture_archive.py` (the 18 `.TE_` wrappers). They write nothing and make no pictures.
 
 ## Compressed level wrapper
 

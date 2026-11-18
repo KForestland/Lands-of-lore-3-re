@@ -35,7 +35,7 @@ candidate at `0x448025`.
 
 ## Definition directory
 
-**CONFIRMED.** The `GLOBAL\\GLOBAL.ODF` entry at
+**CONFIRMED.** The `GLOBAL\GLOBAL.ODF` entry at
 `GLOBAL.WSX+0x3866` has item table offset u32 +4 = 0x1F0
 and count +0x34 = 343. The loader seeks and passes the count
 at `0x44057A–0x44059F` to `0x4ACC40`, and the definition
@@ -48,14 +48,14 @@ each of the following lookup columns are distinct in that table.
 | +0x18 u32 | Identity used by `0x440930–0x440955`. The grant command uses this identity. |
 | +0x73 u32 | Numeric lookup key used by `0x440960–0x440985`. Also selects the definition-load cases and item name. |
 | +0x14 dword | Overwritten with a runtime resource pointer, advanced by 16 × row u8 +0x2E (`0x4ACE0E–0x4ACE19`). |
-| +0x3F dword | Bit 1 invokes the definition-load switch at `0x4ACDE4`. A specific row +0x73 value 7 also sets bits 2 and 3 (`0x4ACD62–0x4ACD8B`). |
+| +0x3F dword | Bit 1 invokes the definition-load switch at `0x4ACDE4`. A specific row +0x73 value 7 also sets bits 2 and 3 (`0x4ACD62–0x4ACD8B`) and definition +0x4F bit 0x10 (`0x4ACD89`), the bit the use-effect path tests at `0x4D7C9C`; value 0x3F sets +0x4F bit 0x20 (`0x4ACD94`). Only definition 5 has +0x73 = 7. |
 | +0x4F dword | Includes the state sense used by `0x4AD050–0x4AD08D`. Bit 1 of the separate byte-array row `[0x662A90][index]` is interpreted relative to definition bit 1. The two update paths invert the operations for the two senses (`0x4AD090–0x4AD106`). |
 | +0x7D u16 | Nonzero disk value `v` becomes `max(1, floor(256/v))` at `0x4ACE1B–0x4ACE3E`. The consumer meaning is **UNCONFIRMED**. |
 
 ## Script grants
 
 **CONFIRMED.** Player construction installs the vtable at
-`0x538388` (`0x408D86`, `0x40A506`). Table +0xC0
+`0x538388` (`0x408D80`, `0x40A504`). Table +0xC0
 at `LOL3.DAT+0x136C48` resolves to `0x410AA0`. Selector
 1 returns the player through `0x41EDE0 → 0x41EE00`.
 The opcode-3 dispatch at `0x448025` reaches the player arm.

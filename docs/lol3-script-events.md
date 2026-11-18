@@ -28,7 +28,7 @@ walk advances by length and stops at kind zero or length zero
 from a flat length walk over the two MAP ranges in all 18 levels.
 Every row fits its range. For kinds with a group reference, the
 u16 +2 values are within the matching stream or index bounds.
-The terminator and render rows have separate uses.
+The terminator rows and the kind-1 rows (consumer UNCONFIRMED) have separate uses.
 
 | Pool | Kind | Bytes | Rows | Matcher or observed consumer |
 |---|---:|---:|---:|---|
@@ -38,11 +38,11 @@ The terminator and render rows have separate uses.
 | Region | 15 | 10 | 72 | Region comparison path, `0x4AC650–0x4AC766`. Individual comparison modes are **UNCONFIRMED** here. |
 | Region | 19 | 4 | 145 | Guard trailer, `0x4F0611–0x4F0639` |
 | Object | 0 | 2 | 9,699 | List terminator, e.g. `CKEEP.WSX+0xD08DB8` |
-| Object | 1 | 16 | 4,516 | `CKEEP.WSX+0xD0962C`. Full render consumer **UNCONFIRMED**. |
+| Object | 1 | 16 | 4,516 | `CKEEP.WSX+0xD0962C`. Consumer **UNCONFIRMED**. |
 | Object | 2 | 10 | 768 | Periodic timer, `0x4F1AD0–0x4F1B84` |
 | Object | 3 | 6 | 1,010 | Compare event u8 +4, `0x4A8255–0x4A8290` |
 | Object | 4 | 10 | 1,999 | Request mode at +4 through 11 slots, `0x4A84FB–0x4A8516` |
-| Object | 5 | 6 | 605 | Compare event u8 +4 and value u8 +5. Value 0xFF gives a wildcard on either side, `0x4A82DE–0x4A8300`. |
+| Object | 5 | 6 | 605 | Compare event u8 +4 and value u8 +5. Input 0xFF matches any value; record value 0xFF matches any nonzero input (`0x4A82DE–0x4A8300`, `0x4A82F0–0x4A82FB`). |
 | Object | 6 | 6 | 7,917 | Compare u8 +4, with specific variants that also test +5, e.g. `0x4A8900–0x4A8925`. |
 | Object | 7 | 6 | 3 | Threshold branch, `0x4A8B09–0x4A8B64`. Full comparison modes **UNCONFIRMED**. |
 | Object | 8 | 6 | 16 | Compare u16 +4, with 0xFFFF wildcard, `0x4A8D25–0x4A8D40`. |
@@ -54,8 +54,8 @@ The terminator and render rows have separate uses.
 
 **CONFIRMED.** Region kind 12 has a ten-slot event table at
 `0x4AC470`. Events 0, 4 and 7 use the true arm. Events 1 and 9
-need signed input at least four times u8 +7. Event 8 compares
-input directly against u8 +7. Events 2 and 3 give true on input
+need signed input at least four times u8 +7. Event 8 tests signed
+input ≥ u8 +7 (`0x4AC287–0x4AC290`). Events 2 and 3 give true on input
 2, truth of +7 on input 1, and +7 equal to zero on input 0.
 Other inputs retain the caller flag. Events 5 and 6 use that
 flag directly (`0x4AC27B–0x4AC2E4`). The following predicate
@@ -72,14 +72,18 @@ row is operation, left type, left operand, right type, right operand
 IDs 0–7 are equal, unequal, signed ≤, ≥, >, <, boolean AND, OR
 (`0x4F046D`, table `0x4F04F8`).
 
-| Type | Left +2 | Right +4 |
+| Type | Left +2 (table `0x4F0424`) | Right +4 (table `0x4F0444`) |
 |---:|---|---|
 | 0 | Literal unsigned byte, `0x4F02DD` | Literal unsigned byte, `0x4F0387` |
-| 1 | Level array `[0x5D54BC]` indexed by operand, `0x4F02EA` | Same array, `0x4F039F` |
-| 2 | Bound object's +0x1C bit 0x80000 for operand zero. Otherwise shared array `[0x5D54C0]`, `0x4F02FF–0x4F0336`. | Shared array for every operand, `0x4F03C1–0x4F03CE` |
-| 3 | Bound object's u8 +0x31, `0x4F033A` | Same byte, `0x4F03E3` |
+| 1 | Default input (the evaluator's second stack argument), `0x4F036D` | Zero operand, `0x4F0411` |
+| 2 | Bound object's +0x1C bit 0x80000 for operand zero. Otherwise shared array `[0x5D54C0]`, `0x4F02FF–0x4F0336` | Shared array for every operand, `0x4F03C1–0x4F03CE` |
+| 3 | Level array `[0x5D54BC]` indexed by operand, `0x4F02EA` | Same array, `0x4F039F` |
 | 4 | Evaluate predicate indexed by operand, `0x4F0349–0x4F0350` | Evaluate predicate indexed by operand, `0x4F0400–0x4F0407` |
-| 5 and above | Defaults and special input test at `0x4F0361–0x4F036D` | Type 5 and above reaches the initialized zero operand, `0x4F0377–0x4F0414` |
+| 5 | Bound object's u8 +0x31 (object pointer `[0x600850]`), `0x4F033A` | Same byte, `0x4F03E3` |
+| 6 | Default input, `0x4F036D` | Above 5: zero operand |
+| 7 | False when the predicate index is 1 or more, otherwise default input, `0x4F0361` | Above 5: zero operand |
+
+Left types above 7 take the default input. The kind-19 guard calls `0x4F02B0` with a single argument (`0x4F0772`), so the default input is not defined on that path. Over the 18 MAP +0xBC tables the left types used are 0 (3,066), 2 (321), 3 (232), 4 (66) and 5 (905); the right types used are 0, 3 and 4. Type 1 never occurs.
 
 **CONFIRMED.** The level array is loaded from MAP +0xB4,
 length +0xB0 (`0x43E91D–0x43E93A`, `0x440A20`).

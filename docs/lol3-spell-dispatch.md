@@ -61,8 +61,9 @@ eight slots at `0x4C44FC` (`0x4C4365–0x4C436E`).
 Each replacement indexes the 87-byte ODF table and writes effect
 +0x34 (`0x4C43D6–0x4C4421`). The constructor copies XYZ from
 the supplied point and sets +0x63 bit 1 if initial placement
-fails at `0x4C4487` or `0x4C44DC`. At `0x44891F`, a
-script object invocation calls it with variant 2 and effect ID
+fails at `0x4C4487` or `0x4C44DC`. At `0x44891F`, inside
+the object command switch (which opcode reaches it is
+**UNCONFIRMED**), a call passes variant 2 and effect ID
 0x62. Adjacent calls at `0x448952` and `0x448985` supply
 variants 0 and 1 with IDs 0x63 and 0x64. These calls confirm
 effect creation through a script path.
@@ -73,8 +74,8 @@ selects `0x4C4530`. The first update searches within
 (`0x4C4562–0x4C45B1`). It filters candidates by flags,
 type and exact distance (`0x4C45C2–0x4C4628`).
 Magnitude comes from the signed-byte table at `0x54BF60`
-at the index from effect +0x69. Its entries 0–7 are
-10, 20, 40, 80, 10, 0, 10 and 10
+at the index from effect +0x69. Its entries 0–8 are
+10, 20, 40, 80, 10, 0, 10, 10 and 60
 (`LOL3.DAT+0x14A760`, `0x4C462E–0x4C463D`).
 Zero skips the hit. Variant 4 submits mask 0x20 and flags
 1. Other admitted variants here use mask 0x10 and flags 5
@@ -87,7 +88,7 @@ health change. See the [native combat path](lol3-combat-dispatch.md).
 `0x4AA5F6–0x4AA663` pick configured bindings for display.
 Their later path calls a key-name function and TRR lookup
 (`0x4AA667–0x4AA689`). A player update calls the effect
-constructor with variant 8 at `0x41503F`, then releases an
+constructor with variant 8 at `0x41503F` (variant 8 is above 7, so `0x4C4365` sends it to the default arm, like variant 5, and its magnitude entry is 60), then releases an
 item object (`0x415044–0x415053`). Those paths have separate
 inputs in the original code.
 

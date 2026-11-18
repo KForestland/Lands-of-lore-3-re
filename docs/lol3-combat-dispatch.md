@@ -29,14 +29,14 @@ new minus old through vtable +0x98.
 
 **UNCONFIRMED.** Concrete virtual-slot meanings by class, all
 mitigation masks, and the initial hit request for each weapon and
-spell are still open. The next check is to resolve +0x9C/+0x98
-for a creature of known current and maximum health and confirm
-a single difference update through the cited caller.
+spell are still open. For the creature class, +0x98/+0x9C are
+resolved below; other classes remain open.
 
 ## Creature definitions and target quantity
 
 **CONFIRMED.** In all 18 level ODFs, u32 +0x10 and count
-+0x48 locate 334 stored creature definitions of 147 bytes.
++0x48 locate 334 type-tagged field-3 definitions of 147 bytes,
+which the creature setup consumes (a few tags are object ids, Q5).
 CKEEP's eight rows begin at `CKEEP.WSX+0xD40705`.
 The [definition reader](lol3-map-odf-readers.md) maps the
 135-byte body and 12-byte type tag. The creature setup at
@@ -68,8 +68,8 @@ path confirm +0xDC's health role.
 
 **CONFIRMED.** The creature hit receiver clears +0x114
 bit 0x20 and rejects a hit from itself
-(`0x4B9190–0x4B91BE`). It calls the shared resolver at
-`0x4B98D0`. If resolved loss +0x24 is nonzero it passes
+(`0x4B9190–0x4B91BE`). At `0x4B98D0` it calls the shared
+resolver `0x4E2270`. If resolved loss +0x24 is nonzero it passes
 result +0x2C to the setter and loss +0x24 to `0x4B8530`
 (`0x4B98DD–0x4B9907`). The resolver rounds its accumulated
 fixed-point loss as `(value + 65535) >> 16`, clamps loss
