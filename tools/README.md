@@ -13,7 +13,7 @@ Run examples outside the repository.
 | Tool | Reads | `--check` |
 |---|---|---|
 | `check_all.py` | all checks below | prints each line, then `ALL 3 CHECKS PASSED` |
-| `repo_guard.py` | the repository | no game files, media, stray images, machine paths, lane or agent names, or foreign commit identities |
+| `repo_guard.py` | the repository | no game files, media, stray images, machine paths, private or assistant names, or foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | walks all 18 and checks every block size against the ladder |
 
