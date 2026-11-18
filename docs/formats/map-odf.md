@@ -2,7 +2,7 @@
 
 **What:** besides the [LMF](lmf.md), every level archive holds two entries that begin with the same kind of header. The header is a u32 38 and then 38 u32 fields, most of them section offsets or counts; the older pages call it "table38".
 
-The two kinds differ in field 0 and size. The executable's strings name the level file types `.map` and `.odf`. Their link to these two entries is a working reading from the older notes ([level file types](../level-file-types.md)), UNCONFIRMED.
+The two kinds differ in field 0 and size. The executable's strings name the level file types `.map` and `.odf`. The resource keys and the [native loaders](../lol3-map-odf-readers.md) confirm which entry has each role.
 
 | Kind | Field 0 | Size | Contents (older notes) |
 |---|---:|---|---|
@@ -22,7 +22,13 @@ Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 | 2 | start of section 2 | as above |
 | 20 | number of 8-byte records in section 1 | CONFIRMED (same check) |
 
-**Section 0.** 88% of its 8-byte slots (110,373 of 124,764 over the 18 levels) have the form `(u16 0, i16 x, u16 0, i16 z)`. In 16 of the 18 levels the section length is not a multiple of 8. So it is not purely a run of point records; its exact layout is open.
+**Section 0. CONFIRMED.** Field 19 counts eight-byte signed 16.16
+X/Z pairs at field 0. A 34–8,399-byte tail follows the vertices
+before field 1. Its role remains **UNCONFIRMED**. This explains the earlier
+measurement that only 88% of the section's 8-byte slots look like points: 110,373 of 124,764 slots
+have that shape, 108,043 of them whole-number vertices; the rest of the 114,483 vertices have a
+fraction, and 2,330 point-like slots lie in the tails.
+[Native readers](../lol3-map-odf-readers.md).
 
 **Section 1.** 8-byte records. The older notes report that the last u16 is often 16 and the third clusters on multiples of 128. Their meaning is open.
 
@@ -46,13 +52,12 @@ Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 
 Check: 83,962 − 43,434 = 40,528 = 8 × 5,066.
 
-The first records of section 0 read `(0, 1370, 0, −5530)`, `(0, 1740, 0, −5530)` and `(0, 930, 0, −5520)`. The first records of section 1 read `(170, 0, 1920, 16)` and `(412, 0, 128, 16)`.
+The first vertices of section 0, read as 16.16 dwords, are X 1370, Z −5530 (bytes `00 00 5a 05`, `00 00 66 ea`), then X 1740, Z −5530 and X 930, Z −5520. The first records of section 1 read `(170, 0, 1920, 16)` and `(412, 0, 128, 16)`.
 
 `CKEEP.WSX` entry 2 is the ODF: 47,696 bytes, starting `26 00 00 00 04 02 00 00`. That is count 38 and field 0 = 516.
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))
 
-- The exact layout of MAP sections 0 and 2, and the meaning of the section-1 fields.
-- The other 35 header fields.
-- The ODF section layout and the placement record format.
-- Which executable routines read these entries. That would also settle which entry is the `.map` and which the `.odf`.
+- The MAP section-0 tail, section 2 and the meaning of the section-1 fields.
+- The header fields not yet bound by the [native readers](../lol3-map-odf-readers.md) (MAP field 19 and ODF fields 0–4 and 14–20 are bound).
+- The ODF per-row meanings, the section-0 companions and what follows the field-2 252-byte rows.

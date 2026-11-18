@@ -21,8 +21,7 @@ They pass a texture descriptor to the bake entry `0x4826D0`
 
 The three source arms call vtable +8 with that key and a zero argument.
 The descriptor therefore selects the table by both its resource class and
-its u16 key. The backing source image for a specific archived texture
-record remains **UNCONFIRMED**.
+its u16 key. The [cache palette inventory](lol3-texture-palette-sources.md) joins every indexed cache span to its original palette bytes.
 
 ## Bake and consumers
 
@@ -58,9 +57,5 @@ row +4 and splits the first word into position and the two high bits
 (`0x4E0C20–0x4E0C53`). The caller uses these row operands at
 `0x48238C–0x4823B8` and reaches the word bake output at `0x48245C`.
 
-**UNCONFIRMED.** No archive offset is yet established for the source
-palette selected by the drawable descriptor of that sample. Match its
-cache range to the original texture resource, recover its descriptor
-bytes +0x02/+0x08/+0x0D and follow the appropriate object vtable +8
-through the resource index. Comparing the source and baked index 0
-and one nonzero index would settle the data-to-display join.
+**CONFIRMED.** The worked span uses arm 3 and palette 6 at game-folder
+`cdcache.wsx+0x9EDD97`. See the [bank descriptor evidence](lol3-texture-palette-sources.md).

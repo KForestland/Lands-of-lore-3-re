@@ -4,7 +4,7 @@ LoL3 has two texture formats. Only the first is decoded.
 
 | Format | Where | State |
 |---|---|---|
-| Row-span records, flags `0x028E` / `0x828E` | the texture banks in `cdcache.wsx` in the game folder | layout CONFIRMED on all 854 records; colour open |
+| Row-span records, flags `0x028E` / `0x828E` | the texture banks in `cdcache.wsx` in the game folder | layout and palette source CONFIRMED on all 854 records |
 | LEVED `+1` packs | the per-level art entries named with `.pcx` names | not decoded ([Q7](../OPEN_QUESTIONS.md)) |
 
 Older notes: [tex-format](../tex-format.md), [texture 028E evidence](../texture-028e-evidence.md). Tool: `tools/lol3_texture_spans.py`. It writes nothing and makes no pictures.
@@ -45,8 +45,7 @@ The next records follow directly, each half the size of the one before: 64 × 12
 **CONFIRMED.** The executable selects a per-descriptor source through
 `0x44B6E0` and builds 256 output words at `0x4826D0`. The native
 [texture colour bake](../lol3-texture-bake.md) gives the source selector,
-zero handling and indexed writes. The source record for a specific
-archived texture remains **UNCONFIRMED**.
+zero handling and indexed writes. The [palette inventory](../lol3-texture-palette-sources.md) gives the source file offsets for all 854 records.
 
 ## The cache file
 
