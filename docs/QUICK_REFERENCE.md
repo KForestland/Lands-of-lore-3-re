@@ -3,7 +3,7 @@
 Run the commands from the repository root with `LOL3_DAT` set to your
 original installation's `DAT` folder. `LOL3_SLOT` is a slot you saved
 while playing. Cache checks use the game-folder cache (written by the game, one folder above `DAT`) when it exists.
-The texture expansion example uses liblzo2. See [Start here](START_HERE.md).
+Texture expansion and SMD run checks use liblzo2. See [Start here](START_HERE.md).
 
 | File or entry | What it contains | Format and evidence | Tool | Command |
 |---|---|---|---|---|
@@ -14,7 +14,7 @@ The texture expansion example uses liblzo2. See [Start here](START_HERE.md).
 | `.ODF` | Definition and placement tables for level objects, including creature definitions | [ODF reader](lol3-map-odf-readers.md), [item definitions](lol3-item-dispatch.md#definition-directory) | Level report checks the level's named member | `python3 tools/lol3_level_report.py --check` |
 | `.LMF` | Grouped and compressed light-map samples | [LMF](formats/lmf.md) | LMF checker | `python3 tools/walk_lmf_leaves.py --check` |
 | `.TE_`, `.TEX` | Packed level texture banks and expanded/shared texture data | [Texture banks](formats/textures.md), [palette sources](lol3-texture-palette-sources.md) | Bank expansion checker | `python3 tools/lol3_texture_archive.py --check --decode` |
-| `.SMD` | Slice resources loaded from SLICECD archives | [SMD frame references](lol3-texture-bake.md#smd-slice-frame-references) | Cache checker verifies referenced frame headers | `python3 tools/lol3_texture_png.py --check` |
+| `.SMD` | Slice resources loaded from SLICECD archives | [SMD frame references](lol3-texture-bake.md#smd-slice-frame-references) | Cache checker verifies and expands referenced frames | `python3 tools/lol3_texture_png.py --check --decode-slices` |
 | `.VQA` | Indexed movie frames, codebooks and sound chunks | [VQA](formats/vqa.md) | Media checker | `python3 tools/lol3_media_check.py --check` |
 | RIFF WAVE members, including music named `.AUD` | IMA ADPCM level samples and MPEG Layer III music streams | [Audio](formats/audio.md) | Media checker | `python3 tools/lol3_media_check.py --check` |
 | `.PHT` | Loose resources with **UNCONFIRMED** payload layout | [Container inventory](container-inventory.md) | Python lists the files | `python3 -c 'from pathlib import Path; import sys; print(sorted(p.name for p in Path(sys.argv[1]).iterdir() if p.suffix.lower()==".pht"))' "$LOL3_DAT"` |

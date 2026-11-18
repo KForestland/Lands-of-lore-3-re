@@ -32,6 +32,13 @@ pixel word identifies a conversion between selection and display.
 If the path enumerates several candidates, keep the upload
 descriptor separate from those candidates.
 
+### Q6. Which bytes does the texture renderer consume?
+
+The [SMD test](lol3-texture-bake.md#slice-directory-and-run-decoder) and [row-flag test](lol3-texture-bake.md#two-ambiguous-row-flags)
+give shipped frame offsets for all four slice flags and the first-pixel
+predictions for the two unresolved row flags. Use those tests to identify
+the source buffer and output words before testing display conversion.
+
 ## Q9. What colours does the VQA frame callback present?
 
 Question: [Q9 in OPEN_QUESTIONS](OPEN_QUESTIONS.md).

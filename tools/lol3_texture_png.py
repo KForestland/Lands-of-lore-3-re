@@ -3,10 +3,13 @@
 
   lol3_texture_png.py --data DAT --offset 0x12C6E2 --out ../texture.png
   lol3_texture_png.py --data DAT --check
+  lol3_texture_png.py --data DAT --check --decode-slices   # liblzo2
 
 An offset is an absolute texture-record position in the game-folder cdcache.wsx.
 --check counts every occupied bank's populated mip records, checks linked SMD
-frame headers, and reports classes whose pixel route is open. It writes no images.
+frame headers, requires the full-width span shape for flags 0x02AC and 0x82AC
+(a mismatch counts as a failure), and reports classes whose pixel route is open.
+It writes no images.
 """
 import struct
 import zlib
@@ -19,6 +22,7 @@ from extract_wsx_entries import wsx_name_hash
 from lol3_texture_archive import cache_rows
 from lol3_texture_palettes import bank_directory, u32
 from lol3_texture_spans import cache_path
+from walk_lmf_leaves import lzo_decoder
 
 RAW_FLAGS = frozenset((0x008B, 0x00A9, 0x00C3, 0x00E1,
                        0x808B, 0x80A9, 0x80C3, 0x80E1))
@@ -93,11 +97,10 @@ def slice_reference(payload):
     start, expanded, stored = struct.unpack_from("<III", payload, 0x20)
     if kind != 3 or not name.lower().endswith(".smd") or expanded < 16 or 0 < stored < 16:
         raise ValueError("invalid SMD frame reference")
-    return name, (kind, identity, frame), start, stored or expanded
+    return name, (kind, identity, frame), start, expanded, stored
 
 
-def check_slice_reference(payload, directory):
-    name, header, start, length = slice_reference(payload)
+def find_slice_frame(directory, name, header, start, length):
     candidates = directory.get(wsx_name_hash(f"slice\\{name}"), ())
     if not candidates:
         raise ValueError(f"slice\\{name} is absent from SLICECD archives")
@@ -105,8 +108,46 @@ def check_slice_reference(payload, directory):
         if start + length <= size:
             source.seek(base + start)
             if struct.unpack("<III", source.read(12)) == header:
-                return name
+                return source, base + start
     raise ValueError(f"no matching SMD frame header in slice\\{name}")
+
+
+def slice_run_count(frame, slices):
+    """Check the row directory and the native bit-0x20 run layout."""
+    cursor = 16 + 4 * slices
+    runs = 0
+    for index in range(slices):
+        if u32(frame, 16 + 4 * index) != cursor:
+            raise ValueError(f"slice {index} does not start at the preceding boundary")
+        count = u32(frame, cursor)
+        cursor += 4
+        runs += count
+        for _ in range(count):
+            length = u32(frame, cursor)
+            cursor += 6 + 2 * length
+            if cursor > len(frame):
+                raise ValueError(f"slice {index} run exceeds the frame")
+    if cursor != len(frame):
+        raise ValueError("slice directory and runs do not cover the frame")
+    return runs
+
+
+def check_slice_reference(payload, directory, decode=None):
+    name, header, start, expanded, stored = slice_reference(payload)
+    length = stored or expanded
+    source, position = find_slice_frame(directory, name, header, start, length)
+    runs = 0
+    if decode is not None:
+        if (u32(payload, 0x0C) & 0x30) != 0x20:
+            raise ValueError("SMD reference does not select the bit-0x20 run layout")
+        source.seek(position)
+        frame = source.read(length)
+        if len(frame) != length:
+            raise ValueError("truncated SMD frame")
+        if stored:
+            frame = frame[:16] + decode(frame[16:], expanded - 16)
+        runs = slice_run_count(frame, u32(payload, 0x2C))
+    return name, runs
 
 
 def decode_texture(record, palette):
@@ -116,7 +157,7 @@ def decode_texture(record, palette):
             raise ValueError("indexed texture length differs from width × height")
         return width, height, b"".join(map(palette.__getitem__, payload))
     if flags in SLICE_FLAGS:
-        name, (_, _, frame), _, _ = slice_reference(payload)
+        name, (_, _, frame), _, _, _ = slice_reference(payload)
         raise ValueError(f"SMD reference to slice\\{name} frame {frame}; slice rendering is open")
     if flags not in SPAN_FLAGS:
         raise ValueError(f"pixel route for flags {flags:#06x} is unconfirmed")
@@ -155,11 +196,15 @@ def png_bytes(width, height, rgba):
 def main(stack):
     parser = lol3_cli.tool_args(__doc__, out_help="write one PNG outside the repository and game tree")
     parser.add_argument("--offset", type=lambda value: int(value, 0))
+    parser.add_argument("--decode-slices", action="store_true",
+                        help="with --check, expand original SMD frames and check every run (liblzo2)")
     args = parser.parse_args()
     if args.check and (args.offset is not None or args.out):
         parser.error("--check takes neither --offset nor --out")
     if not args.check and (args.offset is None or not args.out):
         parser.error("give --offset and --out to export a texture")
+    if args.decode_slices and not args.check:
+        parser.error("--decode-slices requires --check")
     try:
         if cache_path(args.data) is None:
             if args.check:
@@ -170,11 +215,13 @@ def main(stack):
         cache = path.read_bytes()
         decoded = Counter()
         slice_frames = Counter()
+        slice_runs = Counter()
         unconfirmed = Counter()
         seen = set()
         banks = set()
         errors = 0
         slices = slice_directory(args.data, stack) if args.check else {}
+        decode_slices = lzo_decoder() if args.decode_slices else None
         for offset, size, bank, descriptor, mip, key, source in cache_textures(cache, allocations.values()):
             if offset in seen:
                 raise ValueError(f"duplicate texture record at {offset:#x}")
@@ -183,12 +230,20 @@ def main(stack):
                 continue
             record = cache[offset:offset + size]
             try:
-                flags, _, _, payload = texture_payload(record)
+                flags, width, height, payload = texture_payload(record)
                 banks.add(bank)
                 if args.check and flags in SLICE_FLAGS:
-                    slice_frames[check_slice_reference(payload, slices)] += 1
+                    name, runs = check_slice_reference(payload, slices, decode_slices)
+                    slice_frames[name] += 1
+                    slice_runs[flags] += runs
                     continue
                 if args.check and flags in UNCONFIRMED_FLAGS:
+                    stride = width + 4
+                    if len(payload) != height * stride or any(
+                        struct.unpack_from("<HH", payload, row * stride) != (0, width)
+                        for row in range(height)
+                    ):
+                        raise ValueError("record differs from the measured full-width spans")
                     unconfirmed[flags] += 1
                     continue
                 palette = rgba_palette(cache[source:source + 512], cache[descriptor + 8] & 2)
@@ -213,8 +268,12 @@ def main(stack):
         if not args.check:
             raise ValueError(f"{args.offset:#x} is not a cached texture-record offset")
         counts = ", ".join(f"{flag:#06x}={count}" for flag, count in sorted(unconfirmed.items()))
+        slice_result = f"{sum(slice_frames.values())} SMD references verified ({len(slice_frames)} names)"
+        if args.decode_slices:
+            per_flag = ", ".join(f"{flag:#06x}={count}" for flag, count in sorted(slice_runs.items()))
+            slice_result += f", {sum(slice_runs.values())} SMD runs framed ({per_flag})"
         print(f"CHECK texture_png: {len(seen)} records, {sum(decoded.values())} decoded, "
-              f"{sum(slice_frames.values())} SMD references verified ({len(slice_frames)} names), "
+              f"{slice_result}, "
               f"{sum(unconfirmed.values())} unconfirmed ({counts or 'none'}), {errors} failures; "
               f"arm 3 source palettes in {len(banks)} banks; in the game-written game-folder cdcache.wsx")
         return int(not seen or errors > 0)
