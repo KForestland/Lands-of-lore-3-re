@@ -25,13 +25,18 @@ the resulting string pointer at `[0x662A9C][id]`
 (`0x4AD172–0x4AD1B4`). The archive witness is the 343-entry
 `DAT/locallng.wsx+0x5968140`.
 
-**UNCONFIRMED.** The exact per-item effects when a player activates
-a slot remain open. The input binding and definition-time switch
-are now located. Follow reads of the dwords at `0x5D4D58–0x5D4D7C`
-to the item-use button event. Match the selected inventory instance
-to its definition and resolve the virtual method or switch invoked
-there. The object-script opcode-3 vtable +0xC0 call is an additional
-candidate at `0x448025`.
+**CONFIRMED.** The input builder at `0x466B60` makes six-byte
+selector/key rows. The indexed loop at `0x467373–0x46739B` reads
+the configured keys and registers them through `0x41DB00`.
+The registration reads flag/pointer pairs from `0x545E20`
+(`0x41DB53–0x41DB97`). The input event has a release bit 0x800
+(`0x41D8A0–0x41D92B`), and a registered handler is called at
+`0x41DA2F`.
+
+| Configured indexes | Selectors and callbacks | Native action |
+|---|---|---|
+| 32–41 | 0x12–0x16, `0x41E560/570/580/590/5A0` | Slots 0–4, on release. `0x41E4B0` checks modifier cells `0x5D5800/04` for alternate routes `0x4305A0` and `0x432E50`. The default uses the HUD slot and calls `0x426D30`, which reaches item use at `0x426F7B`. |
+| 46–55 | 0x19–0x1D, `0x41E340/370/3A0/3D0/400` | Slots 5–9, on press. The callbacks directly call `0x4282E0` with ECX `0x583151`. |
 
 ## Definition directory
 
@@ -85,20 +90,42 @@ remain **UNCONFIRMED** as exceptional command contexts.
 
 ## Use effects
 
-**CONFIRMED.** The search found one concrete effect route
-from the read of an item's definition pointer at live object
-+0x34. `0x4D7C6E–0x4D7CA0` tests definition dword +0x43,
-instance +0x2A and definition +0x4F bit 0x10. On the admitted
-path it fills a 72-byte hit request with mask 0x100, flags 4,
-kind 5 and subtype 0xFF (`0x4D7CA2–0x4D7CE7`).
-The selected recipient pointer comes from `[0x600764]`
-or `[0x600768]` in that branch. The per-item button-use
-dispatch and the game-facing meaning of this specific path
-are **UNCONFIRMED**.
+**CONFIRMED.** Common use `0x4282E0` reads the pointer in
+inventory row `[ECX+0x80] + 16*slot`, or the cursor pointer at
+`[0x585488]` for cursor use. A null instance or a nonzero
+`0x49F170` check returns before dispatch. Definition flag
+`+0x3F & 0x0C` goes through `0x433B70` into the
+`0x429520` action path. The other branch builds use operation 1
+and calls `0x49E960` at `0x4283AF`
+(`0x4282E0–0x4283AF`). In the action path, eligible instance
+bytes +8 between 101 and 109 are decremented, and that path
+chooses operation 13 or 6 (`0x429C18–0x429C9A`).
 
-**UNCONFIRMED.** `0x4A9F86–0x4A9FED` was checked for the
-five pairs of item bindings. It chooses a configured key for
-a presentation path, which calls `0x4F4180` and then a TRR
-lookup at `0x4AA046`. To settle per-item activation, follow
-the player input event's slot index to its inventory array and
-resolve the first effect handler reached with that instance.
+**CONFIRMED.** `0x49E960` reads the definition dword +0x4B
+and, if the request has no recipient, supplies the player
+(`0x49E969–0x49E97C`). When definition byte +0x3F bit 1 is
+set, it calls table slot 108 at `0x54BAC8`, which points to
+`0x4A4520` (`0x49E97C–0x49E992`). Otherwise, after the
+operation-specific guards it calls `[0x54B918 + 4*index]`
+(`0x49E995–0x49EA0F`). There are 124 consecutive code pointers
+in the table. The 258 regular original definitions use 114
+distinct indexes. The other 85 definitions all store zero at
++0x4B and take the special arm. This census reads 343 rows at
+`GLOBAL.WSX+0x3A56`. For example, definition 53 at +0x571D uses
+regular index 2, destination `0x49F6D0`. Definition 77 at +0x6425
+uses the [special cast arm](lol3-spell-dispatch.md#player-cast-and-cost).
+
+**CONFIRMED.** A separate effect route at `0x4D7C6E–0x4D7CA0`
+reads live object +0x34 as a definition pointer and tests
+definition +0x43, instance +0x2A and definition +0x4F bit 0x10.
+On the admitted path it fills a 72-byte hit request with mask
+0x100, flags 4, kind 5 and subtype 0xFF
+(`0x4D7CA2–0x4D7CE7`). It selects the recipient from
+`[0x600764]` or `[0x600768]`.
+
+**UNCONFIRMED.** Most regular destination effects remain open.
+The input and dispatch paths now identify the exact handler.
+For each regular index, use one +0x4B witness from the original
+definition table and follow that destination's first state write
+or effect request for operation 1. The hit route at `0x4D7C6E`
+still needs an original action that reaches it.

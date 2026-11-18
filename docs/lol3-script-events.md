@@ -120,9 +120,36 @@ its guard passes (`0x4F1B16–0x4F1B6F`). The kind-2 row at
 `CKEEP.WSX+0xD08E7E` has flags 0x20, reload byte 1 and
 stored countdown 0x100, a direct fixed reload witness.
 
-**UNCONFIRMED.** Which host clock updates the two live elapsed
-cells is open. Their exact consumers and scale constant above
-are identified. A bounded check of absolute write operands
-overlapping `0x58CBA5–0x58CBAA` found no direct store. To settle
-the conversion, observe the first write before `0x4F1AD0`
-and compare the raw inputs in an ordinary and a long frame.
+**CONFIRMED.** The writer is the frame update at `0x46D570`.
+Its caller supplies ECX `0x58C6F8` (`0x46CBD4–0x46CBD9`)
+and the update copies it to EBP. The elapsed values are
+written indirectly at EBP +0x4AD and +0x4AF. The stopwatch at
++0x499 is initialized with rate 480 at `0x46D11F–0x46D12B`.
+The Windows host computes `floor(1000/480) = 2` ms and
+registers the periodic callback `0x507F40` through
+`timeSetEvent` (`0x407CB1–0x407CC5`,
+`0x507E20–0x507E59`). That callback increments the host
+counter (`0x507F57–0x507F7B`). The rate selector uses shift
+0 for 480, 1 for 240, 2 for 120 and 3 for 60
+(`0x503170–0x5031CC`), and `0x5031F0–0x503218` reads
+and shifts the counter. Stopwatch read
+`0x503260–0x5032A8` subtracts its saved counter value.
+
+**CONFIRMED.** The loop waits for at least 24 quanta when
+`[0x545A2C] = 0x5385E0`, otherwise 16
+(`0x409930–0x409943`, `0x46D84F–0x46D882`).
+It inserts the elapsed sample capped at 480 into a four-sample
+ring, updates its sum `S` and resets the stopwatch
+(`0x46D887–0x46D8DE`). The following values use integer
+arithmetic and start from zero (`0x46D229–0x46D242`).
+
+| Store | Value | Native source |
+|---|---|---|
+| `0x58CBA1` dword | `D = min(0x80000, trunc((S << 16)/32))` | `0x46D8E3–0x46D902` |
+| `0x58CBA5` word | `out = (D+r8) >> 8`, then `r8 = D+(r8 & 255)-(out << 8)` | `0x46D90C–0x46D934` |
+| `0x58CBA7` dword | `out = (D+r16) >> 16`, then `r16 = D+(r16 & 65535)-(out << 16)` | `0x46D93A–0x46D95E` |
+
+The second accumulator adds `D`, compares with `60 << 16`
+and subtracts that threshold when reached
+(`0x46D969–0x46D998`). These are the writer-side units for
+the countdown inputs above.

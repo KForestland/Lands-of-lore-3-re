@@ -92,10 +92,52 @@ constructor with variant 8 at `0x41503F` (variant 8 is above 7, so `0x4C4365` se
 item object (`0x415044–0x415053`). Those paths have separate
 inputs in the original code.
 
-**UNCONFIRMED.** The button-to-cast mapping and exact mana debit
-remain open. The direct key-cell references resolve to the label
-path above. The ODF table and its effect constructor resolve
-effect setup and hit magnitude. To settle costs, follow the player
-cast request before effect allocation and record the selected
-slot, selected definition, resource comparison and debit together.
-The effect hit magnitude table by itself does not specify a cost.
+**CONFIRMED.** The five cast callbacks feed slots 5–9 to
+`0x4282E0`. The [item use dispatcher](lol3-item-dispatch.md#use-effects)
+sends special definitions to `0x4A4520`. The handler requires
+request operation 1 and starts with the definition dword +0x5B
+as mana cost (`0x4A4547–0x4A4564`, `0x4A45C4–0x4A45D4`).
+For example, the original row at `GLOBAL.WSX+0x6425` holds
+ID 0x50 and cost 50. The row at +0x7F4B holds ID 0x82 and cost 5.
+
+**CONFIRMED.** `0x42B850` scans eight equipped rows at
+`0x546EF8–0x546F68` for a definition's numeric ID. With IDs
+0x128, 0xD8, 0xDC and 0xDB all present, spell IDs 0x82–0x86
+halve cost with integer truncation (`0x4A4620–0x4A4688`).
+With ID 0xE9 equipped, spell IDs 0x50–0x54 subtract
+`trunc(cost/4)` (`0x4A468C–0x4A46BD`). The ordinary
+resource test compares that adjusted cost with player dword
++0x1B8, read by `0x40FEF0`. An unsigned cost above the
+current value queues message ID 0x59 and returns 4 before
+the effect switch (`0x4A46F5–0x4A4727`).
+
+**CONFIRMED.** After the effect branch, two conditional
+discounts check `0x433C80(8, 10)` and `0x433C80(8, 13)`
+with ECX `0x57095C`. They apply to opposite values of
+the local cast flag at stack +0x18. They use bytes
+`0x5D50BD` and `0x5D50BE`, respectively. Let that byte
+be `n` and let `c` be the cost after the equipment adjustment.
+The discount computes `d = trunc(c*(25+2*(n-1))/100)`,
+uses 1 if `d` is zero, and uses `max(1, c-d)` as the
+debit (`0x4A596F–0x4A5A0D`). On the ordinary success
+path, `0x4A5A45–0x4A5A4D` passes the negative debit
+to `0x40FFE0`. That function clamps the updated +0x1B8
+between zero and the vtable +0xB0 return, then refreshes
+the HUD (`0x40FFE0–0x410052`). The failed-effect branch
+at `0x4A5A41–0x4A5A54` skips this debit.
+
+**CONFIRMED.** For IDs 0x54 and 0x59, a nonzero
+`[0x570AB9]` can select a different payment route, which
+calls `0x4329C0(-1)` on success. The other bypass tests
+`[0x581A21]` and can call `0x432AD0(-1)` instead
+(`0x4A46C1–0x4A46F3`, `0x4A5BB0–0x4A5BCE`,
+`0x4A5A0D–0x4A5A54`).
+
+**UNCONFIRMED.** The gameplay names of those two alternate
+resources and the final cost-discount selectors are open.
+To distinguish the resources, take the 0x54 or 0x59 row
+through `0x4A5BB0`, then identify the initializer and HUD
+consumer of the counter that `0x4329C0` changes. On an
+ordinary successful cast, log the two `0x433C80` results
+and the corresponding level byte before `0x4A59A1` or
+`0x4A59EF` to name the discount conditions.

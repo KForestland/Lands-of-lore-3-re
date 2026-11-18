@@ -49,10 +49,10 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
 | Textures | Row-span records: all 854 in this installation's texture cache decode exactly and join to palette sources; the 18 `.TE_` wrappers decode (465 LZO1X chunks); a standalone editor format is unconfirmed (Q7) |
-| Movies, music | Containers listed; formats open (Q9, Q10) |
+| Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced, RGB output open (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, effects marked CONFIRMED or UNCONFIRMED; per-level summaries (Q11) |
-| Items, spells, dialogue, combat | 343 item rows, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join) and the creature hit resolver traced in the program; cast entry, per-item use and mitigation open (Q12) |
+| Items, spells, dialogue, combat | 343 item rows, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join) the creature hit resolver, item use, cast cost and mana debit traced in the program; per-item effects and mitigation names open (Q12) |
 | Saves | Header, directories and compression mapped on 47 original-program saves; payload meanings open (Q13) |
 
 ## Repository layout

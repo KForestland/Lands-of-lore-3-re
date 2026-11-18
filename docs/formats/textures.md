@@ -49,7 +49,7 @@ u32 flags            0x028E or 0x828E
 u16 width, u16 height
 u32 size             bytes of rows that follow
 height rows of:
-    u16 A            A & 0xC000: 0 = opaque copy, 0x4000 = skip palette index 0; A & 0x3FFF = start column
+    u16 A            A & 0xC000: 0 = opaque copy, 0x4000 = skip index 0 in the 0x4E0C20 extractor (the 0x48245C bake copy writes palette output for index 0; descriptor +8 bit 1 sets palette[0], 0x4826DB-0x4826F8); A & 0x3FFF = start column
     u16 B            number of bytes in this row
     B bytes          palette indices placed from the start column
 ```

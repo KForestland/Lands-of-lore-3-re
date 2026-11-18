@@ -87,6 +87,20 @@ def form(stream, start, size, tag, codec, order):
     return chunks(stream, start + 12, start + size, order)
 
 
+def read_movie_table(stream, start, size, header_tag, data_tag, header_size, record_format):
+    rows = list(chunks(stream, start, start + size, ">"))
+    if len(rows) != 2 or (rows[0][0], rows[1][0]) != (header_tag, data_tag):
+        raise ValueError(f"unexpected {header_tag!r} table layout at 0x{start:X}")
+    _, header_at, header_length = rows[0]
+    _, data_at, data_length = rows[1]
+    if header_length != header_size:
+        raise ValueError(f"unexpected {header_tag!r} header size at 0x{header_at:X}")
+    count, = struct.unpack("<H", read_at(stream, header_at, 2))
+    if data_length != count * struct.calcsize(record_format):
+        raise ValueError(f"{data_tag!r} length disagrees with row count at 0x{data_at:X}")
+    return list(struct.iter_unpack(record_format, read_at(stream, data_at, data_length)))
+
+
 def check_movie(stream, start, size):
     header = None
     index = []
@@ -94,6 +108,9 @@ def check_movie(stream, start, size):
     samples = Counter()
     seek_targets = {}
     seek_counts = Counter()
+    loop_rows = codebook_rows = None
+    codebooks = {}
+    frame_index = 0
     for tag, at, length in form(stream, start, size, b"FORM", b"WVQA", ">"):
         counts[tag] += 1
         if tag == b"VQHD":
@@ -106,8 +123,28 @@ def check_movie(stream, start, size):
             seek_targets[at - 8 - start] = tag
         elif tag == b"SND2":
             samples[length] += 1
-        elif tag == b"VQFL":
-            seek_targets[at - 8 - start] = tag
+        elif tag == b"LINF":
+            loop_rows = read_movie_table(stream, at, length, b"LINH", b"LIND", 6, "<HH")
+        elif tag == b"CINF":
+            codebook_rows = read_movie_table(stream, at, length, b"CINH", b"CIND", 8, "<HI")
+        elif tag in (b"VQFR", b"VQFL"):
+            offset = at - 8 - start
+            payloads = Counter()
+            for subtype, body, payload_length in chunks(stream, at, at + length, ">"):
+                payloads[subtype] += 1
+                if subtype == b"CBFZ":
+                    if frame_index in codebooks:
+                        raise ValueError(f"duplicate codebook at 0x{body:X}")
+                    codebooks[frame_index] = (payload_length, offset)
+            if tag == b"VQFL":
+                if payloads != {b"CBFZ": 1}:
+                    raise ValueError(f"unexpected VQFL payload at 0x{at:X}")
+                seek_targets[offset] = tag
+            else:
+                if (payloads.keys() - {b"CBFZ", b"VPTR", b"VPRZ"}
+                        or payloads[b"VPTR"] + payloads[b"VPRZ"] != 1):
+                    raise ValueError(f"unexpected VQFR payload at 0x{at:X}")
+                frame_index += 1
     if header is None or len(header) != 42 or counts[b"VQHD"] != 1 or counts[b"FINF"] != 1:
         raise ValueError("expected one 42-byte VQHD and one FINF")
     version, flags, frames, width, height = struct.unpack_from("<5H", header)
@@ -116,10 +153,21 @@ def check_movie(stream, start, size):
         raise ValueError(f"inconsistent VQHD at 0x{start + 20:X}")
     if len(index) != frames or counts[b"VQFR"] != frames:
         raise ValueError("FINF or VQFR count disagrees with VQHD")
-    for word in index:
-        if word * 2 not in seek_targets:
+    offsets = [(word & 0x0FFFFFFF) * 2 for word in index]
+    for word, offset in zip(index, offsets):
+        if offset not in seek_targets:
             raise ValueError(f"FINF target 0x{word:X} has no SN2J or VQFL header")
-        seek_counts[seek_targets[word * 2]] += 1
+        seek_counts[seek_targets[offset]] += 1
+    if (counts[b"LINF"] != 1 or counts[b"CINF"] != 1
+            or not loop_rows or not codebook_rows or len(loop_rows) != len(codebook_rows)):
+        raise ValueError("expected one matching pair of LINF and CINF tables")
+    if set(codebooks) != {first for first, _ in codebook_rows}:
+        raise ValueError("CIND frame markers disagree with the codebook chunks")
+    for (first, last), (frame, length) in zip(loop_rows, codebook_rows):
+        stored_length, offset = codebooks[frame]
+        if not (first == frame <= last < frames and length == stored_length
+                and (frame == 0 or offset == offsets[frame])):
+            raise ValueError(f"loop/codebook table mismatch at frame {frame}")
     return frames, counts, samples, seek_counts
 
 

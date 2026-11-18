@@ -21,7 +21,7 @@ beginning of the LMF unless indicated otherwise.
 | `+0x18` | Directory row count | Used at `0x440BF5–0x440C04` and `0x440C7D–0x440C89` |
 
 **CONFIRMED.** Each 16-byte row gives a pool-relative offset, expanded
-member byte length, a word whose low bit requests continuation, and a
+member byte length, a dword at row +8 masked with 1 (`0x440C55–0x440C5D`), whose low bit requests continuation, and a
 field whose low 18 bits give the stored group length at the group start
 (`0x440C55–0x440C84`, `0x4E1902–0x4E196E`, `0x4E21C6–0x4E21FD`).
 Run the structural check or add `--decode` with liblzo2 installed.

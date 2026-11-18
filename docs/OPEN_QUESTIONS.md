@@ -16,10 +16,10 @@ One line per question: its state and what would settle what is left.
 | Q6 | Answered for cache spans | Trace what happens to the baked colours on the display device |
 | Q7 | Mostly | The editor-name branch (`0x43FFE4–0x44000D`) converges on the retail reader; only a differently framed standalone file remains unwitnessed |
 | Q8 | Open | Apply the MAP/ODF readers to the QWOD0 and SWOD4 bytes |
-| Q9 | Partly | All 19 movies are named and the reader `0x50DF70` found; decode the VQFR/CBFZ pixels and the LINF/CINF layouts |
+| Q9 | Partly | VQA tables, LCW and the 4×4 pointer callback are confirmed; follow the display pixel-format masks to RGB output |
 | Q10 | Mostly | Music format and the `AIL_open_stream` path are confirmed; trace the initializer of the stem table `0x629070` to join keys to names |
 | Q11 | Partly | Trace the UNCONFIRMED opcode effects one by one |
-| Q12 | Partly | Trace the spell cast entry and mana debit, per-item use effects and mitigation masks |
+| Q12 | Partly | Trace the per-index item effect handlers, the two alternate cast resources and discount selectors, and the mitigation mask names |
 | Q13 | Partly | Compare original save pairs written before and after one known action |
 
 ## Questions
@@ -34,8 +34,8 @@ One line per question: its state and what would settle what is left.
 | Q6 | **Answered for cache spans.** All 854 spans join to arm-3 source palettes. Device presentation after the bake remains open | [Palette source inventory](lol3-texture-palette-sources.md) |
 | Q7 | All 18 original `.TE_` banks expand through LZO1X. The former `+1` witness is inside a compressed block. The editor-name branch `0x43FFE4–0x44000D` converges on the same reader; only a differently framed standalone file remains unwitnessed | [Texture formats](formats/textures.md) |
 | Q8 | What the QWOD0 and SWOD4 byte-pattern labels mean in the game. Open: the MAP/ODF readers now exist but have not been applied to these labels | [lol3-semantic-phase.md](lol3-semantic-phase.md) |
-| Q9 | Movies. **Partly answered:** the 19 `MOVIES1..4` entries are named VQA files read by `0x50DF70`; frame index and sound chunks checked. Open: the VQFR/CBFZ pixel decode and the LINF/CINF layouts | [formats/vqa.md](formats/vqa.md) |
+| Q9 | Movies. **Partly answered:** the 19 `MOVIES1..4` entries are named VQA files read by `0x50DF70`; frame index and sound chunks checked. LINF/CINF tables, LCW payloads and 4×4 tile pointers confirmed ([vqa](formats/vqa.md)). Open: display pixel-format masks and RGB output | [formats/vqa.md](formats/vqa.md) |
 | Q10 | Music and sound. **Partly answered:** the 6,696 level sounds in the 18 sidecar archives are RIFF WAVE, format 17 (IMA ADPCM) ([level sheets](levels/README.md)). The 38 `MUSIC1..4` tracks and their Miles stream path are documented ([formats/audio.md](formats/audio.md)). Open: the stem table `0x629070` | [formats/audio.md](formats/audio.md) |
-| Q11 | Scripts. **Partly answered:** all original MAP scripts frame exactly with the 39 native opcode lengths; the dispatch tables, event pools, predicates and timers are mapped ([events](lol3-script-events.md)); each opcode row on the [opcode page](lol3-script-opcodes.md) is marked CONFIRMED or UNCONFIRMED. The UNCONFIRMED effects remain open | [Script opcodes](lol3-script-opcodes.md), [object dispatch](lol3-object-dispatch.md) |
-| Q12 | Items, spells, dialogue and combat. **Partly answered:** the 343-row item table, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 dialogue commands join) and the creature hit resolver are traced. Open: the spell cast entry and mana debit, per-item use effects, mitigation masks | [Items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md) |
+| Q11 | Scripts. **Partly answered:** all original MAP scripts frame exactly with the 39 native opcode lengths; the dispatch tables, event pools, predicates, timers and the 480 Hz host frame clock are mapped ([events](lol3-script-events.md)); each opcode row on the [opcode page](lol3-script-opcodes.md) is marked CONFIRMED or UNCONFIRMED. The UNCONFIRMED effects remain open | [Script opcodes](lol3-script-opcodes.md), [object dispatch](lol3-object-dispatch.md) |
+| Q12 | Items, spells, dialogue and combat. **Partly answered:** the 343-row item table, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 dialogue commands join) the creature hit resolver, item-use dispatch, cast cost and mana debit are traced. Open: per-index item effect handlers, the two alternate cast resources and discount selectors, mitigation mask names | [Items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md) |
 | Q13 | Native save header, global and level directories, and compression are mapped. Remaining payload meanings are open | [Native saves](lol3-native-saves.md) |

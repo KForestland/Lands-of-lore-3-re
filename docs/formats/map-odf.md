@@ -1,6 +1,6 @@
 # MAP and ODF entries (table38 header)
 
-**What:** besides the [LMF](lmf.md), every level archive holds two entries that begin with the same kind of header. The header is a u32 38 and then 38 u32 fields, most of them section offsets or counts; the older pages call it "table38".
+**What:** besides the [LMF](lmf.md), every level archive holds two entries that begin with the same kind of header. The header starts with u32 38, a format tag that both native readers require, followed by fields that are mostly section offsets or counts. The MAP reader reads a 0x244-byte header and also requires a nonzero field 21 (`0x43E7E0–0x43E80B`); the ODF reader reads 0x204 bytes (`0x43FC86–0x43FCAB`). Both checks are bypassed by the `-CONVERT_TEST` switch. The MAP reader reads further dwords at +0xC4/+0xC8 and +0xD8/+0xDC (`0x43EBD9–0x43EC92`). The older pages call this header "table38".
 
 The two kinds differ in field 0 and size. The executable's strings name the level file types `.map` and `.odf`. The resource keys and the [native loaders](../lol3-map-odf-readers.md) confirm which entry has each role.
 
@@ -45,7 +45,7 @@ fraction, and 2,330 point-like slots lie in the tails.
 
 | Field | Value |
 |---|---|
-| count | 38 |
+| format tag | 38 |
 | field 0 | 12,076 |
 | field 1 | 43,434 |
 | field 2 | 83,962 |
@@ -55,7 +55,7 @@ Check: 83,962 − 43,434 = 40,528 = 8 × 5,066.
 
 The first vertices of section 0, read as 16.16 dwords, are X 1370, Z −5530 (bytes `00 00 5a 05`, `00 00 66 ea`), then X 1740, Z −5530 and X 930, Z −5520. The first records of section 1 read `(170, 0, 1920, 16)` and `(412, 0, 128, 16)`.
 
-`CKEEP.WSX` entry 2 is the ODF: 47,696 bytes, starting `26 00 00 00 04 02 00 00`. That is count 38 and field 0 = 516.
+`CKEEP.WSX` entry 2 is the ODF: 47,696 bytes, starting `26 00 00 00 04 02 00 00`. That is format tag 38 and field 0 = 516 (the ODF header size).
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))
 
