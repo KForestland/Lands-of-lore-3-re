@@ -26,3 +26,6 @@ scratch/
 # default tool output folders
 peels/
 out/
+
+# Full local script listings
+*.script-list.md

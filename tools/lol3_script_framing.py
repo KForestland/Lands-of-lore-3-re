@@ -40,7 +40,7 @@ def native_sizes(image):
     return sizes
 
 
-def level_maps(data_dir):
+def level_map_entries(data_dir):
     for path in lol3_cli.wsx_files(data_dir):
         with path.open("rb") as source:
             count, size = unpack_from("<HI", source.read(6))
@@ -58,8 +58,13 @@ def level_maps(data_dir):
                 payload = source.read(length)
                 if len(payload) != length:
                     raise ValueError(f"{path.name}: truncated MAP entry")
-                yield stem, payload
+                yield stem, 54 + offset, payload
                 break
+
+
+def level_maps(data_dir):
+    for stem, _, payload in level_map_entries(data_dir):
+        yield stem, payload
 
 
 def map_range(payload, location_field, size_field):

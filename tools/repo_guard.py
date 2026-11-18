@@ -127,7 +127,9 @@ def main():
     for f in files:
         ext = os.path.splitext(f)[1].lower()
         p = os.path.join(root, f)
-        if ext in GAME:
+        if f.endswith(".script-list.md"):
+            bad.append(f"{f} (generated script listing)")
+        elif ext in GAME:
             bad.append(f"{f} (game file type)")
         elif ext in (".png", ".jpg", ".gif", ".bmp") and not f.startswith(PNG_OK):
             bad.append(f"{f} (image outside examples/ and docs/images/)")
