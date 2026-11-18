@@ -7,7 +7,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 ## At a glance
 
 - **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
-- **What you can do today:** unpack every archive, read level geometry, light maps and scripts, export textures to PNG, check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
+- **What you can do today:** unpack every archive, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md): 2 of 13 answered, 2 mostly, 9 partly; open points include movie pixels, most item effects and save contents. Some need a [running game](docs/NEEDS_A_RUNNING_GAME.md).
 - **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md)).
@@ -38,13 +38,13 @@ The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
 - `cdcache.wsx`, a large cache the game writes when it runs. The three cache texture checks report SKIP if it is missing.
 
-`LOCAL.WSX` and `locallng.wsx` in the game folder are not used.
+The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are not read by the tools (the copies in `DAT/` are).
 
 ```bash
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 12 checks, ends with ALL 12 CHECKS PASSED
+python3 tools/check_all.py                  # 12 checks, ends with ALL 12 CHECKS PASSED (or 9 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```

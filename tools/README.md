@@ -12,13 +12,13 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 12 CHECKS PASSED` |
+| `check_all.py` | all checks below | prints each line, then `ALL 12 CHECKS PASSED`, or `9 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header. |
 | `lol3_level_schematic.py` | a level archive's MAP entry | projects surface edges into an overhead SVG (lines only). Give a level stem and `--out` (inside the repository only `docs/images/` or `examples/`); `--check` regenerates `docs/images/qwod0-schematic.svg` and compares it byte for byte. |
 | `lol3_level_report.py` | the 18 level archives and their sound sidecars | with `--out DIR` writes the sheets (the repository's are in `docs/levels/`); checks the four named entries per level, the MAP section-1 rule, the surface and waypoint joins, that every sidecar entry is WAVE, and that the scripts are 54,940 object records and 4,040 region records with 25 movie indexes and no music or other-level name |
-| `lol3_texture_spans.py` | the game-written `cdcache.wsx` in the game folder | every row-span texture record consumes exactly (854 of 854 in our cache); SKIP if the cache is missing |
+| `lol3_texture_spans.py` | the game-written `cdcache.wsx` in the game folder | every row-span texture record consumes exactly its height rows inside its width (854 of 854 in our game-written cache; yours may differ); SKIP if the cache is missing |
 | `lol3_texture_palettes.py` | the same cache | every texture joins one palette source through selector arm 3; prints offsets only; SKIP if the cache is missing |
 | `lol3_texture_png.py` | the same cache | bakes one indexed record with `--offset` and writes a PNG only to `--out`. `--check` decodes all supported records and reports the other classes; SKIP if the cache is missing. |
 | `lol3_script_framing.py` | `LOL3.DAT` and the 18 MAP entries | all script streams frame exactly with the native size table; counts only |

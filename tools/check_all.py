@@ -21,6 +21,7 @@ def main():
         ap.error("give --data or set LOL3_DAT")
     here = os.path.dirname(os.path.abspath(__file__))
     failed = []
+    skipped = []
     for t in TOOLS:
         p = subprocess.run([sys.executable, os.path.join(here, t + ".py"), "--check", "--data", a.data],
                            capture_output=True, text=True)
@@ -28,7 +29,14 @@ def main():
         print(line)
         if p.returncode != 0:
             failed.append(t)
-    print(f"ALL {len(TOOLS)} CHECKS PASSED" if not failed else f"{len(failed)} of {len(TOOLS)} checks FAILED: {', '.join(failed)}")
+        elif "SKIP" in line:
+            skipped.append(t)
+    if failed:
+        print(f"{len(failed)} of {len(TOOLS)} checks FAILED: {', '.join(failed)}")
+    elif skipped:
+        print(f"{len(TOOLS) - len(skipped)} CHECKS PASSED, {len(skipped)} SKIPPED (no game-written cache): {', '.join(skipped)}")
+    else:
+        print(f"ALL {len(TOOLS)} CHECKS PASSED")
     return 0 if not failed else 1
 
 

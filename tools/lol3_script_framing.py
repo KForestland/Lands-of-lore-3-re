@@ -132,7 +132,7 @@ def main():
             if metrics != EXPECTED:
                 raise ValueError(f"retail corpus totals {metrics} differ from {EXPECTED}")
             print(f"CHECK script_framing: {maps} MAPs, {total_bytes:,} bytes, {refs:,} index entries on "
-                  f"{records:,} boundaries, {opcodes[GROUP_HEADER]:,} group headers, {len(opcodes)} opcodes")
+                  f"{records:,} boundaries, {opcodes[GROUP_HEADER]:,} group headers, {len(opcodes)} of 39 opcodes occur")
         else:
             for opcode, size in sizes.items():
                 print(f"0x{opcode:02X}: {size} bytes, {opcodes[opcode]:,} occurrences")

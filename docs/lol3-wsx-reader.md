@@ -1,7 +1,7 @@
 # Native WSX archive and cache reader
 
 Addresses are English retail `LOL3.DAT` PE32 VAs. Subtract `0x400C00`
-for an instruction's file offset. See the [PE identification](lol3-lmf-reader.md).
+for an instruction's file offset (and `0x401800` for a data address). See the [PE identification](lol3-lmf-reader.md).
 
 ## WSX directory
 

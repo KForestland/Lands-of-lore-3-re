@@ -14,11 +14,10 @@
 | `0x028E` / `0x828E` | Flags of the row-span texture records decoded on the [texture page](formats/textures.md). |
 | QWOD0, SWOD4 | Two level archives used as reference samples for byte-pattern statistics. |
 | Byte-pattern label | A name for a recurring byte sequence found by statistics, without a known game meaning (Q8). |
-| `LOL3.DAT`, `LOL3.EXE` | `LOL3.DAT` is the game program (a 1.6 MB Windows PE file); addresses in the pages are its virtual addresses (VA) unless a file offset is named, and the pages give the VA-to-file conversion. `LOL3.EXE` is a 77 KB launcher. |
+| `LOL3.DAT`, `LOL3.EXE` | `LOL3.DAT` is the game program (a 1.6 MB Windows PE file); addresses in the pages are its virtual addresses (VA) unless a file offset is named, convert with VA − 0x400C00 for code (`.text`) and VA − 0x401800 for data (`.rdata`/`.data`). `LOL3.EXE` is a 77 KB launcher. |
 | Witness | A concrete sample (a record, file or capture) used to test a claim. |
 | Sidecar | The `<STEM>S.WSX` archive next to a level archive; it holds the level's sounds. |
 | `.TE_` | The name under which a level's texture pack is stored in its WSX (`.tex` with the last letter replaced, `0x4E45D1–0x4E463A`). |
-| table38 | The header shared by the MAP and ODF entries: dword 38, then 38 dword fields. |
 | LZO1X | A standard fast compressor; the game calls its decoder at `0x4ECDB0`. |
 | MIX | Westwood's archive format in Lands of Lore II; WSX uses the same layout ([series page](series-formats.md)). |
 | Arm (palette selector) | One branch of the texture palette selector `0x44B6E0`; the cache textures all use arm 3 ([palette sources](lol3-texture-palette-sources.md)). |
@@ -35,5 +34,4 @@
 | LCW | Westwood's byte-oriented compression ("format 80"), used inside VQA frames ([series formats](series-formats.md)). |
 | VQA | Westwood's vector-quantized movie format ([VQA](formats/vqa.md)). |
 | Miles | The Miles Sound System, the audio library the program imports ([audio](formats/audio.md)). |
-| Arm 3 | Palette-selector arm 3 (`0x44B6E0`), the one all cache textures use. |
 | Witness family | A group of byte samples from the older statistics pages that share one pattern ([history](lol3-semantic-phase.md)). |

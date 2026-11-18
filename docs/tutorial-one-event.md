@@ -1,10 +1,10 @@
 # Follow one region event in Lands of Lore III
 
 This example follows a change to the floor when the player enters
-surface 2833 in KVOLC with the entry condition described below. The
+surface 2833 in KVOLC with the entry condition described below.
 A surface is a row of the [MAP surface table](lol3-map-odf-readers.md#map-sections-1-and-2);
 its event records and commands sit in separate [MAP ranges](lol3-script-events.md#two-event-pools). The steps use the
-original `KVOLC.WSX` and the [English retail PE](lol3-lmf-reader.md).
+original `KVOLC.WSX` (stored as `kvolc.wsx`; archive names are case-insensitive in the game but not on Linux) and the English retail `LOL3.DAT` ([address conversion](GLOSSARY.md)). The script listing calls a surface a "region"; both mean the same 56-byte row.
 
 ## Entering the surface
 
@@ -56,7 +56,7 @@ entry runs and the movement checks allow completion. The
 [opcode table](lol3-script-opcodes.md) identifies the geometry handler.
 
 See the [KVOLC script summary](levels/notes/KVOLC.md), or run the
-[script listing tool](lol3-script-opcodes.md)
+[script listing tool](../tools/README.md)
 on your own files. The offsets above identify the record and group.
 
 ```sh
