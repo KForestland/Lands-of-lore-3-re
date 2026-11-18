@@ -31,6 +31,14 @@ Field 21 counts 11,331 surface rows in section 2 ([native readers](../lol3-map-o
 
 `PWOD3S.WSX` holds 92 entries: 92 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
 
+## Scripts
+
+The object stream has 1,788 records and the region stream has 55 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/PWOD3.md) gives the same record counts with the event pools.
+
+Opcode 0x15 byte +4 names `mfrozen` (index 0, 1 command); `mruloi` (index 3, 1 command); `mvolc` (index 5, 1 command); `mshatter` (index 12, 1 command); `mtent` (index 13, 1 command); `munder` (index 14, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
+No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.
+No framed command contains another level stem, in either case, or the hash of that level's MAP name. So no exit in these two streams names its target level by stem or MAP hash; an exit by numeric index or another path is not ruled out.
+
 ## Related notes
 
 - [Script summary](notes/PWOD3.md) gives trigger and effect counts from the original MAP.

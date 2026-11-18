@@ -8,6 +8,8 @@ the sheet lists, all read from the files:
   - the light map: stored LZO1X groups and light-map members (directory only);
   - the MAP and ODF header fields measured on all levels (docs/formats/map-odf.md);
   - the sound sidecar <STEM>S.WSX: number of RIFF WAVE files and their formats.
+  - object and region script record counts, the movie stems named by opcode 0x15,
+    and whether a music stem or another level name occurs in those commands.
 File roles, ids and counts only; no game text, pictures or sound.
 
   lol3_level_report.py --data DAT --out DIR      # all levels + README.md
@@ -22,9 +24,103 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lol3_cli  # noqa: E402
 from extract_wsx_entries import parse_wsx, wsx_name_hash  # noqa: E402
+from lol3_script_framing import native_sizes  # noqa: E402
+from lol3_script_notes import STREAMS, walk  # noqa: E402
 from walk_lmf_leaves import lmf_groups  # noqa: E402
 
 ROLES = (".LMF", ".MAP", ".ODF", ".TE_")
+DATA_BIAS = 0x401800
+
+
+def c_strings(image, offset, count):
+    out = []
+    for pointer in struct.unpack_from("<%dI" % count, image, offset):
+        at = pointer - DATA_BIAS
+        if pointer == 0 or not (0 <= at < len(image)):
+            raise ValueError("name pointer at file %#x" % offset)
+        end = image.find(b"\x00", at)
+        text = image[at:end]
+        if not text or any(byte < 32 or byte > 126 for byte in text):
+            raise ValueError("name text at file %#x" % at)
+        out.append(text.decode("ascii"))
+    return out
+
+
+def level_path_stems(image):
+    """Stems in the executable's levels\\<stem>\\<stem> list, including aglob."""
+    blob = image[0x147D6C:0x147EE8]
+    names = []
+    at = 0
+    while at < len(blob):
+        if blob[at:at + 7] == b"levels\\":
+            end = blob.find(b"\x00", at)
+            parts = blob[at:end].decode("ascii").split("\\")
+            if len(parts) == 3 and parts[1] == parts[2]:
+                names.append(parts[1])
+            at = end + 1
+        else:
+            at += 1
+    if len(names) != 19:
+        raise ValueError("level path list %s" % len(names))
+    return names
+
+
+def load_script_context(data_dir):
+    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    music = c_strings(image, 0x148180, 40)
+    return {
+        "sizes": native_sizes(image),
+        "movies": c_strings(image, 0x148BD0, 19),
+        "music": [name for name in music if name.isalnum() and name != "None"],
+        "levels": level_path_stems(image),
+    }
+
+
+def script_facts(payload, sizes, stem, movies, music, level_names):
+    walks = {space: walk(payload, 0, space, sizes) for space in STREAMS}
+    named = Counter()
+    second = Counter()
+    music_hit = []
+    level_hit = []
+    hash_hit = []
+    music_hashes = {wsx_name_hash("MUSIC\\%s.aud" % name): name for name in music}
+    level_hashes = {}
+    for name in level_names:
+        if name.upper() == stem:
+            continue
+        level_hashes[wsx_name_hash("LEVELS\\%s\\%s.MAP" % (name, name))] = name
+    for space, (stream, starts, _base, _counts, _events, _aliases) in walks.items():
+        folded = bytes(stream).lower()
+        for name in music:
+            if name.lower().encode("ascii") in folded:
+                music_hit.append((space, name))
+        for name in level_names:
+            if name.upper() == stem:
+                continue
+            if name.lower().encode("ascii") in folded:
+                level_hit.append((space, name))
+        for at in starts:
+            opcode = stream[at]
+            row = bytes(stream[at:at + sizes[opcode]])
+            if opcode == 0x15:
+                named[row[4]] += 1
+                second[row[5]] += 1
+            for index in range(0, len(row) - 3):
+                dword = struct.unpack_from("<I", row, index)[0]
+                if dword in music_hashes:
+                    hash_hit.append(music_hashes[dword])
+                if dword in level_hashes:
+                    hash_hit.append(level_hashes[dword])
+    return {
+        "object": len(walks["object"][1]),
+        "region": len(walks["region"][1]),
+        "movies": named,
+        "second": second,
+        "music_hit": music_hit,
+        "level_hit": level_hit,
+        "hash_hit": hash_hit,
+        "movie_names": movies,
+    }
 
 
 def level_stems(data_dir):
@@ -70,7 +166,7 @@ def geometry_check(data, fields):
                for first, count, _ in struct.iter_unpack("<HBB", data[path_start:path_start + 4 * path_count]))
 
 
-def read_level(stem, main, side):
+def read_level(stem, main, side, ctx):
     p = parse_wsx(main)
     names = {wsx_name_hash(f"LEVELS\\{stem}\\{stem}{r}"): r for r in ROLES}
     rows = []
@@ -106,9 +202,10 @@ def read_level(stem, main, side):
                 sounds[(tag, ch, rate, bits)] += 1
             else:
                 sounds["other"] += 1
+    script = script_facts(blobs[".MAP"], ctx["sizes"], stem, ctx["movies"], ctx["music"], ctx["levels"])
     return dict(stem=stem, main=main.name, size=main.stat().st_size, rows=rows, roles=sorted(blobs),
                 lm=lm, hdr=hdr, geometry_ok=geometry_ok, side=side.name if side else None,
-                side_count=side_count, sounds=sounds)
+                side_count=side_count, sounds=sounds, script=script)
 
 
 def sheet(L):
@@ -146,6 +243,31 @@ def sheet(L):
         lines.append(f"`{L['side']}` holds {L['side_count']} entries: {fmt}.")
     else:
         lines.append("No sidecar archive.")
+    facts = L["script"]
+    lines += ["", "## Scripts", "",
+              f"The object stream has {facts['object']:,} records and the region stream has {facts['region']:,} records. "
+              "Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. "
+              "The [script summary](notes/{s}.md) gives the same record counts with the event pools.".format(s=s),
+              ""]
+    if facts["movies"]:
+        parts = [f"`{facts['movie_names'][index]}` (index {index}, {count} command{'s' if count != 1 else ''})"
+                 for index, count in sorted(facts["movies"].items())]
+        lines.append("Opcode 0x15 byte +4 names " + "; ".join(parts) + ". "
+                     "Byte +5 is 0 on each of these commands. "
+                     "VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads "
+                     "`[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.")
+    else:
+        lines.append("Opcode 0x15 does not occur, so these streams name no movie stem.")
+    if facts["music_hit"] or any(name for name in facts["hash_hit"]):
+        lines.append("A framed command contains a music stem or its aud-name hash. That hit is listed by the check.")
+    else:
+        lines.append("No framed command contains a music stem from the pointer table at file `0x148180`, "
+                     "or the hash of `MUSIC\\<stem>.aud`.")
+    if facts["level_hit"]:
+        lines.append("A framed command contains another level stem.")
+    else:
+        lines.append("No framed command contains another level stem, in either case, or the hash of that level's MAP name. "
+                     "So no exit in these two streams names its target level by stem or MAP hash; an exit by numeric index or another path is not ruled out.")
     lines += ["", "## Related notes", "",
               f"- [Script summary](notes/{s}.md) gives trigger and effect counts from the original MAP.",
               "- [MAP and ODF readers](../lol3-map-odf-readers.md) describe the remaining open fields.",
@@ -156,7 +278,8 @@ def sheet(L):
 def readme(levels):
     lines = ["# Level sheets", "",
              "One sheet per level, written by `tools/lol3_level_report.py --data DAT --out docs/levels` from the original "
-             "archives: named entries, light-map groups, MAP/ODF headers and the sound sidecar. File roles and counts only.", "",
+             "archives: named entries, light-map groups, MAP/ODF headers, the sound sidecar, and the script record counts. "
+             "Each sheet lists the movie stems named by opcode 0x15. The framed commands do not contain a music stem or another level name.", "",
              "The [script summaries](notes/README.md) cover triggers and script groups for each level.", "",
              "| Level | Archive | Entries | Light-map members | MAP size | ODF size | Sounds |", "|---|---|---:|---:|---:|---:|---:|"]
     for L in levels:
@@ -169,8 +292,9 @@ def readme(levels):
 def main():
     ap = lol3_cli.tool_args(__doc__ or "")
     a = ap.parse_args()
+    ctx = load_script_context(a.data)
     stems = level_stems(a.data)
-    levels = [read_level(*s) for s in stems]
+    levels = [read_level(*s, ctx) for s in stems]
     if a.check:
         named = sum(1 for L in levels if L["roles"] == sorted(ROLES))
         snd = Counter()
@@ -178,11 +302,23 @@ def main():
             snd.update(L["sounds"])
         map_ok = sum(1 for L in levels if ".MAP" in L["hdr"] and L["hdr"][".MAP"]["f2"] - L["hdr"][".MAP"]["f1"] == 8 * L["hdr"][".MAP"]["f20"])
         geometry_ok = sum(L["geometry_ok"] for L in levels)
+        objects = sum(L["script"]["object"] for L in levels)
+        regions = sum(L["script"]["region"] for L in levels)
+        movie_commands = sum(sum(L["script"]["movies"].values()) for L in levels)
+        stray = sum(len(L["script"]["music_hit"]) + len(L["script"]["level_hit"]) + len(L["script"]["hash_hit"])
+                    for L in levels)
+        bad_index = any(index >= len(L["script"]["movie_names"]) for L in levels for index in L["script"]["movies"])
+        bad_second = any(value != 0 for L in levels for value in L["script"]["second"])
         print(f"CHECK level_report: {len(levels)} level archives; all four level names (.LMF .MAP .ODF .TE_) found by hash in "
               f"{named}; MAP section-1 rule holds in {map_ok}, surface and waypoint joins in {geometry_ok}; "
               f"{sum(L['lm']['members'] for L in levels):,} light-map members; "
-              f"{sum(snd.values()):,} sidecar sounds, non-WAVE: {snd.get('other', 0)}")
-        return 0 if len(levels) and named == map_ok == geometry_ok == len(levels) and not snd.get("other") else 1
+              f"{sum(snd.values()):,} sidecar sounds, non-WAVE: {snd.get('other', 0)}; "
+              f"scripts {objects} object / {regions} region; opcode 0x15 names {movie_commands} movies; "
+              f"music and other-level names in scripts: {stray}")
+        ok = (len(levels) and named == map_ok == geometry_ok == len(levels) and not snd.get("other")
+              and objects == 54940 and regions == 4040 and movie_commands == 25
+              and stray == 0 and not bad_index and not bad_second)
+        return 0 if ok else 1
     if not a.out:
         ap.print_help(); return 2
     out = Path(a.out)

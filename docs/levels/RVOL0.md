@@ -31,6 +31,14 @@ Field 21 counts 398 surface rows in section 2 ([native readers](../lol3-map-odf-
 
 `RVOL0s.wsx` holds 208 entries: 158 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit), 50 × format 17 (IMA ADPCM, stereo, 22,050 Hz, 4-bit).
 
+## Scripts
+
+The object stream has 194 records and the region stream has 13 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/RVOL0.md) gives the same record counts with the event pools.
+
+Opcode 0x15 does not occur, so these streams name no movie stem.
+No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.
+No framed command contains another level stem, in either case, or the hash of that level's MAP name. So no exit in these two streams names its target level by stem or MAP hash; an exit by numeric index or another path is not ruled out.
+
 ## Related notes
 
 - [Script summary](notes/RVOL0.md) gives trigger and effect counts from the original MAP.

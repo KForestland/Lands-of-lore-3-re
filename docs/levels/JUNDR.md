@@ -31,6 +31,14 @@ Field 21 counts 6,973 surface rows in section 2 ([native readers](../lol3-map-od
 
 `JUNDRs.wsx` holds 292 entries: 292 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
 
+## Scripts
+
+The object stream has 7,766 records and the region stream has 195 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/JUNDR.md) gives the same record counts with the event pools.
+
+Opcode 0x15 byte +4 names `mshard2` (index 10, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
+No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.
+No framed command contains another level stem, in either case, or the hash of that level's MAP name. So no exit in these two streams names its target level by stem or MAP hash; an exit by numeric index or another path is not ruled out.
+
 ## Related notes
 
 - [Script summary](notes/JUNDR.md) gives trigger and effect counts from the original MAP.
