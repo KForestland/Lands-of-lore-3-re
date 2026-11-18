@@ -29,10 +29,69 @@ retains the file name and initializes an 0x800-byte buffer
 | devent.trr | `0x58E4F95` | 5,763 | 74,927 |
 | dtext.trr | `0x58F7444` | 5,763 | 440,376 |
 
-**UNCONFIRMED.** The exact binding from an object interaction or
-dialogue script command to a dialogue record ID remains open.
-The initializer passes the dialogue table's count to its runtime
-object at `0x433D8E–0x433D99`. Trace the calls that obtain a row
-ID from that object, then match the ID to the corresponding original
-`devent` and `dtext` entries. The table layout was checked without
-printing the text.
+## Script identifiers and row lookup
+
+**CONFIRMED.** The object runner's opcode 0x16 takes an
+identifier starting at command +4. On the admitted branch
+`0x448237–0x448287`, it sends that identifier to the sound
+request and then calls `0x4344B0` and `0x4340D0` with it.
+Both readers copy bytes 4–7 from the supplied identifier and
+NUL-terminate the four-character search key
+(`0x4340E3–0x4340F7`, `0x4344C6–0x4344D9`).
+Thus the tag is command bytes +8–+0x0B.
+
+**CONFIRMED.** `0x4340D0` searches the `devent.trr` tags
+by numeric ID (`0x434110–0x434146`), using the
+case-insensitive comparator at `0x51A160–0x51A1AE`. On a
+match it submits the row ID as event type 10 through
+`0x434180` and sends the same ID to `0x455250`
+(`0x434148–0x43416E`). The journal-related sibling
+`0x4344B0` scans `qevent.trr` and looks up the corresponding
+`qtext.trr` row on a match (`0x4344DE–0x434516`).
+The relevant pointers were installed at `0x433D24`,
+`0x433D52` and `0x433D7B`.
+
+**CONFIRMED.** Both `devent.trr` and `qevent.trr` consist of
+five-byte entries with four tag bytes and a trailing zero in the
+listed original archive spans. IDs are unique in each table.
+The dialogue tag table has 5,761 distinct case-folded tags
+for 5,763 IDs. All 5,763 IDs appear in `dtext.trr`. All
+67 `qevent.trr` IDs appear in `qtext.trr`. A case-insensitive
+comparison of command bytes +8–+0x0B against the dialogue
+tag table matches 2,641 of the 2,642 stored opcode-0x16
+records from MAP +0x44/+0x8C. For example,
+`CKEEP.WSX+0xD039F0` joins to dialogue ID 2711.
+The one unmatched record is `HWHIT.WSX+0x111423D`.
+Its source or intent is **UNCONFIRMED**.
+
+**CONFIRMED.** Opcode 0x19, with dword +0xC equal to 5,
+sends u32 +4 as the quest row ID and +8 as the associated
+argument to `0x434560` (`0x4482AC–0x4482C6`).
+The latter queries both quest tables at `0x43457B` and
+`0x434592`. At `BUPP1.WSX+0x18C8D4F` the ID is 61
+and the argument is 5. All 53 object-stream occurrences
+and one region-stream occurrence have +0xC = 5 and valid
+quest IDs in the original `qevent.trr` ID array.
+
+## Text read and transform
+
+**CONFIRMED.** The dialogue display opens `dtext.trr` through
+the streaming reader at `0x454E10` and stores its handle
+at object +0xCD8. It supplies the dialog ID from the parallel
+list to `0x409650` at `0x4547FC–0x45480B`. The renderer
+also calls that reader with the selected ID at
+`0x458777–0x45878C`. The reader scans IDs, reads the
+selected payload and applies the same byte transform as the
+eager reader (`0x409698–0x409712`).
+
+**CONFIRMED.** The transform replaces a matching byte from
+the NUL-terminated table `LOL3.DAT+0x1521B0` with the
+corresponding byte from +0x1521C0. Other bytes pass unchanged
+(`0x5086C2–0x508701`). The total buffer length is passed
+by the caller. No lines are reproduced here.
+
+**UNCONFIRMED.** The HWHIT mismatch, which duplicate dialogue
+tag each interaction selects, and the meaning of every display
+format marker remain open. To settle them, follow the admitted
+opcode-0x16 path for the cited record and capture the four-byte
+query and chosen ID before the `0x409650` read.

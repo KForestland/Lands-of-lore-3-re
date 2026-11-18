@@ -42,7 +42,7 @@ not observed in the 18 MAP ranges.
 | 0x13 | 10 | `0x449905` | 15 | `EWOD1.WSX+0x1894F72` | Fills and submits a hit request using two mask words, magnitude u8 +8 and mode +9 (0x449908 → 0x4E7290). |
 | 0x14 | 10 | `0x448055` | 2,773 | `BUPP1.WSX+0x18C7EF9` | Passes u16 resource ID +4, current object and a pointer to +6 to 0x422C40 (0x44806A–0x44807D). |
 | 0x15 | 6 | `0x447F97` | 25 | `CKEEP.WSX+0xD0546C` | Passes unsigned bytes +4 and +5 to the same indexed function 0x46FA60 called by the map-side arm (0x447F97–0x447FA3). Its full resource effect is **UNCONFIRMED** here. |
-| 0x16 | 18 | `0x4480A4` | 2,642 | `BUPP1.WSX+0x18CA0FD` | Compares the identifier at +4 against active object/queue identifiers in branch-specific paths (0x4480C5–0x448110, 0x44819D–0x448212). Final resource and delivery are **UNCONFIRMED** here. |
+| 0x16 | 18 | `0x4480A4` | 2,642 | `BUPP1.WSX+0x18CA0FD` | Compares the identifier at +4 against active object/queue identifiers in branch-specific paths (0x4480C5–0x448110, 0x44819D–0x448212). The admitted branch uses command +8–+0x0B as a dialogue tag (0x448237–0x448287). See the [native dialogue lookup](lol3-dialogue-dispatch.md). |
 | 0x17 | 6 | `0x447F51` | 80 | `BUPP1.WSX+0x18C7EED` | Writes the low byte of 0x44AA40(0, (u8(+4) << 5) + 31) shifted right five to object +0x31 (0x447F51–0x447F6C). |
 | 0x18 | 10 | `0x448033` | 2 | `BUPP1.WSX+0x18D148A` | Checks flag 4 in byte 0x58C562 and current object 0x5896F4, then normally calls 0x422FA0 with +4/+6. The flag branch enters the continuation of 0x1C (0x448033–0x44809A). |
 | 0x19 | 16 | `0x4482AC` | 53 | `BUPP1.WSX+0x18C8D4F` | Reads three dwords at +4/+8/+0xC. Value 5 at +0xC selects 0x434560, otherwise calls 0x434180 (0x4482AC–0x4482D1). |
