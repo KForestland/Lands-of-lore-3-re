@@ -68,7 +68,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 No game files and no dumps of extracted game media are included; short byte excerpts appear in the documentation as examples. `tools/check_all.py` includes `repo_guard.py`, which fails on:
 - a committed game file, media file or stray image;
 - a file over 300 KB or a generated script listing;
-- a machine path or an assistant name.
+- a machine path, or a word from an optional local word list (`.git/info/private_words`, never tracked).
 
 The release procedure also checks every commit identity (`repo_guard.py --check --release`, see [CONTRIBUTING](CONTRIBUTING.md)).
 
