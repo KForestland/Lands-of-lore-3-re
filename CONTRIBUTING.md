@@ -57,6 +57,13 @@ Good PR shape:
 
 If you are unsure whether something belongs in the public repo, err on the side of keeping it out until the claim and material are cleaned.
 
+## Checks without game files
+
+Run `python3 -m unittest` and `python3 tools/repo_guard.py --check`
+from the repository root. The tests build their own fixtures in memory or
+in a temporary directory. GitHub Actions runs these same commands on
+pushes and pull requests. CI uses the runner's Python (3.12); the minimum version in the README is not tested there.
+
 ## Release procedure (maintainers)
 
 Every commit that reaches a public branch carries the project's noreply identity as author and committer:
@@ -66,5 +73,5 @@ git -c user.name=KForestland -c user.email=261564562+KForestland@users.noreply.g
 ```
 
 1. Contributor work is squash-merged and committed with the identity above.
-2. In a fresh clone of the release branch, with `$LOL3_DAT` set, `python3 tools/check_all.py` must end with `ALL ... CHECKS PASSED`, and `python3 tools/repo_guard.py --check --release` must pass (it also checks every commit identity). Contributors do not need `--release`.
+2. In a fresh clone of the release branch, with `$LOL3_DAT` set, `python3 tools/check_all.py` must end with `ALL ... CHECKS PASSED` and `python3 -m unittest` must pass, and `python3 tools/repo_guard.py --check --release` must pass (it also checks every commit identity). Contributors do not need `--release`.
 3. The tree must be clean after the checks; tools write nothing into the repository.

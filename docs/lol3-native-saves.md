@@ -3,6 +3,8 @@
 VAs refer to the [English retail PE](lol3-lmf-reader.md). The
 witnesses are 47 slots written by the original program, including the autosave: a player's own saves in the game's `SAVEGAME` folder (2024–2026), not shipped game data. Another player's saves reproduce the layout, not these exact counts.
 
+Run [`lol3_save_header.py`](../tools/lol3_save_header.py) on a slot file to list preview, global and level offsets and lengths. It reads the header and writes its report to standard output.
+
 ## Names and entry points
 
 **CONFIRMED.** The manual name constructor at `0x45B230` sets
