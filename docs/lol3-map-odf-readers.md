@@ -88,16 +88,47 @@ path ranges all fit their waypoint table. The first two
 BUPP1 path rows at `BUPP1.WSX+0x181E8E0, +0x181E8E4`
 are (0, 4, 1) and (4, 11, 0).
 
-**UNCONFIRMED.** Waypoint byte +6 and the consumers of the
-26-byte name slots remain open. The low byte of the last
-waypoint word has 15 values in the original corpus. None of
-the six direct references to world +0x34 established a use for
-it. The space after the four-byte path records partitions into
-36 31-byte slots across the 18 MAPs, each with an early NUL.
-For example, they start at `BUPP1.WSX+0x181E90C` and
-end at field 1. These remaining bytes may be editor metadata.
-A native reader starting at each of those spans, or a file
-writer that identifies their serialized fields, would settle them.
+**CONFIRMED (values). UNCONFIRMED (meaning).** Waypoint byte
++6 takes 15 values across the 2,384 rows: 0 (114), 1 (57),
+2 (1,957), 4 (3), 6 (3), 10 (2), 12 (8), 15 (180), 23 (2),
+31 (3), 37 (1), 46 (27), 78 (4), 125 (20) and 255 (3). The
+largest pair with byte +7 is +6 = 2 and +7 = 4 (1,757 rows).
+Six levels use only the value 2: CKEEP, ISHAT, JUNDR, MLOW2,
+OLOW3 and QWOD0. The save record at `0x436077–0x43608C`
+copies the table pointer and a byte length of count × 8, so
+the saved image includes this byte. The other five absolute
+uses of `0x5701A4` are `0x4B4D7E` (s16 +0, s16 +2, u16 +4),
+`0x4B5B1E` (u16 +4, then s16 +0 and s16 +2), `0x4B8A38`
+(forms the row address and returns), `0x4BCAD1` (s16 +0 and
+s16 +2) and `0x4FD6C8` (u16 +4 and byte +7). A read of byte
++6 from one of those rows would name the field.
+
+**CONFIRMED (on-disk text). UNCONFIRMED (reader).** The 2,384
+name slots are 2,330 NUL-padded printable strings of length
+3–25, 39 copies of the eight characters `WayPoint` followed by
+`0xCD` through byte 24 and a final 0, and 15 copies of one
+26-byte record: `BadName`, a NUL, u32 0, three u32 values of 1
+and a u16 0. The `WayPoint` slots are BUPP1 1, DLOW1 1, EWOD1 3,
+FLAIR 2, HWHIT 1, KVOLC 21, LUPP2 1, NWOD2 3, PWOD3 3 and
+SWOD4 3. One starts at `BUPP1.WSX+0x181EEA2`. The `BadName`
+records are BUPP1 index 35 at `BUPP1.WSX+0x181E940`, FLAIR
+indexes 1 and 3, and LUPP2 indexes 3, 5–14 and 35. The retail
+executable image contains none of the byte strings `WayPoint`,
+`BadName` or `Walk of Shame`.
+
+The loader's waypoint read is 8 × the +0xC4 count and its path
+read is 4 × the +0xD8 count, so both label spans sit outside
+those reads. The 31-byte slots, 36 in all, are printable C
+strings. Thirty-two are filled out with `0xCD`. `Vic` and `Sam`,
+each in BUPP1 and again in LUPP2, have one extra NUL and then
+`0xCD`. The first label is `Boris` at `BUPP1.WSX+0x181E90C`.
+The labels are Path (13), Boris, Towel, Vic, Thom and Sam
+(2 each), and one each of robbery, Guard1, main path,
+guard path 2, Pardon Path, Cookie, Chloie, Sydney,
+scarletts path, Dancers, LizardRun, Drar path and Walk of Shame.
+CKEEP, GRULO, ISHAT, MLOW2, OLOW3 and QWOD0 have a path count
+of zero. A seek to header +0xC8 + 8 × count, or to header
++0xDC + 4 × count, would identify a reader.
 
 ## MAP sections 1 and 2
 
@@ -126,12 +157,59 @@ range. The remaining 33,730 have count 0 and index `0xFFFF`.
 For example, `CKEEP.WSX+0xCCF97C` starts the first
 surface with vertices 334, 376, 377 and 335. Its section-1
 span starts at 0 with count 2, at `CKEEP.WSX+0xCC5B2C`.
-The remaining section-1 fields and the additional 0–304 bytes
-between the surface table end and field 16 are **UNCONFIRMED**.
-The first CKEEP byte of that span is `CKEEP.WSX+0xD0368C`.
-The measured spans are multiples of eight. A load or seek
-between the 56-byte surface read and the field-16 reader
-would identify their consumer.
+**CONFIRMED (extent). UNCONFIRMED (consumer).** Between the
+56-byte surface table and header +0x44 the archives hold
+1,784 bytes in 223 groups of eight. The lengths are BUPP1 248,
+CKEEP 104, DLOW1 304, EWOD1 56, FLAIR 80, HWHIT 152, JUNDR 16,
+LUPP2 168, MLOW2 304, NWOD2 40, OLOW3 272 and PWOD3 40. GRULO,
+ISHAT, KVOLC, QWOD0, RVOL0 and SWOD4 have length 0, so on those
+six the start equals header +0x44. On the twelve nonempty
+levels no header dword equals the start. The first CKEEP byte
+is `CKEEP.WSX+0xD0368C`. Each group is four little-endian u16,
+and every word is below that level's vertex count and below its
+surface count. Read as surface indexes, 113 of the 223 groups
+share no vertex between cyclic neighbors. The loader calls the
+seek helper sixteen times in `0x43E884–0x43EC57`, and each call
+pushes one stored header dword. The call at `0x43EA72–0x43EA79`
+pushes `[esp+0x58]`. By the same three-push rule as the waypoint
+seek at `0x43EBD9` (`[esp+0xDC]` is header +0xC8), that dword is
+header +0x44, the first byte after this span. A seek to field 2
++ 56 × field 21 would identify the consumer.
+
+**CONFIRMED (each byte is read or written). UNCONFIRMED (what
+the bits mean).** The 167,942 section-1 rows are eight bytes,
+and the loader copies all eight (`0x43EB7C–0x43EBA1`). Word +0
+ranges from 1 to 65535 (935 distinct values; 213 are `0xFFFF`;
+the value 0 does not occur). 165,745 of those words are below
+both the vertex count and the surface count, and 1,984 are at
+or above both. Bytes +2 and +3 are written and copied as
+separate bytes. Taken together as a little-endian word they
+range from 0 to 65535. Bytes +4 and +5, taken the same way,
+range from 10 to 8191. Byte +4 has 161 values and is 128 on
+162,397 rows. Byte +5 masked with `0x1F` takes every value
+0–31; the counts for 4, 5, 6 and 7 are 26,616, 32,254, 33,511
+and 27,297. Byte +6 has 21 values; 16, 8 and 0 account for
+83,014, 74,591 and 6,811 rows. Byte +7 has 128 values and is
+0 on 160,071 rows.
+
+| Bytes | Native use |
+|---|---|
+| +0, +1 | Word. Written from the caller's word +6 at `0x4E6425–0x4E6431`. Compared with zero at `0x4FFD69`. Sign-extended and used as an index at `0x4FFE05` and again at `0x4EFC01`; a negative index reads the table at `0x5701DC`. |
+| +2 | Added or replaced from the caller's byte +7 (`0x4E6474`, `0x4E64CB`). Copied to the caller's object +0x30 at `0x4FFD91`. |
+| +3 | Added or replaced the same way (`0x4E6493`, `0x4E64B2`). Copied to object +0x31 at `0x4FFD97`. |
+| +4 | Replaced from the caller's byte +7 by switch arms 0 and 15 (`0x4E65CE`). Copied to object +0x40 at `0x4FFD9D`. |
+| +5 | Low five bits select a row (`0x4A74E0–0x4A74E3`, `0x4EFE2C–0x4EFE32`). Bits `0x20`, `0x40` and `0x10` are tested at `0x4FFD61`, `0x4FFD89` and `0x50071A`. Switch arms 17–19 set bit `0x20` or `0x40`, clear bit `0x20`, or toggle bit `0x20` (`0x4E6600`, `0x4E6611`, `0x4E6625`). Every arm of the switch ORs in bit `0x40`, and `0x4FFE00` clears that bit after the copy. |
+| +6 | Switch arms 5–13 set, clear or toggle bits 2, `0x20` and `0x40` (`0x4E64E4–0x4E65CB`). The copy at `0x4FFDA3–0x4FFDED` tests bits `0x10`, 3, `0x20`, `0x40`, 2 and 0. `0x4FFD4B` sets ebx to 1, and `0x4FFDDF` ORs that 1 into the object word +0x3E when bit 2 is set. Bit `0x80` is passed to `0x4FFFB0` at `0x50072A–0x500737`. |
+| +7 | Replaced from the caller's byte +7 by switch arms 14 and 16 (`0x4E65E7`). Zero-extended, shifted left 14 and ORed into object +0x3E at `0x4FFDF1–0x4FFDF9`. |
+
+The switch is `0x4E6450`. Its index is the caller's byte +6,
+its operand is byte +7, and the row index is the caller's
+word +4. The 20 targets are the dwords at `0x4E663C`. An index
+above 19 returns 1 at `0x4E6631` and leaves the row unchanged.
+The export at `0x438B80` reports the same table with stride 8.
+`lol3_map_spans.py --check` re-counts the rows, the byte
+histograms, the name classes, the path labels and the gap
+lengths above.
 
 ## ODF header and primary tables
 

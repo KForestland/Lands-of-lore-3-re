@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 TOOLS = ["repo_guard", "extract_wsx_entries", "walk_lmf_leaves", "lol3_texture_spans", "lol3_texture_palettes", "lol3_texture_png",
-         "lol3_script_framing", "lol3_texture_archive", "lol3_script_notes", "lol3_level_report", "lol3_media_check", "lol3_level_schematic"]
+         "lol3_script_framing", "lol3_texture_archive", "lol3_script_notes", "lol3_level_report", "lol3_media_check", "lol3_level_schematic", "lol3_map_spans"]
 
 
 def main():

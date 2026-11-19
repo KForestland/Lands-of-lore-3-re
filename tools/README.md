@@ -12,7 +12,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 12 CHECKS PASSED`, or `9 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 13 CHECKS PASSED`, or `10 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header. |
@@ -25,6 +25,7 @@ Run examples outside the repository.
 | `lol3_texture_archive.py` | the 18 `.TE_` entries in the level archives | every LZO1X-wrapped bank frames (465 chunks); with `--decode` (liblzo2) expands each, checks the palette joins (692 / 4,635 / 44,357 = 49,684 descriptors) and compares the 4 cached copies, SKIPPED if the cache is missing; counts only (`check_all` runs it without `--decode`) |
 | `lol3_script_notes.py` | `LOL3.DAT` and the 18 MAP entries | `--check` re-derives the tracked summaries; `--out DIR` (outside the repository) writes the full per-record listings for your own copy; `--summary DIR` writes the summaries |
 | `lol3_media_check.py` | the `MOVIES1..4`, `MUSIC1..4` and level sound archives, and `LOL3.DAT` | the 19 named movies and their frame index, the 38 music tracks and 6,696 level sounds; counts only |
+| `lol3_map_spans.py` | `LOL3.DAT` and the 18 MAP entries | waypoint byte +6, the 2,330/39/15 name slots, the 36 path labels, the 1,784 bytes before field 16 and the 167,942 section-1 rows |
 | `lol3_save_header.py` | one save slot you name (a player save, not a game file) | prints the preview, 61 global and 18 level offsets and lengths as JSON; writes nothing; no `--check` |
 
 `lol3_cli.py` is a shared library for the options above, not a command.

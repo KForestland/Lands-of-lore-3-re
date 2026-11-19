@@ -2,7 +2,7 @@
 
 **As of:** 2026-11-18. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. This table replaces the earlier "closure" wording; the older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (12 checks; all pass on the English GOG copy).
+Run the checks: `python3 tools/check_all.py --data <DAT>` (13 checks; all pass on the English GOG copy).
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
@@ -12,7 +12,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (12 checks; all pass o
 |---|---|---|---|
 | WSX archives | [format page](formats/wsx.md), [wsx-extraction](wsx-extraction.md) (history), [container inventory](container-inventory.md) (history) | `extract_wsx_entries`: 51 of 52 `DAT/*.WSX` parse (count, 12-byte records, payload sizes sum to the file), 7,549 entries and 76 native names match their keys. Both cache copies fail the ordinary exact-size check (`check_all` tests the shipped `DAT/` copy). The game-folder copy, written by the game when it runs, has a separate directory of 40 allocation rows | Q1 |
 | LMF light maps | [format page](formats/lmf.md), [native reader](lol3-lmf-reader.md) | 18 LMF entries, 5,256 stored LZO1X groups, 424,288 decoded member lengths checked with `--decode` | Q3 |
-| MAP and ODF level files | [format page](formats/map-odf.md), [native readers](lol3-map-odf-readers.md), [map-format](map-format.md) (history), [level catalog notes](level-catalog-notes.md) (history), [level file types](level-file-types.md) (history) | measured: 18 MAP and 18 ODF entries; MAP section 1 = 8 × field 20 in all 18. `lol3_level_report` also checks the surface and waypoint joins (118,951 surfaces, 2,384 waypoints, 36 paths). | Q4, Q5 |
+| MAP and ODF level files | [format page](formats/map-odf.md), [native readers](lol3-map-odf-readers.md), [map-format](map-format.md) (history), [level catalog notes](level-catalog-notes.md) (history), [level file types](level-file-types.md) (history) | measured: 18 MAP and 18 ODF entries; MAP section 1 = 8 × field 20 in all 18. `lol3_level_report` checks the surface and waypoint joins (118,951 surfaces, 2,384 waypoints, 36 paths). `lol3_map_spans` re-counts waypoint byte +6, the name classes, the path labels, the 1,784 bytes before field 16 and the 167,942 section-1 rows. | Q4 mostly, Q5 |
 | Textures | [Texture formats](formats/textures.md), [texture bake and PNG](lol3-texture-bake.md#cache-record-to-png), [tex-format](tex-format.md) (history), [texture 028E evidence](texture-028e-evidence.md) (history) | The census of the game-folder `cdcache.wsx` (written by the game when it runs) joins all 15,118 mip records to arm-3 palettes. The PNG tool decodes 10,669 and verifies 4,429 records as SMD frame references and reports the 20 unconfirmed ones by flag. All 18 level wrappers frame. Optional LZO expansion checks all 49,684 palette joins and matches the four installed banks. | Q1, Q6, Q7 |
 | Byte-pattern labels (QWOD0, SWOD4) | [structural phase](lol3-structural-phase.md) (history), [semantic phase](lol3-semantic-phase.md) (history), [witness map](../evidence/lol3-witness-map.md) | — | Q8 |
 | Level sheets | [levels/](levels/README.md) | `lol3_level_report`: 18 level archives, each with its four named entries (.LMF .MAP .ODF .TE_ by hash); 6,696 sidecar sounds, all RIFF WAVE format 17 (IMA ADPCM) | Q4, Q10 |

@@ -44,7 +44,7 @@ The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are no
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 12 checks, ends with ALL 12 CHECKS PASSED (or 9 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py                  # 13 checks, ends with ALL 13 CHECKS PASSED (or 10 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```
@@ -65,7 +65,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 |------|-------|
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
-| MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers; the rest open (Q4, Q5) |
+| MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers. Section-1 bytes each have a reader; waypoint byte +6, the label spans and the bytes before field 16 are measured (Q4 mostly, Q5) |
 | Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values need further work. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
 | Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced; under Wine on a 16-bit display the intro converts 5-5-5 codebook words to 5-6-5 (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
