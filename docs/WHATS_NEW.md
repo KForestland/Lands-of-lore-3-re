@@ -4,6 +4,12 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Numbers at a glance.** Tables generated from the original files, with a check that the page equals the tool output ([numbers](NUMBERS.md)).
+- **How a level is put together.** The pieces a level needs, the file that holds each and the order the program loads them ([level assembly](HOW_A_LEVEL_IS_PUT_TOGETHER.md)).
+- **Tour.** One level followed end to end: its picture, sheet, exits and numbers, with the command behind each part ([tour](TOUR.md)).
+- **Across the three games.** How each game gates progress and scales its numbers, each fact linked to its evidence ([progress and numbers](series-progress-and-numbers.md)).
+- **Page index.** `docs/index.json` lists every page, the questions it answers and the tools it cites; `tools/doc_index.py --check` keeps it current ([index](index.json)).
+- **Tool options.** One name for the data folder, the check and the output in every tool; old spellings still work as aliases ([tools](../tools/README.md)).
 - **Round trip on one page.** [ROUND_TRIP](ROUND_TRIP.md) lists each writer, what it rebuilds and whether the result is byte-identical or decode-identical. `lol3_lzo_writer.py --check` now finds the packed SMD frames from the 18 level texture banks and the two shared banks in `LOCAL.WSX`: 15,990 distinct frames from 33,068 packed references, without the game-written cache. The cache's 4,428 packed references, when present, reach no further frame.
 - **Archive and LZO writers.** `lol3_wsx_writer.py --check` rebuilds the 51 DAT archives and the 2 loose WSX beside `DAT` (7,614 rows) from their parsed rows, byte for byte. `lol3_lzo_writer.py --check` compresses the 5,256 light-map groups, 465 texture blocks and the SMD frames the game-written cache points at again with liblzo2; the packed bytes differ from the original, the decoded bytes are identical ([WSX](formats/wsx.md#writing), [LMF](formats/lmf.md#writing)).
 - **Save writer.** `lol3_save_writer.py --check` reads each game-written slot into fields and writes it again, byte for byte: 47 slots, 416 level blocks and 59,654 stored LZO packets in our copy. The packets are copied, not compressed again, so it checks the slot layout and (with liblzo2) that each packet decodes, not a compressor ([native saves](lol3-native-saves.md#level-blocks-and-chunking)).

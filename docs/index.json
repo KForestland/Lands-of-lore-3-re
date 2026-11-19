@@ -417,6 +417,7 @@
       ],
       "tools": [
         "tools/check_all.py",
+        "tools/doc_index.py",
         "tools/doc_links.py",
         "tools/lol3_cache_seed.py",
         "tools/lol3_claimed_edges.py",
