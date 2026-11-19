@@ -170,7 +170,7 @@ Selectors 7 and 11 in the turn and forward slots are byte-identical
 to the no-action slot. Those two controls and the four table entries
 account for all changes in selectors 7 and 11 in the quick-slot trial.
 
-**UNCONFIRMED, pickup from the world.** Left clicks on the bridge
+**CONFIRMED, earlier pickup setup.** Left clicks on the bridge
 while holding that item did not create a loose item to pick up again.
 For example, the crouch-and-click slot `f0289d9cc607` still has the
 same cursor reference at `+0x21CA5`. A right click released the
@@ -207,8 +207,7 @@ the same world pointer already recorded at player +0x132
 `0x40BA1F`, then passes operation 0x13 to the item's handler
 at `0x40BA51`.
 
-**CONFIRMED stores; the save differences are UNCONFIRMED until a save
-pair shows them.** For a successful, ordinary
+**CONFIRMED stores.** For a successful, ordinary
 nonstacked pickup with a free player row and empty cursor,
 let `i` be the outgoing world row and `j` the allocated
 player row. The following offsets are relative to the section's
@@ -236,15 +235,39 @@ adjustment and compression calls are at `0x437FC0`, `0x437FDC`
 and `0x437FEF`. `tools/lol3_native_checks.py --data DAT --check`
 verifies the vtable, writer selection, calls and store anchors.
 
-**UNCONFIRMED, native slot comparison.** The predicted differences in
-the table above stay unconfirmed, and other stores on the path (for
-example `[0x5D500E]` at `0x40B874`, `[0x5D5012]`/`[0x58613C]` at
-`0x4D75DA`/`0x4D75EC`) may change too. This static pass followed
-the original call and writers. The previous trials exercised an
-inventory transfer and a cursor release. A matched pickup needs a
-save containing a reachable, nonstacked world item, an empty cursor
-and an available player row. In the pickup trial, record both row
-indices at `0x49EDA0`, the world flag at `0x4D75CE`, the destination
-row before and after `0x40BA51`, and the cursor at `0x4224C6`.
-Save immediately, then apply the decoded-offset comparison above
-against the slot saved after an otherwise identical load.
+### Controlled floor pickup in BUPP1
+
+**CONFIRMED.** The original English retail game restored a copied
+level-2 player slot (SHA-256 prefix `802f83893758`) with a private
+16-bit Xvfb display and a PulseAudio null sink. The progress sound
+returned 0 at `0x46F59F` and the restore reached `0x43703E`.
+In an outdoor area, an item was moved from the first quick slot
+to the cursor and placed on the floor with the original left click
+while looking down. F10 then wrote the floor control with an empty
+cursor. One left click on the visible loose item reached
+`0x4D83A0`; F10 saved the result at `0x43766F`.
+
+The live world pool had 1,216 rows of 72 bytes. At `0x49EDA0`,
+row 489 (`0x09D03F20`) supplied definition pointer `0x09A96E59`
+and three zero dwords from +0x34. The allocator returned player
+row 4 (`0x01BF5E18`), initially zero. After the click, its first
+dword held the same definition pointer. At `0x4D75CE` world +0x1C
+was about to set bit 0x80. By the following save the flags were
+`0x00100082` and the world vtable was `0x539AC0`, while
+`[0x585488]` held the player row. This isolates the world-to-player
+copy, retirement and cursor handoff of one definition.
+
+| Section | Control / picked stored span starts | Decoded difference |
+|---|---|---|
+| Global 2 | `+0x191FA` / `+0x18FFF` | Only +0x40..+0x43 change, from zero to `59 6E A9 09` in player row 4. |
+| Global 3 | `+0x194D7` / `+0x192DD` | Only +0 changes, `0xEF` → `0xFF` in the XOR data. Mask 0x10 corresponds to row 4. |
+| Global 7 | `+0x1980A` / `+0x19610` | Raw +0x44 changes 0 → `0x01BF5E18` and +0x64 changes 0 → 1. Also observed +0x24 `0x17` → `0x16` and +0x50 0 → 1. |
+| Global 11 | `+0x19A99` / `+0x1989F` | All 80 quick-slot bytes agree. The item is on the cursor after pickup. |
+| Level 25 | `+0x408CA` / `+0x40701` | All 13 changed bytes are in world row 489 at decoded +0x8988. At row +0 the changed XOR dword is `0x00079F40`, equal to `0x540580 XOR 0x539AC0`. Row +0x1C changes `0x03` → `0x83` in XOR data. Bytes in the two link dwords +0x10/+0x14 and the flags at +0x1E also change. |
+
+The native slots have SHA-256 prefixes `64b5d9ec325a` and
+`2acfada073b0`. Slot +0x498 is 2 in both, and the first position
+group `+0x49C..+0x4A9` agrees. The second position group changes.
+The decoded values for selectors 2, 3 and 25 are XOR data.
+Retirement, allocation and cursor values agree with the predicted
+changes above. The new-game route was not needed for this comparison.

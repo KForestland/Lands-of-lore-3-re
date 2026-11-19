@@ -130,14 +130,11 @@ moved its reference from global selector 11 +0 to selector 7 +0x44,
 leaving both position groups unchanged.
 [Autosave offsets, hashes and writer traces](lol3-native-saves.md#controlled-saves-with-a-null-sink)
 
-**UNCONFIRMED, pickup from the world.** Attempts to drop the held item
-on the level-5 bridge left the same cursor reference or produced no
-visible loose item. The new-game route to a tutorial item stopped at
-the video-memory error. Start from an original slot within reach of
-one visible loose item, with space in the player's inventory. Save a
-no-action control and one pickup from the same source. At `0x4378C0`
-and `0x437F79`, compare the old and new item by definition identity.
-A removed world-pool row and a new reference to that identity would
-isolate the pickup. Compare the decoded sections after accounting
-for the base XOR and pointer relocations.
-[Measured controls and remaining pickup procedure](lol3-native-saves.md#controlled-saves-with-a-null-sink)
+**ANSWERED for a controlled floor pickup, CONFIRMED.** A copied
+level-2 slot restored at `0x43703E` with the null sink. An item was
+placed on the ground using normal input, then picked up with an
+empty-hand left click. The native transfer at `0x49EDA0` copied
+world row 489 to player row 4. Native saves before and after agree
+with the predicted retirement mask, definition dword, allocation
+bit and cursor transfer. The first position group agrees.
+[Live values and slot offsets](lol3-native-saves.md#controlled-floor-pickup-in-bupp1)
