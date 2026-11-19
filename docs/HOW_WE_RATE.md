@@ -15,12 +15,14 @@ does **not** mean that every entry inside is decoded or understood; the
 [STATUS](STATUS.md) table says how far each format is read. Files the game
 writes while it runs (the full texture cache sits in the game folder,
 next to `DAT`) are not part of this count. The shipped compact
-`cdcache.wsx` does not parse as an ordinary archive. It counts when
-`tools/lol3_cache_seed.py` shows that a 114-byte header plus 51 copies of
-one 64,000-byte block fill the file. What writes that block stays open
-(Q1). A `.PHT` file counts when `tools/lol3_pht.py` shows that every byte
-is the shared cycle of 0x1010000 bytes. What the game does with the four
-files stays open.
+`cdcache.wsx` does not parse as an ordinary archive, and the four `.PHT`
+files have no known layout. These five files are **not** counted as read.
+They are listed separately as repeated blocks: `tools/lol3_cache_seed.py`
+shows the pinned 114-byte header plus 51 copies of one pinned
+64,000-byte block fill `cdcache.wsx`, and `tools/lol3_pht.py` shows every
+byte of each `.PHT` file is the pinned shared cycle of 0x1010000 bytes.
+What those bytes mean and what reads or writes them stays open (Q1 for
+the cache).
 
 **Rules traced.** How many statements on the current pages carry the
 evidence label CONFIRMED (backed by a program address or a file offset

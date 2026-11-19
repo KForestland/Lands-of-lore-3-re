@@ -4,7 +4,7 @@ Newest first. One line per answered question, new tool or visible change. Detail
 
 ## 19 November 2026
 
-- **Files read to the last byte.** `lol3_pht.py` walks the four `.PHT` files as one repeating cycle, and the rating counts the shipped cache body. What the game does with either stays open ([PHT](formats/pht.md), Q1).
+- **Repeated blocks shown.** `lol3_pht.py` shows the four `.PHT` files are prefixes of one repeating cycle, and `lol3_cache_seed.py` shows the shipped cache body is one block repeated; these five files are listed separately in the rating, not counted as read. What the bytes mean and what reads them stays open ([PHT](formats/pht.md), Q1).
 - **Counted rating.** The README and [STATUS](STATUS.md) show four counted lines instead of a percentage; [how we rate](HOW_WE_RATE.md) explains them.
 - **Script commands (Q11, now mostly answered).** Each object command is traced for every kind of object it can target; floors and ceilings that move under script control are described ([opcodes](lol3-script-opcodes.md)).
 - **Light maps (Q3, now mostly answered).** One flag marks smooth per-vertex lighting, and a colour field is identified ([LMF reader](lol3-lmf-reader.md)).

@@ -4,11 +4,14 @@ import tempfile
 import unittest
 import zlib
 from ctypes.util import find_library
+from hashlib import sha256
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from extract_wsx_entries import parse_wsx, wsx_name_hash
+from lol3_cache_seed import FILL_MARKER, HEADER, body_covers
+from lol3_pht import cycle_covers, pht_covers
 from lol3_save_header import HEADER_SIZE, parse_header
 from lol3_script_framing import frame
 from lol3_texture_archive import chunks
@@ -80,3 +83,39 @@ class ReaderTests(unittest.TestCase):
         length, tag = struct.unpack_from(">I4s", png, 33)
         self.assertEqual(tag, b"IDAT")
         self.assertEqual(zlib.decompress(png[41:41 + length]), b"\0" + expected)
+
+    def test_pht_cycle_rejects_a_corrupt_later_byte(self):
+        period = 16
+        block = bytes(range(0x30, 0x30 + period))
+        stream = block * 3 + block[:7]
+        pin = sha256(block).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "Small.PHT"
+            path.write_bytes(stream)
+            self.assertTrue(cycle_covers(path, period, pin))
+            self.assertTrue(pht_covers(path, {"small.pht": len(stream)}, period, pin))
+            self.assertFalse(pht_covers(path, {"small.pht": len(stream) + 1}, period, pin))
+            self.assertFalse(cycle_covers(path, period, "0" * 64))
+            for at in (period + 3, len(stream) - 1):
+                corrupt = bytearray(stream)
+                corrupt[at] ^= 1
+                path.write_bytes(corrupt)
+                self.assertFalse(cycle_covers(path, period))
+            path.write_bytes(block)
+            self.assertFalse(cycle_covers(path, period))
+
+    def test_cache_body_rejects_a_changed_header(self):
+        size, copies = 8, 3
+        header = bytes(range(HEADER))
+        block = FILL_MARKER.to_bytes(4, "little") + b"\x01\x02\x03\x04"
+        data = header + block * copies
+        pins = dict(header_sha=sha256(header).hexdigest(), block_sha=sha256(block).hexdigest(),
+                    block_size=size, copies=copies)
+        self.assertTrue(body_covers(data, **pins))
+        changed = bytearray(data)
+        changed[5] ^= 1
+        self.assertFalse(body_covers(bytes(changed), **pins))
+        changed = bytearray(data)
+        changed[HEADER + 2 * size + 6] ^= 1
+        self.assertFalse(body_covers(bytes(changed), **pins))
+        self.assertFalse(body_covers(data, **dict(pins, block_sha="0" * 64)))

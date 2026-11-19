@@ -5,7 +5,8 @@
   rating.py --data DAT --check  # also require README.md and docs/STATUS.md to carry them
 
 The lines are explained in docs/HOW_WE_RATE.md:
-  Files read      DAT files whose every byte a reader here accounts for, by count and by bytes
+  Files read      DAT files whose every byte a reader here accounts for, by count and by bytes;
+                  files only shown to be one block repeated are listed separately, not counted as read
   Rules traced    evidence labels on the current pages: CONFIRMED against UNCONFIRMED
   Running game    probes on docs/NEEDS_A_RUNNING_GAME.md answered, out of all probes there
   Open questions  the state words of the At-a-glance table in docs/OPEN_QUESTIONS.md
@@ -17,18 +18,19 @@ from pathlib import Path
 import lol3_cli
 from extract_wsx_entries import parse_wsx
 from lol3_cache_seed import shipped_body_covers
-from lol3_pht import cycle_covers
+from lol3_pht import pht_covers
 
 ROOT = Path(__file__).resolve().parent.parent
 BEGIN, END = "<!-- rating:begin -->", "<!-- rating:end -->"
 
 
 def files_read(data_dir):
-    """A WSX archive counts when its directory and entry sizes add up to the file length with no overlap
-    (parse_wsx raises otherwise). The shipped cdcache.wsx counts when a 114-byte header plus 51 identical
-    blocks fill the file. A .PHT file counts when every byte belongs to its first cycle of 0x1010000 bytes.
-    Every other file in the folder counts as not read."""
-    total = read = total_bytes = read_bytes = 0
+    """A WSX archive counts as read when its directory and entry sizes add up to the file length with no
+    overlap (parse_wsx raises otherwise). Every other file counts as not read. The shipped cdcache.wsx
+    (pinned header plus 51 copies of the pinned block) and the four .PHT files (retail name and size,
+    pinned 0x1010000-byte cycle) are returned as a separate repeated-block group: their bytes are shown
+    to be one block repeated, but what they mean is unknown."""
+    total = read = total_bytes = read_bytes = repeated = repeated_bytes = 0
     for path in sorted(p for p in Path(data_dir).iterdir() if p.is_file()):
         size = path.stat().st_size
         total += 1
@@ -38,15 +40,15 @@ def files_read(data_dir):
                 parse_wsx(path)
             except ValueError:
                 if path.name.lower() == "cdcache.wsx" and shipped_body_covers(path):
-                    read += 1
-                    read_bytes += size
+                    repeated += 1
+                    repeated_bytes += size
                 continue
             read += 1
             read_bytes += size
-        elif path.suffix.lower() == ".pht" and cycle_covers(path):
-            read += 1
-            read_bytes += size
-    return read, total, read_bytes, total_bytes
+        elif path.suffix.lower() == ".pht" and pht_covers(path):
+            repeated += 1
+            repeated_bytes += size
+    return read, total, read_bytes, total_bytes, repeated, repeated_bytes
 
 
 def history(text):
@@ -89,12 +91,12 @@ def questions():
 
 
 def rating(data_dir):
-    read, total, read_bytes, total_bytes = files_read(data_dir)
+    read, total, read_bytes, total_bytes, rep, rep_bytes = files_read(data_dir)
     confirmed, unconfirmed, pages = labels()
     seen, needed = probes()
     answered, mostly, partly, count = questions()
     return [
-        f"- **Files read:** {read} of {total} files in `DAT` ({read_bytes / 2**20:,.1f} of {total_bytes / 2**20:,.1f} MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory, entry or repeating block (what is inside an entry may still be only partly understood).",
+        f"- **Files read:** {read} of {total} files in `DAT` ({read_bytes / 2**20:,.1f} of {total_bytes / 2**20:,.1f} MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). {rep} more ({rep_bytes / 2**20:,.1f} MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated; what those bytes mean and what reads them is unknown.",
         f"- **Rules traced:** the pages mark {confirmed:,} statements CONFIRMED (proved from the program code or the files) and {unconfirmed:,} UNCONFIRMED (a reading not yet proved), on {pages} current pages; old notes kept as history are not counted.",
         f"- **Seen in the running game:** {seen} of {needed} questions that can only be settled by watching the original game run are settled.",
         f"- **Open questions:** {count} numbered questions: {answered} answered, {mostly} mostly answered, {partly} partly answered.",
