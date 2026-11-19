@@ -1,5 +1,7 @@
 # Tools
 
+To write the inventory, level sheets and text counts together, use `full_report.py`. [Cookbook](../docs/COOKBOOK.md#write-a-full-report)
+
 ## Common options
 
 The tools follow one set of rules:
