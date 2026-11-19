@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Reader parity.** [tools/README](../tools/README.md#reader-parity) lists every current format and rules table with its reader, its check, and the text or drawing a reader gets. Rows with no such output are marked gap.
 - **Link check.** `doc_links.py` resolves every relative link and anchor in the README and the docs, and `check_all.py` runs it.
 - **Repeated blocks shown.** `lol3_pht.py` shows the four `.PHT` files are prefixes of one repeating cycle, and `lol3_cache_seed.py` shows the shipped cache body is one block repeated; these five files are listed separately in the rating, not counted as read. What the bytes mean and what reads them stays open ([PHT](formats/pht.md); Q1 is partly answered).
 - **Counted rating.** The README and [STATUS](STATUS.md) show four counted lines instead of a percentage; [how we rate](HOW_WE_RATE.md) explains them.
