@@ -229,11 +229,17 @@ path-label counts and digest and the gap lengths above.
 | 4 | 18 | `0x43FDA7–0x43FDC8` loads exactly field 18 bytes into `[0x7E3200]`. |
 | 20 | 19 | `0x43FD09–0x43FD22` loads count × 8 bytes into world +0x70. All 18 entries contain one byte of varying value after that computed end. |
 
-**CONFIRMED.** In all 18 entries, 22 bytes per section-0 row follow
-the counted 24-byte rows before section 1. CKEEP's first companion
-begins at entry +0x5DC with a NUL-terminated identifier and padding.
-The companion reader is **UNCONFIRMED**. Section 4 ends at the
-start of section 3 in all 18 entries.
+**CONFIRMED** (the bytes and the skip). **UNCONFIRMED** (a reader
+of the names). In all 18 entries, 22 bytes per section-0 row follow
+the counted 24-byte rows and end where section 1 begins: 630 slots.
+Each is a NUL-terminated printable name, padded with `0x00` or
+`0xCD`, and 168 of the names are distinct. CKEEP's first slot is
+at entry +0x5DC and is `Floor39`. The loader seeks to field 0
+(`0x43FCCE`, call `0x435A90` at `0x43FCD6`) and `0x4AB420` reads
+exactly 24 times the count (`0x4AB42E`). The timed walk steps
+`0x18` (`0x4AB682`). The next seek is field 1 (`0x43FD3D`,
+`0x43FD45`), so this loader does not read the names. Section 4
+ends at the start of section 3 in all 18 entries.
 
 ### Creature definitions in field 3
 
@@ -262,24 +268,43 @@ Follow that pointer into the first consumer to identify the subtable.
 **CONFIRMED.** The lookup at `0x4FDEF0` searches cached objects by
 the original tag at runtime +0x2764. On a miss `0x4FD8F0`
 copies that tag and formats `global\ai\%s` at
-`0x4FD932–0x4FD963`. The next calls build the resources
-`stat.csv`, `goals.csv`, `actions.csv` and `effector.csv`
-(`0x4FD986–0x4FDA0D`; leaf strings at VAs `0x551BE4`,
-`0x551BD8`, `0x551BCC`, `0x551BBC`). The lookup increments
+`0x4FD932–0x4FD963` (the format is at `0x551BF0`). The next
+calls build five resources: `stat.csv`, `goals.csv`,
+`actions.csv`, `effector.csv` and `spells.csv`
+(`0x4FD975–0x4FDA39`; leaf strings at `0x551BE4`, `0x551BD8`,
+`0x551BCC`, `0x551BBC` and `0x551BB0`). Each call joins the
+directory and the leaf at `0x420300`, then loads at `0x4FD780`.
+The five grid sizes, rows by columns, are 1×`0x20`, `0x0E`×`0x2E`,
+`0x0F`×`0x2E`, `0x20`×`0x3A` and `0x95`×`0x2E`, stored at object
++8, +0x28, +0x2AC, +0x55E and +0xC9E. The lookup increments
 the cached object's count at +0x2774 (`0x4FDF4E–0x4FDF56`).
 
 **CONFIRMED.** The 18 original ODFs contain 334 field-3 rows and
-68 distinct tags. Hashing the four paths against `GLOBAL.WSX`
+68 distinct tags. Hashing the first four paths against `GLOBAL.WSX`
 joins all four for 60 tags, three for one, two for one and
-zero for six. In QWOD0, the tag `SPIDER` starts at
-`QWOD0.WSX+0x7781AB`. Its four resource payload starts in the
-order above are `GLOBAL.WSX+0x1FDBA3`, `+0x1FBE73`,
-`+0x1FB11F` and `+0x1FB568`. This establishes a use of the type
-tag without assigning gameplay meaning to every tag.
+zero for six. The fifth path, `spells.csv`, does not change the
+60 or the six: 60 tags have all five files and the same six have
+none. `NONE` has `stat.csv`, `goals.csv` and `spells.csv`.
+`Spire` has `stat.csv`, `goals.csv` and `actions.csv`. In QWOD0,
+the tag `SPIDER` starts at `QWOD0.WSX+0x7781AB`. Its four resource
+payload starts in the order above are `GLOBAL.WSX+0x1FDBA3`,
+`+0x1FBE73`, `+0x1FB11F` and `+0x1FB568`. This establishes a use
+of the type tag without assigning gameplay meaning to every tag.
 
-**UNCONFIRMED.** The role of the 22-byte section-0 companions
-and the missing leaf files remains open. For the former,
-follow another read or a writer for the exact span, beginning
-at `CKEEP.WSX` ODF entry +0x5DC. For the latter, follow the
-failed resource branch from `0x420300 → 0x4FD780`, using a
-missing input such as the tag `NONE`.
+**CONFIRMED** (the miss arm). **UNCONFIRMED** (what sets the two
+flag fields). `0x420300` begins after four `nop`s. It copies the
+directory, the backslash at `0x546318`, and the leaf into the
+destination, or into `0x5D5818` when that pointer is null, and
+returns the buffer. It does not look the name up. `0x4FD780`
+begins after `ret` and two `nop`s at `0x4FD77D`. It zeros the
+row-by-column product, then calls `0x435880`, which returns the
+result of `0x435150` (`0x4358A1`, `0x4358C9`). That lookup returns
+1 when the virtual call at +0x18 is nonzero (`0x435161`) or when
+the hashed name is found (`0x4351E6`). The miss calls `0x494390`,
+which returns 1 when bit 5 of `[ecx+0x24]` is set (`0x49439A`) and
+otherwise calls `0x493820`, which returns 0 when `[ecx+0x18]` is 0
+(`0x49382B`). A zero result at `0x4FD7B1` jumps to the epilogue
+`0x4FD8E4` and leaves the zeros. The caller does not test the
+return. `lol3_odf_companions.py --check` re-counts the names, the
+joins and these bytes. What reads a section-0 name, and what sets
+the two flag fields, remain open.
