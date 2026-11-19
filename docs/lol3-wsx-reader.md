@@ -75,12 +75,23 @@ spans. Shutdown writes the index back to its stored position
 (`0x4E4854–0x4E487F`).
 
 **CONFIRMED** (the shipped body and the missing instruction).
-**UNCONFIRMED** (what produces the block, and what leaves 0x67).
+**UNCONFIRMED** (which screen the shipped block holds, and why it has 51 blocks when this build fills at least 100 MiB).
 `DAT/cdcache.wsx` is 114 bytes plus 51 copies of one 64,000-byte
 block. The block is not present in `LOL3.DAT`, `LOL3.EXE`, or
 this installation's game-written cache, and sampled 16-byte pieces of
 it are absent from the other `DAT` files and the root `cdcache.lst` /
-`CDCACHE.LS_` (stored bytes). The shipped dword at
+`CDCACHE.LS_` (stored bytes). The same 16-byte head is absent from
+every `.exe`, `.dll`, `.asi` and `.dat` in the install folder.
+**CONFIRMED** (where the fill comes from). The initializer's fill loop
+`0x4E4E61–0x4E4E95` writes 0xFA00 bytes per pass (`push 0xFA00` at
+`LOL3.DAT+0xE4271` = `0x4E4E71`) to the `CDCACHE.wsx` handle
+`[0x54F738]` through `0x4357E0`. The source is the pointer `0x5046E0`
+returns for the surface `[0x5D5394]`: the lock is the vtable +0x64 call
+at `0x504589`, and `0x5045B9–0x5045C7` take `lpSurface` from descriptor
++0x24. The fill is screen surface memory, not a stored resource. This
+installation's game-written cache (114 bytes plus 1,639 × 64,000) ends
+in identical blocks (1,615 to 1,638 checked) that form one 8-bit picture
+with 640-byte rows. The shipped dword at
 +0x72 is `0xD0BCD8BE`, the first dword of that block, not the
 live marker `0xF1E2D3C4`.
 
@@ -104,6 +115,13 @@ empty rows, and 17 of the 40 rows have +0x17 equal to +0x16.
 tallies and that witness. A program or installer input that
 contains the 64,000-byte block, and a cache saved before any
 texture write, are the settling tests.
+
+On the first run the read at `0x4FE4FA` loads fill bytes, and the
+reset loop `0x4FE596–0x4FE5B4` writes row bytes +0, +4, +8, +0x10,
++0x14 and +0x15 only, so +0x16 and +0x17 keep surface pixels. Every
+value seen there on empty rows is a pixel value of that picture, and a
+second installation's game-written cache holds 0x42 at +0x17 of an
+occupied row (measured on that copy).
 
 ## Resource name key
 

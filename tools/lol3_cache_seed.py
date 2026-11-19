@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Re-prove the shipped cdcache body and that allocator byte +0x17 has no address.
+"""Re-prove the shipped cdcache body, that its head is absent from the programs
+beside the game, and that allocator byte +0x17 has no address.
 
   lol3_cache_seed.py --data DAT            # header bytes and, when present, the second directory
   lol3_cache_seed.py --data DAT --check
@@ -19,6 +20,22 @@ BLOCK_SHA = "bba1aa5f85ce13bfe9a493a445bea858c270db9bea543bac83d6df6d35730fad"
 
 HEADER_SHA = "9b66af6f5ca8880f5b44efc3f87d36f69c4348ff42dd25871cb81b820591e829"
 FILL_MARKER = 0xD0BCD8BE
+# Programs and libraries beside the game. The shipped fill head is in none of them.
+PROGRAM_SUFFIXES = {".exe", ".dll", ".asi", ".dat"}
+PUSH_64000 = bytes.fromhex("6800fa0000")
+PUSH_64000_AT = 0xE4271
+# Fill loop 0x4E4E61-0x4E4E95: push 0xFA00 at 0x4E4E71, call 0x4357E0 (write to [0x54F738])
+# at 0x4E4E78; the source is the surface pointer 0x5046E0 returns after the vtable +0x64
+# lock call at 0x504589. File offset = VA - 0x400C00.
+CODE_BIAS = 0x400C00
+FILL_LOOP_BYTES = {
+    0x4E4E6B: bytes.fromhex("8b0d38f75400"),  # mov ecx, [0x54F738]
+    0x4E4E71: PUSH_64000,                       # push 0xFA00
+    0x4E4E78: bytes.fromhex("e86309f5ff"),      # call 0x4357E0
+    0x4E4E2E: bytes.fromhex("8b0d94535d00"),    # mov ecx, [0x5D5394]
+    0x4E4E34: bytes.fromhex("e8a7f80100"),      # call 0x5046E0
+    0x504589: bytes.fromhex("ff5164"),          # call [ecx+0x64] (surface lock)
+}
 
 
 def body_covers(data, header_sha=HEADER_SHA, block_sha=BLOCK_SHA, block_size=BLOCK, copies=COPIES):
@@ -48,6 +65,42 @@ def shipped_body_covers(path):
 
 # Little-endian address of row 0's bytes +0x14 through +0x17 in the code section.
 FLAG_ADDRESSES = {0x7F3A0C: 7, 0x7F3A0D: 6, 0x7F3A0E: 5, 0x7F3A0F: 0}
+
+
+def install_programs(install_dir):
+    """Every program, library and small DAT beside the game, not the archives under DAT."""
+    return sorted(
+        path for path in Path(install_dir).iterdir()
+        if path.is_file() and path.suffix.lower() in PROGRAM_SUFFIXES)
+
+
+def fill_absent_from_programs(install_dir, head):
+    """The 16-byte fill head is in none of those files, and push 64000 occurs once, at the known site."""
+    files = install_programs(install_dir)
+    names = {path.name.lower() for path in files}
+    if "lol3.dat" not in names or "lol3.exe" not in names:
+        raise ValueError("install folder is missing LOL3.DAT or LOL3.EXE")
+    found = []
+    for path in files:
+        blob = path.read_bytes()
+        if head in blob:
+            raise ValueError(f"{path.name} contains the shipped fill head")
+        if PUSH_64000 in blob:
+            found.append(path.name)
+    if found != ["LOL3.DAT"]:
+        raise ValueError(f"push 64000 occurs in {found}")
+    image = next(path for path in files if path.name.lower() == "lol3.dat").read_bytes()
+    if image[PUSH_64000_AT:PUSH_64000_AT + len(PUSH_64000)] != PUSH_64000:
+        raise ValueError("LOL3.DAT+0xE4271 is not push 64000")
+    return len(files)
+
+
+def fill_loop_pinned(image):
+    """The fill loop writes 64,000-byte passes from the locked screen surface."""
+    for address, expected in FILL_LOOP_BYTES.items():
+        at = address - CODE_BIAS
+        if image[at:at + len(expected)] != expected:
+            raise ValueError(f"fill loop byte pin at {address:#x} differs")
 
 
 def code_section(image):
@@ -176,11 +229,14 @@ def main():
             witness = "; 8 occupied rows hold 0x67"
         else:
             witness = "; game-written cache absent"
+        fill_absent_from_programs(data.resolve().parent, block[:16])
+        fill_loop_pinned((data.resolve().parent / "LOL3.DAT").read_bytes())
     except (OSError, ValueError) as exc:
         print(f"CHECK cache_seed FAILED: {exc}")
         return 1
     print("CHECK cache_seed: shipped cdcache is 114 bytes plus 51 copies of one 64,000-byte block; "
-          f"row byte +0x17 has no code address{witness}")
+          f"row byte +0x17 has no code address{witness}; "
+          "the fill loop writes 64,000-byte passes from the locked surface")
     return 0
 
 

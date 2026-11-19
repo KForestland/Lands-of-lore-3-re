@@ -7,9 +7,10 @@
 A file passes when its name and size are one of the four retail files, its
 first cycle has the pinned SHA-256 and every later byte equals the byte at
 that distance into the first cycle. The check also requires that LOL3.DAT
-and LOL3.EXE do not contain the names (compared without case). This shows
-the bytes are one block repeated; what they mean and what reads them is
-unknown.
+and LOL3.EXE do not contain the names (ASCII, either case, or UTF-16), that
+the cycle length is not a code immediate, and that the stored `$*.*` search
+is the save-game folder. This shows the bytes are one block repeated; what
+they mean and what reads them is unknown.
 """
 from hashlib import sha256
 from pathlib import Path
@@ -28,6 +29,17 @@ CYCLE_SHA = "989e39205a5bf3e1aa7856cd9f9bc3191ada4e9ce34cf8811980b2c0c8bb9755"
 NEEDLES = (b"cygnus", b"quann", b"raider", b"yupa", b".pht")
 DAT_SIZE = 1_643_520
 EXE_SIZE = 77_824
+# .text of LOL3.DAT. The cycle length is not an immediate there.
+TEXT_RAW = 0x400
+TEXT_SIZE = 0x136400
+PERIOD_IMM = (0x1010000).to_bytes(4, "little")
+# One-byte opcodes whose immediate is the next dword, plus 0x81 (opcode, ModRM, dword).
+IMM_OPCODES = set(range(0xB8, 0xC0)) | {0x68, 0x3D, 0x05, 0x0D, 0x15, 0x1D, 0x25, 0x2D, 0x35, 0xA1, 0xA3}
+# Save-game search: $*.* between $AUTOSAV.XXX and .\SAVEGAME, pushed at three sites.
+WILD_AT = 0x1488A0
+WILD = b"$*.*\x00\x00\x00\x00.\\SAVEGAME\x00"
+WILD_PUSHES = (0x5A3A9, 0x5A441, 0x5A554)
+WILD_PUSH = bytes.fromhex("68a0a05400")
 
 
 def cycle_covers(path, period=PERIOD, cycle_sha=None):
@@ -59,6 +71,37 @@ def pht_covers(path, sizes=SIZES, period=PERIOD, cycle_sha=CYCLE_SHA):
     if sizes.get(path.name.lower()) != path.stat().st_size:
         return False
     return cycle_covers(path, period, cycle_sha)
+
+
+def period_is_immediate(text):
+    """True when 0x1010000 is the immediate of a one-byte opcode or of opcode 0x81."""
+    start = 0
+    while True:
+        index = text.find(PERIOD_IMM, start)
+        if index < 0:
+            return False
+        if index and text[index - 1] in IMM_OPCODES:
+            return True
+        if index >= 2 and text[index - 2] == 0x81:
+            return True
+        start = index + 1
+
+
+def names_absent(blob):
+    """ASCII names in any case, and the same names as UTF-16 in any case.
+
+    UTF-16 text is decoded at both byte alignments (errors ignored) and lowered.
+    """
+    lowered = blob.lower()
+    for needle in NEEDLES:
+        if needle in lowered:
+            return needle.decode("ascii")
+    for start in (0, 1):
+        wide = blob[start:len(blob) - (len(blob) - start) % 2].decode("utf-16le", errors="ignore").lower()
+        for needle in NEEDLES:
+            if needle.decode("ascii") in wide:
+                return needle.decode("ascii") + " (UTF-16)"
+    return None
 
 
 def head_line(path, count=16):
@@ -95,19 +138,30 @@ def main():
             if not cycle_covers(path, PERIOD, CYCLE_SHA):
                 raise ValueError(f"{path.name} is not the pinned cycle repeated every {PERIOD:#x} bytes")
         root = data.resolve().parent
+        programs = {}
         for label, size in (("LOL3.DAT", DAT_SIZE), ("LOL3.EXE", EXE_SIZE)):
-            blob = (root / label).read_bytes().lower()
+            blob = (root / label).read_bytes()
             if len(blob) != size:
                 raise ValueError(f"{label} is {len(blob)} bytes")
-            for needle in NEEDLES:
-                if needle in blob:
-                    raise ValueError(f"{label} contains {needle.decode('ascii')}")
+            hit = names_absent(blob)
+            if hit:
+                raise ValueError(f"{label} contains {hit}")
+            programs[label] = blob
+        image = programs["LOL3.DAT"]
+        if period_is_immediate(image[TEXT_RAW:TEXT_RAW + TEXT_SIZE]):
+            raise ValueError("LOL3.DAT code uses 0x1010000 as an immediate")
+        if image[WILD_AT:WILD_AT + len(WILD)] != WILD:
+            raise ValueError("save-game search string differs")
+        for offset in WILD_PUSHES:
+            if image[offset:offset + len(WILD_PUSH)] != WILD_PUSH:
+                raise ValueError(f"save-game search push +{offset:#x} differs")
     except (OSError, ValueError) as exc:
         print(f"CHECK pht FAILED: {exc}")
         return 1
     shown = ", ".join(f"{path.name} {path.stat().st_size}" for path in ordered)
     print(f"CHECK pht: 4 files are prefixes of one pinned 0x1010000-byte cycle; {shown}; "
-          "names absent from LOL3.DAT and LOL3.EXE (any case)")
+          "names absent from LOL3.DAT and LOL3.EXE (any case, ASCII/UTF-16); "
+          "0x1010000 not an immediate; `$*.*` pushes at 3 sites")
     return 0
 
 

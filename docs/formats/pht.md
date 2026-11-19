@@ -27,7 +27,20 @@ No reader is known.
 
 `quann.pht`, `RAIDER.PHT` and `yupa.pht` start with the same eight bytes.
 
-**UNCONFIRMED** (what the game does with them). `LOL3.DAT` (1,643,520
-bytes) and `LOL3.EXE` (77,824 bytes) contain none of `CYGNUS`, `QUANN`,
-`RAIDER`, `YUPA`, `.PHT` or `.pht`. Settling test: a file-open trace
-that shows whether the game opens any of the four names.
+**CONFIRMED.** `LOL3.DAT` (1,643,520 bytes) and `LOL3.EXE` (77,824 bytes)
+contain none of `CYGNUS`, `QUANN`, `RAIDER`, `YUPA`, `.PHT` or `.pht`, in
+either letter case, as ASCII or as UTF-16. The code section of `LOL3.DAT`
+(file `+0x400` for `0x136400` bytes) does not use `0x1010000` as the
+immediate of a one-byte opcode or of opcode `0x81`. The file-search wrapper
+`0x51A410` has five callers. Three (`+0x5A3A9`, `+0x5A441`, `+0x5A554`) push
+`+0x1488A0`, the string `$*.*`, which sits between `$AUTOSAV.XXX` and
+`.\SAVEGAME`. `+0x675A9` pushes `.\SAVEGAME` itself. The call at `+0x34074`
+searches a drive root with `*` (`+0x14709C`) appended, before the
+free-space query. None names a `DAT` file. The name keys of `CYGNUS.PHT`,
+`DAT\CYGNUS.PHT` and the other three names (with and without the folder) are
+in no WSX directory and not in either program.
+
+**UNCONFIRMED** (what the game does with them). No stored name and no stored
+search pattern in those two programs names the four files, and nothing there
+shows how a byte of the cycle would be indexed. Settling test: a file-open
+trace that shows whether the game opens any of the four names.

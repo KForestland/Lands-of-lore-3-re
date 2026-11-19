@@ -4,6 +4,8 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Shipped cache block (Q1, partly answered).** The 64,000-byte block is absent from every program and DLL in the install folder. The initializer's fill loop (`0x4E4E61–0x4E4E95`) writes it in 64,000-byte passes from locked screen memory, so it is a screen picture, not a stored resource; byte +0x17 keeps that fill. Which screen the shipped copy holds, and why it has 51 blocks, stay open ([native WSX reader](lol3-wsx-reader.md)).
+- **PHT files.** They stay unread. The two programs do not store the four names in ASCII or UTF-16, the cycle length is not an immediate in the code, and the stored file-search patterns are the save-game wildcard `$*.*`, the `.\SAVEGAME` folder and a drive-root `*` for the free-space check. What the bytes are for stays open ([PHT](formats/pht.md)).
 - **Glossary.** The [glossary](GLOSSARY.md) gives a one-line meaning to each term on the front page, the start page and the cookbook. A word shared with the other two games has the same meaning there. The rating still counts the glossary as a page, but not its label words.
 - **Level sheets.** Each sheet lists the commands per opcode, the waypoint and path counts, and the five placement tables by type with their row ids. `lol3_level_report.py --check` fails when `docs/levels` differs from what the tool writes. `check_all.py` still runs twenty-four checks.
 - **Reader listings.** The checks that already run can also print directory rows, format fields and the named table bytes. Nothing is written unless an output path is given, and `check_all.py` still runs twenty-four checks. The region byte-index table length is still a gap ([tools](../tools/README.md#reader-parity)).
