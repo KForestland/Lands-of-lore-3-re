@@ -156,12 +156,15 @@ at +0xCB4F. Its +0x3F is 0x40. The native dispatcher
 reads both fields at `0x49E969–0x49E992` before the regular
 table lookup at `0x49EA08`. The complete `.text` virtual range
 (`LOL3.DAT+0x400..+0x1366E4`, VA `0x401000..0x5372E4`)
-contains two `E8 rel32` encodings targeting `0x432AD0`:
+contains two `E8 rel32` encodings targeting `0x432AD0` (and no
+`E9` or conditional-jump targets):
 `0x4A6133` passes +1 after regular handler 112 accepts
 operation 1, and `0x4A5A3A` passes −1. A whole-file search
 finds no literal dword pointer to the writer. These checks
 cover encoded direct calls, literal pointers and the original
-item table. Indirect or computed targets remain **UNCONFIRMED**.
+item table.
+
+**UNCONFIRMED.** Indirect or computed targets of the writer.
 
 #### Second-counter debit
 
