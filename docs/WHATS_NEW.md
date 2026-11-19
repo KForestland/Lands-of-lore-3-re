@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Glossary.** The [glossary](GLOSSARY.md) gives a one-line meaning to each term on the front page, the start page and the cookbook. A word shared with the other two games has the same meaning there. The rating still counts the glossary as a page, but not its label words.
 - **Level sheets.** Each sheet lists the commands per opcode, the waypoint and path counts, and the five placement tables by type with their row ids. `lol3_level_report.py --check` fails when `docs/levels` differs from what the tool writes. `check_all.py` still runs twenty-four checks.
 - **Reader listings.** The checks that already run can also print directory rows, format fields and the named table bytes. Nothing is written unless an output path is given, and `check_all.py` still runs twenty-four checks. The region byte-index table length is still a gap ([tools](../tools/README.md#reader-parity)).
 - **Script browser.** `lol3_script_browser.py` groups one level's commands by opcode and prints the one-line meaning from the opcode page. It does not list each command.
