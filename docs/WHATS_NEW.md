@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Section count.** `LOL3.DAT` at file +0xCE is `04 00`, the COFF section count 4. `lol3_pht.py --check` re-reads those two bytes ([light maps](lol3-lmf-reader.md)).
 - **Numbers at a glance.** Tables generated from the original files, with a check that the page equals the tool output ([numbers](NUMBERS.md)).
 - **How a level is put together.** The pieces a level needs, the file that holds each and the order the program loads them ([level assembly](HOW_A_LEVEL_IS_PUT_TOGETHER.md)).
 - **Tour.** One level followed end to end: its picture, sheet, exits and numbers, with the command behind each part ([tour](TOUR.md)).

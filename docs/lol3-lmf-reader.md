@@ -12,6 +12,8 @@ File +0xE0 is `0B 01`, the PE32 optional-header magic `0x010B`.
 The same check re-reads those two bytes.
 File +0xCC is `4C 01`, the COFF machine word `0x014C`.
 The same check re-reads those two bytes.
+File +0xCE is `04 00`, the COFF section count 4.
+The same check re-reads those two bytes.
 
 ## File and group reader
 
