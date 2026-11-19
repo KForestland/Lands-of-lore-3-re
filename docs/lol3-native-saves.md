@@ -324,3 +324,13 @@ own later autosave cleared the two used item rows and their
 occupancy bits and stored the remaining pointers against its new
 bases.
 [Exact byte changes and original item use](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
+
+## Close-out
+
+### Q13
+
+**What was measured.** All 47 slot files give global selectors 5, 24, 37 and 50 a stored span of 0 bytes. The other 57 global selectors have a nonzero span in every one of those files.
+
+**What was tried.** This compares the 61 directory offsets in each slot header. The page already records controlled saves for movement, the quick-slot transfer and the floor pickup.
+
+**What would settle it.** The running-game test is not yet run ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). It compares the original save bytes before and after one controlled action for each remaining selector payload.

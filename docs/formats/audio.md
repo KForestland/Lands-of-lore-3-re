@@ -122,3 +122,13 @@ Movie audio has a separate native decoder, described in [VQA movies](vqa.md).
 
 Run `python3 tools/lol3_media_check.py --data DAT --check`
 to check movie identity, frame indexes and both audio corpora in place.
+
+## Close-out
+
+### Q10
+
+**What was measured.** The bytes `DA 73 4F 1D` occur once in `music4.wsx`, at file +0x8A. The same four bytes occur zero times in `MUSIC1.WSX`, `MUSIC2.WSX`, `music3.wsx` and `LOL3.DAT`.
+
+**What was tried.** This is a four-byte scan for key `0x1D4F73DA`. The page already records that no default stem from the builder and no stored string hashes to that key.
+
+**What would settle it.** Break at the lookup entry `0x435880` and the call at `0x44A7F5`, logging the name and the returned archive row while the music changes (also with `-SCORE`); a stop that returns the `music4.wsx+0x8A` row names the track. The running-game test is not yet run ([probes not yet run](../NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).

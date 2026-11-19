@@ -185,3 +185,13 @@ a key and is not a path. `lol3_name_hash.py --check` re-counts
 this. Music key `0x1D4F73DA` is one of the unnamed keys
 ([music](formats/audio.md)). To name another entry, follow the
 caller that builds its filename.
+
+## Close-out
+
+### Q1
+
+**What was measured.** The eighteen bytes at `LOL3.DAT` file +0xE4241 are `81 C6 FF F9 00 00 B8 D3 4D 62 10 F7 E6 8B F2 C1 EE 0C`. They add 63,999, multiply by `0x10624DD3`, and shift the high half right by 12, which returns 51 for a length of 3,264,000.
+
+**What was tried.** This slice is the pass-count setup immediately before the fill loop at `0x4E4E61`. The page already records that the loop writes 64,000-byte passes from locked screen memory and that the shipped file is 51 copies of one block.
+
+**What would settle it.** Lock the same surface at the fill loop (`0x4E4E61–0x4E4E95`) and compare its first 64,000 bytes with the shipped block; that shows which screen the shipped copy holds. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).

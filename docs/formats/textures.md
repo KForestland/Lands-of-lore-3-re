@@ -89,3 +89,13 @@ zero handling and indexed writes. The [palette inventory](../lol3-texture-palett
 The texture records live in the game-folder `cdcache.wsx`, a cache the game writes when it runs (our copy: last written 2026-03-27). The counts on this page (854 records, 4 banks) describe this installation's cache; the two texture checks report SKIP if it is absent.
 
 The `cdcache.wsx` in the game folder has a WSX header for 9 entries and 52,663,679 bytes of data. The file is 104,896,114 bytes, and its storage is laid out by a second, 40-row allocation index at +0x76 ([WSX cache rows](wsx.md#cdcachewsx)): the 854 records lie inside the four occupied texture spans (191, 243, 395 and 25 records), 420 of them past file offset 52,663,793. The `cdcache.wsx` in `DAT/` is a different, 3,264,114-byte file with the same kind of header, and it holds no span records. The allocator and its rows are documented on the WSX page; the origin of the smaller, shipped `DAT/` copy and byte +0x17 of the allocator rows are open ([Q1](../OPEN_QUESTIONS.md)).
+
+## Close-out
+
+### Q7
+
+**What was measured.** The texture entry in `QWOD0.WSX` begins with decoded length 10,503,050 and first packed length 583,717 (`8A 43 A0 00 25 E8 08 00`). Walking the length fields, without expanding the chunks, counts 11 packed chunks.
+
+**What was tried.** This walk is one `.TE_` entry's length fields. The page already records CKEEP's decoded length 20,463,678, its first packed length 604,394, and that the editor-name branch meets the same reader.
+
+**What would settle it.** A separate source entry and a native reader for its header, for example an editor output accepted under `-CONVERT_TEST` (`0x43F741–0x43F750`).

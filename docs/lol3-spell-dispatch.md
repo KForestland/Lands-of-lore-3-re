@@ -460,3 +460,13 @@ rows 12 and 14 hold the same pool rows as the edited copy
 (rows 12, 18 and 83; rows 35 and 36). So the game cleared both
 used items and translated the remaining pointers to its new
 bases when it saved.
+
+## Close-out
+
+### Q12
+
+**What was measured.** The seventeen bytes at `LOL3.DAT` file +0x30094 are `B9 20 00 00 00 33 C0 BF 58 A5 5F 00 83 C4 0C F3 AB`. They zero 32 dwords, 128 bytes, at `0x5FA558` after the decimal format call at `0x430C8F`.
+
+**What was tried.** This slice follows the display read at `0x430C7D`. The page already records the second-counter debit, the edited-save observation, and the list-8 discounts on keys 10 and 13.
+
+**What would settle it.** The running-game test is not yet run ([test Q12](NEEDS_A_RUNNING_GAME.md#q12-which-live-cast-consumes-an-alternate-resource), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). Still open are native acquisition, the exact HUD feedback, individual handler effects, and the on-screen names of slots, keys and mask bits.

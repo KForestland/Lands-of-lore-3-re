@@ -361,3 +361,13 @@ built by opcodes 0x0F and 0x1C. Settle the actor in a running game:
 break at `0x48EBE0` when an opcode-0x1A record such as
 `BUPP1.WSX+0x18C7FD3` runs, and watch which character performs
 action +4.
+
+## Close-out
+
+### Q11
+
+**What was measured.** The bytes `F0 60 58 00` occur 162 times in the code of `LOL3.DAT`. At file +0x47711 the ten bytes `B9 F0 60 58 00 E8 C5 68 04 00` are the `mov ecx` and call of opcode 0x1A.
+
+**What was tried.** This is a count of that address in the code section. The page already traces each opcode's handler to its state writes, including this call on the second player-side actor and the type-5 builders for opcodes 0x0F and 0x1C.
+
+**What would settle it.** Break at the opcode 0x1A call (`0x448300–0x448316`, object `0x5860F0`) and match the object to the actor on screen; for opcode 0x1C, break after `0x4484AD` while a stored record such as `BUPP1.WSX+0x18C9F51` runs and capture the frame that draws the type-5 object. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).

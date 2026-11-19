@@ -150,3 +150,13 @@ the consumer. If `0x44ED16` or
 scratch result (`EAX` at `0x44EEC3`) and render its surface. A typed read
 of those words, or a shipped writer that supplies their sample indices,
 would settle their purpose.
+
+## Close-out
+
+### Q3
+
+**What was measured.** The group at `CKEEP.WSX+0xC48D7D` is 5,311 stored bytes and decodes to 52,800 bytes, 256 members. Thirty-seven of those members hold a nonzero word at +0x0C through +0x13 (122 words); the four words of member index 125 are 30,560, 32,672, 28,480 and 26,336.
+
+**What was tried.** This decode is one group, not the full set of members. The page already matched every nonzero header word to a sample in its own grid and showed that quadrant summaries do not reproduce them.
+
+**What would settle it.** A read watch on the dwords +0x0C/+0x10 of a nonzero member returned by `0x44EB40`, as described above, isolates the consumer; a typed read of those words, or a shipped writer that supplies their sample indices, settles their purpose.

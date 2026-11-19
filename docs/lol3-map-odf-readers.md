@@ -421,3 +421,29 @@ when that fails (`0x493889`) and 1 after `CloseHandle`
 epilogue `0x4FD8E4` and leaves the zeros. The caller does not
 test the return. `lol3_odf_companions.py --check` re-counts the
 names, the joins and these bytes.
+
+## Close-out
+
+### Q4
+
+**What was measured.** The twelve nonempty gaps are 1,784 bytes, and 11 of those bytes are `0x00`. As 892 little-endian u16 values, none is 0, and 820 of the values are distinct.
+
+**What was tried.** This count is the gap before field 16. The page already records that the loader's seeks skip both label spans and this gap.
+
+**What would settle it.** Log every read the level load makes; a read that covers the 26-byte names or the 31-byte labels, or a read watch on a loaded copy, gives the reader, and a reader that steps by 26 or 31 bytes settles it. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
+
+### Q5
+
+**What was measured.** The 630 name slots hold 8,771 bytes after the terminating NUL: 6,684 are `0xCD` and 2,087 are `0x00`. In 176 slots that pad is not entirely `0xCD`.
+
+**What was tried.** This is a pad-byte count on the section-0 names. The page already records that the loader reads 24 bytes times the count and seeks away without reading the names, and that a zero AI lookup leaves a zeroed buffer.
+
+**What would settle it.** A read of a 22-byte section-0 slot past the 24 × count rows (`0x4AB42E`), or a memory search for `Floor39` followed by a read watch, settles it. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
+
+### Q8
+
+**What was measured.** The 2,873 four-byte rows at `QWOD0.WSX+0x72E4D3` are 11,492 bytes. All 2,873 little-endian dwords are different, and none is 0.
+
+**What was tried.** This is a row-value count in the shared block. The page already records the leading count of 2,873, the identical bytes in all 18 MAPs, and the seeks that skip the block in the standard, conversion and editor cases.
+
+**What would settle it.** Log the reads of the MAP loader `0x43E6B0`; a reader of the span at header +0xCC, followed to the first typed use of one row, settles it. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
