@@ -78,17 +78,25 @@ spans. Shutdown writes the index back to its stored position
 **UNCONFIRMED** (what produces the block, and what leaves 0x67).
 `DAT/cdcache.wsx` is 114 bytes plus 51 copies of one 64,000-byte
 block. The block is not present in `LOL3.DAT`, `LOL3.EXE`, or
-this installation's game-written cache. The shipped dword at
+this installation's game-written cache, and sampled 16-byte pieces of
+it are absent from the other `DAT` files and the root `cdcache.lst` /
+`CDCACHE.LS_` (stored bytes). The shipped dword at
 +0x72 is `0xD0BCD8BE`, the first dword of that block, not the
 live marker `0xF1E2D3C4`.
 
 Every reference to the index base `0x7F39F8` lies in
-`0x4FE390–0x4FED37`. Across `0x4FE390–0x4FEE7D` no operand is
-+0x17, and the address of row 0's byte +0x17 (`0x7F3A0F`) does
-not occur in the code section. The byte is inside the 0x3C0-byte
-read at `0x4FE4EF`, the matching write at `0x4FE675`, the
-0xF0-dword clear at `0x4FE4AF` (the read then replaces it), and
-the 6-dword row copy at `0x4FE9BA`. Bytes +0x14, +0x15 and +0x16
+`0x4FE390–0x4FED37`, and the address of row 0's byte +0x17
+(`0x7F3A0F`) does not occur in the code section. The row loops walk
+pointers that start part-way into a row (`0x7F3A0D`, `0x7F3A0E`,
+`0x7F3A24`, `0x7F3A3C`, `0x7F39FC`, `0x7F3A04`); read against those
+starts, their accesses reach only row bytes +0x0, +0x4, +0x8, +0x10,
++0x14, +0x15 and +0x16 (a manual review of `0x4FE390–0x4FEE7D`; the
+tool counts absolute addresses only). The byte travels inside the
+0x3C0-byte read at `0x4FE4EF`, the matching write at `0x4FE675`, the
+0xF0-dword clears at `0x4FE4AF` (the read then replaces it) and
+`0x4FE3C7` (the create path, after which rows 0 and 1 are written
+only up to +0x15, so a new index holds 0 at +0x17), and the 6-dword
+row copies at `0x4FE9BA` and `0x4FEC0E`. Bytes +0x14, +0x15 and +0x16
 have their own stores, listed on the format page. In this
 installation all 8 occupied rows hold 0x67 at +0x17, as do 12
 empty rows, and 17 of the 40 rows have +0x17 equal to +0x16.

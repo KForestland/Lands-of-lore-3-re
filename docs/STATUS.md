@@ -10,7 +10,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (18 checks; all pass o
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
 - **Rules traced:** 245 statements labelled CONFIRMED against the program or the files, 75 labelled UNCONFIRMED, on 71 current pages.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
-- **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
+- **Open questions:** 13: 3 answered, 5 mostly, 5 partly.
 <!-- rating:end -->
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
