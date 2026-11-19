@@ -23,7 +23,7 @@ QWOD0 seen from above. Dark edges occur once in the surface table and pale edges
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Executable pages** in [`docs/`](docs/README.md): the WSX, LMF, texture, MAP/ODF, script, item, spell, dialogue, combat and save readers in the game program `LOL3.DAT`.
-- **Tools** in [`tools/`](tools/README.md): twelve checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a save-header reader, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
+- **Tools** in [`tools/`](tools/README.md): fifteen checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a save-header reader, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -44,7 +44,7 @@ The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are no
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 14 checks, ends with ALL 14 CHECKS PASSED (or 11 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py                  # 15 checks, ends with ALL 15 CHECKS PASSED (or 12 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```

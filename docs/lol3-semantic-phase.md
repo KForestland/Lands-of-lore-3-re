@@ -99,7 +99,8 @@ stride at `0x43EADF–0x43EB04`.
 the program reads).** The adjacent bytes `C5 A5` occur 195 times in
 the texture entry at `QWOD0.WSX+0x36` (6,871,261 bytes), twice in the
 MAP at `QWOD0.WSX+0x730744` and `+0x730748`, once in the light map at
-`QWOD0.WSX+0x694783`, and not at all in the ODF. The retail executable
+`QWOD0.WSX+0x694783`, and not at all in the ODF. The texture and light-map hits are in
+LZO-compressed bytes, which carry no field meaning. The retail executable
 image contains that byte pair once, at file `0xBC607`. Residues 0 through 7 of those 195 texture offsets hold 22, 24, 27,
 28, 24, 21, 20 and 29, and no distance between them repeats more
 than twice. No byte
@@ -107,14 +108,19 @@ column of the MAP's 8-byte vertices, 8-byte section-1 rows, 56-byte
 surfaces or 8-byte waypoints steps from `C5` to `A5`.
 
 The two MAP copies sit four bytes apart inside a 64-byte run of
-4-byte groups at `QWOD0.WSX+0x730738`. No header dword in that MAP
+4-byte groups at `QWOD0.WSX+0x730738`, within the unidentified fixed
+block from MAP +0x244 (header end) to +0x2F2C (field 0). No header dword in that MAP
 equals the run's start. Decoding both light maps (5,364 QWOD0 members
 and 10,232 SWOD4 members; each member is 44 bytes plus two bytes per
 sample) finds none of `0x0B`, `0xC5`, `0xA5`, `0xAD` or `0xEB` as a
-sample's high byte.
+sample's high byte. The largest high byte is 82 in QWOD0 and 127 in
+SWOD4, so only `0x0B` is a test the data could have passed.
 
-Whole-archive mode changes were counted for windows of 64, 256, 1,024,
-4,096 and 16,384 bytes. `C5` to `A5` occurs once, at the 64-byte size
+Whole-archive mode changes (the most frequent byte of each
+non-overlapping window from the file start, ties to the lowest
+byte) were counted for windows of 64, 256, 1,024, 4,096 and
+16,384 bytes. The SWOD4 change `0B` to `00` is common at 64 bytes
+(69 in SWOD4, 108 in QWOD0), so it does not single out an edge. `C5` to `A5` occurs once, at the 64-byte size
 in `QWOD0.WSX`, and at none of the larger sizes. The history note's
 span `0768-1280` is not a field stored in either MAP header.
 
