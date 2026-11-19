@@ -15,7 +15,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (24 checks; all pass o
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
-**Running-game results** (original program under Wine with a debugger and a silent audio device, one run each; [procedures and results](NEEDS_A_RUNNING_GAME.md)): the texture format (Q6) and the movie colour conversion (Q9) are answered for one display; a spell that spends an item charge instead of mana (Q12) and the save fields of a turn, a step and an item move (Q13) are partly answered.
+**Running-game results.** Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](NEEDS_A_RUNNING_GAME.md#answered-probes). Runs on hand-edited copies of a game-written save: [edited saves](EDITED_SAVES.md).
 
 | Area | Pages | Tool check (re-run 2026-11-18) | Open |
 |---|---|---|---|
