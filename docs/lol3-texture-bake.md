@@ -276,7 +276,7 @@ is at least π, or the float at `0x54077C` otherwise
 The row loop selects slices in descending order. Equal heights
 visit `slice_count - 1` through zero (`0x4E3140–0x4E318C`).
 For unequal heights, the setup divides the slice count by the
-effective output height, starts the phase at 0.5, and subtracts
+effective output height, starts the phase at 0.0 (the float at `0x54076C`), and subtracts
 1.0 while the phase strictly exceeds 1.0, backing up one slice
 each time. It adds the ratio for the next output row
 (`0x4E31E4–0x4E3275`; constants `0x540768/0x54076C`).
@@ -339,7 +339,8 @@ palette bake maps these to `0x8000` and `0x83C0`
 (`0x4826DB–0x482720`). The two alternatives therefore
 give different output even at the first pixel.
 
-**CONFIRMED.** For all 20 original records, the selected
+**CONFIRMED.** For the 20 source mips (four banks) of the cache's
+flag-`0x02AC`/`0x82AC` records, the selected
 helper sets start column and row flags to zero and the count
 to the stored width (`0x4E0CA8–0x4E0CD6`). An unscaled bake
 uses each returned byte as an index into the 256-word table
@@ -363,12 +364,17 @@ different positions per bank, in mip order.
 | `EWOD1.WSX+0x36` | +0x1ED42E | +0x2084B0, +0x20C6BC, +0x20D7C8, +0x20DC54, +0x20DDA0 |
 | `RVOL0.WSX+0x36` | +0xABD99 | +0xB11A7, +0xB53B3, +0xB64BF, +0xB694B, +0xB6A97 |
 
+`check_all.py` runs `tools/lol3_native_checks.py --check`, which checks the
+pickup and copy-dispatch anchors only; the SMD scale, slice and crop
+addresses are cited, not machine-checked. The separate command
 `tools/lol3_native_checks.py --data DAT --check --decode-copy`
 replays the fixed-width and span index reads on the shipped
 archives using liblzo2. It checks the dispatch instructions,
 all row headers, both first indexes, their palette witness
 and the two-matrix difference counts. It needs no game-written
-cache and writes no images.
+cache and writes no images. All pixels of these mips are index 3, so
+the difference counts measure where the row-header bytes fall; the same
+flagged five-mip set exists in all 18 banks (90 mips, identical counts).
 
 **CONFIRMED.** In the remap dispatcher, both words masked with 0x211
 give 0x200, selecting `0x42136E` (`0x421326–0x421345`). This path

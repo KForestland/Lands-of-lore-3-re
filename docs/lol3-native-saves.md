@@ -202,7 +202,8 @@ the same world pointer already recorded at player +0x132
 `0x40BA1F`, then passes operation 0x13 to the item's handler
 at `0x40BA51`.
 
-**CONFIRMED, immediate stores.** For a successful, ordinary
+**CONFIRMED stores; the save differences are UNCONFIRMED until a save
+pair shows them.** For a successful, ordinary
 nonstacked pickup with a free player row and empty cursor,
 let `i` be the outgoing world row and `j` the allocated
 player row. The following offsets are relative to the section's
@@ -230,7 +231,10 @@ adjustment and compression calls are at `0x437FC0`, `0x437FDC`
 and `0x437FEF`. `tools/lol3_native_checks.py --data DAT --check`
 verifies the vtable, writer selection, calls and store anchors.
 
-**UNCONFIRMED, native slot comparison.** This static pass followed
+**UNCONFIRMED, native slot comparison.** The predicted differences in
+the table above stay unconfirmed, and other stores on the path (for
+example `[0x5D500E]` at `0x40B874`, `[0x5D5012]`/`[0x58613C]` at
+`0x4D75DA`/`0x4D75EC`) may change too. This static pass followed
 the original call and writers. The previous trials exercised an
 inventory transfer and a cursor release. A matched pickup needs a
 save containing a reachable, nonstacked world item, an empty cursor
