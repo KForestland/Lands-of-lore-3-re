@@ -20,7 +20,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 303 statements CONFIRMED (proved from the program code or the files) and 59 UNCONFIRMED (a reading not yet proved), on 75 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 305 statements CONFIRMED (proved from the program code or the files) and 60 UNCONFIRMED (a reading not yet proved), on 76 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -30,6 +30,8 @@ These are counts of work done, not a percentage of how complete the project is. 
 The level QWOD0 seen from above, drawn from its map file: each line is an edge of a surface; dark edges belong to one surface and pale edges are shared. Hollow squares are waypoints, dashed lines are paths (this level has none), and dots are the rows of the five placement tables (type 3, type 16, creature, mover, item), numbered from 1; numbers that would overlap are left out and counted under the legend. Heights are not drawn. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
 
 ## Tools at a glance
+
+[How a level is put together](docs/HOW_A_LEVEL_IS_PUT_TOGETHER.md) · [Numbers at a glance](docs/NUMBERS.md)
 
 What you can look at with your own copy of the game. Run from the clone with `export LOL3_DAT=/path/to/your/LoL3/DAT` (and `LOL3_SLOT` set to one of your own save files for the last line); pictures and files go only where you point them (here `../lol3-out`, outside the clone; make it first with `mkdir -p ../lol3-out`). The texture line needs the cache the game writes when it first runs. Every tool and option is in [`tools/README.md`](tools/README.md), with a table of every format and how to look at it.
 
