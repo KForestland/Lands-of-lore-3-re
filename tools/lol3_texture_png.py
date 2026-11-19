@@ -23,7 +23,7 @@ import lol3_cli
 from extract_wsx_entries import wsx_name_hash
 from lol3_texture_archive import cache_rows
 from lol3_texture_palettes import bank_directory, u32
-from lol3_texture_spans import cache_path
+from lol3_texture_spans import CACHE_MISSING, cache_path
 from walk_lmf_leaves import lzo_decoder
 
 RAW_FLAGS = frozenset((0x008B, 0x00A9, 0x00C3, 0x00E1,
@@ -207,6 +207,7 @@ def png_bytes(width, height, rgba):
 
 def main(stack):
     parser = lol3_cli.tool_args(__doc__, out_help="write one PNG outside the repository and game tree")
+    parser.add_argument("--cache", help="game-written cdcache.wsx (default: next to DAT)")
     parser.add_argument("--offset", type=lambda value: int(value, 0))
     parser.add_argument("--decode-slices", action="store_true",
                         help="with --check, expand original SMD frames and check every run (liblzo2)")
@@ -222,12 +223,13 @@ def main(stack):
     if args.decode_slices and not args.check:
         parser.error("--decode-slices requires --check")
     try:
-        if cache_path(args.data) is None:
+        cache_file = cache_path(args.data, args.cache)
+        if cache_file is None:
             if args.check:
-                print("CHECK texture_png: SKIP: game-folder cdcache.wsx is absent")
+                print(f"CHECK texture_png: SKIP: {CACHE_MISSING}")
                 return 0
-            raise ValueError("game-folder cdcache.wsx is absent")
-        path, allocations = cache_rows(args.data)
+            raise ValueError(CACHE_MISSING)
+        path, allocations = cache_rows(args.data, cache_file)
         cache = path.read_bytes()
         if args.list_slices:
             decode = lzo_decoder()
@@ -295,7 +297,7 @@ def main(stack):
                 continue
             output = Path(args.out).resolve()
             repo = Path(__file__).resolve().parents[1]
-            if any(root in output.parents for root in (repo, path.resolve().parent)):
+            if any(root in output.parents for root in (repo, path.resolve().parent, Path(args.data).resolve().parent)):
                 parser.error("--out must be outside the repository and game tree")
             with output.open("xb") as destination:
                 destination.write(png_bytes(width, height, rgba))
@@ -311,7 +313,7 @@ def main(stack):
         print(f"CHECK texture_png: {len(seen)} records, {sum(decoded.values())} decoded, "
               f"{slice_result}, "
               f"{sum(unconfirmed.values())} unconfirmed ({counts or 'none'}), {errors} failures; "
-              f"arm 3 source palettes in {len(banks)} banks; in the game-written game-folder cdcache.wsx")
+              f"arm 3 source palettes in {len(banks)} banks; in the game-written cdcache.wsx")
         return int(not seen or errors > 0)
     except (OSError, ValueError, struct.error) as error:
         parser.exit(1, f"texture PNG: {error}\n")

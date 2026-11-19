@@ -31,6 +31,24 @@ QWOD0.WSX+0x72e28b: 1308 vertices, 1430 surfaces, waypoints 1, paths 0, type 3 4
 
 The SVG is an overhead line drawing: surface edges, one hollow waypoint square, and numbered placement dots (type 3, type 16, creature, mover, item); 327 overlapping numbers are left out. No game pixels.
 
+## Check the texture cache
+
+The original game writes a texture cache named `cdcache.wsx` in its game folder, beside `DAT`, when it first runs. To get one, start the game once from your installation; the checks then find the file there. The 3 MB `DAT/cdcache.wsx` the game ships is only the seed and holds no texture records. Without the game-written file the other 23 checks still run. [Cache and row spans](formats/textures.md#the-cache-file)
+
+```bash
+python3 tools/check_all.py
+# If your matching game-written cache is stored elsewhere:
+python3 tools/check_all.py --cache /path/to/game-written/cdcache.wsx
+```
+
+The following checks each print a single `SKIP` line when the game-written cache is absent. Run them individually with `--check` and, if needed, the same `--cache` option.
+
+| Tool | What it checks |
+|---|---|
+| `lol3_texture_spans.py` | For flags 0x028E and 0x828E, each payload consumes exactly the stored number of rows, every row fits within the width, and the final row ends at the payload boundary. [Row spans](formats/textures.md) |
+| `lol3_texture_palettes.py` | Each of those span records is named by exactly one texture descriptor whose palette arm is 3 and whose palette key is in range, and, as in the documented cache, the four texture banks hold 191, 243, 395 and 25 of them. [Palette source](formats/textures.md) |
+| `lol3_texture_png.py` | The full cache directory joins record positions and arm-3 palettes. It decodes supported raw and span formats, validates SMD references, checks the remaining unconfirmed flags against the measured full-width row layout, and counts them. `--decode-slices` also checks original SMD runs with liblzo2. [Cache-to-PNG checks](lol3-texture-bake.md#cache-record-to-png) |
+
 ## Read your position from a save
 
 ```bash

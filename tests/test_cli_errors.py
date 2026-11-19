@@ -66,5 +66,21 @@ class ReaderErrors(unittest.TestCase):
             with self.subTest(size=len(content)):
                 self.assert_bad("lol3_texture_spans.py", "--data", self.data, "--list", 1)
 
+    def test_missing_optional_texture_cache(self):
+        # The shipped seed must not be picked up as a game-written cache.
+        (self.data / "cdcache.wsx").write_bytes(b"shipped seed")
+        for name in ("texture_spans", "texture_palettes", "texture_png"):
+            tool = f"lol3_{name}.py"
+            with self.subTest(tool=tool):
+                run = subprocess.run(
+                    [sys.executable, str(TOOLS / tool), "--data", str(self.data), "--check"],
+                    cwd=self.root, env=self.env, capture_output=True, text=True, timeout=10,
+                )
+                self.assertEqual(run.returncode, 0, run.stderr)
+                self.assertEqual(run.stderr, "")
+                self.assertEqual(len(run.stdout.splitlines()), 1)
+                self.assertTrue(run.stdout.startswith(f"CHECK {name}: SKIP: no game-written cdcache.wsx"))
+                self.assert_bad(tool, "--data", self.data, "--check", "--cache", self.root / "wrong.wsx")
+
     def test_save(self):
         self.bad_files("SAVE.000", b"short", "lol3_save_header.py", "--data", self.data, self.data / "SAVE.000")

@@ -56,8 +56,8 @@ def chunks(data):
     raise ValueError("missing zero-length texture terminator")
 
 
-def cache_rows(data_dir):
-    path = cache_path(data_dir)
+def cache_rows(data_dir, explicit=None):
+    path = cache_path(data_dir, explicit)
     if path is None:
         raise ValueError("missing game-folder cdcache.wsx")
     with Path(path).open("rb") as source:

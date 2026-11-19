@@ -15,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 
 import lol3_cli
-from lol3_texture_spans import cache_path, records
+from lol3_texture_spans import CACHE_MISSING, cache_path, records
 
 
 def u32(data, at):
@@ -83,13 +83,16 @@ def palette_sources(data):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
+    parser.add_argument("--cache", help="game-written cdcache.wsx (default: next to DAT)")
     args = parser.parse_args()
     try:
-        path = cache_path(args.data)
+        path = cache_path(args.data, args.cache)
         if path is None:
-            print("CHECK texture_palettes: SKIP: no game-folder cdcache.wsx next to the DAT folder (the game writes this cache when it runs; the shipped DAT/cdcache.wsx holds no texture records)")
-            return 0
+            if args.check:
+                print(f"CHECK texture_palettes: SKIP: {CACHE_MISSING}")
+                return 0
+            raise ValueError(CACHE_MISSING)
         rows = palette_sources(Path(path).read_bytes())
         if args.check:
             by_bank = Counter(row["bank_offset"] for row in rows.values())

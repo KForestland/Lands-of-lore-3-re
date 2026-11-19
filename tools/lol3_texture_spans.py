@@ -18,11 +18,13 @@ import re
 import struct
 import sys
 from collections import Counter
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lol3_cli  # noqa: E402
 
 FLAGS = (0x028E, 0x828E)
+CACHE_MISSING = "no game-written cdcache.wsx next to DAT (supply --cache or use a copy with its generated cache)"
 
 
 def records(blob):
@@ -48,21 +50,28 @@ def records(blob):
             yield o, flag, w, h, size, ok and p == end
 
 
-def cache_path(data_dir):
+def cache_path(data_dir, explicit=None):
+    if explicit is not None:
+        if not Path(explicit).is_file():
+            raise ValueError(f"cache file does not exist: {explicit}")
+        return explicit
     for name in ("cdcache.wsx", "CDCACHE.WSX"):
         p = os.path.join(os.path.dirname(os.path.abspath(data_dir)), name)
-        if os.path.exists(p):
+        if os.path.isfile(p):
             return p
     return None
 
 
 def main():
-    ap = lol3_cli.tool_args(__doc__)
+    ap = lol3_cli.tool_args(__doc__, writes=False)
+    ap.add_argument("--cache", help="game-written cdcache.wsx (default: next to DAT)")
     ap.add_argument("--list", type=int, default=0)
     a = ap.parse_args()
-    path = cache_path(a.data)
+    path = cache_path(a.data, a.cache)
     if path is None:
-        print("CHECK texture_spans: SKIP: no game-folder cdcache.wsx next to the DAT folder (the game writes this cache when it runs; the shipped DAT/cdcache.wsx holds no texture records)")
+        if a.list and not a.check:
+            raise ValueError(CACHE_MISSING)
+        print(f"CHECK texture_spans: SKIP: {CACHE_MISSING}")
         return 0
     with open(path, "rb") as source:
         blob = source.read()
