@@ -338,9 +338,12 @@
       "question_references": [],
       "tools": [
         "tools/check_all.py",
+        "tools/lol3_level_schematic.py",
         "tools/lol3_lzo_writer.py",
+        "tools/lol3_map_writer.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_writer.py",
+        "tools/lol3_script_notes.py",
         "tools/lol3_wsx_writer.py"
       ]
     },
@@ -986,8 +989,11 @@
       "question_references": [],
       "tools": [
         "tools/lol3_claimed_edges.py",
+        "tools/lol3_level_schematic.py",
         "tools/lol3_map_spans.py",
-        "tools/lol3_odf_companions.py"
+        "tools/lol3_map_writer.py",
+        "tools/lol3_odf_companions.py",
+        "tools/lol3_script_notes.py"
       ]
     },
     {
@@ -1215,6 +1221,7 @@
         "tools/lol3_level_schematic.py",
         "tools/lol3_lzo_writer.py",
         "tools/lol3_map_spans.py",
+        "tools/lol3_map_writer.py",
         "tools/lol3_media_check.py",
         "tools/lol3_name_hash.py",
         "tools/lol3_native_checks.py",

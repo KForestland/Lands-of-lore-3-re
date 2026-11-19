@@ -422,6 +422,50 @@ epilogue `0x4FD8E4` and leaves the zeros. The caller does not
 test the return. `lol3_odf_companions.py --check` re-counts the
 names, the joins and these bytes.
 
+## Writing the stored fields
+
+**CONFIRMED.** `lol3_map_writer.py --check --data /path/to/DAT` reads each
+of the 18 MAPs into fields, writes it again in memory and gets the same
+bytes. Command lengths are the 39 opcode sizes that the English retail
+image returns at `0x4E56F0/0x4E5790`. The region stream (MAP +0x3C/+0x84)
+holds 4,040 command records and the object stream (+0x44/+0x8C) holds
+54,940, group headers included; these are the counts on the
+[opcode page](lol3-script-opcodes.md). 33 of the 39 opcodes occur. The
+other rows are 2,384 waypoints (`0x43EBD9–0x43EC45`), 36 paths
+(`0x43EC4D–0x43EC92`) and 23,850 placements (`0x43EEB6–0x43EF6F`, X/Z
+taken by `0x4411F0`).
+
+Only 2.3% of the MAP bytes are regenerated from parsed fields. The other
+97.7% are copied as stored bytes, so the check proves the framing of these
+rows and commands, not the meaning of the copied bytes. Totals over the
+18 MAPs (21,232,680 bytes):
+
+| Part | Written from fields | Copied as stored bytes |
+|---|---:|---:|
+| Region commands: opcode, selector, index, typed operands | 23,466 | 4,021 (operand bytes without a field) |
+| Object commands: the same | 336,202 | 95,293 (operand bytes without a field) |
+| Waypoint rows (8 bytes: X, Z, u16, two u8) | 19,072 | — |
+| Path rows (4 bytes: u16, two u8) | 144 | — |
+| Placements: X/Z words; mover state bytes +0x21–+0x28 (`0x4D591B–0x4D5994`) | 95,400 + 6,688 | 797,463 (the other row bytes) |
+| Waypoint labels | — | 61,984 |
+| Path labels | — | 1,116 |
+| Shared block, MAP +0x244 through +0x2F2B in each MAP | — | 206,928 (11,496 × 18) |
+| Surface-to-script gap | — | 1,784 |
+| All other MAP bytes: header 10,440, vertices 915,864, section 1 rows 1,343,536, surfaces 6,661,256, object index 219,864, event pools 267,228, and 10,164,931 in the other MAP sections | — | 19,583,119 |
+| **Total** | **480,972** | **20,751,708** |
+
+The CHECK line prints both totals. It then changes one object-command
+operand, one waypoint X and one creature Z in memory. Only those bytes
+change, and `lol3_script_notes.py` and `lol3_level_schematic.py` read the
+new values.
+
+**CONFIRMED.** `--list STEM` prints the MAP offset, WSX offset, size and
+SHA-256 of the four copied spans named in the table: the shared block,
+both label ranges and the gap. It does not print their bytes. In CKEEP,
+for example, the waypoint labels start at `CKEEP.WSX+0xCC59A6`. What the
+shared block holds remains **UNCONFIRMED**, as described in
+[Q8](#q8).
+
 ## Close-out
 
 ### Q4
