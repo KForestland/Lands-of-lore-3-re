@@ -179,7 +179,7 @@ In this sample the table was at `0x65D3F0`, the input at
 `0x02045918` and the destination at `0x02191AD0`.
 At return `0x495635`, all 128 destination words agreed
 with their individual lookups in memory. The trace printed
-the first 16 input and output words and the match count for
+the first 16 input bytes and output words and the match count for
 all 128. The live table has no confirmed join to a particular
 cache record or documented palette source.
 
