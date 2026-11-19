@@ -18,7 +18,7 @@ Counted by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
-- **Rules traced:** 254 statements labelled CONFIRMED against the program or the files, 80 labelled UNCONFIRMED, on 71 current pages.
+- **Rules traced:** 255 statements labelled CONFIRMED against the program or the files, 80 labelled UNCONFIRMED, on 71 current pages.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
 - **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
 <!-- rating:end -->
@@ -81,7 +81,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 | Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced; under Wine on a 16-bit display the intro converts 5-5-5 codebook words to 5-6-5 (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (only the on-screen look of effect objects is open); per-level summaries (Q11) |
-| Items, spells, dialogue, combat | Traced in the program: 343 item rows, six item handlers, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: most per-item effects and mitigation names (Q12) |
+| Items, spells, dialogue, combat | Traced in the program: 343 item rows, fourteen regular item handlers, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: most per-item effects and mitigation names (Q12) |
 | Saves | Header, directories and compression mapped on 47 saves the original program wrote in our copy (player saves, not shipped; no tool here re-checks them); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
 
 ## Repository layout
