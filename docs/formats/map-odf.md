@@ -25,7 +25,7 @@ Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 
 **Section 0. CONFIRMED.** Field 19 counts eight-byte signed 16.16
 X/Z pairs at field 0. A 34–8,399-byte tail follows the vertices
-before field 1. The native +0xC8 seek binds its 8-byte waypoint rows (positions that creature paths step through, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)) and the file partitions into points, name slots and a final counted span. The first 4 bytes per path are a native path record. The name slots and remaining 31 bytes per path are not read by the game (**CONFIRMED**, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)). This explains the earlier
+before field 1. The native +0xC8 seek binds its 8-byte waypoint rows (positions that creature paths step through, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)) and the file partitions into points, name slots and a final counted span. The first 4 bytes per path are a native path record. The loader's 23 seek/read paths skip the 26-byte name slots and the 31-byte path labels (**CONFIRMED**, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)). This explains the earlier
 measurement that only 88% of the section's 8-byte slots look like points: 110,373 of 124,764 slots
 have that shape, 108,043 of them whole-number vertices; the rest of the 114,483 vertices have a
 fraction, and 2,330 point-like slots lie in the tails.
@@ -79,6 +79,6 @@ python3 tools/lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))
 
-- The remaining MAP waypoint and surface fields, the meanings of the section-1 bits (each byte now has a native reader), the label spans and the gap before field 16.
+- The remaining MAP surface and section-1 bit meanings, the authoring code for the label spans and a typed consumer for the gap before field 16. Waypoint byte +6 enters predicate 41's distance limit at `0x4BDED6–0x4BDEE9`.
 - The header fields not yet bound by the [native readers](../lol3-map-odf-readers.md) (MAP fields 19–21 and ODF fields 0–4 and 14–20 are bound).
 - The ODF per-row meanings, a reader of the 22-byte section-0 names, and what follows the field-2 252-byte rows.

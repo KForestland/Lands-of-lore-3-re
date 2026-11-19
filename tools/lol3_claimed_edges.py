@@ -33,6 +33,23 @@ MAP_SEEKS = {
     0x43EEB6: 0x14, 0x43EEE0: 0x18, 0x43EF0A: 0x1C, 0x43EF34: 0x24,
     0x43EF5E: 0x20, 0x43EF9A: 0x48,
 }
+MAP_MODE_CODE = {
+    0x43E6E0: "8a 0d 80 53 5d 00 f6 d9 1b c9 83 e1 9c 81 c1 c8 00 00 00 8b f9 89 3d b0 38 58 00",
+    0x43E73B: "a0 80 53 5d 00 f6 d8 1b c0 24 9c 05 2c 01 00 00 8b f8 89 3d 68 97 58 00",
+    # Option lookup, jump past header checks, tag/count checks and error return.
+    0x43E7EF: "68 ac 97 54 00 e8 97 60 ff ff 83 c4 04 85 c0 75 25 83 7c 24 14 26 75 06 "
+              "39 6c 24 6c 75 18 57 e8 4d 6f ff ff 83 c4 04 33 c0 5f 5e 5d 5b 81 c4 60 04 00 00 c2 08 00",
+}
+MAP_TAIL_CODE = {
+    # Vertex, waypoint and path read widths, then the waypoint predicate.
+    0x4F01EE: "8d 3c f5 00 00 00 00 8d 47 04 50 e8 c2 81 02 00 83 c4 04 85 c0 74 20 "
+              "8b 4c 24 0c 89 30 83 c0 04 4e 89 74 24 10 8b f0 57 56 51",
+    0x43EBF9: "8d 1c c5 00 00 00 00 8b e8 8d 53 04 52 e8 b5 97 0d 00 83 c4 04 85 c0 74 1b "
+              "89 28 83 c0 04 4d 53 89 6c 24 14 8b e8 55 57 e8 7a 6b ff ff",
+    0x43EC6D: "8d 2c 85 00 00 00 00 55 e8 46 97 0d 00 83 c4 04 8b d8 55 53 57 e8 19 6b ff ff",
+    0x4BDED6: "8a 4e 06 ba 00 00 00 00 c1 e1 05 2b c1 2b c3 8b 5c 24 30 0f 98 c2",
+    0x4BE2F4: "92 de 4b 00",
+}
 
 
 def u32(buf, at):
@@ -59,6 +76,13 @@ def column_hits(payload, start, count, stride, pair):
 
 
 def check_shared_map_block(image, maps):
+    for va, raw in (MAP_MODE_CODE | MAP_TAIL_CODE).items():
+        at = va - CODE_BIAS
+        expected = bytes.fromhex(raw)
+        if image[at:at + len(expected)] != expected:
+            raise ValueError(f"MAP native anchor {va:#x} changed")
+    if image[0x147FAC:0x147FBA] != b"-CONVERT_TEST\0":
+        raise ValueError("MAP conversion option name changed")
     header_read = 0x43E7DA - CODE_BIAS
     if image[header_read:header_read + 21] != bytes.fromhex(
         "8d 54 24 14 8b f8 68 44 02 00 00 52 57 e8 b4 6f ff ff 83 c4 0c"
@@ -91,16 +115,27 @@ def check_shared_map_block(image, maps):
             raise ValueError(f"nested MAP seek call at {va:#x} changed")
     if len(maps) != 18:
         raise ValueError(f"expected 18 MAPs, found {len(maps)}")
+    fields = (*MAP_SEEKS.values(), 0x30)
     for stem, payload in maps.items():
-        if u32(payload, 0x30) < MAP_VERTICES:
-            raise ValueError(f"{stem}: nested seek (header +0x30) before MAP vertices")
         if (u32(payload, 0xCC), u32(payload, 4)) != (MAP_HEADER, MAP_VERTICES):
             raise ValueError(f"{stem}: shared MAP block bounds changed")
-        if any(u32(payload, field) < MAP_VERTICES for field in MAP_SEEKS.values()):
+        if any(u32(payload, field) < MAP_VERTICES for field in fields):
             raise ValueError(f"{stem}: native seek before MAP vertices")
         block = payload[MAP_HEADER:MAP_VERTICES]
         if len(block) != 4 + 4 * u32(block, 0) or sha256(block).hexdigest() != SHARED_MAP_DIGEST:
             raise ValueError(f"{stem}: shared MAP block contents changed")
+        # Only the vertex, waypoint and path reads may start below the end
+        # of either label span. Their bounded sizes exclude both spans.
+        sizes = {0x04: 8 * u32(payload, 0x50), 0xC8: 8 * u32(payload, 0xC4),
+                 0xDC: 4 * u32(payload, 0xD8)}
+        for lo, hi in ((u32(payload, 0xC8) + sizes[0xC8], u32(payload, 0xDC)),
+                       (u32(payload, 0xDC) + sizes[0xDC], u32(payload, 0x08))):
+            if lo == hi:
+                continue
+            for field in fields:
+                start = u32(payload, field)
+                if start < hi and (field not in sizes or start + sizes[field] > lo):
+                    raise ValueError(f"{stem}: MAP seek +{field:#x} could overlap labels")
 
 
 def file_facts(data_dir):
@@ -214,6 +249,9 @@ def main():
           f"no MAP column steps from C5 to A5; SWOD4 surface +4 is 0/2/6/0x0B on 2393/14/29/0 rows{decoded}")
     print("CHECK claimed_edges: 18 identical 0x2CE8-byte MAP blocks fit 2,873 four-byte rows; "
           "all 23 native post-header seeks (22 direct, 1 nested) start at the vertices or later")
+    print("CHECK claimed_edges: the two editor limits and conversion guard match the executable; "
+          "the 23 seek sites and read widths exclude both label spans on all 18 MAPs; "
+          "waypoint predicate 41 uses row byte +6")
     return 0
 
 

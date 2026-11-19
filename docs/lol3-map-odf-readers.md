@@ -31,15 +31,36 @@ at `0x43E293`, which leads to `0x43E304`, the only caller of the retail
 loader above. An exact 24-byte prefix and suffix search of the original
 `DAT` directory and `LOL3.DAT` finds this block only inside the 18 MAPs.
 
+**CONFIRMED.** The conversion option `-CONVERT_TEST` (`LOL3.DAT+0x147FAC`)
+is looked up at `0x43E7F4` after the MAP header read. A match branches to
+`0x43E825`. With the option absent, the same address is reached only
+when the header begins with 38 and the surface count at +0x58 is
+nonzero (`0x43E7FC–0x43E822`). Both accepted cases continue with the
+same handle and header to the seek at `0x43E884`. The other five
+operands referencing this option are at `0x43F742`, `0x43FC96`,
+`0x44051B`, `0x440608` and `0x440BCE`, in the level texture, level ODF,
+shared definition and light-map loaders.
+
+**CONFIRMED.** Editor flag byte `[0x5D5380]` changes two arena limits
+before the MAP header read. Zero gives limits of 200 and 300. A nonzero
+flag gives 100 and 200 (`0x43E6E0–0x43E6F5`, `0x43E73B–0x43E74D`).
+Both values use the same MAP open and read at `0x43E7D2` and `0x43E7E7`.
+The flag also selects `c:\leved\` shared bank paths at
+`0x43FFE4–0x44000D` and disables cache-name resolution at
+`0x4E4599–0x4E45A0 → 0x4E4AF3`; the resource wrapper then uses the
+supplied path at `0x4356D3–0x4356DB`. The separate `-LEVED` string at
+`LOL3.DAT+0x144608` has one direct code reference, the check at
+`0x40E84C–0x40E85B`. These branches add no MAP reads in the loader above.
+
 **UNCONFIRMED.** The shared block's purpose, whether the leading u32 is a
-row count, any fields within the four-byte rows, and whether another
-program consumes it.
-To settle it, find a shipped reader that accesses the span at header
-+0xCC, then follow a full row to its first typed use. A future native
-trace on the MAP handle across resource reads at `0x4357A0` can also
-test whether that span is requested elsewhere during a level load.
-`lol3_claimed_edges.py --check` checks the original blocks, the 22
-direct seek sites and the nested seek.
+row count, the fields within the proposed four-byte rows, and whether a
+separate program consumes them. The conversion option, editor flag,
+`.map` suffix and seek paths were checked in the shipped image. To settle
+the layout, find an original reader that accesses the span at header
++0xCC and follow a row to its first typed use. A future trace of the MAP
+handle at `0x4357A0` can test for reads from an indirect caller during
+level load. `lol3_claimed_edges.py --check` verifies the block in the
+original archives, the conversion and editor branches and the 23 seek sites.
 
 ## MAP section 0
 
@@ -135,8 +156,11 @@ Six levels use only the value 2: CKEEP, ISHAT, JUNDR, MLOW2,
 OLOW3 and QWOD0. The save record at `0x436077–0x43608C`
 copies the table pointer and a byte length of count × 8, so
 the saved image includes this byte. Byte +6 is a distance
-limit in steps of 32 X/Z units. `0x4B8A38–0x4B8A46` stores a
-waypoint row pointer in `0x7D772C`. The creature test loop at
+limit in steps of 32 X/Z units. Creature command 0x0D subcommand 16
+reads the command's u16 +6. It clears `0x7D772C` for `0xFFFF` or
+stores the corresponding waypoint row pointer there
+(`0x4B8A0D–0x4B8A46`). The [opcode census](lol3-script-opcodes.md#creature-subcommands-of-opcode-0x0d)
+found zero stored instances of that subcommand. The creature test loop at
 `0x4BD7F4–0x4BDF1F` runs indexes 0–48 through the table at
 `0x4BE250`. Index 41 (`0x4BDE92–0x4BDEEC`) passes row s16 +0/+2
 and the creature's dwords +4/+8, each shifted right 16, to the
@@ -151,7 +175,7 @@ the value returned by the creature's virtual call +0x14
 The `0x7D772C` pointer is also copied to object +0x1990 at
 `0x4F8F7C` and exported at `0x438E47`.
 
-**CONFIRMED (on-disk text, and not read by the game).** The 2,384
+**CONFIRMED.** The 2,384
 name slots are 2,330 NUL-padded printable strings of length
 3–25 (ten of them a plain `WayPoint` with NUL padding: BUPP1 5,
 EWOD1 1, LUPP2 4), 39 copies of the eight characters `WayPoint` followed by
@@ -169,17 +193,20 @@ strings. Thirty-two are filled out with `0xCD`. `Vic` and `Sam`,
 each in BUPP1 and again in LUPP2, have one extra NUL and then
 `0xCD`. The first label starts at `BUPP1.WSX+0x181E90C`. There are 19
 distinct labels: one occurs 13 times, five occur twice and 13 once.
-The repository does not reproduce them (they are level-author
-text); `lol3_map_spans.py --check` compares their counts and a
-digest. The retail executable image contains neither `WayPoint`
-nor `BadName`.
+`lol3_map_spans.py --check` compares their counts and a digest.
+The retail executable image contains neither `WayPoint` nor `BadName`.
 CKEEP, GRULO, ISHAT, MLOW2, OLOW3 and QWOD0 have a path count
-of zero. The game does not read the name slots or the 31-byte labels.
-`0x43E6B0` is the only `.map` reader (see the gap below). In all
-18 entries, the only loader seeks that start before them are
-header +4, +0xC8 and +0xDC. Those reads (8 × field 19,
-8 × +0xC4 and 4 × +0xD8) end at or before the first name
-slot and the first label.
+of zero. For every nonempty label span in the 18 entries, the only seeks
+below its end in loader `0x43E6B0` are from header +4, +0xC8 and +0xDC.
+The subsequent reads of 8 × field 19, 8 × u32(+0xC4) and
+4 × u32(+0xD8) end at or before that span (`0x4F0218`, `0x43EC21`,
+`0x43EC82`). `lol3_claimed_edges.py --check` tests all 23 seek offsets
+and these read widths against both spans.
+
+**UNCONFIRMED.** Which original authoring code writes or reads the two
+label spans. A separate original editor reader would settle it if it
+reaches `u32(+0xC8) + 8 * u32(+0xC4)` or
+`u32(+0xDC) + 4 * u32(+0xD8)` and advances by 26 or 31 bytes.
 
 ## MAP sections 1 and 2
 
@@ -225,9 +252,9 @@ nested seek at `0x4EFE96`; all are listed above), and each call pushes one store
 dword. The call at `0x43EA72–0x43EA79` pushes `[esp+0x58]`.
 By the same three-push rule as the waypoint seek at `0x43EBD9`
 (`[esp+0xDC]` is header +0xC8), that dword is header +0x44,
-the first byte after this span. Nothing reads the span. The
-`.map` suffix at `0x54976C` is used only at `0x43E293`, and
-`0x43E6B0` is called only from `0x43E304`. In all 18 entries,
+the first byte after this span. The traced MAP loader skips the span.
+The `.map` suffix at `0x54976C` is used only at `0x43E293`, and
+the sole direct call to `0x43E6B0` is at `0x43E304`. In all 18 entries,
 the only seeks that start before the span are header +4, +8,
 +0x0C, +0xC8 and +0xDC. Their reads (8 × field 19,
 8 × field 20, 56 × field 21 at `0x4A6604–0x4A663C`,
