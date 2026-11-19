@@ -11,7 +11,7 @@ GLOBAL, movies, music, and slice CDs. cdcache.wsx is a known exception.
 """
 from __future__ import annotations
 
-from cli_errors import ReaderArgumentParser, run_cli
+from cli_errors import ReaderArgumentParser, output_refusal, run_cli
 import argparse
 import hashlib
 import json
@@ -220,6 +220,10 @@ def main() -> int:
         return 0
     if args.out is None:
         ap.error("--out is required unless --check or --list is given")
+    # The entries are original game bytes: they never land in the game folders or this repository.
+    refusal = output_refusal(args.out, args.game_dat, repository=True)
+    if refusal:
+        ap.error(refusal)
 
     if args.stems:
         stems = args.stems

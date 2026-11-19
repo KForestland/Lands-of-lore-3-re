@@ -1,4 +1,5 @@
 """File reader commands report bad inputs without Python tracebacks."""
+import json
 import os
 from pathlib import Path
 import struct
@@ -84,3 +85,77 @@ class ReaderErrors(unittest.TestCase):
 
     def test_save(self):
         self.bad_files("SAVE.000", b"short", "lol3_save_header.py", "--data", self.data, self.data / "SAVE.000")
+
+
+class OutputGuard(unittest.TestCase):
+    """No tool writes into the game data (the --data folder, a folder holding a WSX archive or
+    LOL3.DAT, or anything below one); the entry extractor also refuses the repository."""
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.game = self.root / "GAME"
+        self.data = self.game / "DAT"
+        self.data.mkdir(parents=True)
+        (self.game / "LOL3.DAT").write_bytes(b"MZ")
+        (self.data / "TEST.WSX").write_bytes(struct.pack("<HI3I", 1, 4, 0x1234, 0, 4) + b"abcd")
+        self.loose = self.root / "LOOSE"
+        (self.loose / "SUB").mkdir(parents=True)
+        (self.loose / "fake.wsx").write_bytes(b"")
+        self.repo = TOOLS.parent
+        self.env = {key: value for key, value in os.environ.items()
+                    if key not in ("LOL1_DATA", "LOL2_DAT", "LOL3_DAT")}
+
+    def run_tool(self, tool, *args):
+        return subprocess.run([sys.executable, str(TOOLS / tool), *map(str, args)], cwd=self.root,
+                              env=self.env, capture_output=True, text=True, timeout=20)
+
+    def assert_refused(self, targets, tool, *args):
+        for target in targets:
+            with self.subTest(tool=tool, target=target):
+                run = self.run_tool(tool, *[target if a is None else a for a in args])
+                self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
+                self.assertIn("give an output path outside", run.stderr)
+                self.assertNotIn("Traceback", run.stderr)
+                self.assertFalse(target.exists())
+
+    def game_targets(self, name):
+        return (self.loose / name, self.loose / "SUB" / name, self.data / name,
+                self.game / name, self.game / "SAVEGAME" / name)
+
+    def test_output_refusal(self):
+        sys.path.insert(0, str(TOOLS))
+        try:
+            from cli_errors import output_refusal
+        finally:
+            sys.path.remove(str(TOOLS))
+        outside = self.root / "out" / "x.png"
+        for target in self.game_targets("x.png"):
+            with self.subTest(target=target):
+                self.assertIsNotNone(output_refusal(target, self.data))
+        self.assertIsNotNone(output_refusal(self.root / "elsewhere", [None, self.root / "elsewhere"]))
+        self.assertIsNone(output_refusal(outside, self.data))
+        self.assertIsNone(output_refusal(self.repo / "docs" / "x.md", self.data))
+        self.assertIsNotNone(output_refusal(self.repo / "docs" / "x.md", self.data, repository=True))
+        self.assertIsNone(output_refusal(outside, self.data, repository=True))
+
+    def test_shared_parser_refuses_game_folders(self):
+        self.assert_refused(self.game_targets("sheets"), "lol3_level_report.py", "--data", self.data, "--out", None)
+        lmf = self.root / "A.LMF"
+        lmf.write_bytes(b"")
+        self.assert_refused(self.game_targets("lmf.json"), "walk_lmf_leaves.py", lmf, "-o", None)
+        self.assert_refused(self.game_targets("manifest.json"), "extract_wsx_entries.py", "--data", self.data,
+                            "--out", self.root / "entries", "--manifest", None)
+        self.assertFalse((self.root / "entries").exists())
+
+    def test_extracted_entries_refuse_game_and_repository(self):
+        targets = (*self.game_targets("entries"), self.repo / "no-such-folder")
+        self.assert_refused(targets, "extract_wsx_entries.py", "--data", self.data, "--stems", "TEST", "--out", None)
+        fine = self.root / "entries"
+        manifest = self.root / "manifest.json"
+        run = self.run_tool("extract_wsx_entries.py", "--data", self.data, "--stems", "TEST",
+                            "--out", fine, "--manifest", manifest)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertEqual([path.read_bytes() for path in (fine / "TEST").iterdir()], [b"abcd"])
+        self.assertEqual(json.loads(manifest.read_text())[0]["stem"], "TEST")
