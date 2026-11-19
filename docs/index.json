@@ -341,9 +341,11 @@
         "tools/lol3_level_schematic.py",
         "tools/lol3_lzo_writer.py",
         "tools/lol3_map_writer.py",
+        "tools/lol3_media_check.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_writer.py",
         "tools/lol3_script_notes.py",
+        "tools/lol3_text_writer.py",
         "tools/lol3_wsx_writer.py"
       ]
     },
@@ -944,7 +946,10 @@
         "Q12"
       ],
       "question_references": [],
-      "tools": []
+      "tools": [
+        "tools/lol3_media_check.py",
+        "tools/lol3_text_writer.py"
+      ]
     },
     {
       "path": "docs/lol3-dispatch-search.md",
@@ -1235,6 +1240,7 @@
         "tools/lol3_script_browser.py",
         "tools/lol3_script_framing.py",
         "tools/lol3_script_notes.py",
+        "tools/lol3_text_writer.py",
         "tools/lol3_texture_archive.py",
         "tools/lol3_texture_palettes.py",
         "tools/lol3_texture_png.py",

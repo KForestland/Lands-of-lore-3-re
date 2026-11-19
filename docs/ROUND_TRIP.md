@@ -1,6 +1,6 @@
 # Round-trip proof for LoL3
 
-Four writers read the original files, build a replacement in memory and compare it with the original. Nothing is written to disk. "Byte-identical" means the rebuilt file equals the original file. "Decode-identical" means the rebuilt compressed data reads back to the same bytes as the original, while the compressed bytes themselves differ.
+Five writers read the original files, build a replacement in memory and compare it with the original. Nothing is written to disk. "Byte-identical" means the rebuilt file equals the original file. "Decode-identical" means the rebuilt compressed data reads back to the same bytes as the original, while the compressed bytes themselves differ.
 
 | Writer | What is rebuilt | Comparison | Counts (GOG copy that has run, with saves) |
 |---|---|---|---|
@@ -9,6 +9,7 @@ Four writers read the original files, build a replacement in memory and compare 
 | `lol3_lzo_writer.py` | Packed SMD frames in `SLICECD1`–`4.WSX`, re-compressed with liblzo2 | Decoded bytes only; the frames are not written back into an archive | 15,990 distinct frames from 33,068 packed references in the 18 level banks and the two shared banks |
 | `lol3_save_writer.py` | Game-written save slots from their fields | Byte-identical; the stored LZO packets are copied, so no compressor is tested | 47 slots, 416 level blocks, 59,654 packets (your saves give other counts) |
 | `lol3_map_writer.py` | The 18 level MAPs from their command, waypoint, path and placement fields | Byte-identical; 480,972 of 21,232,680 bytes come from parsed fields and the other 20,751,708 are copied as stored | 54,940 object and 4,040 region commands, 2,384 waypoints, 36 paths, 23,850 placements |
+| `lol3_text_writer.py` | TRR text and tag tables from their parsed IDs and fields | Byte-identical; count, IDs, boundary table and NUL terminators are regenerated, field bytes come from the parsed rows | 53 tables: 26 members in each of the two identical `locallng.wsx` and the loose `PROMPT.TRR` (26 distinct); 26,170 rows counting every copy |
 
 ## WSX archives
 
@@ -30,6 +31,10 @@ Four writers read the original files, build a replacement in memory and compare 
 
 **CONFIRMED.** The writer frames both command streams with the 39 opcode sizes from `LOL3.DAT` and writes back each command's opcode, selector, index and typed operands, the 8-byte waypoint rows, the 4-byte path rows, every placement's X/Z words and the mover's eight state bytes. Everything else is copied as stored: operand bytes without a field, the other placement bytes, the 11,496-byte shared block, the waypoint and path labels, the 1,784-byte surface-to-script gap and all the MAP tables the writer does not parse (19,583,119 bytes). So this proves the framing of these rows, not the meaning of the copied bytes. A change to one command operand, one waypoint and one placement made in memory alters only those bytes and reads back through `lol3_script_notes.py` and `lol3_level_schematic.py`. `--list STEM` gives offsets, sizes and SHA-256 of the copied spans, never their bytes. [Byte table](lol3-map-odf-readers.md#writing-the-stored-fields)
 
+## Text tables
+
+**CONFIRMED.** A TRR is a u32 count, the u32 IDs, then count + 1 u32 boundaries (counted from +4), then the NUL-terminated fields. The writer rebuilds the whole table from (ID, field) rows; IDs may repeat and be out of order. It finds the TRR-shaped members of both `locallng.wsx` copies and the loose `.trr` files, and stops unless there are 53 and the four quest and dialogue tables are among them. A field changed in memory changes the length and the later boundaries and reads back through the same directory reader `lol3_media_check.py` uses (synthetic test). [Writing the stored tables](lol3-dialogue-dispatch.md#writing-the-stored-tables)
+
 ## Run the checks
 
 ```bash
@@ -37,7 +42,8 @@ python3 tools/lol3_wsx_writer.py --data "$LOL3_DAT" --check
 python3 tools/lol3_lzo_writer.py --data "$LOL3_DAT" --check
 python3 tools/lol3_save_writer.py --data "$LOL3_DAT" --check
 python3 tools/lol3_map_writer.py --data "$LOL3_DAT" --check
-python3 -m unittest tests.test_round_trip tests.test_map_write
+python3 tools/lol3_text_writer.py --data "$LOL3_DAT" --check
+python3 -m unittest tests.test_round_trip tests.test_map_write tests.test_text_write
 ```
 
-All four run in `tools/check_all.py`. Without liblzo2 the LZO and save writers print SKIP. Without the game-written cache the LZO check still runs in full on the shipped banks and says the cache was not followed; give `--cache PATH` for a cache stored elsewhere. Without game-written saves the save writer checks a synthetic slot and reports SKIP. The unit tests use synthetic archives, light maps, banks, slots and MAPs and need no game files.
+All five run in `tools/check_all.py`. Without liblzo2 the LZO and save writers print SKIP. Without the game-written cache the LZO check still runs in full on the shipped banks and says the cache was not followed; give `--cache PATH` for a cache stored elsewhere. Without game-written saves the save writer checks a synthetic slot and reports SKIP. The unit tests use synthetic archives, light maps, banks, slots, MAPs and TRR rows and need no game files.

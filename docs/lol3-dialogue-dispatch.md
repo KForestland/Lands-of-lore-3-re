@@ -112,3 +112,20 @@ running game: break at `0x4340D0` and `0x422FA0` when the HWHIT
 kind-6 event fires, and record the key, the path and whether
 `0x434180` is reached. Settle the markers by listing every byte the
 renderer branches on after `0x45878C`.
+
+## Writing the stored tables
+
+**CONFIRMED.** `tools/lol3_text_writer.py --check --data /path/to/DAT`
+rebuilds the counts, ordered IDs, relative boundaries and NUL-terminated
+stored payloads before the transform at `0x5086C2`. It reads 53 TRR
+tables and each rebuilds byte for byte. The 53 are 26 TRR members of
+`DAT/locallng.wsx`, the same 26 members in the byte-identical
+`locallng.wsx` beside `DAT`, and the loose `PROMPT.TRR` at file +0. That
+is 26 distinct tables: the loose prompt table equals the member at
+`locallng.wsx+0x5986BB5` (key `0x623224A4`, file name at
+`LOL3.DAT+0x143B8C`). Counting every copy they hold 26,170 text or tag
+records; one archive's 26 members hold 13,065. The four quest and
+dialogue tables are identified by the offsets above, and their counts
+(67, 67, 5,763, 5,763) match `lol3_media_check.py --trr`. `--list` prints
+the file, source offset, key, byte length and row count for every
+matching entry, never the text.
