@@ -20,7 +20,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 305 statements CONFIRMED (proved from the program code or the files) and 60 UNCONFIRMED (a reading not yet proved), on 76 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 308 statements CONFIRMED (proved from the program code or the files) and 64 UNCONFIRMED (a reading not yet proved), on 77 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -56,7 +56,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-four checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-six checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -77,7 +77,7 @@ Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the c
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
-python3 tools/check_all.py                  # 25 passed with a matching cache, 22 passed and 3 skipped without one
+python3 tools/check_all.py                  # 26 passed with a matching cache, 23 passed and 3 skipped without one
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository

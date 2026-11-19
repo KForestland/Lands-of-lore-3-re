@@ -149,6 +149,21 @@ For kinds 2–5 the move goes through `0x469550` / `0x469400` and
 the step is published in `0x600720`–`0x600728`. Every stored
 opcode-1 index is below its level's mover count.
 
+### Portal subcommands of opcode 0x02
+
+**CONFIRMED.** For opcode 0x02 the player handler `0x410AA0` jumps
+through the table at `0x4117D4` indexed by byte +4 (`0x410B63–0x410B7D`,
+values above 0x51 return). Entries 27 and 76, and no others, are
+`0x410F98`. That arm stores `(+5 & 31) + 2` at `[0x5D5370]` and
+`+5 >> 5`, plus 8 for subcommand 76, at `[0x5D5374]`
+(`0x410F98–0x410FC3`), unless byte `[0x5D5380]` is nonzero
+(`0x410FB0–0x410FB8`). The group runner copies a nonzero `[0x5D5370]`
+to `[0x5D5368]` at `0x4E596A–0x4E598A`, and the object queue does
+the same at `0x447C86–0x447CA8`; the first value is the row of the
+level-name table at `0x548938`. All 131 stored commands (125 of
+subcommand 27, 6 of 76) are listed with their guards in
+[progression](PROGRESSION.md).
+
 ### Creature subcommands of opcode 0x0D
 
 **CONFIRMED.** Subcommand u8 +4 indexes 33 slots at `0x4B8D78`

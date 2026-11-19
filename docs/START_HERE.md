@@ -6,7 +6,7 @@ You need Python 3.8+ (optional: the system LZO library, `apt install liblzo2-2`)
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
-python3 tools/check_all.py         # 25 checks; the last line should read ALL 25 CHECKS PASSED (or 22 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py         # 26 checks; the last line should read ALL 26 CHECKS PASSED (or 23 passed, 3 skipped if the game has never run)
 ```
 
 Words you do not know are in the [glossary](GLOSSARY.md). Short worked commands, with the first lines they print, are in the [cookbook](COOKBOOK.md). What is known and what is open: [STATUS](STATUS.md) and [open questions](OPEN_QUESTIONS.md). Write tool output outside the repository.
@@ -31,6 +31,7 @@ Follow the engine from startup to saving in [How Lands of Lore III works](HOW_TH
 2. Every opcode with its native effect: [lol3-script-opcodes.md](lol3-script-opcodes.md); events, predicates and timers: [lol3-script-events.md](lol3-script-events.md); dispatch: [lol3-object-dispatch.md](lol3-object-dispatch.md).
 3. Full per-record listings for your own copy: `python3 tools/lol3_script_notes.py --data $LOL3_DAT --out ../lol3-notes`.
 4. [Follow one region event](tutorial-one-event.md) from entry to a moving floor.
+5. [Progression](PROGRESSION.md): each portal command, the guard that takes it, and the level-to-level graph.
 
 ## I want to know how items, spells, dialogue and combat work
 
