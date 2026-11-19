@@ -26,7 +26,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 ![Overhead QWOD0 schematic from MAP edges, waypoints and placements](docs/images/qwod0-schematic.svg)
 
-The level QWOD0 seen from above, drawn from its map file: each line is an edge of a surface; dark edges belong to one surface and pale edges are shared. Squares are waypoints, dashed lines are paths (this level has none), and numbered dots are placements. Heights are not drawn. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
+The level QWOD0 seen from above, drawn from its map file: each line is an edge of a surface; dark edges belong to one surface and pale edges are shared. Hollow squares are waypoints, dashed lines are paths (this level has none), and dots are the rows of the five placement tables (type 3, type 16, creature, mover, item), numbered from 1; numbers that would overlap are left out and counted under the legend. Heights are not drawn. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
 
 ## What you get
 

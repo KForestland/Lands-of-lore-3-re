@@ -11,12 +11,13 @@ from pathlib import Path
 DEFAULT_DATA = os.environ.get("LOL3_DAT")
 
 
-def tool_args(doc, data=True, out_help="write the result here (default: print only)"):
+def tool_args(doc, data=True, out_help="write the result here (default: print only)", writes=True):
+    """writes=False: the tool only prints, so --help does not offer --out (passing it is refused)."""
     ap = argparse.ArgumentParser(description=doc, formatter_class=argparse.RawDescriptionHelpFormatter)
     if data:
         ap.add_argument("--data", default=DEFAULT_DATA, required=DEFAULT_DATA is None,
                         help="the game's DAT folder (default: $LOL3_DAT)")
-    ap.add_argument("--out", help=out_help)
+    ap.add_argument("--out", help=out_help if writes else argparse.SUPPRESS)
     ap.add_argument("--check", action="store_true", help="run the tool's check and print one CHECK line; exit 1 on failure")
     return ap
 

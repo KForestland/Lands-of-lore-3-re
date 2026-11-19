@@ -3,9 +3,15 @@
 
   lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg
 
-The drawing uses MAP coordinates: surface edges, waypoint squares, path
-runs and numbered placement dots, plus a legend. No texture, sprite,
-light map or game image is opened for drawing.
+The drawing uses MAP coordinates: surface edges, hollow waypoint squares,
+path runs and numbered dots for the rows of all five placement tables
+(type 3, type 16, creature, mover, item), plus a legend. The scale fits the
+surface edges; waypoints and placements outside them, and numbers that would
+overlap one already drawn, are left out and counted in the footer
+(--no-labels draws no numbers). Large levels give SVGs over the repository's
+300 KB file limit (BUPP1 650 KB, FLAIR 670 KB, DLOW1 370 KB with numbers), so
+write those outside the repository.
+No texture, sprite, light map or game image is opened for drawing.
 """
 import struct
 from collections import Counter
@@ -17,16 +23,19 @@ from extract_wsx_entries import parse_wsx, wsx_name_hash
 from lol3_level_report import geometry_check
 
 
-# Disk rows whose first two s16 values 0x4411F0 shifts left 16 into object +4/+8.
-# Header offsets and strides are the MAP loader seeks at 0x43EEC7–0x43EF6F
-# and the reads at 0x44FCEB (0x25), 0x4699A2 (0x21), 0x4B4553 (0x38), 0x4D74AC (0x25).
+# Disk rows whose first two s16 values 0x4411F0 shifts left 16 into object +4/+8
+# (all five constructors reach it; the mover through 0x4D58F0 -> 0x4698D0).
+# Header offsets are the MAP loader seeks at 0x43EEB6-0x43EF6F; the strides are
+# the reads at 0x44FCEB (0x25), 0x4699A2 (0x21), 0x4B4553 (0x38),
+# 0x4D5A1C (0x29) and 0x4D74AC (0x25). Drawn numbers are 1-based table rows.
 PLACEMENTS = (
     ("type 3", 0x14, 0x60, 0x25, "#6b3fa0"),
     ("type 16", 0x18, 0x64, 0x21, "#2f6f4e"),
     ("creature", 0x1C, 0x68, 0x38, "#a33b3b"),
+    ("mover (type 32)", 0x24, 0x70, 0x29, "#1f5fa8"),
     ("item", 0x20, 0x6C, 0x25, "#c47b12"),
 )
-MAP_W, MAP_H, LEGEND_H = 900, 620, 96
+MAP_W, MAP_H, LEGEND_H = 900, 620, 116
 
 
 def map_geometry(data):
@@ -62,7 +71,7 @@ def map_geometry(data):
     return vertices, surfaces, waypoints, routes, placed
 
 
-def schematic_svg(stem, vertices, surfaces, waypoints, routes, placed):
+def schematic_svg(stem, vertices, surfaces, waypoints, routes, placed, labels=True, notes=None):
     outlines = Counter()
     for indices in surfaces:
         points = [vertices[index] for index in indices]
@@ -71,14 +80,15 @@ def schematic_svg(stem, vertices, surfaces, waypoints, routes, placed):
                 outlines[tuple(sorted((start, end)))] += 1
     if not outlines:
         raise ValueError("MAP has no nonzero surface edges")
+    # The scale fits the surface edges only; marks outside them are counted, not drawn.
     used = {point for pair in outlines for point in pair}
-    used.update(waypoints)
-    used.update(point for route in routes for point in route)
-    used.update((x, z) for _, _, x, z, _ in placed)
     x0 = min(x for x, _ in used)
     x1 = max(x for x, _ in used)
     z0 = min(z for _, z in used)
     z1 = max(z for _, z in used)
+
+    def inside(point):
+        return x0 <= point[0] <= x1 and z0 <= point[1] <= z1
 
     width, height = MAP_W, MAP_H + LEGEND_H
     scale = min((width - 64) / max(1, x1 - x0), (MAP_H - 64) / max(1, z1 - z0))
@@ -100,49 +110,78 @@ def schematic_svg(stem, vertices, surfaces, waypoints, routes, placed):
                   for stroke, weight, segment in zip(groups, ("1.35", "0.55"), segments)]
     route_paths = []
     for route in routes:
-        route_paths.append('<path fill="none" stroke="#c45c26" stroke-width="1.4" stroke-dasharray="5 3" d="%s"/>'
-                           % "".join(("M" if i == 0 else "L") + pair(point) for i, point in enumerate(route)))
+        shown = [point for point in route if inside(point)]
+        if len(shown) > 1:
+            route_paths.append('<path fill="none" stroke="#c45c26" stroke-width="1.4" stroke-dasharray="5 3" d="%s"/>'
+                               % "".join(("M" if i == 0 else "L") + pair(point) for i, point in enumerate(shown)))
     squares = []
+    waypoints_out = 0
     for point in waypoints:
+        if not inside(point):
+            waypoints_out += 1
+            continue
         px, py = project(point)
-        squares.append(f'<rect x="{px - 3.2:.2f}" y="{py - 3.2:.2f}" width="6.4" height="6.4" fill="#14343b"/>')
-    dots = []
+        squares.append(f'<rect x="{px - 3.2:.2f}" y="{py - 3.2:.2f}" width="6.4" height="6.4" '
+                       f'fill="none" stroke="#14343b" stroke-width="1.3"/>')
+    dots, texts, taken = [], [], []
+    placed_out = labels_dropped = 0
     for name, index, x, z, color in placed:
+        if not inside((x, z)):
+            placed_out += 1
+            continue
         px, py = project((x, z))
         dots.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="2.3" fill="{color}"/>')
-        dots.append(f'<text x="{px + 3.2:.2f}" y="{py - 2.4:.2f}" fill="{color}" font-family="sans-serif" '
-                    f'font-size="6" stroke="#f5f7f6" stroke-width="2" paint-order="stroke">{index}</text>')
+        if not labels:
+            continue
+        box = (px + 2.6, py - 7.4, px + 3.8 + 3.6 * len(str(index)), py - 1.2)
+        if any(box[0] < b[2] and b[0] < box[2] and box[1] < b[3] and b[1] < box[3] for b in taken):
+            labels_dropped += 1
+            continue
+        taken.append(box)
+        texts.append(f'<text x="{px + 3.2:.2f}" y="{py - 2.4:.2f}" fill="{color}" font-family="sans-serif" '
+                     f'font-size="6" stroke="#f5f7f6" stroke-width="2" paint-order="stroke">{index}</text>')
     counts = Counter(name for name, _, _, _, _ in placed)
+    font = 'font-family="sans-serif" font-size="12" fill="#14343b"'
     legend = [
         f'<rect x="0" y="{MAP_H}" width="{width}" height="{LEGEND_H}" fill="#e7eeec"/>',
         f'<line x1="16" y1="{MAP_H + 16}" x2="46" y2="{MAP_H + 16}" stroke="#1e4c56" stroke-width="1.35"/>',
-        f'<text x="52" y="{MAP_H + 20}" font-family="sans-serif" font-size="12" fill="#14343b">edge used once</text>',
+        f'<text x="52" y="{MAP_H + 20}" {font}>edge used once</text>',
         f'<line x1="180" y1="{MAP_H + 16}" x2="210" y2="{MAP_H + 16}" stroke="#87acae" stroke-width="1.6"/>',
-        f'<text x="216" y="{MAP_H + 20}" font-family="sans-serif" font-size="12" fill="#14343b">shared edge</text>',
-        f'<rect x="340" y="{MAP_H + 11}" width="8" height="8" fill="#14343b"/>',
-        f'<text x="354" y="{MAP_H + 20}" font-family="sans-serif" font-size="12" fill="#14343b">waypoint ({len(waypoints)})</text>',
+        f'<text x="216" y="{MAP_H + 20}" {font}>shared edge</text>',
+        f'<rect x="340" y="{MAP_H + 11}" width="8" height="8" fill="none" stroke="#14343b" stroke-width="1.3"/>',
+        f'<text x="354" y="{MAP_H + 20}" {font}>waypoint ({len(waypoints)})</text>',
         f'<line x1="500" y1="{MAP_H + 16}" x2="540" y2="{MAP_H + 16}" stroke="#c45c26" stroke-width="1.4" stroke-dasharray="5 3"/>',
-        f'<text x="546" y="{MAP_H + 20}" font-family="sans-serif" font-size="12" fill="#14343b">path ({len(routes)})</text>',
+        f'<text x="546" y="{MAP_H + 20}" {font}>path ({len(routes)})</text>',
     ]
     for slot, (name, _, _, _, color) in enumerate(PLACEMENTS):
         column, row = divmod(slot, 2)
-        lx, ly = 16 + column * 220, MAP_H + 42 + row * 22
+        lx, ly = 16 + column * 290, MAP_H + 44 + row * 22
         legend.append(f'<circle cx="{lx + 5}" cy="{ly - 4}" r="4" fill="{color}"/>')
-        legend.append(f'<text x="{lx + 16}" y="{ly}" font-family="sans-serif" font-size="12" fill="#14343b">'
-                      f'{escape(name)} {counts[name]}, numbered</text>')
+        legend.append(f'<text x="{lx + 16}" y="{ly}" {font}>{escape(name)} ({counts[name]}){", numbered" if labels else ""}</text>')
+    footer = ["numbers are 1-based table rows" if labels else "row numbers not drawn (--no-labels)"]
+    if labels_dropped:
+        footer.append(f"{labels_dropped} overlapping numbers left out")
+    if waypoints_out or placed_out:
+        footer.append(f"outside the bounding box of the surface edges, not drawn: {waypoints_out} waypoints, {placed_out} placements")
+    if notes is not None:
+        notes.extend(footer)
+    legend.append(f'<text x="16" y="{MAP_H + 102}" font-family="sans-serif" font-size="11" fill="#14343b">'
+                  f'{escape("; ".join(footer))}</text>')
     return "\n".join([
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img">',
         f'<title>{escape(stem)} MAP schematic</title>',
         '<desc>Overhead X/Z projection. Dark lines are edges used once, pale lines are shared edges, '
-        'squares are waypoints, dashed lines are paths, and numbered dots are placements.</desc>',
+        'hollow squares are waypoints, dashed lines are paths, and ' + ('numbered ' if labels else '')
+        + 'dots are the rows of the five placement tables (type 3, type 16, creature, mover, item).</desc>',
         f'<rect width="{width}" height="{MAP_H}" fill="#f5f7f6"/>',
-        edge_paths[1], edge_paths[0], *route_paths, *squares, *dots, *legend, '</svg>', '',
+        edge_paths[1], edge_paths[0], *route_paths, *dots, *texts, *squares, *legend, '</svg>', '',
     ])
 
 
 def main():
     parser = lol3_cli.tool_args(__doc__, out_help="write the SVG to this path")
     parser.add_argument("level", nargs="?", help="level archive stem, for example QWOD0")
+    parser.add_argument("--no-labels", action="store_true", help="draw placement dots without row numbers")
     args = parser.parse_args()
     if args.check:
         args.level = "QWOD0"
@@ -158,7 +197,9 @@ def main():
         if len(matches) != 1:
             raise ValueError(f"expected one MAP with key {key:#010x} in {archive.name}")
         vertices, surfaces, waypoints, routes, placed = map_geometry(matches[0]["blob"])
-        svg = schematic_svg(stem, vertices, surfaces, waypoints, routes, placed)
+        notes = []
+        svg = schematic_svg(stem, vertices, surfaces, waypoints, routes, placed,
+                            labels=args.check or not args.no_labels, notes=notes)
         counts = ", ".join(f"{name} {sum(item[0] == name for item in placed)}" for name, *_ in PLACEMENTS)
         summary = (f"{len(vertices)} vertices, {len(surfaces)} surfaces, "
                    f"waypoints {len(waypoints)}, paths {len(routes)}, {counts}")
@@ -177,7 +218,7 @@ def main():
                 folder in output.parents for folder in (repo / "docs" / "images", repo / "examples")):
             parser.error("inside the repository, --out may only point into docs/images/ or examples/")
         output.write_text(svg, encoding="utf-8")
-        print(f"{archive.name}+{matches[0]['offset']:#x}: {summary}")
+        print(f"{archive.name}+{matches[0]['offset']:#x}: {summary}; {'; '.join(notes)}")
         return 0
     except (OSError, ValueError, struct.error) as error:
         parser.exit(1, f"level schematic: {error}\n")

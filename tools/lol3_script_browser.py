@@ -19,7 +19,7 @@ from pathlib import Path
 import lol3_cli
 from lol3_script_framing import level_map_entries, map_range, native_sizes
 
-# First-sentence meanings from the opcode page's native-effect column.
+# Shortened meanings (leading sentences, nothing added) from the opcode page's native-effect column.
 MEANINGS = {
     0x01: "Calls target vtable +0xC0 with the command.",
     0x02: "For +4 = 2 or 3, resolves the object from +1/u16 +2 and calls player helper 0x415540 or 0x415620. Other values route to player command 0x410AA0.",
@@ -29,7 +29,7 @@ MEANINGS = {
     0x07: "Calls target virtual +0xCC with u8 +4/+5.",
     0x08: "The object table slot reaches the common exit without a command body.",
     0x09: "Dispatches object property u8 +4 through 0x447680 and table 0x447AE0.",
-    0x0B: "Passes u16 +4 to 0x4EED60.",
+    0x0B: "Passes u16 +4 to 0x4EED60. That helper is a bare return in this executable.",
     0x0D: "Calls target virtual +0xC0 with the complete command.",
     0x0E: "Selects kind-2 timer by u8 +6, then uses u8 +4 as the operation 0-6 and +5 as its argument.",
     0x0F: "Builds a point 10 fixed-point world units ahead of the target and a second point from selector +5/u16 +6, then reads action +4.",
@@ -45,7 +45,7 @@ MEANINGS = {
     0x19: "Reads three dwords at +4/+8/+0xC. Value 5 at +0xC selects 0x434560, otherwise calls 0x434180.",
     0x1A: "When 0x600854 is zero, resolves the pair +8/+0xC and calls 0x48EBE0 with the object, +4/+0x10 and pointers +0x14/+0x1D.",
     0x1B: "Queue marker or continuation. Subcommand +8 takes the four-arm switch at 0x449C84.",
-    0x1C: "Gates on 0x600854. It allocates 0x146 bytes from heap 0x660CA4, builds a type-5 object of vtable 0x5392C8 (0x4B1BA0) at the target's position, then sets its fields from the command.",
+    0x1C: "Gates on 0x600854. It allocates 0x146 bytes from heap 0x660CA4, builds a type-5 object of vtable 0x5392C8 (0x4B1BA0) at the target's position, then sets its fields from the command. Its visible role is UNCONFIRMED.",
     0xC4: "Animates the floor or ceiling height of the 56-byte map region selected by u16 +2.",
     0xC5: "Selects a map region with u16 +2 and switches on +4 to edit region flags or an associated table row.",
     0xC6: "Stores byte +5 to the level array at index +4.",

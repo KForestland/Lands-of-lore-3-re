@@ -122,7 +122,7 @@ def descriptor_lines(data, stem):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--decode", action="store_true", help="expand each bank and compare the installed copies")
     parser.add_argument("--list", help="print one level's descriptors; requires --decode")
     args = parser.parse_args()

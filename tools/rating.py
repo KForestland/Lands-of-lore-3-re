@@ -111,7 +111,7 @@ def block_of(path):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     args = parser.parse_args()
     if args.out:
         parser.error("prints only")

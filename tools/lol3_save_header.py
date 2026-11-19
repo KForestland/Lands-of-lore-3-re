@@ -4,7 +4,7 @@
   lol3_save_header.py --data DAT SLOT
   lol3_save_header.py --data DAT --check
 
-The slot is a player save, not a file from the DAT folder. --check builds a
+The slot is a player save the game wrote, not a shipped file. --check builds a
 synthetic slot and compares the version checks in LOL3.DAT. Nothing is written
 unless --out is given, and that path must be outside the game tree and this
 repository. Section payloads are spans only; they are not expanded.
@@ -22,18 +22,18 @@ import lol3_cli
 HEADER_SIZE = 0x64C
 BLOCK_HEADER = 0x34C
 LEVEL_SECTIONS = 75
-LAYOUT_CMP_AT = 0x3BE0B
-LAYOUT_CMP = bytes.fromhex("817c242436010000")
-VERSION_CMP_AT = 0x3BE17
-VERSION_CMP = bytes.fromhex("837c241026")
+VERSION_310_CMP_AT = 0x3BE0B
+VERSION_310_CMP = bytes.fromhex("817c242436010000")
+VERSION_38_CMP_AT = 0x3BE17
+VERSION_38_CMP = bytes.fromhex("837c241026")
 
 
 def parse_header(header, file_size):
     """Read the preview and both directories without loading save payloads."""
     if len(header) < HEADER_SIZE:
         raise ValueError("short LoL3 slot header")
-    size, version, layout = struct.unpack_from("<3I", header, 0x2C)
-    if size != file_size or (version, layout) != (38, 310):
+    size, first, second = struct.unpack_from("<3I", header, 0x2C)
+    if size != file_size or (first, second) != (38, 310):
         raise ValueError("LoL3 slot size or version mismatch")
     width, height, preview = struct.unpack_from("<3I", header, 0x39C)
     levels = struct.unpack_from("<18I", header, 0x5B0)
@@ -68,7 +68,7 @@ def synthetic_slot():
     level_at = HEADER_SIZE + 8
     end = level_at + len(block)
     header = bytearray(HEADER_SIZE)
-    header[:7] = b"Reader\0"
+    header[:9] = b"Reader\0RS"
     struct.pack_into("<3I", header, 0x2C, end, 38, 310)
     struct.pack_into("<3I", header, 0x38, 0x11111111, 0x22222222, 0x33333333)
     struct.pack_into("<20I", header, 0x44, *range(20))
@@ -81,7 +81,9 @@ def synthetic_slot():
     struct.pack_into("<iiIH", header, 0x49C, 0x00010000, -0x00020000, 0x8000, 0x0018)
     struct.pack_into("<iiIH", header, 0x4AA, 0x00030000, 0x00040000, 0x0100, 0xFFFF)
     struct.pack_into("<61I", header, 0x4B8, global_at, *([level_at] * 60))
+    header[0x5AC:0x5B0] = b"ZZZZ"
     struct.pack_into("<18I", header, 0x5B0, level_at, *([end] * 17))
+    header[0x5F8:0x600] = bytes.fromhex("66778899aabbccdd")
     struct.pack_into("<18I", header, 0x600, len(block), *([0] * 17))
     header[0x648:0x64C] = b"\x10\x20\x30\x40"
     return bytes(header) + b"prev" + b"glob" + bytes(block)
@@ -113,14 +115,19 @@ def report(data):
     lines = []
     name = bytes(header[:0x2C])
     if b"\0" in name:
-        shown = _text(name.split(b"\0", 1)[0])
+        text_part = name.split(b"\0", 1)[0]
+        shown = _text(text_part)
     else:
+        text_part = name
         shown = _text(name) + " (no NUL in the 44-byte slot)"
     lines.append(f"display name +0: {shown}")
+    after = len(text_part) + 1
+    if after < 0x2C:
+        lines.append(f"display name bytes after the NUL +{after:#x}..+0x2c:")
+        lines.extend(_hex_lines(header, after, 0x2C))
     lines.append(f"file length +0x2c: {parsed['size']}")
-    version, layout = struct.unpack_from("<2I", header, 0x30)
-    lines.append(f"version +0x30: {version}")
-    lines.append(f"layout +0x34: {layout}")
+    first, second = struct.unpack_from("<2I", header, 0x30)
+    lines.append(f"version +0x30/+0x34: {first} {second}")
     stamps = struct.unpack_from("<3I", header, 0x38)
     lines.append("stamps +0x38 +0x3c +0x40: " + " ".join(f"{stamp:#010x}" for stamp in stamps))
     level_stamps = struct.unpack_from("<20I", header, 0x44)
@@ -142,6 +149,10 @@ def report(data):
     lines.append("global sections +0x4b8:")
     for index, (start, length) in enumerate(parsed["sections"]):
         lines.append(f"global {index} +{start:#x} length {length}")
+    lines.append("unnamed +0x5ac..+0x5b0:")
+    lines.extend(_hex_lines(header, 0x5AC, 0x5B0))
+    lines.append("unnamed +0x5f8..+0x600:")
+    lines.extend(_hex_lines(header, 0x5F8, 0x600))
     lines.append("level directory +0x5b0 +0x600:")
     for index, (start, length) in enumerate(parsed["levels"]):
         ident = index + 2
@@ -195,19 +206,20 @@ def check_line(data_dir):
     sections_printed = sum(line.startswith("level index 0 section ") for line in text.splitlines())
     if (parsed["size"] != len(blob) or len(parsed["sections"]) != 61 or len(parsed["levels"]) != 18
             or globals_printed != 61 or sections_printed != LEVEL_SECTIONS
-            or "version +0x30: 38" not in text or "layout +0x34: 310" not in text
+            or "version +0x30/+0x34: 38 310" not in text or "+0x5ac: 5a 5a 5a 5a" not in text
+            or "+0x5f8: 66 77 88 99 aa bb cc dd" not in text or "+0x7: 52 53" not in text
             or "+0x94: aa bb cc dd" not in text or "player +0x49c:" not in text
             or "second object +0x4aa:" not in text or "PAYLOAD" in text
             or "50 41 59 4c" in text):
         raise ValueError("synthetic slot report is wrong")
     image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
-    if image[LAYOUT_CMP_AT:LAYOUT_CMP_AT + len(LAYOUT_CMP)] != LAYOUT_CMP:
-        raise ValueError("LOL3.DAT layout compare at file +0x3BE0B differs")
-    if image[VERSION_CMP_AT:VERSION_CMP_AT + len(VERSION_CMP)] != VERSION_CMP:
-        raise ValueError("LOL3.DAT version compare at file +0x3BE17 differs")
-    return ("CHECK save_header: synthetic slot names version 38, layout 310, "
+    if image[VERSION_310_CMP_AT:VERSION_310_CMP_AT + len(VERSION_310_CMP)] != VERSION_310_CMP:
+        raise ValueError("LOL3.DAT version 310 compare at file +0x3BE0B differs")
+    if image[VERSION_38_CMP_AT:VERSION_38_CMP_AT + len(VERSION_38_CMP)] != VERSION_38_CMP:
+        raise ValueError("LOL3.DAT version 38 compare at file +0x3BE17 differs")
+    return ("CHECK save_header: synthetic slot names version +0x30/+0x34: 38 310, "
             "both position groups, 61 global spans, 18 level spans and one 75-section block; "
-            "unnamed header bytes are hex; LOL3.DAT+0x3BE0B is the layout 310 compare and "
+            "unnamed header bytes are hex; LOL3.DAT+0x3BE0B is the version 310 compare and "
             "+0x3BE17 is the version 38 compare")
 
 

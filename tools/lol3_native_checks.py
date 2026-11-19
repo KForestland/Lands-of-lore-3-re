@@ -222,7 +222,7 @@ def spell_lines(archive):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--decode-copy", action="store_true", help="compare all 20 shipped copy mips")
     parser.add_argument("--list", action="store_true", help="print the anchor values the check reads")
     parser.add_argument("--spells", action="store_true", help="print spell rows and special-definition costs")

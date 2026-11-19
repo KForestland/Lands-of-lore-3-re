@@ -264,10 +264,12 @@ def section1_listing(payload, stem):
 
 
 def main():
-    ap = lol3_cli.tool_args(__doc__)
+    ap = lol3_cli.tool_args(__doc__, writes=False)
     ap.add_argument("--list", help="print one level's waypoint rows and slot bytes")
     ap.add_argument("--rows", help="print one level's section-1 rows")
     a = ap.parse_args()
+    if a.out:
+        ap.error("prints only")
     if a.list and a.rows:
         ap.error("pass only one of --list and --rows")
     if a.rows:
@@ -295,7 +297,7 @@ def main():
             ap.exit(1, f"map spans: {exc}\n")
         return 0
     if not a.check:
-        ap.error("this tool only checks; pass --check")
+        ap.error("pass --check, --list LEVEL or --rows LEVEL")
     try:
         bad = mismatches(census(a.data))
     except (OSError, ValueError) as exc:

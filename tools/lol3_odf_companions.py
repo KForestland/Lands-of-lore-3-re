@@ -119,7 +119,7 @@ def ai_lines(tags, keys):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--list", help="print one level's names, creature fields and AI leaves")
     args = parser.parse_args()
     if args.out:

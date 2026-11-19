@@ -96,7 +96,7 @@ def stem_lines(stems):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--list", action="store_true", help="print the 40 music stems and their keys")
     args = parser.parse_args()
     if args.out:

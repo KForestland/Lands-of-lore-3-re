@@ -85,8 +85,7 @@ class ReaderTests(unittest.TestCase):
         self.assertEqual(parsed["preview"], (HEADER_SIZE, 3))
         self.assertEqual(parsed["levels"][0], (HEADER_SIZE + 8, 4))
         short = report(bytes(header) + bytes(12))
-        self.assertIn("version +0x30: 38", short)
-        self.assertIn("layout +0x34: 310", short)
+        self.assertIn("version +0x30/+0x34: 38 310", short)
         self.assertIn("+0x94: 00 00 00 00", short)
         self.assertIn("shorter than the 0x34c block header", short)
         self.assertNotIn("section 0:", short)
@@ -99,8 +98,12 @@ class ReaderTests(unittest.TestCase):
         text = report(blob)
         self.assertIn("display name +0: Reader", text)
         self.assertIn(f"file length +0x2c: {len(blob)}", text)
-        self.assertIn("version +0x30: 38", text)
-        self.assertIn("layout +0x34: 310", text)
+        self.assertIn("version +0x30/+0x34: 38 310", text)
+        self.assertNotIn("layout", text)
+        self.assertIn("display name bytes after the NUL +0x7..+0x2c:", text)
+        self.assertIn("+0x7: 52 53 00", text)
+        self.assertIn("unnamed +0x5ac..+0x5b0:\n+0x5ac: 5a 5a 5a 5a", text)
+        self.assertIn("unnamed +0x5f8..+0x600:\n+0x5f8: 66 77 88 99 aa bb cc dd", text)
         self.assertIn("+0x94: aa bb cc dd", text)
         self.assertIn("+0x648: 10 20 30 40", text)
         self.assertIn("player +0x49c: x 65536 (1.0000) z -131072 (-2.0000) heading 0x8000 region 0x18", text)
@@ -235,7 +238,7 @@ class ReaderTests(unittest.TestCase):
         surface = field1
         surface_end = surface + 56
         tables = surface_end
-        strides = (0x25, 0x21, 0x38, 0x25)
+        strides = (0x25, 0x21, 0x38, 0x29, 0x25)
         offsets = []
         for stride in strides:
             offsets.append(tables)
@@ -245,7 +248,7 @@ class ReaderTests(unittest.TestCase):
         struct.pack_into("<3I", header, 4 + 19 * 4, 4, 0, 1)
         struct.pack_into("<II", header, 0xC4, 1, point_start)
         struct.pack_into("<II", header, 0xD8, 1, path_start)
-        for at, offset, count_at in zip((0x14, 0x18, 0x1C, 0x20), offsets, (0x60, 0x64, 0x68, 0x6C)):
+        for at, offset, count_at in zip((0x14, 0x18, 0x1C, 0x24, 0x20), offsets, (0x60, 0x64, 0x68, 0x70, 0x6C)):
             struct.pack_into("<I", header, at, offset)
             struct.pack_into("<I", header, count_at, 1)
         body = bytearray(tables)
@@ -257,21 +260,35 @@ class ReaderTests(unittest.TestCase):
         struct.pack_into("<HBB", body, path_start, 0, 1, 0)
         struct.pack_into("<4H", body, surface + 0x10, 0, 1, 2, 3)
         struct.pack_into("<H", body, surface + 0x1E, 0xFFFF)
-        for offset, (x, z) in zip(offsets, ((2, 3), (4, 6), (7, 1), (8, 8))):
+        for offset, (x, z) in zip(offsets, ((2, 3), (4, 6), (7, 1), (9, 2), (8, 8))):
             struct.pack_into("<hh", body, offset, x, z)
         vertices, surfaces, waypoints, routes, placed = map_geometry(bytes(body))
         self.assertEqual(len(vertices), 4)
         self.assertEqual(waypoints, [(5 << 16, 5 << 16)])
         self.assertEqual(routes, [[(5 << 16, 5 << 16)]])
         self.assertEqual([item[:2] for item in placed],
-                         [("type 3", 1), ("type 16", 1), ("creature", 1), ("item", 1)])
+                         [("type 3", 1), ("type 16", 1), ("creature", 1), ("mover (type 32)", 1), ("item", 1)])
         drawing = schematic_svg("SYN", vertices, surfaces, waypoints, routes, placed)
+        self.assertIn("mover (type 32) (1), numbered", drawing)
+        self.assertIn('fill="none" stroke="#14343b"', drawing)
+        self.assertLess(drawing.index("<circle"), drawing.index('<rect x="'))
         self.assertIn("waypoint (1)", drawing)
         self.assertIn("path (1)", drawing)
         self.assertIn('stroke-dasharray="5 3"', drawing)
         self.assertIn("<title>SYN MAP schematic</title>", drawing)
         self.assertIn(">1</text>", drawing)
         self.assertIn("numbered", drawing)
+        self.assertIn("1-based", drawing)
+        # A far waypoint does not widen the scale; two dots on one spot keep one number.
+        notes = []
+        crowded = placed + [("item", 2, 8 << 16, 8 << 16, "#c47b12")]
+        wide = schematic_svg("SYN", vertices, surfaces, waypoints + [(5000 << 16, 0)], routes, crowded, notes=notes)
+        self.assertIn("1 overlapping numbers left out", notes)
+        self.assertIn("outside the bounding box of the surface edges, not drawn: 1 waypoints, 0 placements", notes)
+        self.assertEqual(wide.count('<rect x="'), drawing.count('<rect x="'))
+        bare = schematic_svg("SYN", vertices, surfaces, waypoints, routes, placed, labels=False)
+        self.assertNotIn("paint-order", bare)
+        self.assertNotIn("numbered", bare)
 
     def test_remaining_listings_need_no_game_files(self):
         header = bytearray(0x76)

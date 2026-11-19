@@ -186,7 +186,7 @@ def subcommand_lines(pairs, sizes):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--subcommands", action="store_true", help="print selector and subcommand counts")
     parser.add_argument("--dispatch", action="store_true", help="print the 28 object opcode slots")
     args = parser.parse_args()

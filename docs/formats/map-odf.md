@@ -70,11 +70,36 @@ The drawing projects the stored X/Z coordinates with the same scale
 on both axes. It joins each surface's consecutive corner positions,
 including the closing edge, and discards edges of zero length.
 Edges used by multiple surfaces are pale. The colour measures
-edge reuse in the projection. Squares are waypoints and dashed
-lines are paths. Numbered dots are the type 3, type 16, creature
-and item rows, one number series per kind, and the legend under
-the plan names them. Heights and collision are outside the
-drawing. See [the native surface fields](../lol3-map-odf-readers.md#map-sections-1-and-2)
+edge reuse in the projection. Hollow squares are waypoints and
+dashed lines are paths. Dots are the rows of the five placement
+tables (type 3, type 16, creature, mover, item), one number
+series per table, numbered from 1 (row 0 is drawn as 1); the
+legend under the plan names them. The scale fits the surface
+edges only: waypoints and placements outside their bounding box
+are not drawn and are counted in the footer (SWOD4: 162 of 188
+waypoints), and a number that would overlap one already drawn is
+left out and counted (`--no-labels` draws none). Heights and
+collision are outside the drawing. Large levels give SVGs over
+the repository's 300 KB file limit (BUPP1 about 650 KB), so
+write those outside the repository.
+
+The placement tables are read as the MAP loader reads them. It
+seeks to each header offset at `0x43EEB6–0x43EF6F` and calls the
+five loaders in this order:
+
+| Table | Header offset / count | Loader, row read | Row bytes |
+|---|---|---|---:|
+| type 3 | +0x14 / +0x60 | `0x44FCD0`, `0x44FCEB` | 0x25 (37) |
+| type 16 | +0x18 / +0x64 | `0x469980`, `0x4699A2` | 0x21 (33) |
+| creature (type 2) | +0x1C / +0x68 | `0x4B44F0`, `0x4B4553` | 0x38 (56) |
+| mover (type 32) | +0x24 / +0x70 | `0x4D59F0`, `0x4D5A1C` | 0x29 (41) |
+| item (type 4) | +0x20 / +0x6C | `0x4D7480`, `0x4D74AC` | 0x25 (37) |
+
+Each row reaches the shared object constructor `0x4411F0` (the
+mover through `0x4D58F0 → 0x4698D0`), which sign-extends the
+row's s16 at +0 and +2, shifts each left 16 and stores them as
+object +4 (X) and +8 (Z) (`0x4411FB–0x441212`). The drawing uses
+those two values. See [the native surface fields](../lol3-map-odf-readers.md#map-sections-1-and-2)
 and [the waypoint and path rows](../lol3-map-odf-readers.md#tail-after-the-vertices).
 
 ```bash

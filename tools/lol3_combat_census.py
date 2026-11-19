@@ -113,7 +113,7 @@ def mode_lines(image):
 
 
 def main():
-    parser = lol3_cli.tool_args(__doc__)
+    parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--items", action="store_true", help="print regular definition fields")
     parser.add_argument("--mitigation", action="store_true", help="print mitigation selector and mask fields")
     parser.add_argument("--modes", action="store_true", help="print behavior and action slot values")

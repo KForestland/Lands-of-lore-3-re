@@ -245,11 +245,13 @@ def pattern_lines(got):
 
 
 def main():
-    ap = lol3_cli.tool_args(__doc__)
+    ap = lol3_cli.tool_args(__doc__, writes=False)
     ap.add_argument("--decode", action="store_true", help="also decode the two light maps")
     ap.add_argument("--span", help="print this level's unidentified MAP span as hex")
     ap.add_argument("--counts", action="store_true", help="print the QWOD0 and SWOD4 byte-pattern counts")
     a = ap.parse_args()
+    if a.out:
+        ap.error("prints only")
     if a.counts:
         if a.check or a.decode or a.span:
             ap.error("--counts only prints the two histograms")
@@ -271,7 +273,7 @@ def main():
             ap.exit(1, f"claimed edges: {exc}\n")
         return 0
     if not a.check:
-        ap.error("this tool only checks; pass --check")
+        ap.error("pass --check, --span LEVEL or --counts")
     try:
         got = file_facts(a.data)
         bad = []
