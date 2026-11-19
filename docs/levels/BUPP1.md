@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/BUPP1.WSX` and `DAT/BUPP1S.WSX`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 10,483 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 179. Paths 11. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 740 | 1-740 |
+| type 16 | 257 | 1-257 |
+| creature | 60 | 1-60 |
+| mover (type 32) | 96 | 1-96 |
+| item | 959 | 1-959 |
+
 ## Sounds
 
 `BUPP1S.WSX` holds 1684 entries: 1684 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,59 @@ Field 21 counts 10,483 surface rows in section 2 ([native readers](../lol3-map-o
 ## Scripts
 
 The object stream has 8,795 records and the region stream has 759 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/BUPP1.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 167 |
+| 0x02 | 458 |
+| 0x03 | 207 |
+| 0x05 | 463 |
+| 0x06 | 69 |
+| 0x07 | 75 |
+| 0x09 | 1,498 |
+| 0x0D | 1,235 |
+| 0x0E | 92 |
+| 0x0F | 4 |
+| 0x10 | 330 |
+| 0x11 | 16 |
+| 0x12 | 32 |
+| 0x14 | 290 |
+| 0x16 | 871 |
+| 0x17 | 5 |
+| 0x18 | 1 |
+| 0x19 | 26 |
+| 0x1A | 33 |
+| 0x1B | 514 |
+| 0x1C | 4 |
+| 0xC4 | 29 |
+| 0xC5 | 82 |
+| 0xC6 | 52 |
+| 0xC7 | 41 |
+| 0xCC | 64 |
+| 0xCF | 6 |
+| 0xD0 | 10 |
+| 0xD2 | 15 |
+| 0xF0 | 2,106 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 47 |
+| 0x02 | 55 |
+| 0x07 | 2 |
+| 0x09 | 349 |
+| 0x0D | 14 |
+| 0x10 | 11 |
+| 0x14 | 2 |
+| 0x1B | 25 |
+| 0xC4 | 2 |
+| 0xC5 | 16 |
+| 0xC6 | 21 |
+| 0xC7 | 4 |
+| 0xF0 | 211 |
 
 Opcode 0x15 does not occur, so these streams name no movie stem.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

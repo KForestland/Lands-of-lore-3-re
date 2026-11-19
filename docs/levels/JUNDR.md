@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/jundr.wsx` and `DAT/JUNDRs.wsx`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 6,973 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 102. Paths 1. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 1,017 | 1-1017 |
+| type 16 | 384 | 1-384 |
+| creature | 77 | 1-77 |
+| mover (type 32) | 70 | 1-70 |
+| item | 27 | 1-27 |
+
 ## Sounds
 
 `JUNDRs.wsx` holds 292 entries: 292 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,58 @@ Field 21 counts 6,973 surface rows in section 2 ([native readers](../lol3-map-od
 ## Scripts
 
 The object stream has 7,766 records and the region stream has 195 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/JUNDR.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 146 |
+| 0x02 | 39 |
+| 0x03 | 115 |
+| 0x05 | 737 |
+| 0x06 | 680 |
+| 0x07 | 823 |
+| 0x09 | 1,639 |
+| 0x0D | 123 |
+| 0x0E | 149 |
+| 0x0F | 13 |
+| 0x10 | 769 |
+| 0x11 | 83 |
+| 0x12 | 18 |
+| 0x13 | 1 |
+| 0x14 | 571 |
+| 0x15 | 1 |
+| 0x16 | 129 |
+| 0x17 | 16 |
+| 0x19 | 4 |
+| 0x1A | 14 |
+| 0x1B | 5 |
+| 0x1C | 11 |
+| 0xC4 | 1 |
+| 0xC5 | 40 |
+| 0xC6 | 33 |
+| 0xC7 | 1 |
+| 0xCE | 1 |
+| 0xCF | 14 |
+| 0xD2 | 3 |
+| 0xF0 | 1,587 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 2 |
+| 0x05 | 15 |
+| 0x06 | 1 |
+| 0x07 | 1 |
+| 0x09 | 109 |
+| 0x0D | 2 |
+| 0x0E | 17 |
+| 0x12 | 2 |
+| 0x14 | 6 |
+| 0xC5 | 8 |
+| 0xC6 | 4 |
+| 0xF0 | 28 |
 
 Opcode 0x15 byte +4 names `mshard2` (index 10, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

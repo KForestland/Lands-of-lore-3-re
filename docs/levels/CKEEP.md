@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/CKEEP.WSX` and `DAT/CKEEPS.WSX`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 3,790 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 15. Paths 0. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 186 | 1-186 |
+| type 16 | 99 | 1-99 |
+| creature | 15 | 1-15 |
+| mover (type 32) | 30 | 1-30 |
+| item | 84 | 1-84 |
+
 ## Sounds
 
 `CKEEPS.WSX` holds 357 entries: 357 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,43 @@ Field 21 counts 3,790 surface rows in section 2 ([native readers](../lol3-map-od
 ## Scripts
 
 The object stream has 1,746 records and the region stream has 35 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/CKEEP.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 63 |
+| 0x02 | 120 |
+| 0x03 | 32 |
+| 0x05 | 1 |
+| 0x06 | 2 |
+| 0x09 | 181 |
+| 0x0D | 322 |
+| 0x0E | 28 |
+| 0x10 | 70 |
+| 0x11 | 2 |
+| 0x12 | 10 |
+| 0x14 | 6 |
+| 0x15 | 1 |
+| 0x16 | 219 |
+| 0x1A | 4 |
+| 0x1B | 189 |
+| 0xC4 | 6 |
+| 0xC5 | 20 |
+| 0xC6 | 12 |
+| 0xC7 | 1 |
+| 0xD0 | 6 |
+| 0xD2 | 6 |
+| 0xF0 | 445 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x05 | 1 |
+| 0x09 | 19 |
+| 0xC5 | 5 |
+| 0xF0 | 10 |
 
 Opcode 0x15 byte +4 names `mking` (index 2, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

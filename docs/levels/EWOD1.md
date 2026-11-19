@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/EWOD1.WSX` and `DAT/EWOD1S.WSX`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 11,160 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 173. Paths 2. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 1,125 | 1-1125 |
+| type 16 | 191 | 1-191 |
+| creature | 156 | 1-156 |
+| mover (type 32) | 16 | 1-16 |
+| item | 44 | 1-44 |
+
 ## Sounds
 
 `EWOD1S.WSX` holds 199 entries: 199 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,51 @@ Field 21 counts 11,160 surface rows in section 2 ([native readers](../lol3-map-o
 ## Scripts
 
 The object stream has 2,629 records and the region stream has 82 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/EWOD1.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 10 |
+| 0x02 | 54 |
+| 0x03 | 248 |
+| 0x05 | 309 |
+| 0x06 | 8 |
+| 0x07 | 3 |
+| 0x09 | 487 |
+| 0x0D | 195 |
+| 0x0E | 62 |
+| 0x10 | 176 |
+| 0x11 | 53 |
+| 0x12 | 85 |
+| 0x13 | 2 |
+| 0x14 | 214 |
+| 0x15 | 3 |
+| 0x16 | 30 |
+| 0x17 | 2 |
+| 0x19 | 6 |
+| 0x1A | 8 |
+| 0x1B | 11 |
+| 0x1C | 7 |
+| 0xC5 | 5 |
+| 0xC6 | 10 |
+| 0xC7 | 6 |
+| 0xD0 | 7 |
+| 0xD2 | 5 |
+| 0xF0 | 623 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 5 |
+| 0x02 | 3 |
+| 0x09 | 42 |
+| 0x0D | 2 |
+| 0x0E | 12 |
+| 0x12 | 1 |
+| 0xC6 | 1 |
+| 0xF0 | 16 |
 
 Opcode 0x15 byte +4 names `mfrozen` (index 0, 1 command); `mvolc` (index 5, 1 command); `mvol0` (index 15, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

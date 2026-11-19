@@ -8,8 +8,11 @@ the sheet lists, all read from the files:
   - the light map: stored LZO1X groups and light-map members (directory only);
   - the MAP and ODF header fields measured on all levels (docs/formats/map-odf.md);
   - the sound sidecar <STEM>S.WSX: number of RIFF WAVE files and their formats.
-  - object and region script record counts, the movie stems named by opcode 0x15,
-    and whether a music stem or another level name occurs in those commands.
+  - object and region script record counts, the commands per opcode, the movie stems
+    named by opcode 0x15, and whether a music stem or another level name occurs
+    in those commands;
+  - waypoint and path counts, and the five placement tables by type (count and
+    row ids, no names).
 File roles, ids and counts only; no game text, pictures or sound.
 
   lol3_level_report.py --data DAT --out DIR      # all levels + README.md
@@ -30,6 +33,16 @@ from walk_lmf_leaves import lmf_groups  # noqa: E402
 
 ROLES = (".LMF", ".MAP", ".ODF", ".TE_")
 DATA_BIAS = 0x401800
+# Header offset, count offset and row stride, in the order the MAP loader reads them
+# (docs/formats/map-odf.md). The same four numbers are the first fields of
+# lol3_level_schematic.PLACEMENTS; --check requires the two lists to agree.
+PLACEMENT_TABLES = (
+    ("type 3", 0x14, 0x60, 0x25),
+    ("type 16", 0x18, 0x64, 0x21),
+    ("creature", 0x1C, 0x68, 0x38),
+    ("mover (type 32)", 0x24, 0x70, 0x29),
+    ("item", 0x20, 0x6C, 0x25),
+)
 
 
 def c_strings(image, offset, count):
@@ -114,6 +127,7 @@ def script_facts(payload, sizes, stem, movies, music, level_names):
     return {
         "object": len(walks["object"][1]),
         "region": len(walks["region"][1]),
+        "opcodes": {space: Counter(stream[at] for at in starts) for space, (stream, starts, *_rest) in walks.items()},
         "movies": named,
         "second": second,
         "music_hit": music_hit,
@@ -121,6 +135,27 @@ def script_facts(payload, sizes, stem, movies, music, level_names):
         "hash_hit": hash_hit,
         "movie_names": movies,
     }
+
+
+def placement_summary(data):
+    """Waypoint count, path count, and (type, row count) for the five placement tables.
+
+    Row ids on the sheet are 1 through the count, the same numbering as the schematic.
+    Row bytes are not copied.
+    """
+    if len(data) < 0xDC:
+        raise ValueError("MAP is shorter than the placement header")
+    waypoints = struct.unpack_from("<I", data, 0xC4)[0]
+    paths = struct.unpack_from("<I", data, 0xD8)[0]
+    placed = []
+    for name, off_at, count_at, stride in PLACEMENT_TABLES:
+        offset = struct.unpack_from("<I", data, off_at)[0]
+        count = struct.unpack_from("<I", data, count_at)[0]
+        end = offset + stride * count
+        if count and (offset < 0x244 or end > len(data)):
+            raise ValueError(f"{name} table runs outside the MAP")
+        placed.append((name, count))
+    return waypoints, paths, placed
 
 
 def level_stems(data_dir):
@@ -203,9 +238,11 @@ def read_level(stem, main, side, ctx):
             else:
                 sounds["other"] += 1
     script = script_facts(blobs[".MAP"], ctx["sizes"], stem, ctx["movies"], ctx["music"], ctx["levels"])
+    waypoints, paths, placed = placement_summary(blobs[".MAP"])
     return dict(stem=stem, main=main.name, size=main.stat().st_size, rows=rows, roles=sorted(blobs),
                 lm=lm, hdr=hdr, geometry_ok=geometry_ok, side=side.name if side else None,
-                side_count=side_count, sounds=sounds, script=script)
+                side_count=side_count, sounds=sounds, script=script,
+                waypoints=waypoints, paths=paths, placed=placed)
 
 
 def sheet(L):
@@ -234,6 +271,21 @@ def sheet(L):
     if L["geometry_ok"]:
         lines.append(f"Field 21 counts {L['hdr']['.MAP']['surfaces']:,} surface rows in section 2 "
                      "([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).")
+    lines += ["", "## Waypoints and paths", "",
+              f"Waypoints {L['waypoints']:,}. Paths {L['paths']:,}. "
+              "These are the header counts at +0xC4 and +0xD8, the same counts "
+              "`lol3_map_spans.py --list` prints.",
+              "", "## Placements", "",
+              "Rows of the five MAP placement tables, numbered from 1. No names.",
+              "", "| Type | Count | Row ids |", "|---|---:|---|"]
+    for name, count in L["placed"]:
+        if count == 0:
+            ids = ""
+        elif count == 1:
+            ids = "1"
+        else:
+            ids = f"1-{count}"
+        lines.append(f"| {name} | {count:,} | {ids} |")
     lines += ["", "## Sounds", ""]
     if L["side"]:
         fmt = ", ".join(
@@ -249,6 +301,18 @@ def sheet(L):
               "Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. "
               "The [script summary](notes/{s}.md) gives the same record counts with the event pools.".format(s=s),
               ""]
+    for space in ("object", "region"):
+        counts = facts["opcodes"][space]
+        lines.append(f"{space.capitalize()} stream by opcode:")
+        lines.append("")
+        if not counts:
+            lines.append("No commands.")
+            lines.append("")
+            continue
+        lines += ["| Opcode | Commands |", "|---:|---:|"]
+        for opcode in sorted(counts):
+            lines.append(f"| 0x{opcode:02X} | {counts[opcode]:,} |")
+        lines.append("")
     if facts["movies"]:
         parts = [f"`{facts['movie_names'][index]}` (index {index}, {count} command{'s' if count != 1 else ''})"
                  for index, count in sorted(facts["movies"].items())]
@@ -278,7 +342,8 @@ def sheet(L):
 def readme(levels):
     lines = ["# Level sheets", "",
              "One sheet per level, written by `tools/lol3_level_report.py --data DAT --out docs/levels` from the original "
-             "archives: named entries, light-map groups, MAP/ODF headers, the sound sidecar, and the script record counts. "
+             "archives: named entries, light-map groups, MAP/ODF headers, waypoint and path counts, "
+             "placement tables by type, the sound sidecar, script record counts and the commands per opcode. "
              "Each sheet lists the movie stems named by opcode 0x15. The framed commands do not contain a music stem or another level name.", "",
              "The [script summaries](notes/README.md) cover triggers and script groups for each level.", "",
              "| Level | Archive | Entries | Light-map members | MAP size | ODF size | Sounds |", "|---|---|---:|---:|---:|---:|---:|"]
@@ -309,15 +374,30 @@ def main():
                     for L in levels)
         bad_index = any(index >= len(L["script"]["movie_names"]) for L in levels for index in L["script"]["movies"])
         bad_second = any(value != 0 for L in levels for value in L["script"]["second"])
+        from lol3_level_schematic import PLACEMENTS
+        if [(name, off_at, count_at, stride) for name, off_at, count_at, stride, _color in PLACEMENTS] != list(PLACEMENT_TABLES):
+            raise ValueError("placement tables differ from the schematic")
+        opcode_commands = sum(sum(L["script"]["opcodes"][space].values()) for L in levels for space in ("object", "region"))
+        root = Path(__file__).resolve().parents[1] / "docs" / "levels"
+        differ = []
+        for L in levels:
+            path = root / f"{L['stem']}.md"
+            if not path.is_file() or path.read_text(encoding="utf-8") != sheet(L):
+                differ.append(L["stem"])
+        readme_path = root / "README.md"
+        if not readme_path.is_file() or readme_path.read_text(encoding="utf-8") != readme(levels):
+            differ.append("README")
+        sheet_note = "sheets match docs/levels" if not differ else "sheets differ: " + ", ".join(differ)
         print(f"CHECK level_report: {len(levels)} level archives; all four level names (.LMF .MAP .ODF .TE_) found by hash in "
               f"{named}; MAP section-1 rule holds in {map_ok}, surface and waypoint joins in {geometry_ok}; "
               f"{sum(L['lm']['members'] for L in levels):,} light-map members; "
               f"{sum(snd.values()):,} sidecar sounds, non-WAVE: {snd.get('other', 0)}; "
               f"scripts {objects} object / {regions} region; opcode 0x15 names {movie_commands} movies; "
-              f"music and other-level names in scripts: {stray}")
+              f"music and other-level names in scripts: {stray}; {sheet_note}")
         ok = (len(levels) and named == map_ok == geometry_ok == len(levels) and not snd.get("other")
               and objects == 54940 and regions == 4040 and movie_commands == 25
-              and stray == 0 and not bad_index and not bad_second)
+              and stray == 0 and not bad_index and not bad_second
+              and opcode_commands == objects + regions and not differ)
         return 0 if ok else 1
     if not a.out:
         ap.print_help(); return 2

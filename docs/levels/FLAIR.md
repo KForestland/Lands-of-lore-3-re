@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/flair.wsx` and `DAT/FLAIRs.wsx`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 7,761 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 184. Paths 3. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 1,523 | 1-1523 |
+| type 16 | 430 | 1-430 |
+| creature | 165 | 1-165 |
+| mover (type 32) | 104 | 1-104 |
+| item | 170 | 1-170 |
+
 ## Sounds
 
 `FLAIRs.wsx` holds 384 entries: 384 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,59 @@ Field 21 counts 7,761 surface rows in section 2 ([native readers](../lol3-map-od
 ## Scripts
 
 The object stream has 5,718 records and the region stream has 697 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/FLAIR.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 165 |
+| 0x02 | 168 |
+| 0x03 | 53 |
+| 0x05 | 274 |
+| 0x06 | 58 |
+| 0x07 | 143 |
+| 0x09 | 1,120 |
+| 0x0D | 642 |
+| 0x0E | 407 |
+| 0x0F | 79 |
+| 0x10 | 274 |
+| 0x11 | 15 |
+| 0x12 | 17 |
+| 0x13 | 8 |
+| 0x14 | 337 |
+| 0x15 | 3 |
+| 0x16 | 286 |
+| 0x17 | 2 |
+| 0x19 | 1 |
+| 0x1A | 14 |
+| 0x1B | 132 |
+| 0x1C | 86 |
+| 0xC4 | 8 |
+| 0xC5 | 57 |
+| 0xC6 | 26 |
+| 0xC7 | 6 |
+| 0xCF | 4 |
+| 0xD0 | 12 |
+| 0xD2 | 9 |
+| 0xF0 | 1,312 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 102 |
+| 0x02 | 5 |
+| 0x03 | 1 |
+| 0x09 | 201 |
+| 0x0E | 86 |
+| 0x12 | 9 |
+| 0x14 | 55 |
+| 0x19 | 1 |
+| 0xC4 | 58 |
+| 0xC5 | 1 |
+| 0xC6 | 12 |
+| 0xD0 | 2 |
+| 0xF0 | 164 |
 
 Opcode 0x15 byte +4 names `mfinale` (index 8, 1 command); `mcredits` (index 16, 1 command); `mepilog` (index 17, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

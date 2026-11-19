@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/olow3.wsx` and `DAT/OLOW3s.wsx`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 5,544 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 125. Paths 0. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 845 | 1-845 |
+| type 16 | 445 | 1-445 |
+| creature | 79 | 1-79 |
+| mover (type 32) | 74 | 1-74 |
+| item | 296 | 1-296 |
+
 ## Sounds
 
 `OLOW3s.wsx` holds 576 entries: 576 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,44 @@ Field 21 counts 5,544 surface rows in section 2 ([native readers](../lol3-map-od
 ## Scripts
 
 The object stream has 2,494 records and the region stream has 203 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/OLOW3.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 43 |
+| 0x02 | 135 |
+| 0x03 | 73 |
+| 0x05 | 332 |
+| 0x07 | 30 |
+| 0x09 | 445 |
+| 0x0D | 305 |
+| 0x0E | 76 |
+| 0x10 | 87 |
+| 0x12 | 4 |
+| 0x14 | 121 |
+| 0x16 | 141 |
+| 0x17 | 5 |
+| 0x1A | 2 |
+| 0x1B | 100 |
+| 0x1C | 9 |
+| 0xC5 | 5 |
+| 0xC6 | 4 |
+| 0xC7 | 24 |
+| 0xD0 | 4 |
+| 0xD2 | 11 |
+| 0xF0 | 538 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 5 |
+| 0x02 | 2 |
+| 0x09 | 188 |
+| 0x0E | 1 |
+| 0xC5 | 5 |
+| 0xF0 | 2 |
 
 Opcode 0x15 does not occur, so these streams name no movie stem.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

@@ -27,6 +27,22 @@ Made by `tools/lol3_level_report.py` from `DAT/ishat.wsx` and `DAT/ISHATs.wsx`. 
 For the MAP entry, field 2 − field 1 = 8 × field 20 (section 1 holds field 20 records of 8 bytes).
 Field 21 counts 7,341 surface rows in section 2 ([native readers](../lol3-map-odf-readers.md#map-sections-1-and-2)).
 
+## Waypoints and paths
+
+Waypoints 109. Paths 0. These are the header counts at +0xC4 and +0xD8, the same counts `lol3_map_spans.py --list` prints.
+
+## Placements
+
+Rows of the five MAP placement tables, numbered from 1. No names.
+
+| Type | Count | Row ids |
+|---|---:|---|
+| type 3 | 874 | 1-874 |
+| type 16 | 176 | 1-176 |
+| creature | 109 | 1-109 |
+| mover (type 32) | 74 | 1-74 |
+| item | 3 | 1-3 |
+
 ## Sounds
 
 `ISHATs.wsx` holds 306 entries: 306 × format 17 (IMA ADPCM, mono, 22,050 Hz, 4-bit).
@@ -34,6 +50,50 @@ Field 21 counts 7,341 surface rows in section 2 ([native readers](../lol3-map-od
 ## Scripts
 
 The object stream has 3,061 records and the region stream has 162 records. Both counts are a walk of the MAP command bytes with the opcode sizes from the executable. The [script summary](notes/ISHAT.md) gives the same record counts with the event pools.
+
+Object stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x01 | 102 |
+| 0x02 | 30 |
+| 0x03 | 67 |
+| 0x05 | 253 |
+| 0x06 | 280 |
+| 0x07 | 77 |
+| 0x09 | 558 |
+| 0x0D | 101 |
+| 0x0E | 208 |
+| 0x0F | 39 |
+| 0x10 | 211 |
+| 0x11 | 10 |
+| 0x12 | 71 |
+| 0x14 | 148 |
+| 0x15 | 1 |
+| 0x16 | 69 |
+| 0x17 | 10 |
+| 0x19 | 3 |
+| 0x1A | 20 |
+| 0x1B | 21 |
+| 0x1C | 56 |
+| 0xC4 | 75 |
+| 0xC5 | 44 |
+| 0xC6 | 7 |
+| 0xC7 | 1 |
+| 0xCC | 28 |
+| 0xCF | 11 |
+| 0xD0 | 20 |
+| 0xD2 | 9 |
+| 0xF0 | 531 |
+
+Region stream by opcode:
+
+| Opcode | Commands |
+|---:|---:|
+| 0x09 | 132 |
+| 0x0D | 18 |
+| 0x0E | 2 |
+| 0xF0 | 10 |
 
 Opcode 0x15 byte +4 names `mshard3` (index 11, 1 command). Byte +5 is 0 on each of these commands. VA `0x447F97` passes byte +4 to VA `0x46FA60`, and VA `0x46FCF2` reads `[index*4 + 0x54A3D0]`, the 19 stems at file `0x148BD0`.
 No framed command contains a music stem from the pointer table at file `0x148180`, or the hash of `MUSIC\<stem>.aud`.

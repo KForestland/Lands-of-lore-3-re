@@ -1,6 +1,6 @@
 # Level sheets
 
-One sheet per level, written by `tools/lol3_level_report.py --data DAT --out docs/levels` from the original archives: named entries, light-map groups, MAP/ODF headers, the sound sidecar, and the script record counts. Each sheet lists the movie stems named by opcode 0x15. The framed commands do not contain a music stem or another level name.
+One sheet per level, written by `tools/lol3_level_report.py --data DAT --out docs/levels` from the original archives: named entries, light-map groups, MAP/ODF headers, waypoint and path counts, placement tables by type, the sound sidecar, script record counts and the commands per opcode. Each sheet lists the movie stems named by opcode 0x15. The framed commands do not contain a music stem or another level name.
 
 The [script summaries](notes/README.md) cover triggers and script groups for each level.
 
