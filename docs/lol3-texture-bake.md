@@ -121,12 +121,14 @@ checks write no files.
 ## Live Direct3D texture format
 
 **CONFIRMED.** On Wine 9.0 with the built-in DirectDraw library and a
-16-bit Xvfb display, the English retail `LOL3.DAT` (SHA-256 prefix
+`1024x768` Xvfb display at 16-bit depth, the English retail `LOL3.DAT` (SHA-256 prefix
 `9a9eb04c8f40`) reached its menu with the native `-WINDOW -MIJAS`
 options. `-WINDOW` sets the flag at `0x4083CE`. `-MIJAS` skips the
 logo call at `0x407574`. In Video Controls, choose `Direct3D: display`
 and accept the `1024x768x32` mode offered in that run. Then load the
 game-written player autosave (not shipped, not tracked) with SHA-256 prefix `df50eda48c27` (slot +0x498 = 5).
+The trace used GDB through `winedbg --gdb` and Wine's
+`WINEDEBUG=-all,+ddraw` log.
 
 | Native observation | Measured value |
 |---|---|
@@ -134,6 +136,15 @@ game-written player autosave (not shipped, not tracked) with SHA-256 prefix `df5
 | Return at `0x495199` and selected descriptor `0x661608` | Result 1 (an alpha-capable RGB format was found and copied: ctx+0x20 at `0x49508F`), pixel size 16, mask quartet `7C00/03E0/001F/8000`; selector 0 (R mask bit 15 clear and not `0xF00`, i.e. 555; 1 would be 565, 2 = 444). |
 | Loaded level, selector at `0x66163C` and result at `0x661640` | Selector 0 and result 1 persisted, with a live device pointer in `0x65F434`. |
 | Texture copy in Wine's DirectDraw trace | `IDirect3DTexture2::Load` copied between two 32×32 surfaces. Both `CreateSurface` descriptors requested the same 16-bit `7C00/03E0/001F/8000` format. |
+
+**CONFIRMED.** `[0x65F460]` was zero when the callback accepted the
+RGB555 candidate. This follows from the observed 555 descriptor and
+the only 555 copy path at `0x495070–0x495092`, which rejects the
+candidate when the flag is nonzero. The `-D3DUSEARGB4444` option
+(`LOL3.DAT+0x149360`) sets the flag at `0x472AC1–0x472AD8`.
+An enumerated RGB444 candidate can still reach `0x4950B1–0x4950C6`.
+**UNCONFIRMED.** Which candidate the tested device supplies with
+that option and whether the upload proceeds.
 
 This is one device: Wine's DirectDraw translation layer enumerates its own format list. A native Windows driver may omit the 1555 format (result 0) or offer only 4444 (selector 2).
 
