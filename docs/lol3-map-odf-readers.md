@@ -99,33 +99,35 @@ copies the table pointer and a byte length of count × 8, so
 the saved image includes this byte. The other five absolute
 uses of `0x5701A4` are `0x4B4D7E` (s16 +0, s16 +2, u16 +4),
 `0x4B5B1E` (u16 +4, then s16 +0 and s16 +2), `0x4B8A38`
-(forms the row address and returns), `0x4BCAD1` (s16 +0 and
+(stores the row pointer in `0x7D772C`; that global is read at
+`0x4BDE92`/`0x4BDEAE` for +0 and +2 only, copied to object +0x1990
+at `0x4F8F7C` and exported at `0x438E47`, so those paths are not
+yet checked for +6), `0x4BCAD1` (s16 +0 and
 s16 +2) and `0x4FD6C8` (u16 +4 and byte +7). A read of byte
 +6 from one of those rows would name the field.
 
 **CONFIRMED (on-disk text). UNCONFIRMED (reader).** The 2,384
 name slots are 2,330 NUL-padded printable strings of length
-3–25, 39 copies of the eight characters `WayPoint` followed by
+3–25 (ten of them a plain `WayPoint` with NUL padding: BUPP1 5,
+EWOD1 1, LUPP2 4), 39 copies of the eight characters `WayPoint` followed by
 `0xCD` through byte 24 and a final 0, and 15 copies of one
 26-byte record: `BadName`, a NUL, u32 0, three u32 values of 1
 and a u16 0. The `WayPoint` slots are BUPP1 1, DLOW1 1, EWOD1 3,
 FLAIR 2, HWHIT 1, KVOLC 21, LUPP2 1, NWOD2 3, PWOD3 3 and
 SWOD4 3. One starts at `BUPP1.WSX+0x181EEA2`. The `BadName`
 records are BUPP1 index 35 at `BUPP1.WSX+0x181E940`, FLAIR
-indexes 1 and 3, and LUPP2 indexes 3, 5–14 and 35. The retail
-executable image contains none of the byte strings `WayPoint`,
-`BadName` or `Walk of Shame`.
-
+indexes 1 and 3, and LUPP2 indexes 3, 5–14 and 35. 
 The loader's waypoint read is 8 × the +0xC4 count and its path
 read is 4 × the +0xD8 count, so both label spans sit outside
 those reads. The 31-byte slots, 36 in all, are printable C
 strings. Thirty-two are filled out with `0xCD`. `Vic` and `Sam`,
 each in BUPP1 and again in LUPP2, have one extra NUL and then
-`0xCD`. The first label is `Boris` at `BUPP1.WSX+0x181E90C`.
-The labels are Path (13), Boris, Towel, Vic, Thom and Sam
-(2 each), and one each of robbery, Guard1, main path,
-guard path 2, Pardon Path, Cookie, Chloie, Sydney,
-scarletts path, Dancers, LizardRun, Drar path and Walk of Shame.
+`0xCD`. The first label starts at `BUPP1.WSX+0x181E90C`. There are 19
+distinct labels: one occurs 13 times, five occur twice and 13 once.
+The repository does not reproduce them (they are level-author
+text); `lol3_map_spans.py --check` compares their counts and a
+digest. The retail executable image contains neither `WayPoint`
+nor `BadName`.
 CKEEP, GRULO, ISHAT, MLOW2, OLOW3 and QWOD0 have a path count
 of zero. A seek to header +0xC8 + 8 × count, or to header
 +0xDC + 4 × count, would identify a reader.
@@ -181,7 +183,7 @@ the bits mean).** The 167,942 section-1 rows are eight bytes,
 and the loader copies all eight (`0x43EB7C–0x43EBA1`). Word +0
 ranges from 1 to 65535 (935 distinct values; 213 are `0xFFFF`;
 the value 0 does not occur). 165,745 of those words are below
-both the vertex count and the surface count, and 1,984 are at
+both the vertex count and the surface count, and 1,984 of the non-`0xFFFF` words are at
 or above both. Bytes +2 and +3 are written and copied as
 separate bytes. Taken together as a little-endian word they
 range from 0 to 65535. Bytes +4 and +5, taken the same way,
@@ -198,18 +200,18 @@ and 27,297. Byte +6 has 21 values; 16, 8 and 0 account for
 | +2 | Added or replaced from the caller's byte +7 (`0x4E6474`, `0x4E64CB`). Copied to the caller's object +0x30 at `0x4FFD91`. |
 | +3 | Added or replaced the same way (`0x4E6493`, `0x4E64B2`). Copied to object +0x31 at `0x4FFD97`. |
 | +4 | Replaced from the caller's byte +7 by switch arms 0 and 15 (`0x4E65CE`). Copied to object +0x40 at `0x4FFD9D`. |
-| +5 | Low five bits select a row (`0x4A74E0–0x4A74E3`, `0x4EFE2C–0x4EFE32`). Bits `0x20`, `0x40` and `0x10` are tested at `0x4FFD61`, `0x4FFD89` and `0x50071A`. Switch arms 17–19 set bit `0x20` or `0x40`, clear bit `0x20`, or toggle bit `0x20` (`0x4E6600`, `0x4E6611`, `0x4E6625`). Every arm of the switch ORs in bit `0x40`, and `0x4FFE00` clears that bit after the copy. |
-| +6 | Switch arms 5–13 set, clear or toggle bits 2, `0x20` and `0x40` (`0x4E64E4–0x4E65CB`). The copy at `0x4FFDA3–0x4FFDED` tests bits `0x10`, 3, `0x20`, `0x40`, 2 and 0. `0x4FFD4B` sets ebx to 1, and `0x4FFDDF` ORs that 1 into the object word +0x3E when bit 2 is set. Bit `0x80` is passed to `0x4FFFB0` at `0x50072A–0x500737`. |
-| +7 | Replaced from the caller's byte +7 by switch arms 14 and 16 (`0x4E65E7`). Zero-extended, shifted left 14 and ORed into object +0x3E at `0x4FFDF1–0x4FFDF9`. |
+| +5 | Low five bits select a row (`0x4A74E0–0x4A74E3`, `0x4EFE2C–0x4EFE32`). Bits `0x20`, `0x40` and `0x10` are tested at `0x4FFD61`, `0x4FFD89` and `0x50071A`. Switch arm 17 sets `0x20` (with `0x40`), arm 18 clears `0x20` and arm 19 toggles `0x20` (`0x4E6600`, `0x4E6611`, `0x4E6625`). Every arm of the switch ORs in bit `0x40`, and `0x4FFE00` clears that bit after the copy. |
+| +6 | Switch arms 5–13 set, clear or toggle masks 4, `0x20` and `0x40` (`0x4E64E4–0x4E65CB`). The copy at `0x4FFDA3–0x4FFDED` tests masks `0x10`, 8, `0x20`, `0x40`, 4 and 1. `0x4FFD4B` sets ebx to 1, and `0x4FFDDF` ORs that 1 into the object word +0x3E when mask 4 is set. Bit `0x80` is passed to `0x4FFFB0` at `0x50072A–0x500737`. |
+| +7 | Replaced from the caller's byte +7 by switch arms 14 and 16 (`0x4E65E7`). Zero-extended, shifted left 14 and ORed into the u16 object +0x3E at `0x4FFDF1–0x4FFDF9`, which keeps only its bits 0–1 although the byte takes 128 values, so another consumer may exist (**UNCONFIRMED**). |
 
 The switch is `0x4E6450`. Its index is the caller's byte +6,
 its operand is byte +7, and the row index is the caller's
 word +4. The 20 targets are the dwords at `0x4E663C`. An index
 above 19 returns 1 at `0x4E6631` and leaves the row unchanged.
 The export at `0x438B80` reports the same table with stride 8.
-`lol3_map_spans.py --check` re-counts the rows, the byte
-histograms, the name classes, the path labels and the gap
-lengths above.
+`lol3_map_spans.py --check` re-counts the rows, the waypoint +6/+7 histograms, the
+section-1 range and byte-value counts, the name classes, the
+path-label counts and digest and the gap lengths above.
 
 ## ODF header and primary tables
 

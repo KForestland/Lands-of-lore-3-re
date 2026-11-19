@@ -35,14 +35,18 @@ BAD_AT = {
     ("LUPP2", 9), ("LUPP2", 10), ("LUPP2", 11), ("LUPP2", 12), ("LUPP2", 13),
     ("LUPP2", 14), ("LUPP2", 35),
 }
-PATHS = Counter({
-    "Path": 13, "Boris": 2, "Towel": 2, "Vic": 2, "Thom": 2, "Sam": 2,
-    "robbery": 1, "Guard1": 1, "main path": 1, "guard path 2": 1,
-    "Pardon Path": 1, "Cookie": 1, "Chloie": 1, "Sydney": 1,
-    "scarletts path": 1, "Dancers": 1, "LizardRun": 1, "Drar path": 1,
-    "Walk of Shame": 1,
-})
-ABSENT = (b"WayPoint", b"BadName", b"Walk of Shame")
+# The 36 path labels are level-author text: the check compares counts and a digest, never the strings.
+# 19 distinct labels; the most common one occurs 13 times; two labels carry one extra NUL (in two levels each).
+PATHS_DIGEST = "2880ef4cf848bf11"
+EXTRA_NUL_DIGEST = "bedbfd1d6ab612d8"
+
+
+def label_digest(counter):
+    """sha256 prefix of the sorted 'label<TAB>count' lines."""
+    return sha256("\n".join(f"{k}\t{v}" for k, v in sorted(counter.items())).encode()).hexdigest()[:16]
+
+
+ABSENT = (b"WayPoint", b"BadName")
 
 
 def u32(buf, at):
@@ -197,7 +201,8 @@ def mismatches(got):
         bad.append("name placement")
     if not got["zero_len"] or min(got["zero_len"]) != 3 or max(got["zero_len"]) != 25:
         bad.append("name lengths")
-    if got["paths"] != PATHS or got["extra_nul"] != Counter({"Vic": 2, "Sam": 2}):
+    if (sum(got["paths"].values()) != 36 or len(got["paths"]) != 19 or label_digest(got["paths"]) != PATHS_DIGEST
+            or label_digest(got["extra_nul"]) != EXTRA_NUL_DIGEST):
         bad.append("path labels")
     if got["no_path"] != NO_PATH:
         bad.append(f"levels with no path {sorted(got['no_path'])}")

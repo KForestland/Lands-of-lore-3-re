@@ -79,6 +79,6 @@ python3 tools/lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))
 
-- The remaining MAP waypoint and surface fields and the individual section-1 record fields.
+- The remaining MAP waypoint and surface fields, the meanings of the section-1 bits (each byte now has a native reader), the label spans and the gap before field 16.
 - The header fields not yet bound by the [native readers](../lol3-map-odf-readers.md) (MAP fields 19–21 and ODF fields 0–4 and 14–20 are bound).
 - The ODF per-row meanings, the section-0 companions and what follows the field-2 252-byte rows.
