@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Script browser.** `lol3_script_browser.py` groups one level's commands by opcode and prints the one-line meaning from the opcode page. It does not list each command.
 - **Save inspector.** `lol3_save_header.py` prints the named slot fields, both directories and the other header bytes as hex with offsets. A level block long enough for a header lists its 75 section starts and lengths. `--check` uses a synthetic slot and the version compares in `LOL3.DAT`.
 - **Level schematic.** The QWOD0 drawing adds waypoint squares, path runs and numbered placement dots, with a legend. `--check` still regenerates that picture and compares it byte for byte.
 - **Reader parity.** [tools/README](../tools/README.md#reader-parity) lists every current format and rules table with its reader, its check, and the text or drawing a reader gets. Rows with no such output are marked gap.

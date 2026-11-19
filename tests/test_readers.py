@@ -13,6 +13,7 @@ from extract_wsx_entries import parse_wsx, wsx_name_hash
 from lol3_cache_seed import FILL_MARKER, HEADER, body_covers
 from lol3_pht import cycle_covers, pht_covers
 from lol3_save_header import HEADER_SIZE, parse_header, report, synthetic_slot
+from lol3_script_browser import MEANINGS, summary_text
 from lol3_script_framing import frame
 from lol3_texture_archive import chunks
 from lol3_level_schematic import map_geometry, schematic_svg
@@ -100,6 +101,21 @@ class ReaderTests(unittest.TestCase):
         struct.pack_into("<I", broken, HEADER_SIZE + 8 + 0xF4 + 4, 0)
         with self.assertRaises(ValueError):
             report(bytes(broken))
+
+    def test_script_browser_groups_opcodes_without_game_files(self):
+        sizes = {0x01: 6, 0x16: 18, 0xF0: 6}
+        command = bytes((0x01, 1, 0, 0, 4, 0))
+        dialogue = bytes((0x16,)) + bytes(7) + b"ABCD" + bytes(6)
+        self.assertEqual(len(dialogue), 18)
+        text = summary_text("SYN", command + command + dialogue, bytes((0xF0, 0, 0, 0, 0, 0)), sizes)
+        self.assertIn("SYN object commands: 3", text)
+        self.assertIn(f"0x01 2: {MEANINGS[0x01]}", text)
+        self.assertIn(f"0x16 1: {MEANINGS[0x16]}", text)
+        self.assertNotIn("ABCD", text)
+        self.assertIn("SYN region commands: 1", text)
+        self.assertIn(f"0xF0 1: {MEANINGS[0xF0]}", text)
+        with self.assertRaises(ValueError):
+            summary_text("SYN", command[:-1], b"", sizes)
 
     def test_texture_bake_to_png(self):
         source = struct.pack("<256H", 0, 0x7C00, *([0] * 254))
