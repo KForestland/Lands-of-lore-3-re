@@ -336,6 +336,14 @@ position group of the [save page](lol3-native-saves.md)) with +4,
 (`0x448300–0x448316`). There +4 (0–0x11) selects an arm through
 `0x48F0D4`; the common tail passes mode +0x7C to `0x48F720` and
 stores the last argument at +0x4C (`0x48EC08–0x48EC48`).
-**UNCONFIRMED.** What the object at `0x5860F0` is on screen, and
-the visible look of the type-5 effect classes built by opcodes 0x0F
-and 0x1C.
+**CONFIRMED.** The object at `0x5860F0` is a second player-side
+actor. The hit resolver treats it like the player on both sides: on
+difficulty `[0x5D57BC]` 0 a hit on the player or on it is divided by 3,
+a hit by the player or by it is doubled, and a hit by it is doubled
+again when `0x48FE40` on it returns nonzero (`0x4E23D8–0x4E245C`). A hit
+on the player by another actor is reported to it through `0x489700`
+(`0x4E228C–0x4E22AE`), and saves keep its position next to the
+player's (`0x43766F–0x43776D`).
+**UNCONFIRMED.** Who this actor is on screen (a companion is the
+likely reading), and the visible look of the type-5 effect classes
+built by opcodes 0x0F and 0x1C.
