@@ -79,7 +79,7 @@ Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the c
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
-python3 tools/check_all.py                  # 28 passed with a matching cache, 25 passed and 3 skipped without one
+python3 tools/check_all.py                  # 30 passed with a matching cache, 27 passed and 3 skipped without one
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository

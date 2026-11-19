@@ -31,6 +31,10 @@ python3 tools/walk_lmf_leaves.py --data DAT --check
 python3 tools/walk_lmf_leaves.py --data DAT --check --decode
 ```
 
+## Writing
+
+`tools/lol3_lzo_writer.py --check --data DAT` (needs liblzo2) expands each stored group, compresses it again with liblzo2's `lzo1x_1_compress`, and writes new group lengths (the low 18 bits at the group's first row), member offsets and pool size. This is a real encoder, not a copy: the new packed bytes differ from the original in all 5,256 groups, so the 18 rebuilt light maps differ from the files, while the 424,288 decoded members are identical. The same check re-encodes the 465 `.TE_` texture blocks and, when the game-written cache is beside `DAT`, the packed SMD frames its records point at. Without liblzo2 it prints one SKIP line. Nothing is written to disk.
+
 ## Worked example
 
 **CONFIRMED.** `CKEEP.WSX+0xC19084` starts a 663,806-byte LMF.

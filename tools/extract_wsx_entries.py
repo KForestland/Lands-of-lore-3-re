@@ -36,7 +36,11 @@ def wsx_name_hash(name: str) -> int:
 
 
 def parse_wsx(path: Path) -> dict:
-    data = path.read_bytes()
+    return parse_wsx_bytes(path.read_bytes(), path)
+
+
+def parse_wsx_bytes(data: bytes, path="<memory>") -> dict:
+    """Parse WSX bytes already in memory; `path` only names them in errors."""
     if len(data) < HEADER_PREFIX + RECORD_SIZE:
         raise ValueError(f"{path}: too small for WSX header")
     count = struct.unpack_from("<H", data, 0)[0]

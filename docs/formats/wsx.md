@@ -28,6 +28,10 @@ and adds a six-bit contribution from each uppercase ASCII filename byte.
 The [native reader](../lol3-wsx-reader.md#resource-name-key) gives the
 formula, name normalization and 76 exact name/key witnesses.
 
+## Writing
+
+`tools/lol3_wsx_writer.py --check --data DAT` rebuilds each archive in memory from its parsed rows: the count, the data size, the rows in their stored order, then the entries in offset order. All 51 DAT archives and the loose `LOCAL.WSX` and `locallng.wsx` beside `DAT` (7,614 rows) come out byte for byte equal to the files. A member changed in memory moves the later offsets and re-reads with the change. `cdcache.wsx` is not an ordinary archive (see below) and is left out. Nothing is written to disk.
+
 ## Worked example
 
 `DAT/QWOD0.WSX` (7,832,695 bytes) starts:

@@ -33,7 +33,7 @@ The SVG is an overhead line drawing: surface edges, one hollow waypoint square, 
 
 ## Check the texture cache
 
-The original game writes a texture cache named `cdcache.wsx` in its game folder, beside `DAT`, when it first runs. To get one, start the game once from your installation; the checks then find the file there. The 3 MB `DAT/cdcache.wsx` the game ships is only the seed and holds no texture records. Without the game-written file the other 25 checks still run. [Cache and row spans](formats/textures.md#the-cache-file)
+The original game writes a texture cache named `cdcache.wsx` in its game folder, beside `DAT`, when it first runs. To get one, start the game once from your installation; the checks then find the file there. The 3 MB `DAT/cdcache.wsx` the game ships is only the seed and holds no texture records. Without the game-written file the other 27 checks still run (the LZO writer check then skips only its SMD part). [Cache and row spans](formats/textures.md#the-cache-file)
 
 ```bash
 python3 tools/check_all.py

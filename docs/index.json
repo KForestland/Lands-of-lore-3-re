@@ -408,6 +408,7 @@
         "tools/lol3_claimed_edges.py",
         "tools/lol3_combat_census.py",
         "tools/lol3_level_report.py",
+        "tools/lol3_lzo_writer.py",
         "tools/lol3_map_spans.py",
         "tools/lol3_name_hash.py",
         "tools/lol3_native_checks.py",
@@ -417,6 +418,7 @@
         "tools/lol3_save_header.py",
         "tools/lol3_save_selectors.py",
         "tools/lol3_script_browser.py",
+        "tools/lol3_wsx_writer.py",
         "tools/rating.py"
       ]
     },
@@ -468,6 +470,7 @@
       "answers": [],
       "question_references": [],
       "tools": [
+        "tools/lol3_lzo_writer.py",
         "tools/walk_lmf_leaves.py"
       ]
     },
@@ -521,7 +524,8 @@
       "answers": [],
       "question_references": [],
       "tools": [
-        "tools/extract_wsx_entries.py"
+        "tools/extract_wsx_entries.py",
+        "tools/lol3_wsx_writer.py"
       ]
     },
     {
@@ -1192,6 +1196,7 @@
         "tools/lol3_combat_census.py",
         "tools/lol3_level_report.py",
         "tools/lol3_level_schematic.py",
+        "tools/lol3_lzo_writer.py",
         "tools/lol3_map_spans.py",
         "tools/lol3_media_check.py",
         "tools/lol3_name_hash.py",
@@ -1209,6 +1214,7 @@
         "tools/lol3_texture_palettes.py",
         "tools/lol3_texture_png.py",
         "tools/lol3_texture_spans.py",
+        "tools/lol3_wsx_writer.py",
         "tools/rating.py",
         "tools/repo_guard.py",
         "tools/walk_lmf_leaves.py"
