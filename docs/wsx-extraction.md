@@ -1,6 +1,6 @@
 # LoL3 WSX extraction (reproducible)
 
-> **Superseded by [formats/wsx.md](formats/wsx.md):** the second `u32` of a row is the entry offset, and payloads are not stored largest first (that holds in 18 of 52 files).
+> **History.** Superseded by [formats/wsx.md](formats/wsx.md): the second `u32` of a row is the entry offset, and payloads are not stored largest first (that holds in 18 of 52 files).
 
 Updated 2026-09-17.
 
