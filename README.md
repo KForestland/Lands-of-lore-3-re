@@ -18,9 +18,9 @@ It contains documentation, tools and small diagrams. It contains no game files a
 These are counts of work done, not a percentage of how complete the project is. Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest. The lines are produced by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_RATE.md) explains each line and what it does not claim.
 
 <!-- rating:begin -->
-- **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated; what those bytes mean and what reads them is unknown.
+- **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
 - **Rules traced:** the pages mark 289 statements CONFIRMED (proved from the program code or the files) and 60 UNCONFIRMED (a reading not yet proved), on 73 current pages; old notes kept as history are not counted.
-- **Seen in the running game:** 3 of 5 questions that can only be settled by watching the original game run are settled.
+- **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe).
 - **Open questions:** 13 numbered questions: 3 answered, 6 mostly answered, 4 partly answered.
 <!-- rating:end -->
 
