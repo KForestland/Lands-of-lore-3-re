@@ -14,7 +14,7 @@ The schematic goes outside the clone. A save slot is a game-written player save:
 python3 tools/full_report.py --data "$LOL3_DAT" --out ../lol3-out/report
 ```
 
-The tool writes `inventory.tsv` with the files in `DAT`, their sizes, the reader used and its result. For an archive, `complete` describes its directory and payload spans.{1: '', 2: ' The two copies of the credits table have separate rows.', 3: ' The report labels the shipped cache seed and PHT files as repeated blocks when the byte-pattern checks pass.'} Open `levels/README.md` for the level sheets. `text-counts.tsv` gives one count per table from the four event and dialogue TRRs in `LOCALLNG.WSX`.
+The tool writes `inventory.tsv` with the files in `DAT`, their sizes, the reader used and its result. For an archive, `complete` describes its directory and payload spans. The report labels the shipped cache seed and PHT files as repeated blocks when the byte-pattern checks pass. Open `levels/README.md` for the level sheets. `text-counts.tsv` gives one count per table from the four event and dialogue TRRs in `LOCALLNG.WSX`.
 
 Choose an output folder outside the game and clone. Use a fresh folder for each report.
 
