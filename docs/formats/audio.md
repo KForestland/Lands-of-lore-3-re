@@ -66,8 +66,11 @@ path components, and twelve folder prefixes with seven extensions)
 also found no name for the key.
 
 `lol3_name_hash.py --check` re-counts the stems, the music join
-and the stored-string hits. A stored spelling, or the resolved
-name at `0x44A7F5` for that key, is the settling test. The 76
+and the stored-string hits. The stem table at `0x629070` is written
+only by the initializer (`0x44A2A2–0x44A450`) and read only at
+`0x44A775` and `0x44A7DD`. So slots 0–39 never build this key.
+A stored spelling, for example in another release, is the settling
+test. A run that stops at `0x44A7F5` with this key would also settle it. The 76
 constructed level and global names stay with the WSX check.
 
 ## Level sample data

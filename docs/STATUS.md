@@ -8,7 +8,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (20 checks; all pass o
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood).
-- **Rules traced:** the pages mark 255 statements CONFIRMED (proved from the program code or the files) and 80 UNCONFIRMED (a reading not yet proved), on 72 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 280 statements CONFIRMED (proved from the program code or the files) and 57 UNCONFIRMED (a reading not yet proved), on 72 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 questions that can only be settled by watching the original game run are settled.
 - **Open questions:** 13 numbered questions: 3 answered, 6 mostly answered, 4 partly answered.
 <!-- rating:end -->

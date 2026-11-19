@@ -28,7 +28,7 @@ the level reader with the saved current ID
 
 ## Slot header and stream
 
-**CONFIRMED** offsets and writer/reader addresses; labels marked UNCONFIRMED are readings, not traced uses.
+**CONFIRMED** offsets, writer/reader addresses and labels. Each row cites the code that writes or reads the field.
 
 | Slot offset | Native interpretation and evidence |
 |---|---|
@@ -37,7 +37,7 @@ the level reader with the saved current ID
 | +0x30/+0x34 | Version u32s 38 and 310, checked at `0x43CA0B–0x43CA1C`. |
 | +0x38/+0x3C/+0x40 | Three u32 consistency stamps compared with `[0x5FE2E0]`, `[0x5FE280]`, `[0x5FE2DC]` at `0x43CA20–0x43CA4C`. |
 | +0x44 | 20 level stamp dwords copied at `0x437630–0x437664`. The loader conditionally compares the 18 values used by levels 2–19 (`0x43CA4E–0x43CA7E`). |
-| +0x9C | 768 bytes (a preview palette: UNCONFIRMED) copied by `0x437804–0x43782C`. Their palette role is **UNCONFIRMED** from this writer alone. |
+| +0x9C | 768 bytes (the preview's 256-colour RGB palette) copied by `0x437804–0x43782C`. **CONFIRMED.** The writer copies them from the 768-byte table `0x57026E`, which the renderer reads as pixel byte × 3 + 0/1/2 (`0x46ED41–0x46ED84`). The slot reader `0x4366A0` copies +0x9C into a 0x300-byte buffer (`0x43681C–0x436837`), and `0x468A20` passes it to the palette routine `0x420A30` (`0x468AA2`), which walks 256 RGB triplets into `0x5D8748` (`0x420A46–0x420B27`). Header +0x98 holds 1 from the writer (`0x43781E`); the reader decodes the preview image only when it is nonzero (`0x436774–0x43677D`). |
 | +0x39C/+0x3A0/+0x3A4 | Preview width, height, and data offset. Writer fills these fields and compresses the source at `0x4377FF–0x437854`. |
 | +0x498 | Current level ID from `[0x5708DB]` (`0x4377EB–0x4377F8`, restored through `0x436CC1–0x436CD4`). |
 | +0x49C, +0x4AA | Two 14-byte position groups, for the player at `0x5D4EE0` and the object at `0x5860F0`. Writer `0x43766F–0x43776D` reads two horizontal dwords at object +4/+8, zero-extends the heading word at object +0x26 into a dword, and writes a u16 region index. |
@@ -100,8 +100,9 @@ contains 130,702 bytes.
 **UNCONFIRMED.** Meaning of every global and level payload and the
 remaining header fields. The native selector entry points and
 archive boundaries above give the starting sites. Name the saved
-state from the individual selector's writers and confirm it on two
-slots with a comparable state change.
+state from the individual selector's writers. Then confirm it on two
+game-written slots saved from the same load, one before and one after
+a single controlled change, as in the trials below.
 
 ## Controlled save setup
 

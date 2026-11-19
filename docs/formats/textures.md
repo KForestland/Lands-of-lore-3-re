@@ -42,7 +42,9 @@ at expanded bank +0xE8A8F. The supposed `+1` subtype and
 size fields are an interpretation of byte positions in the
 packed stream. A standalone LEVED `+1` texture layout
 in original retail data remains **UNCONFIRMED**. A separate
-source entry and a native reader for its header would settle it.
+source entry and a native reader for its header would settle it,
+for example an editor output accepted under `-CONVERT_TEST`
+(`0x43F741–0x43F750`).
 
 ## Row-span record
 

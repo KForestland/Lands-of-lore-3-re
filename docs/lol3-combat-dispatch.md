@@ -27,11 +27,19 @@ packet through vtable +0x80. The object path at `0x446584–0x4465B7`
 passes the old quantity from +0x9C, invokes the resolver and applies
 new minus old through vtable +0x98.
 
-**UNCONFIRMED.** Concrete virtual-slot meanings by class, the
-names of the mitigation mask bits (creature records are traced
+**CONFIRMED.** For the player, vtable `0x538388` (installed at
+`0x40A504`) gives +0x8C `0x40AED0`, +0x98 `0x40FF80` (adds the
+signed argument to dword +0x1C0, clamped to 0..+0x1BC), +0x9C
+`0x40FEA0` (reads +0x1C0) and +0xA0 `0x40FEB0` (returns the +0x1BC
+ceiling, lowered by half of +0x331 when +0x231 bit 0x80 is set).
+The creature class is resolved below.
+
+**UNCONFIRMED.** Concrete virtual-slot meanings for the other classes,
+the names of the mitigation mask bits (creature records are traced
 [below](#where-the-mitigation-records-come-from)), and the initial hit request for each weapon and
-spell are still open. For the creature class, +0x98/+0x9C are
-resolved below; other classes remain open.
+spell are still open. For each other class, read slots +0x8C and
++0x98–+0xA0 from its installed vtable and follow the field each one
+writes.
 
 ## Creature definitions and target quantity
 
@@ -80,8 +88,10 @@ to starting health +0x28, and writes
 kind-1 hit by the player adds 10 if the test for ID 0x13A
 succeeds. Zero computed loss with a non-null attacker
 becomes 1 before the health clamp
-(`0x4E28BC–0x4E2902`). Full mitigation masks remain
-**UNCONFIRMED**.
+(`0x4E28BC–0x4E2902`). The mitigation record layout and the
+mask scan are confirmed
+[below](#where-the-mitigation-records-come-from); only the
+game-facing names of the mask bits remain **UNCONFIRMED**.
 
 ## Behavior and action modes
 

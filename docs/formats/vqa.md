@@ -174,7 +174,22 @@ confirmed in the native callback.
 
 The tile callback writes packed u16 words. See the
 [live offscreen format and test word](#live-introduction-opener).
-**UNCONFIRMED.** Native uses of the trailing reserved header words.
+**CORRECTED.** The trailing VQHD words are not all unused. The decoder
+copies the header to decoder +0xEC (`0x50E1BE`). Dword +0x22 is a
+size bound. The FINF handler `0x513870` computes
+`(u16 +0x10 × block width × block height + 4) & ~3`, doubled for
+mode 1 or 4 (`0x513896–0x5138CE`). A larger +0x22 fails with −3.
+Zero is replaced by that bound (`0x5138D4–0x5138F5`). The value
+plus 0x10, rounded down to four, goes to decoder +0x766
+(`0x5139AA–0x5139BB`). All 19 headers hold a nonzero +0x22 below
+the bound, for example 0x16AF0 in `MOVIES1.WSX+0x42`. Dword +0x26
+is an audio byte count (`0x51069A–0x5106C6`). If it is zero and flag
+bit 8 is clear, the count becomes half the audio bytes per second.
+It is zero in all 19. Bytes +0x1C to +0x1F give the audio rate,
+channels and bits when flag bit 0x40 is set (`0x50E3C6–0x50E3DE`).
+They are zero, and flags 0x1D lack bit 0x40. Only u16 +0x0E and
+byte +0x21 have no reader in the decoder code `0x50D000–0x519000`.
+Both are zero in all 19.
 
 ## Live introduction opener
 
@@ -241,4 +256,8 @@ in the low 16 bits of the separate Xvfb window capture. The
 post-submit capture matched 248,455 of 307,200 low words.
 **UNCONFIRMED.** The cause of the remaining capture differences,
 full-frame synchronization with the window surface and other
-renderer or display formats.
+renderer or display formats. To settle the differences, stop at
+`0x47011B` for one frame. Dump the locked movie surface and the
+intermediate surface. Capture the window before the next decoder
+call and compare all 307,200 words. Other formats need a display
+that reports different masks to `0x409C70`.

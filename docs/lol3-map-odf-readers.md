@@ -88,7 +88,7 @@ path ranges all fit their waypoint table. The first two
 BUPP1 path rows at `BUPP1.WSX+0x181E8E0, +0x181E8E4`
 are (0, 4, 1) and (4, 11, 0).
 
-**CONFIRMED (values). UNCONFIRMED (meaning).** Waypoint byte
+**CONFIRMED.** Waypoint byte
 +6 takes 15 values across the 2,384 rows: 0 (114), 1 (57),
 2 (1,957), 4 (3), 6 (3), 10 (2), 12 (8), 15 (180), 23 (2),
 31 (3), 37 (1), 46 (27), 78 (4), 125 (20) and 255 (3). The
@@ -96,17 +96,24 @@ largest pair with byte +7 is +6 = 2 and +7 = 4 (1,757 rows).
 Six levels use only the value 2: CKEEP, ISHAT, JUNDR, MLOW2,
 OLOW3 and QWOD0. The save record at `0x436077–0x43608C`
 copies the table pointer and a byte length of count × 8, so
-the saved image includes this byte. The other five absolute
-uses of `0x5701A4` are `0x4B4D7E` (s16 +0, s16 +2, u16 +4),
-`0x4B5B1E` (u16 +4, then s16 +0 and s16 +2), `0x4B8A38`
-(stores the row pointer in `0x7D772C`; that global is read at
-`0x4BDE92`/`0x4BDEAE` for +0 and +2 only, copied to object +0x1990
-at `0x4F8F7C` and exported at `0x438E47`, so those paths are not
-yet checked for +6), `0x4BCAD1` (s16 +0 and
-s16 +2) and `0x4FD6C8` (u16 +4 and byte +7). A read of byte
-+6 from one of those rows would name the field.
+the saved image includes this byte. Byte +6 is a distance
+limit in steps of 32 X/Z units. `0x4B8A38–0x4B8A46` stores a
+waypoint row pointer in `0x7D772C`. The creature test loop at
+`0x4BD7F4–0x4BDF1F` runs indexes 0–48 through the table at
+`0x4BE250`. Index 41 (`0x4BDE92–0x4BDEEC`) passes row s16 +0/+2
+and the creature's dwords +4/+8, each shifted right 16, to the
+distance routine `0x44AAB0`. It reads byte +6 at `0x4BDED6`
+and is true when that distance is less than 32 × byte +6 plus
+the value returned by the creature's virtual call +0x14
+(`0x4BDEAB`, `0x4BDEDE–0x4BDEE9`). A true result goes to
+`0x4FDE80` (`0x4BDF00–0x4BDF12`). The other absolute uses of
+`0x5701A4` are `0x4B4D7E` (s16 +0, s16 +2, u16 +4),
+`0x4B5B1E` (u16 +4, then s16 +0 and s16 +2), `0x4BCAD1`
+(s16 +0 and s16 +2) and `0x4FD6C8` (u16 +4 and byte +7).
+The `0x7D772C` pointer is also copied to object +0x1990 at
+`0x4F8F7C` and exported at `0x438E47`.
 
-**CONFIRMED (on-disk text). UNCONFIRMED (reader).** The 2,384
+**CONFIRMED (on-disk text, and not read by the game).** The 2,384
 name slots are 2,330 NUL-padded printable strings of length
 3–25 (ten of them a plain `WayPoint` with NUL padding: BUPP1 5,
 EWOD1 1, LUPP2 4), 39 copies of the eight characters `WayPoint` followed by
@@ -129,8 +136,12 @@ text); `lol3_map_spans.py --check` compares their counts and a
 digest. The retail executable image contains neither `WayPoint`
 nor `BadName`.
 CKEEP, GRULO, ISHAT, MLOW2, OLOW3 and QWOD0 have a path count
-of zero. A seek to header +0xC8 + 8 × count, or to header
-+0xDC + 4 × count, would identify a reader.
+of zero. The game does not read the name slots or the 31-byte labels.
+`0x43E6B0` is the only `.map` reader (see the gap below). In all
+18 entries, the only loader seeks that start before them are
+header +4, +0xC8 and +0xDC. Those reads (8 × field 19,
+8 × +0xC4 and 4 × +0xD8) end at or before the first name
+slot and the first label.
 
 ## MAP sections 1 and 2
 
@@ -159,7 +170,7 @@ range. The remaining 33,730 have count 0 and index `0xFFFF`.
 For example, `CKEEP.WSX+0xCCF97C` starts the first
 surface with vertices 334, 376, 377 and 335. Its section-1
 span starts at 0 with count 2, at `CKEEP.WSX+0xCC5B2C`.
-**CONFIRMED (extent). UNCONFIRMED (consumer).** Between the
+**CONFIRMED (extent, and not read by the game).** Between the
 56-byte surface table and header +0x44 the archives hold
 1,784 bytes in 223 groups of eight. The lengths are BUPP1 248,
 CKEEP 104, DLOW1 304, EWOD1 56, FLAIR 80, HWHIT 152, JUNDR 16,
@@ -170,16 +181,26 @@ levels no header dword equals the start. The first CKEEP byte
 is `CKEEP.WSX+0xD0368C`. Each group is four little-endian u16,
 and every word is below that level's vertex count and below its
 surface count. Read as surface indexes, 113 of the 223 groups
-share no vertex between cyclic neighbors. The loader calls the
-seek helper sixteen times in `0x43E884–0x43EC57`, and each call
-pushes one stored header dword. The call at `0x43EA72–0x43EA79`
-pushes `[esp+0x58]`. By the same three-push rule as the waypoint
-seek at `0x43EBD9` (`[esp+0xDC]` is header +0xC8), that dword is
-header +0x44, the first byte after this span. A seek to field 2
-+ 56 × field 21 would identify the consumer.
+share no vertex between cyclic neighbors. The loader calls the seek helper sixteen times in
+`0x43E884–0x43EC57`, and each call pushes one stored header
+dword. The call at `0x43EA72–0x43EA79` pushes `[esp+0x58]`.
+By the same three-push rule as the waypoint seek at `0x43EBD9`
+(`[esp+0xDC]` is header +0xC8), that dword is header +0x44,
+the first byte after this span. Nothing reads the span. The
+`.map` suffix at `0x54976C` is used only at `0x43E293`, and
+`0x43E6B0` is called only from `0x43E304`. In all 18 entries,
+the only seeks that start before the span are header +4, +8,
++0x0C, +0xC8 and +0xDC. Their reads (8 × field 19,
+8 × field 20, 56 × field 21 at `0x4A6604–0x4A663C`,
+8 × +0xC4 and 4 × +0xD8) all end at or before its start.
 
 **CONFIRMED (each byte is read or written). UNCONFIRMED (what
-the bits mean).** The 167,942 section-1 rows are eight bytes,
+the bits mean).** Settling test: in a running level, change one
+bit of byte +5 or +6 in the section-1 row of the surface under
+the party (table pointer `0x570190`), let the copy at
+`0x4FFD91–0x4FFDF9` run again, and compare what changes on
+screen and in movement. Rows with byte +5 bit `0x10` are
+already decoded as geometry in the +7 row below. The 167,942 section-1 rows are eight bytes,
 and the loader copies all eight (`0x43EB7C–0x43EBA1`). Word +0
 ranges from 1 to 65535 (935 distinct values; 213 are `0xFFFF`;
 the value 0 does not occur). 165,745 of those words are below
@@ -202,7 +223,7 @@ and 27,297. Byte +6 has 21 values; 16, 8 and 0 account for
 | +4 | Replaced from the caller's byte +7 by switch arms 0 and 15 (`0x4E65CE`). Copied to object +0x40 at `0x4FFD9D`. |
 | +5 | Low five bits select a row (`0x4A74E0–0x4A74E3`, `0x4EFE2C–0x4EFE32`). Bits `0x20`, `0x40` and `0x10` are tested at `0x4FFD61`, `0x4FFD89` and `0x50071A`. Switch arm 17 sets `0x20` (with `0x40`), arm 18 clears `0x20` and arm 19 toggles `0x20` (`0x4E6600`, `0x4E6611`, `0x4E6625`). Every arm of the switch ORs in bit `0x40`, and `0x4FFE00` clears that bit after the copy. |
 | +6 | Switch arms 5–13 set, clear or toggle masks 4, `0x20` and `0x40` (`0x4E64E4–0x4E65CB`). The copy at `0x4FFDA3–0x4FFDED` tests masks `0x10`, 8, `0x20`, `0x40`, 4 and 1. `0x4FFD4B` sets ebx to 1, and `0x4FFDDF` ORs that 1 into the object word +0x3E when mask 4 is set. Bit `0x80` is passed to `0x4FFFB0` at `0x50072A–0x500737`. |
-| +7 | Replaced from the caller's byte +7 by switch arms 14 and 16 (`0x4E65E7`). Zero-extended, shifted left 14 and ORed into the u16 object +0x3E at `0x4FFDF1–0x4FFDF9`, which keeps only its bits 0–1 although the byte takes 128 values, so another consumer may exist (**UNCONFIRMED**). |
+| +7 | Replaced from the caller's byte +7 by switch arms 14 and 16 (`0x4E65E7`). Zero-extended, shifted left 14 and ORed into the u16 object +0x3E at `0x4FFDF1–0x4FFDF9` and at `0x4FFC65–0x4FFC6D`, which keeps only bits 0–1. **CONFIRMED:** a second consumer reads the whole byte. For rows with byte +5 bit `0x10` (`0x50071A`), `0x500723` calls `0x500600`. It writes four 16.16 X/Y/Z corner points to object +0x00–+0x2F along one surface edge, chosen by object +0x42 bits 0–1. Bytes +2 and +4 give the start and width along the edge in 1/256 steps (`0x500688–0x5006E3`). The top Y is surface s16 +0x1A minus (s16 +0x1A − s16 +0x18 − byte +7) × byte +3 / 256 (`0x50060E–0x50063F`). The bottom Y is the top minus byte +7 minus 1, in whole units (`0x500642–0x500658`). |
 
 The switch is `0x4E6450`. Its index is the caller's byte +6,
 its operand is byte +7, and the row index is the caller's
@@ -229,8 +250,8 @@ path-label counts and digest and the gap lengths above.
 | 4 | 18 | `0x43FDA7–0x43FDC8` loads exactly field 18 bytes into `[0x7E3200]`. |
 | 20 | 19 | `0x43FD09–0x43FD22` loads count × 8 bytes into world +0x70. All 18 entries contain one byte of varying value after that computed end. |
 
-**CONFIRMED** (the bytes and the skip). **UNCONFIRMED** (a reader
-of the names). In all 18 entries, 22 bytes per section-0 row follow
+**CONFIRMED** (the bytes, the skip, and that the game does not
+read the names). In all 18 entries, 22 bytes per section-0 row follow
 the counted 24-byte rows and end where section 1 begins: 630 slots.
 Each is a NUL-terminated printable name, padded with `0x00` or
 `0xCD`, and 168 of the names are distinct. CKEEP's first slot is
@@ -240,10 +261,14 @@ exactly 24 times the count (`0x4AB42E`). The timed walk steps
 `0x18` (`0x4AB682`). The next seeks go to field 20 (`0x43FD09`, when field 19 is
 nonzero) and then field 1 (`0x43FD45`), so this loader does not read
 the names. A scan of the code section for another 22-byte stride found
-only `add edi, 0x16` at `0x45D9D9`, a screen spacing, so no reader of
-the names is known. **UNCONFIRMED:** most of the 630 names read as
-material names (454 are `Floor` plus digits), which suggests a
-material or sound lookup. Section 4
+only `add edi, 0x16` at `0x45D9D9`, a screen spacing, and the game has
+no reader of the names. The `.odf` suffix at `0x549774` is used
+only at `0x43E202`, and `0x43FC40` is called only from
+`0x43E246`. In all 18 entries, the only seek that starts before
+the names is field 0, and its read stops where they begin.
+Fields 20, 1, 2, 4 and 3 all start at or after section 1.
+Most names look like material names (454 are `Floor` plus
+digits), but nothing in the game reads them. Section 4
 ends at the start of section 3 in all 18 entries.
 
 ### Creature definitions in field 3
@@ -262,8 +287,11 @@ ends at the start of section 3 in all 18 entries.
 `CKEEP.WSX+0xD40705`, in the eight-row table. Its words +0x59/+0x5B
 are 750 and 500. The runtime stride is 139 (`0x4F0E83`).
 The [combat reader](lol3-combat-dispatch.md) traces the creature
-consumers, including HP and behavior. Unused definition
-bytes remain **UNCONFIRMED**. The section-1 and section-3
+consumers, including HP and behavior. Definition bytes not
+listed above or on the combat page have no known reader
+(**UNCONFIRMED**). Settling test: in a running level, set read
+watchpoints on those bytes of one creature's 139-byte runtime
+row (stride at `0x4F0E83`) and note each reading address. The section-1 and section-3
 subtables share reader `0x4FD560`. It assigns each 16-byte row
 a pointer into the subsequent 12-byte array (`0x4FD5DC–0x4FD617`).
 Follow that pointer into the first consumer to identify the subtable.
@@ -297,8 +325,8 @@ payload starts in the order above are `GLOBAL.WSX+0x1FDBA3`,
 `+0x1FBE73`, `+0x1FB11F` and `+0x1FB568`. This establishes a use
 of the type tag without assigning gameplay meaning to every tag.
 
-**CONFIRMED** (the miss arm). **UNCONFIRMED** (what sets the two
-flag fields). `0x420300` begins after `nop` padding. It copies the
+**CONFIRMED** (the miss arm and both fields it tests).
+`0x420300` begins after `nop` padding. It copies the
 directory, the backslash at `0x546318` when the directory does not
 already end in one, and the leaf into the destination, or into
 `0x5D5818` when that pointer is null (always here), and
@@ -307,11 +335,21 @@ begins after `ret` and two `nop`s at `0x4FD77D`. It zeros the
 row-by-column product, then calls `0x435880`, which returns the
 result of `0x435150` (`0x4358A1`, `0x4358C9`). That lookup returns
 1 when the virtual call at +0x18 is nonzero (`0x435161`) or when
-the hashed name is found (`0x4351E6`). The miss calls `0x494390`,
-which returns 1 when bit 5 of `[ecx+0x24]` is set (`0x49439A`) and
-otherwise calls `0x493820`, which returns 0 when `[ecx+0x18]` is 0
-(`0x49382B`). A zero result at `0x4FD7B1` jumps to the epilogue
-`0x4FD8E4` and leaves the zeros. The caller does not test the
-return. `lol3_odf_companions.py --check` re-counts the names, the
-joins and these bytes. What reads a section-0 name, and what sets
-the two flag fields, remain open.
+the hashed name is found (`0x4351E6`). The miss calls `0x494390`
+on the name object that `0x435880` builds on its stack with
+`0x434E80`. The base constructor `0x493F80` clears the low six
+bits of +0x24 (`0x493F9E–0x493FA4`) and zeroes +0x18 (`0x493FAA`).
+`0x434E80` then sets the name through `0x494DB0 → 0x494300 →
+0x493690`, which stores a heap copy of the name at +0x18
+(copy routine `0x529920`, `0x4936D4–0x4936DC`). Bit 5 of +0x24
+is set only by other methods of the class (`0x4941D9`,
+`0x49445F`, `0x4945A4`, `0x494803`, `0x494A0F`, `0x494AB5`),
+which this path does not call. So `0x494390` calls `0x493820`.
+After the same virtual +0x18 test, `0x493820` tries to open the
+name as a loose disk file with `CreateFileA` (import `0x538090`,
+read access, open existing; `0x49385F–0x493875`). It returns 0
+when that fails (`0x493889`) and 1 after `CloseHandle`
+(`0x493890–0x4938B6`). A zero result at `0x4FD7B1` jumps to the
+epilogue `0x4FD8E4` and leaves the zeros. The caller does not
+test the return. `lol3_odf_companions.py --check` re-counts the
+names, the joins and these bytes.

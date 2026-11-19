@@ -105,8 +105,15 @@ surfaces used the same masks.
 [Native conversion and live presentation evidence](formats/vqa.md#live-introduction-opener)
 
 **UNCONFIRMED.** Exact full-frame correspondence with the host
-window capture and behavior of other renderer or display formats
-(the surface takes the display mode's format, so a 555 desktop would select a different conversion mode at `0x409D27`).
+window capture, and the behaviour of other renderers or display formats.
+The surface takes the display mode's format. The format reader
+`0x409C70` counts the red, green and blue mask bits
+(`0x409CAD–0x409CF1`). It picks mode 0 for 5/5/5 (`0x409D3D`),
+1 for 5/5/6 (`0x409D36`), 2 for 5/6/5 (`0x409D27`) and 3 for
+6/5/5 (`0x409D11`). To settle, in the RGB565 run dump the primary
+surface after frame 16 is submitted (`0x47011B`) and compare every
+pixel with the host window capture of the same frame. Then repeat on
+a 15-bit desktop, break at `0x409D45` and check that `esi` is 0.
 
 ### Q13. Which original save bytes follow one controlled action?
 

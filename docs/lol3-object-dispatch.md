@@ -32,7 +32,7 @@ Left and right operand type bytes +1/+3 select switches at
 inequality, signed <=, >=, >, <, and boolean AND/OR (IDs 0–7)
 at `0x4F046D`. CKEEP's 255 predicates start at file +0xD2F277.
 Guard values 5000 and above take the range dispatch
-`0x4F0635–0x4F0767`. Their gameplay meanings are **UNCONFIRMED**.
+`0x4F0635–0x4F0767`. **CONFIRMED:** 5000 and 6000 test item keys held or equipped, 7000–7399 test four slot levels, and 7399–7469 in steps of ten test `[0x586158]`; see the [event page](lol3-script-events.md#predicates-and-global-bytes). The play meaning of `[0x586158]` is **UNCONFIRMED**.
 
 ## Command selection
 
@@ -56,5 +56,7 @@ The [opcode table and corpus check](lol3-script-opcodes.md) identify all framing
 
 **UNCONFIRMED.** The full set of command effects, producer meanings,
 and the concrete object implementations of the virtual slots still
-need separate traces. Begin with the low switch above and follow each
-virtual slot from the class resolved by the command's selector.
+need separate traces. The opcode page resolves slot +0xC0 per class.
+Next trace slot +0xC8 (opcode 5, 4,496 records) and +0xCC (opcode 7,
+1,494) in the six class vtables, e.g. creature `0x4BAAB0` / `0x4B4AB0`
+and mover `0x4D6FF0` / `0x46B470`.

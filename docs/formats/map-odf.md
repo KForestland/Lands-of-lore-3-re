@@ -25,13 +25,13 @@ Re-run 2026-11-18 on the 51 readable WSX files. CONFIRMED:
 
 **Section 0. CONFIRMED.** Field 19 counts eight-byte signed 16.16
 X/Z pairs at field 0. A 34–8,399-byte tail follows the vertices
-before field 1. The native +0xC8 seek binds its 8-byte waypoint rows (positions that creature paths step through, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)) and the file partitions into points, name slots and a final counted span. The first 4 bytes per path are a native path record. The name slots and remaining 31 bytes per path are **UNCONFIRMED**. This explains the earlier
+before field 1. The native +0xC8 seek binds its 8-byte waypoint rows (positions that creature paths step through, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)) and the file partitions into points, name slots and a final counted span. The first 4 bytes per path are a native path record. The name slots and remaining 31 bytes per path are not read by the game (**CONFIRMED**, [readers](../lol3-map-odf-readers.md#tail-after-the-vertices)). This explains the earlier
 measurement that only 88% of the section's 8-byte slots look like points: 110,373 of 124,764 slots
 have that shape, 108,043 of them whole-number vertices; the rest of the 114,483 vertices have a
 fraction, and 2,330 point-like slots lie in the tails.
 [Native readers](../lol3-map-odf-readers.md).
 
-**Section 1. CONFIRMED.** Eight-byte rows referenced by contiguous ranges on individual surfaces. The native matcher tests row +5 low five bits (`0x4A74C0–0x4A74F7`). Other fields are **UNCONFIRMED**.
+**Section 1. CONFIRMED.** Eight-byte rows referenced by contiguous ranges on individual surfaces. The native matcher tests row +5 low five bits (`0x4A74C0–0x4A74F7`). Every byte has a native reader or writer; what the bits mean is **UNCONFIRMED** ([section-1 bytes and settling test](../lol3-map-odf-readers.md#map-sections-1-and-2)). Rows with byte +5 bit `0x10` use bytes +2, +3, +4 and +7 as edge geometry (`0x500600`).
 
 **Section 2. CONFIRMED.** Field-21 56-byte surfaces. Four neighbor indices, four vertex indices, waypoint height and the attached section-1 range are mapped in the [native reader](../lol3-map-odf-readers.md#map-sections-1-and-2).
 

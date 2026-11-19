@@ -97,6 +97,11 @@ limit of 8 (`0x479D90–0x479E2E`).
 
 **UNCONFIRMED.** The four s16 values at +0x0C–+0x13. They are all zero
 in 214,743 members and vary in the rest; no reader on the member has
-been found yet. Follow the remaining `0x44EB40` callers
-(`0x474D85`, `0x47596D`, `0x47F833`, `0x47FD11`, `0x480438`,
-`0x499C42`) for a read of member +0x0C.
+been found yet. Checked without a hit: `0x44EB40` itself, `0x44EC90`
+(it copies the 0x2C-byte header as 11 dwords at `0x44ED0A–0x44ED16`,
+but reads no field there), the first 45 instructions after each of the
+15 calls to `0x44EB40`, the size path `0x479D90` and the surface
+renderer around `0x4980D8`. Settling test: in a running level, set a
+read watchpoint on +0x0C of a member returned by `0x44EB40` (eax at
+`0x44EC7D`) whose +0x0C is nonzero, then look at that surface. A hit
+other than the copy at `0x44ED16` names the reader.

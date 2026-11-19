@@ -55,7 +55,7 @@ each of the following lookup columns are distinct in that table.
 | +0x14 dword | Overwritten with a runtime resource pointer, advanced by 16 × row u8 +0x2E (`0x4ACE0E–0x4ACE19`). |
 | +0x3F dword | Bit 1 invokes the definition-load switch at `0x4ACDE4`. A specific row +0x73 value 7 also sets bits 2 and 3 (`0x4ACD62–0x4ACD8B`) and definition +0x4F bit 0x10 (`0x4ACD89`), the bit the use-effect path tests at `0x4D7C9C`; value 0x3F sets +0x4F bit 0x20 (`0x4ACD94`). Only definition 5 has +0x73 = 7. |
 | +0x4F dword | Includes the state sense used by `0x4AD050–0x4AD08D`. Bit 1 of the separate byte-array row `[0x662A90][index]` is interpreted relative to definition bit 1. The two update paths invert the operations for the two senses (`0x4AD090–0x4AD106`). |
-| +0x7D u16 | Nonzero disk value `v` becomes `max(1, floor(256/v))` at `0x4ACE1B–0x4ACE3E`. The consumer meaning is **UNCONFIRMED**. |
+| +0x7D u16 | Nonzero disk value `v` becomes `max(1, floor(256/v))` at `0x4ACE1B–0x4ACE3E` (ESI there is row +0x4F). **CONFIRMED** reader: `0x492319` in `0x4922B0`, when its second argument is nonzero. It finds the definition's index ((definition − `[0x57017C]`) / 139) and subtracts the value from byte +0x10+index of one 366-byte record at `0x5838B8`. A value above the byte sets it to 0 (`0x49230F–0x49234E`). The one caller passing 1 is `0x491C20` (`0x491C58`), reached from `0x446D98`. The meaning of those 19 records is **UNCONFIRMED**. Break at `0x492319` and note the player action. |
 
 ## Script grants
 
@@ -78,15 +78,26 @@ copies those fields and clears +0xC
 2, the routine also calls recipient vtable +0x78 with the
 allocated pointer and grant mode (`0x49EEF0–0x49EF0E`).
 The byte +8 can be set at grant time. Its purpose for all item
-classes remains **UNCONFIRMED**.
+classes remains **UNCONFIRMED**. Readers seen so far are the
+charge paths at `0x429C18–0x429C9A`, `0x49F76B–0x49F7AA` and
+`0x49FC40–0x49FD10`. To settle another class, grant it with a
+known +0xC and put a read watchpoint on instance +8.
 
 **CONFIRMED.** `BUPP1.WSX+0x18CA79F` contains a 16-byte
 opcode-3 grant with selector 1 and byte +0xC equal to 4.
 Its identity `0xF50F9FCB` matches definition 53 at
 `GLOBAL.WSX+0x571D`. Of 1,021 stored selector-1 opcode-3
 records across the 18 indexed command streams, 1,010 match
-the native +0x18 identity column. The eleven other operands
-remain **UNCONFIRMED** as exceptional command contexts.
+the native +0x18 identity column. **CONFIRMED.** The eleven others
+are ten in `BUPP1.WSX` (`+0x18CFF33` to `+0x18CFFA3` in steps of
+16, `+0x18D0123`, `+0x18D0143`) and one at `HWHIT.WSX+0x1110029`.
+Their identities occur nowhere else in DAT or LOL3.DAT, and in
+neither definition key column. For such an identity `0x440930`
+returns 0 (`0x440953`). `0x49EE8D` then reads definition +0x73
+through that null pointer. With guard `[0x5D5378]` clear
+(`0x410B19`), executing one would fault.
+**UNCONFIRMED.** Whether the game ever runs them. Break at
+`0x49EF82` with EAX = 0.
 
 ## Use effects
 
@@ -174,8 +185,20 @@ and include equipment contributions (`0x42A9DD–0x42AA9B`).
 The result feeds hit-packet magnitude at `0x4A050F–0x4A0538`
 and event comparisons at `0x4BDCFE–0x4BDD58`.
 
-**UNCONFIRMED.** The visual effect from template 0x78, the meaning
-of the player +0x32D and +0x224 values and the class-specific effect
+**CONFIRMED.** Player +0x32D (`0x5D520D`) is the hunger value.
+The tooltip at `0x42B107–0x42B12F` picks text key 0x274F below
+900, 0x2750 below 9,000 and 0x2751 otherwise. In the `tooltip.trr`
+entry at `locallng.wsx+0x598AD7C` these are "Not hungry", "Hungry"
+and "Starving". Above 9,000 the mana ceiling `0x40FF00` (player
+vtable +0xB0) drops by (value − 9,000)/30, to at least 1. Player
++0x224 (`0x5D5104`) is consumed at `0x40D668–0x40D70F`. A step
+based on 30 × the value (`0x46E6E0`) is added to +0x1C0, capped
+by vtable +0xA0, and +0x224 is then cleared. +0x1C0 is the
+quantity the player's hit slots +0x98/+0x9C change and read
+(`0x40FF80`, `0x40FEA0`).
+
+**UNCONFIRMED.** The visual effect from template 0x78, the on-screen
+name of player +0x1C0, and the class-specific effect
 of the template 0x7C variants remain open. Follow the update slot
 on the object generated at `0x49F766` or `0x4A1C5E`. Trace the
 readers of `0x5D520D` and `0x5D5104` to their first display or

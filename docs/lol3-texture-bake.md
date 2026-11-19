@@ -97,8 +97,9 @@ yielding 0x9C67. The exported 128×256 PNG reads
 has an all-zero scratch word.
 
 The [two ambiguous row flags](#two-ambiguous-row-flags) have
-contradictory storage and dispatch evidence. The PNG tool reports
-those records as **UNCONFIRMED**.
+contradictory storage and dispatch evidence. **CONFIRMED.** The PNG tool
+`--check` counts those 20 records as unconfirmed (`0x02ac=15, 0x82ac=5`,
+re-run 2026-11-19) and does not render them.
 
 **CONFIRMED.** Device texture-format enumeration tests RGB555
 masks 0x7C00/0x03E0/0x001F and an alternate RGB444 mask set
@@ -151,15 +152,22 @@ candidate reaches `0x4950B1–0x4950C6` without a flag test and does
 not stop the enumeration (the callback returns 1).
 **UNCONFIRMED.** Whether Wine's DirectDraw list contains an
 `F00/0F0/00F` format, and whether a texture upload succeeds with the
-flag set.
+flag set. To settle it, repeat the Wine run with `-D3DUSEARGB4444`.
+Break at `0x4950B1` to see whether a 444 candidate arrives. After
+`0x4951BA`, read the result `[0x661640]` and selector `[0x66163C]`
+(2 means 444). Then check the `CreateSurface` masks and the
+`IDirect3DTexture2::Load` result in the `+ddraw` log.
 
 This is one device: Wine's DirectDraw translation layer enumerates
 its own format list. **UNCONFIRMED.** A native Windows driver could
 omit the 1555 format (result 0) or offer only 4444 (selector 2).
+To settle it for a given driver, run the game on that Windows device
+and read `[0x661640]` and `[0x66163C]` after `0x4951BA`.
 
 This selects an RGB555 texture word with one alpha bit for this
 device. **UNCONFIRMED.** The individual uploaded pixel words, final
 composited screen colour and the choice on other devices remain open.
+They depend on the live device and the window capture.
 To check a content conversion, capture the same texture's locked source
 and destination around `IDirect3DTexture2::Load`. The SMD raster and row
 flags below have their own input and output comparisons.
@@ -382,7 +390,15 @@ selects the same fixed-width helper, then uses its pointer and count
 to replace each indexed byte through a remap table (`0x42136E–0x4213C1`).
 The final flag write sets 0x100 and preserves 0x20
 (`0x4213C3–0x4213CA`). Whether this runs on the live texture instances
-before the bake remains **UNCONFIRMED**.
+before the bake remains **UNCONFIRMED**. The remap routine `0x421320`
+has two callers. `0x44B440` is inside the resource resolver `0x44B130`.
+It runs only when the resolver's third argument is nonzero, the dword
+`[0x549C0C]` is nonzero (stored value 1; other code
+rewrites it) and record bit 0x100 is clear (`0x44B39D–0x44B3FC`).
+The other caller, `0x4E7CC3`, remaps the record at `[0x7E3120]`.
+A static search did not bind the bake's record to either path.
+To settle it, break at `0x421326` and compare `EBX` with the record
+pointer recorded at `0x482311` below.
 
 **UNCONFIRMED.** Which bytes reach a draw or upload for this
 resource class. Load QWOD0 and BUPP1 separately. Break on

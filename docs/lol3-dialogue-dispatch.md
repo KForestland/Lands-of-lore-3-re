@@ -63,9 +63,14 @@ tag table matches 2,641 of the 2,642 stored opcode-0x16
 records from MAP +0x44/+0x8C. For example,
 `CKEEP.WSX+0xD039F0` joins to dialogue ID 2711.
 The one unmatched record is `HWHIT.WSX+0x111423D`.
-Its source or intent is **UNCONFIRMED**. The region stream holds
-one more opcode-0x16 record, `PWOD3.WSX+0x1BC8883`, whose
-three-character tag also matches no dialogue tag. Archive names
+**CONFIRMED.** Its identifier is seven characters, `dh09eh2`, so the
+tag is `eh2` plus a NUL. Its group (index 2860, `HWHIT.WSX+0x1114219`)
+is run by the kind-6 event at `HWHIT.WSX+0x111BE27`. Under the prefix that matches the other names,
+`HWHITs.wsx` has no `LEVELS\HWHIT\dh09eh2.aud` entry, while `dh09eh26.aud` exists and
+no opcode-0x16 record names it. A lost last digit is the likely cause; the intended
+digit is **UNCONFIRMED**. The region stream holds one more opcode-0x16
+record, `PWOD3.WSX+0x1BC8883`, whose four-character tag `hwl2` also
+matches no dialogue tag. Archive names
 are case-insensitive; the files are stored in lower case.
 
 **CONFIRMED.** Opcode 0x19, with dword +0xC equal to 5,
@@ -94,8 +99,15 @@ corresponding byte from +0x1521C0. Other bytes pass unchanged
 (`0x5086C2–0x508701`). The total buffer length is passed
 by the caller. No lines are reproduced here.
 
-**UNCONFIRMED.** The HWHIT mismatch, which duplicate dialogue
-tag each interaction selects, and the meaning of every display
-format marker remain open. To settle them, follow the admitted
-opcode-0x16 path for the cited record and capture the four-byte
-query and chosen ID before the `0x409650` read.
+**CONFIRMED.** The duplicate tags are `mr24` (IDs 3572, 3573) and
+`ya85` (5196, 5197). Replaying the search `0x434102–0x434146` on the
+original table returns 3572 and 5196. The search never probes the last
+ID, 5762 (`ZK49`). No stored opcode-0x16 record and no string in
+`LOL3.DAT` uses these three tags. The same search finds the
+other 2,641 stored object-stream tags. **UNCONFIRMED:** what the game does with the HWHIT query
+above, the keys built at run time by `0x48A6F3–0x48A709`, and the
+meaning of every display format marker. Settle the first two in a
+running game: break at `0x4340D0` and `0x422FA0` when the HWHIT
+kind-6 event fires, and record the key, the path and whether
+`0x434180` is reached. Settle the markers by listing every byte the
+renderer branches on after `0x45878C`.

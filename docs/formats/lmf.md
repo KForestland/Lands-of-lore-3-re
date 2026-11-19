@@ -17,7 +17,7 @@ beginning of the LMF unless indicated otherwise.
 | `+0x08` | Directory offset, `0x100` on all 18 | Seek at `0x440C2F` |
 | `+0x0C` | Stored group pool offset | Added to directory +0 at `0x440C6A` |
 | `+0x10` | Directory byte size | Directory read at `0x440C34–0x440C3E` |
-| `+0x14` | Pool byte extent as measured in all 18 | Equals entry size minus pool offset. Native read of this field **UNCONFIRMED**. |
+| `+0x14` | Pool byte extent as measured in all 18 | Equals entry size minus pool offset. **CONFIRMED** not read by the game: `0x440B40` keeps the 0x100-byte header in a stack buffer at `esp+0x24` and reads only +0x00, +0x04, +0x08, +0x0C, +0x10 and +0x18 (`0x440BDE–0x440C66`). |
 | `+0x18` | Directory row count | Used at `0x440BF5–0x440C04` and `0x440C7D–0x440C89` |
 
 **CONFIRMED.** Each 16-byte row gives a pool-relative offset, expanded

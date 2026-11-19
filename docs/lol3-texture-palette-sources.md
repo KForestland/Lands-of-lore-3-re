@@ -12,7 +12,7 @@ Native VAs refer to the retail `LOL3.DAT`.
 |---|---|
 | Bank +0 | The loader reads 0x6A2 header bytes and checks that header dword 0 equals 38 (0x26) (`0x43F70F–0x43F73F`). Further header checks at `0x43F75D–0x43F79E`: +0x54 = 0x4200, +0x58 = 0x20000, +0x4C and +0x50 nonzero. The +0x40 = 0x300 compare is always true, because `0x43F73B` stores 0x300 there first; the tool's +0x40 filter is a data heuristic, not a native rule. |
 | Bank +0x10, +0x4C, +0x2A8 | Descriptor table offset, byte length, and count. The seek/read is `0x43F859` for the separate 768-byte palette and `0x43F8F1–0x43F90B` for descriptors. The loop copies the first 14 descriptor bytes, advancing the source by 58 and destination by 14 (`0x43F925–0x43F940`). |
-| Bank +0x14, descriptor +0x12 + 4*mip | Payload base and relative mip offset. Descriptor +0x26 + 4*mip supplies its nonzero byte length (`0x43F9A2–0x43FA1D`). Within that range, `0x43F9C7–0x43F9EB` registers mip 0 with length 0 when byte `[0x5D4ECE]` is 0, desc+0xC > 1, desc+4 or +6 > 0x80 and flag bit 0x8000 is clear (131 of the 178 mip-0 joins, including the worked example); the palette source is unchanged. What `[0x5D4ECE]` means is UNCONFIRMED. For these records the length equals 12 plus the span body length. |
+| Bank +0x14, descriptor +0x12 + 4*mip | Payload base and relative mip offset. Descriptor +0x26 + 4*mip supplies its nonzero byte length (`0x43F9A2–0x43FA1D`). Within that range, `0x43F9C7–0x43F9EB` registers mip 0 with length 0 when byte `[0x5D4ECE]` is 0, desc+0xC > 1, desc+4 or +6 > 0x80 and flag bit 0x8000 is clear (131 of the 178 mip-0 joins, including the worked example); the palette source is unchanged. **CONFIRMED.** `[0x5D4ECE]` is the `Video_Texture_Resolution` setting: 0 is `Low`, 1 is any other value. The settings loader reads that key in section `Video` with default `Low` and stores the case-insensitive compare result (`0x4F2F97–0x4F2FCA`). The writer saves `High` for 1 and `Low` for 0 (`0x4F3873–0x4F38AF`). So the `Low` setting drops mip 0 of these large textures. For these records the length equals 12 plus the span body length. |
 | Bank +0x34, +0x70 | Offset and byte length of the 512-byte source palettes. The loader divides the length by 512, saves the first palette key, and registers each palette as a separate resource (`0x43F7E0–0x43F808`, `0x43FA4D–0x43FA9F`). |
 | Descriptor +2, +0xD | Palette number u16 and arm u8. Arm 3 calls the level bank's vtable +8 at `0x44B70F` with key `[0x570238]+u16(+2)`. |
 
@@ -38,7 +38,8 @@ palette file offset is therefore
 descriptor 7 at +`0x10876E`. Byte +0xD is 3 and word +2 is 6,
 giving the 512-byte palette starting at +`0x9EDD97`.
 The origin of the baked colour for these cache records is resolved.
-Further graphics-device presentation is **UNCONFIRMED**.
+Further graphics-device presentation is **UNCONFIRMED**. Its settling
+tests are in [Live Direct3D texture format](lol3-texture-bake.md#live-direct3d-texture-format).
 
 ```bash
 python3 tools/lol3_texture_palettes.py --data DAT --check

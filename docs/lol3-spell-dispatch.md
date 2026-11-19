@@ -31,8 +31,17 @@ pointer at world +0x14 (VA `0x570184`). `0x4B42FD–0x4B4348`
 reads 28 rows of 87 bytes, beginning at `GLOBAL.WSX+0x16BFEF`.
 An independent offset pair holds one 8-byte auxiliary row at
 +0x43EC, file `GLOBAL.WSX+0x17023F`, read through
-`0x440611–0x440648`. That row's gameplay role is
-**UNCONFIRMED**.
+`0x440611–0x440648`. **CONFIRMED.** The loader stores that
+row's pointer at world +0x78 (`0x440642`, VA `0x5701E8`). The
+only absolute reader is `0x4909D5` in `0x4909A0`, which the spell
+effect update calls at `0x4C4725`. It indexes the rows by frame
+word +8 and reads a list of 8-byte entries. Kind byte 0 ends the
+list and returns 0. Kind 1 adds byte +2 to the result. Kind 2
+plays sound u16 +2 through `0x422C40` (`0x4909D5–0x490A6F`).
+The one original row is eight zero bytes, so it asks for nothing.
+**UNCONFIRMED.** Whether any spell frame has a nonzero word +8,
+which would read past the single row. Break at `0x490A03` during
+casts and log CX.
 
 **CONFIRMED.** Definition +0x18 is the identity compared by
 `0x440990–0x4409B4` in the 87-byte table. The resource
@@ -62,9 +71,13 @@ Each replacement indexes the 87-byte ODF table and writes effect
 +0x34 (`0x4C43D6–0x4C4421`). The constructor copies XYZ from
 the supplied point and sets +0x63 bit 1 if initial placement
 fails at `0x4C4487` or `0x4C44DC`. At `0x44891F`, inside
-the object command switch (which opcode reaches it is
-**UNCONFIRMED**), a call passes variant 2 and effect ID
-0x62. Adjacent calls at `0x448952` and `0x448985` supply
+script opcode 0x0F, a call passes variant 2 and effect ID
+0x62. **CONFIRMED.** Opcode 0x0F reads action byte +4 at
+`0x4485BD`. Action 0x62 has index byte 54 at `0x449BEC+0x62`,
+and slot `0x449A8C+4×54` (`0x449B64`) holds `0x4488F6`, the arm
+that makes this call. Actions 0x63 and 0x64 take slots 55 and 56.
+The [opcode 0x0F action table](lol3-script-opcodes.md#effect-actions-of-opcode-0x0f)
+lists no stored record for actions 0x62–0x64. Adjacent calls at `0x448952` and `0x448985` supply
 variants 0 and 1 with IDs 0x63 and 0x64. These calls confirm
 effect creation through a script path.
 
@@ -165,6 +178,9 @@ cover encoded direct calls, literal pointers and the original
 item table.
 
 **UNCONFIRMED.** Indirect or computed targets of the writer.
+These cannot be ruled out statically. In a debugged session,
+break at `0x432AD0` and log each return address. Any return
+other than `0x4A5A3F` and `0x4A6138` is an indirect caller.
 
 #### Second-counter debit
 
@@ -249,10 +265,20 @@ other spell ID takes the list-8 key 10 discount scaled by slot-1
 level, and those IDs take the key 13 discount scaled by slot-2
 level.
 
-**UNCONFIRMED.** What the four slots and list-8 keys 10 and 13 are
-called on screen, and a live cast after either consumable. On an
-ordinary successful cast, log the two `0x433C80` results and the
-corresponding level byte at `0x4A59A1` or `0x4A59EF`.
+**CONFIRMED.** The four slots are the Fighter, Wizard, Cleric and
+Thief classes on screen. The display at `0x458241–0x4582B5` reads
+slot k's level and dword, then asks text key 0x2723 + k through
+`0x428890` with ECX `0x570900`. That function looks the key up in
+the table at `[ECX+0x58]`, which `0x431600–0x431613` fills from
+`tooltip.trr` (string at `LOL3.DAT+0x146F18`). In the original
+`DAT/locallng.wsx` entry at +0x598AD7C, keys 0x2723–0x2726 are
+"Fighter", "Wizard", "Cleric" and "Thief". So the two discounts scale
+with the Wizard level (slot 1) and the Cleric level (slot 2).
+
+**UNCONFIRMED.** What list-8 keys 10 and 13 are called on screen,
+and a live cast after either consumable. On an ordinary successful
+cast, log the two `0x433C80` results and the corresponding level
+byte at `0x4A59A1` or `0x4A59EF`.
 
 ## Live cast setup
 
@@ -269,7 +295,10 @@ disabled (`[0x7F4DF8] = 0` at the check in `0x506F70`). The progress
 path installs its completion callback `0x46F8A0` at `0x46F573` and
 waits for it to clear that cell.
 
-**UNCONFIRMED.** Runtime cast selection or payment. Pressing the
+**Superseded.** This blocked load did not settle runtime cast
+selection or payment. The null-sink run below witnessed the
+ordinary debit and the first-counter debit. Only the second-counter
+debit stays open (end of page). Pressing the
 five configured cast keys during the blocked load did not reach
 `0x4A46C1`. No negative debit was seen at `0x410014` or at either
 alternate function. (The load waits on a flag the progress sound's completion callback clears: `0x46F55B` sets `[0x65BD64]` to 1 whatever the sound result, so without audio the loader hangs. With the debugger attached, set `[0x65BD64]` to 0, or force the `0x46F512` skip, and label the run as patched in memory.) A load that completes the progress sound and

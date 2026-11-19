@@ -28,29 +28,29 @@ walk advances by length and stops at kind zero or length zero
 from a flat length walk over the two MAP ranges in all 18 levels.
 Every row fits its range. For kinds with a group reference, the
 u16 +2 values are within the matching stream or index bounds.
-The terminator rows and the kind-1 rows (consumer UNCONFIRMED) have separate uses.
+The terminator rows and the kind-1 rows have separate uses. **CONFIRMED.** Every kind-1 row directly follows a terminator row. `0x4F21B0` walks a list while the kind is below its argument and returns the row only on an exact kind match. `0x445F80` calls it with kind 1 when object +0x18 bit 0x200 is set; it is vtable slot +0xE4 (next to `0x44A060` at +0xD0) of the creature, type-3, item, type-16 and mover classes, e.g. `0x53F3A4`. `0x4466B0` (called at `0x492EB7` and `0x492FBC`) also fetches it, updates it through `0x49E180` (which rewrites row +2 and +0xF) and copies row +2, +6, +8, +0xA and +0xE (`0x4466B0–0x446745`). The game meaning of these fields is open.
 
 | Pool | Kind | Bytes | Rows | Matcher or observed consumer |
 |---|---:|---:|---:|---|
 | Region | 0 | 2 | 905 | List terminator, e.g. `CKEEP.WSX+0xD0E889` |
 | Region | 11 | 8 | 49 | Region u16 +4 and event u8 +6, `0x4AC4F2–0x4AC50B` |
 | Region | 12 | 8 | 2,080 | Region u16 +4, event u8 +6 and conditional +7, `0x4AC252–0x4AC2E9` |
-| Region | 15 | 10 | 72 | Region comparison path, `0x4AC650–0x4AC766`. Individual comparison modes are **UNCONFIRMED** here. |
+| Region | 15 | 10 | 72 | **CONFIRMED.** Load threshold. Walker `0x4AC9F9–0x4ACA6C` in `0x4AC990` calls `0x4ACAB0`. u16 +4 must be the changed 56-byte row. The guard runs first (`0x4ACAE9`). `0x4A7CC0` gives the summed vtable +0xC value W and count N of objects resting on a row. The threshold T is u16 +8, or with +7 nonzero the W (modes 0–3) or N (modes 4–7) of row u16 +8. With signed change d, mode +6 is: 0 W > T ≥ W+d; 1 W < T ≤ W+d; 2 W = T ≠ W+d; 3 W ≠ T = W+d (`0x4ACB66–0x4ACBA0`, table `0x4ACC1C`). Modes 4–7 put N in place of W and T−1 (d > 0) or T+1 in place of W+d (`0x4ACBA2–0x4ACBE4`); above 7, nonzero N fires. Stored rows: 36 of mode 0 and 36 of mode 1, all with +7 = 0. The path `0x4AC650–0x4AC766` matches kind 13, which has no stored rows. |
 | Region | 19 | 4 | 145 | Guard trailer, `0x4F0611–0x4F0639` |
 | Object | 0 | 2 | 9,699 | List terminator, e.g. `CKEEP.WSX+0xD08DB8` |
-| Object | 1 | 16 | 4,516 | `CKEEP.WSX+0xD0962C`. Consumer **UNCONFIRMED**. |
+| Object | 1 | 16 | 4,516 | `CKEEP.WSX+0xD0962C`. **CONFIRMED** consumer: the row after a terminator, fetched by `0x4F21B0` with kind 1 from `0x445F80` and `0x4466B0` (see above). Field meanings open. |
 | Object | 2 | 10 | 768 | Periodic timer, `0x4F1AD0–0x4F1B84` |
 | Object | 3 | 6 | 1,010 | Compare event u8 +4, `0x4A8255–0x4A8290` |
 | Object | 4 | 10 | 1,999 | Request mode at +4 through 11 slots, `0x4A84FB–0x4A8516` |
 | Object | 5 | 6 | 605 | Compare event u8 +4 and value u8 +5. Input 0xFF matches any value; record value 0xFF matches any nonzero input (`0x4A82DE–0x4A8300`, `0x4A82F0–0x4A82FB`). |
 | Object | 6 | 6 | 7,917 | Compare u8 +4, with specific variants that also test +5, e.g. `0x4A8900–0x4A8925`. |
-| Object | 7 | 6 | 3 | Threshold branch, `0x4A8B09–0x4A8B64`. Full comparison modes **UNCONFIRMED**. |
+| Object | 7 | 6 | 3 | **CONFIRMED.** Quantity threshold in `0x4A8AC0`, mode u8 +4 through table `0x4A8BC4`, value V = u8 +5. Inputs are hit-request +0x28 (before) and +0x2C (after) from resolver `0x4E2270`; `0x4465E0` runs it when object +0x18 bit 0x400 is set, e.g. after `0x4B98D0`. Mode 0: while +5 is nonzero, subtract before−after from +5; fire and zero +5 when the drop reaches it. Mode 1: before ≥ V > after. Mode 2: before ≤ V < after. Mode 3: after = V. Above 3 never fires (`0x4A8AFC–0x4A8B5A`). All 3 stored rows are mode 1 with V 200 or 100, e.g. `DLOW1.WSX+0x154DFA0`. |
 | Object | 8 | 6 | 16 | Compare u16 +4, with 0xFFFF wildcard, `0x4A8D25–0x4A8D40`. |
-| Object | 9 | 10 | 1,904 | Hit filter path, `0x4A8C4E–0x4A8C7B`. Full bit meanings **UNCONFIRMED**. |
+| Object | 9 | 10 | 1,904 | Hit filter in `0x4A8BE0`, run by `0x4465E0` after kind 7. **CONFIRMED:** nonzero u16 +4 and +6 must each share a bit with request words +0 and +2. Mode +9 & 7 (table `0x4A8CF4`): 1 loss +0x24 ≥ u8 +8; 2 the same, then +8 becomes 0 unless bit 0x80 is set; 3 before +0x28 > +8 ≥ after +0x2C; 4 after ≤ +8; 0 and 5–7 never. After a fire, +9 bit 0x80 clears +9 (one shot) (`0x4A8C0F–0x4A8CDE`). Stored modes: 1 (1,272), 4 (630), 2 (2). The names of the mask bits are **UNCONFIRMED**, as on the [combat page](lol3-combat-dispatch.md); settle them there from the producers of request words +0/+2. |
 | Object | 10 | 8 | 17 | Selector/event alternatives, `0x4A8EB2–0x4A8F00`, `0x4A8F8D–0x4A8FFF` |
 | Object | 19 | 4 | 3,994 | Guard trailer, `0x4F0611–0x4F0639` |
 | Object | 21 | 8 | 269 | Compare event byte, `0x4A9088–0x4A9096` |
-| Object | 22 | 14 | 2,368 | Identifier comparison, `0x4A8DBC–0x4A8E1B`. Full identifier protocol **UNCONFIRMED**. |
+| Object | 22 | 14 | 2,368 | **CONFIRMED.** Finished named audio. Opcode 0x16 formats `%s\%s.aud` (`LOL3.DAT+0x14812C`) from its identifier and plays it through `0x422FA0` with ID 0xFFFE (`0x448244–0x448271`); the path is copied to object `0x589998` +0x2BCC (`0x42314E–0x423177`). When the slot loop `0x422B3A–0x422C15` retires the slot, it passes that path to `0x4A8DA0` on the owning object's list. The file-name part from `0x51AE90` is compared case-sensitively with the NUL-terminated name at +4 (`0x4A8DE9–0x4A8E13`). Otherwise the loop passes slot +4 to the kind-8 matcher `0x4A8D10` (`0x422BD0–0x422BDD`). 2,361 of the 2,368 names equal an opcode-0x16 identifier in the same level's object stream. |
 
 **CONFIRMED.** Region kind 12 has a ten-slot event table at
 `0x4AC470`. Events 0, 4 and 7 use the true arm. Events 1 and 9
@@ -91,9 +91,21 @@ Global save selector 1 stores the shared array and length
 (`0x43817D–0x4381A3`). The higher guard indices use alternate
 tests and threshold families with bases 5000, 6000, 7000, 7100,
 7200 and 7300 (`0x4F0635–0x4F0767`).
-The meanings of those families and named individual global
-indices remain **UNCONFIRMED**. Follow a concrete guard value
-to its helper and join the index to its native initializer.
+**CONFIRMED.** Index n ≥ 5000 is tested as follows. 5000+n: the
+cursor item `[0x585488]` or an item list or cell of `0x570900` holds item
+key n (definition +0x73; `0x4F0520 → 0x432150–0x4321CF`). 6000+n: one of
+the eight equipped rows holds key n (`0x4F0530 → 0x42B850`, see
+the [spell page](lol3-spell-dispatch.md)). 7000/7100/7200/7300+n:
+slot k = 0–3 has its flag `0x5D50C8+k` set and level
+`0x5D50BC+k` above n (`0x4F0540–0x4F05CE`). The eight values
+7399, 7409 … 7469 compare `[0x586158]` with 0–3; the first four
+also need `[0x589544]` zero (`0x4F0647–0x4F06E2`, index bytes
+`0x4F07AC`). **UNCONFIRMED:** what `[0x586158]` and `[0x589544]`
+mean in play, and the game names of the shared and level array
+indices. Settle the first by finding the writers of those two
+dwords and a consumer that shows them to the player. Settle an
+array index by listing the 0xC6/0xC7/0xCE/0xCF records that write
+it and the events that run them.
 
 ## Timers and elapsed units
 

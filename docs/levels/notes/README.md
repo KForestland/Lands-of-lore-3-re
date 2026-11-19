@@ -25,7 +25,9 @@ in stream order, including the commands counted by an initial
 Positions are absolute offsets in the original WSX. Repeated object
 index entries are shown as aliases on the same line. A line with
 **UNCONFIRMED** producer has no direct reference from either event
-pool for that stream. An identifier tag or a text payload is never
+pool for that stream. Such a record can still run as a counted member
+of a referenced group, so check the enclosing 0xF0 line first. Otherwise
+search native code for a constant group index or stream offset. An identifier tag or a text payload is never
 printed.
 
 **CONFIRMED.** The object runner gets its position from the
@@ -36,7 +38,7 @@ references and 2,201 region references resolve to a framed
 boundary. The opcode switch at `0x41EDF9` supplies the selector
 roles. The region arms that use u16 +2 for the region lookup are
 at `0x4E5D30` and `0x4E5EC0`. A class's virtual dispatch
-can add effects that are **UNCONFIRMED** in the listing.
+can add effects that are **UNCONFIRMED** in the listing. The [opcode page](../../lol3-script-opcodes.md#per-class-effects-of-the-indirect-commands) resolves slot +0xC0 per class; slots +0xC8 (opcode 5) and +0xCC (opcode 7) are not yet traced.
 
 ## Summaries
 

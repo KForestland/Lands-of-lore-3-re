@@ -50,7 +50,7 @@ In the witness column, "size selector" means the opcode's index byte in the leng
 | 0x19 | 16 | `0x4482AC` | 53 | `BUPP1.WSX+0x18C8D4F` | Reads three dwords at +4/+8/+0xC. Value 5 at +0xC selects 0x434560, otherwise calls 0x434180 (0x4482AC–0x4482D1). |
 | 0x1A | 45 | `0x4482DB` | 151 | `BUPP1.WSX+0x18C7FD3` | When 0x600854 is zero, resolves the pair +8/+0xC and calls 0x48EBE0 with the object, +4/+0x10 and pointers +0x14/+0x1D (0x4482DB–0x448316). |
 | 0x1B | 10 | `0x449912` | 1,654 | `BUPP1.WSX+0x18CB66B` | Queue marker or continuation. Subcommand +8 takes the four-arm switch at 0x449C84, which can clear object +0x1C bit 0x80000 or process matching queued commands (0x44991C–0x4499E1). |
-| 0x1C | 38 | `0x448320` | 217 | `BUPP1.WSX+0x18C9F51` | Gates on 0x600854. It allocates 0x146 bytes from heap `0x660CA4`, builds a type-5 object of vtable `0x5392C8` (`0x4B1BA0`) at the target's position, then sets its fields from the command (0x448320–0x4484B2). See [opcode 0x1C fields](#opcode-0x1c-fields). The visible role of that class is **UNCONFIRMED**. |
+| 0x1C | 38 | `0x448320` | 217 | `BUPP1.WSX+0x18C9F51` | Gates on 0x600854. It allocates 0x146 bytes from heap `0x660CA4`, builds a type-5 object of vtable `0x5392C8` (`0x4B1BA0`) at the target's position, then sets its fields from the command (0x448320–0x4484B2). See [opcode 0x1C fields](#opcode-0x1c-fields). The visible role of that class is **UNCONFIRMED**. Settle it in a running game: break after `0x4484AD` while a stored record such as `BUPP1.WSX+0x18C9F51` runs and capture the frame. |
 | 0xC4 | 12 | `0x4E59D3` | 453 | `BUPP1.WSX+0x18C87E3` | Animates the floor or ceiling height of the 56-byte map region selected by u16 +2 (0x4E5EC0–0x4E63B0). It stays in the map queue and steps once per frame. See [opcode 0xC4 flags](#opcode-0xc4-flags). |
 | 0xC5 | 6 | `0x4E59E1` | 584 | `BUPP1.WSX+0x18C83AB`, +4=10 | Selects a map region with u16 +2 and switches on +4 to edit region flags or an associated table row (0x4E5D30–0x4E5E34). |
 | 0xC6 | 6 | `0x4E59FD` | 217 | `BUPP1.WSX+0x18C8231`, +4=31 | Stores byte +5 to the level array at index +4 (0x4E5BD0). |
@@ -211,7 +211,9 @@ object, the second object and the point (+0x1C local):
 
 Records by selector: creature 71, type 3 57, type 16 77, mover 13,
 selector 192 one. The on-screen look of each effect class is
-**UNCONFIRMED**.
+**UNCONFIRMED**. Settle it in a running game: trigger the event that
+runs a stored action (for action 59, `GRULO.WSX+0xCC4330`), break
+after the constructor in its arm and capture the frame.
 
 ### Opcode 0x1C fields
 
@@ -316,11 +318,15 @@ the range described by their command count. For instance
 0xF0 is routed to the high queue and its ordinary high switch
 takes the range return (`0x4E58F4–0x4E592F`,
 `0x4E59A7–0x4E59B0`). A parser can preserve the raw
-boundaries. Treating these records as a recursively executed
-tree assigns a behavior that is **UNCONFIRMED**. To settle
-whether this exact archive pair is executed in context, follow
-both index references to their event callers and record which
-entry is passed to `0x4E5880`.
+boundaries. **CONFIRMED.** They are not a recursive tree. The 14
+headers form seven chains A → B → C, where B is A's last counted
+record and C is B's first record. In every chain the object-event
+pool references A and C once each and B never (MLOW2 indices 1766,
+1769, 1770 for the example). A run of A sends B to queue `0x589760`.
+The high switch returns 0 for 0xF0 (`0x4E59A7–0x4E59B0`, `0x4E5A77`),
+so B's records do not run, and the entry is not passed to
+`0x4F0860`, which receives completed entries (`0x4E5934–0x4E593E`). C runs only from its
+own event.
 
 Run `python3 tools/lol3_script_framing.py --data DAT --check` on
 the English retail files. The tool reads the size table directly
@@ -346,4 +352,7 @@ on the player by another actor is reported to it through `0x489700`
 player's (`0x43766F–0x43776D`).
 **UNCONFIRMED.** Who this actor is on screen (a companion is the
 likely reading), and the visible look of the type-5 effect classes
-built by opcodes 0x0F and 0x1C.
+built by opcodes 0x0F and 0x1C. Settle the actor in a running game:
+break at `0x48EBE0` when an opcode-0x1A record such as
+`BUPP1.WSX+0x18C7FD3` runs, and watch which character performs
+action +4.
