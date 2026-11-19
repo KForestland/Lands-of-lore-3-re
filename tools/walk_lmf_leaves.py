@@ -85,6 +85,23 @@ def walk_bytes(data, name, decode=None):
                 if flags not in (0, 1) or size != 44 + 2 * width * height:
                     raise ValueError(f"{name}: unexpected decoded member at {source:#x}+{at:#x}")
                 stats[flags] += 1
+                words = unpack_from("<4H", members, at + 0x0C)
+                if any(words):
+                    grid = unpack_from(f"<{width * height}H", members, at + 0x2C)
+                    colors = set(grid)
+                    stats["members_with_header_samples"] += 1
+                    for word, (x, y) in zip(words, ((0, 0), (1, 0), (1, 1), (0, 1))):
+                        if not word:
+                            continue
+                        stats["nonzero_header_samples"] += 1
+                        if word & 0x8000 or word not in colors:
+                            raise ValueError(f"{name}: header word outside sample colors at {source:#x}+{at:#x}")
+                        near = [
+                            (width - 1 - col if x else col) * height + (height - 1 - row if y else row)
+                            for col in range(min(2, width)) for row in range(min(2, height))
+                        ]
+                        stats["matching_corner"] += any(grid[index] == word for index in near)
+                        stats["opposite_corner"] += any(grid[-1 - index] == word for index in near)
                 vectors = [unpack_from("<3h", members, at + 0x14 + 6 * j) for j in range(4)]
                 unit = sum(abs(x * x + y * y + z * z - 32767 * 32767) < 1 << 18 for x, y, z in vectors)  # length 32767-32769
                 if flags:
@@ -125,9 +142,14 @@ def check(data_dir, decode):
     if decode:
         extra += (f"; bit 0 set on {stats[1]:,} members whose {stats['vertex_unit']:,} vertex normals are unit length "
                   f"({stats['vertex_zero']} zero), one repeated vector on {stats['face_repeated']:,} of {stats[0]:,} others")
+        extra += (f"; {stats['nonzero_header_samples']:,} nonzero +0x0C–+0x13 words occur in their own grids "
+                  f"({stats['matching_corner']:,} near their corresponding corners, "
+                  f"{stats['opposite_corner']:,} near their opposite corners)")
         print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
         return int((files, groups, members, stats[1], stats["vertex_unit"], stats["vertex_zero"], stats[0],
-                    stats["face_repeated"]) != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071))
+                    stats["face_repeated"], stats["members_with_header_samples"], stats["nonzero_header_samples"],
+                    stats["matching_corner"], stats["opposite_corner"])
+                   != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071, 209545, 610325, 340718, 107136))
     print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
     return int((files, groups, members) != (18, 5256, 424288))
 

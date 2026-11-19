@@ -73,6 +73,35 @@ A stored spelling, for example in another release, is the settling
 test. A run that stops at `0x44A7F5` with this key would also settle it. The 76
 constructed level and global names stay with the WSX check.
 
+**CONFIRMED.** At `0x44A7F5` the argument is the NUL-terminated
+string at `EBX`, which points to the music object at `EBP` plus
+0x30 (`0x44A772`, `0x44A7F4`). The three calls into the builder
+at `0x44A750` pass a score row from object +0, +6 or the current
+row pointer at +0x18 (`0x44A623–0x44A62C`, `0x44A686–0x44A691`,
+`0x44A733–0x44A73B`). The row's first byte selects a stem. The only
+references to the stem-table base `0x629070` are the initializer
+instruction at `0x44A2A1` and the reads at `0x44A775` and `0x44A7DD`.
+The ordinary build is `MUSIC\<stem>.aud`. The optional `-SCORE`
+branch copies the directory token from the command line and sends
+`<directory>\<stem>.wav` to the same lookup (`0x44A78B–0x44A7F5`,
+strings at `LOL3.DAT+0x1483B0` and +0x1483BC). Thus no row whose
+first byte is 0–39 (a stock stem) can supply key `0x1D4F73DA` at that call on the
+default path.
+
+**CONFIRMED.** The unmatched WAVE at `music4.wsx+0x11FD49A` has
+only `fmt `, `fact` and `data` chunks (body offsets +0x14, +0x3A,
++0x46), with no title chunk, leading ID3v2 or trailing ID3v1 tag.
+A manual scan of the root `LOCAL.WSX` and `locallng.wsx`, the shipped `CDCACHE.LS_`,
+the installed `cdcache.lst` and `cdcache.hdr`, `LOL3.LCF` and `PATCHGET.DAT` found no stored ASCII string matching the key or `uhfroze1` spelling.
+`lol3_name_hash.py --check` rechecks the builder sites, archive stem
+joins and WAVE chunk layout.
+
+The unmatched spelling remains open as marked above. To settle it,
+find a shipped name table or another original edition that supplies a
+path for the same track, then compare its payload to the `music4.wsx`
+entry. If another original code path reaches that key, capture its
+filename at the lookup entry `0x435880` and the returned archive row.
+
 ## Level sample data
 
 **CONFIRMED.** The 18 level sound archives hold 6,696

@@ -95,13 +95,41 @@ The render size path `0x47451E → 0x479D90` reads only +4 and +6,
 rounding each up to a power of two no larger than 256 with an aspect
 limit of 8 (`0x479D90–0x479E2E`).
 
-**UNCONFIRMED.** The four s16 values at +0x0C–+0x13. They are all zero
-in 214,743 members and vary in the rest; no reader on the member has
-been found yet. Checked without a hit: `0x44EB40` itself, `0x44EC90`
-(it copies the 0x2C-byte header as 11 dwords at `0x44ED0A–0x44ED16`,
-but reads no field there), the first 45 instructions after each of the
-15 calls to `0x44EB40`, the size path `0x479D90` and the surface
-renderer around `0x4980D8`. Settling test: in a running level, set a
-read watchpoint on +0x0C of a member returned by `0x44EB40` (eax at
-`0x44EC7D`) whose +0x0C is nonzero, then look at that surface. A hit
-other than the copy at `0x44ED16` names the reader.
+**CONFIRMED from file data.** The four words at +0x0C–+0x13 are all
+zero in 214,743 members. Every one of the 610,325 nonzero words in the
+remaining 209,545 members has bit 15 clear and occurs verbatim in its
+own member's sample grid at +0x2C. For example, `BUPP1.WSX+0x1699822`,
+expanded offset +0x2634 (LMF row 23), holds `(24256, 0, 9472, 23200)`
+in these words, and all four appear in the 16 × 32 grid. For the
+column-major index `x × u16(+6) + y` and corner order `(0,0)`,
+`(width−1,0)`, `(width−1,height−1)`, `(0,height−1)`, 340,718 nonzero
+words match a sample within the 2 × 2 square extending inward from
+the corresponding corner. At the opposite corner, 107,136 match. For comparison, a random 2 × 2
+square of the member's own grid matches 158,693 words, and the previous
+member's grid holds 260,804 of them, so the corner figures are a
+measured tendency, not a rule. `walk_lmf_leaves.py
+--check --decode` rechecks all four counts.
+
+**UNCONFIRMED.** The exact sample selection rule and any consumer that
+interprets these words. The `0x474D85` and `0x47596D` render paths call
+`0x479D90` for dimensions and `0x479E60` for surface form and projection.
+The `0x47F833`, `0x47FD11` and `0x480438` paths use the parallel pair
+`0x4857C0` and `0x485840`. Their dimension reads are at
+`0x479D90–0x479E2E` and `0x4857C0–0x485833`. The sampler at
+`0x485FD0` passes +0x2C at `0x485FFB` or `0x48601E`. The `0x499C42`
+and `0x498D51` paths send the member to `0x44EED0`, which tests a bit
+in its first dword and takes its projection inputs from a separate
+argument (`0x44EED6–0x44EF40`). The subsequent normal reads start
+at +0x14 (`0x499C79`, `0x498BA4–0x498BC2`). The resampler copies the
+whole 44-byte header, including the four words, at `0x44ED16` and
+returns the scratch copy through `0x44EEAB–0x44EEC3`.
+
+Checked without a hit: `0x44EB40` itself, `0x44EC90`, the first 45
+instructions after each of the 15 calls to `0x44EB40`, the size path
+`0x479D90` and the surface renderer around `0x4980D8`. A future read watch on the two dwords +0x0C/+0x10 of a nonzero member
+returned by `0x44EB40` (`EAX` at `0x44EC7D` or `0x44EC83`) can isolate
+the consumer. If `0x44ED16` or
+`0x44EEA2` copies the member, move the watch to the same offsets in the
+scratch result (`EAX` at `0x44EEC3`) and render its surface. A typed read
+of those words, or a shipped writer that supplies their sample indices,
+would settle their purpose.

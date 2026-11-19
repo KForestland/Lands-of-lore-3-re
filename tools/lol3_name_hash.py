@@ -11,11 +11,12 @@ import mmap
 import re
 from hashlib import sha256
 from pathlib import Path
-from struct import unpack, unpack_from
+from struct import pack, unpack, unpack_from
 
 import lol3_cli
 from extract_wsx_entries import wsx_name_hash
 from lol3_level_report import DATA_BIAS, c_strings
+from lol3_media_check import form, read_at
 from lol3_script_framing import CODE_BIAS, RETAIL_PE
 
 TARGET = 0x1D4F73DA
@@ -66,6 +67,24 @@ def strings_in(blob):
     return [(match.start(), match.group().decode("ascii")) for match in STRING.finditer(blob)]
 
 
+def check_music_lookup(image):
+    table = find_all(image, pack("<I", 0x629070))
+    if table != [va - CODE_BIAS for va in (0x44A2A2, 0x44A778, 0x44A7E0)]:
+        raise ValueError("music stem references changed")
+    default_at = 0x44A775 - CODE_BIAS
+    override_at = 0x44A7DD - CODE_BIAS
+    if image[default_at:default_at + 15] != bytes.fromhex("8b0485709062005068c49b540053e8"):
+        raise ValueError("default music formatter changed")
+    if image[override_at:override_at + 29] != bytes.fromhex(
+        "8b148d70906200525068b09b540053e84fe60c0083c41053e886b0feff"
+    ):
+        raise ValueError("score override or music lookup changed")
+    if image[0x1483B0:0x1483BA] != b"%s\\%s.wav\0":
+        raise ValueError("score override template changed")
+    if image[0x1483BC:0x1483C3] != b"-SCORE\0":
+        raise ValueError("score override switch changed")
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
     args = parser.parse_args()
@@ -83,6 +102,7 @@ def main():
             raise ValueError("stem load at 0x44A290 is not the pointer table")
         if image[FORMAT_AT:FORMAT_AT + 12] != b"MUSIC\\%s.aud":
             raise ValueError("music format string changed")
+        check_music_lookup(image)
         stems = c_strings(image, STEMS_AT, 40)
         if stems[9] != "uhfrozen" or stems[11] != "uhfroze2":
             raise ValueError(f"slots 9 and 11 are {stems[9]!r} and {stems[11]!r}")
@@ -136,6 +156,16 @@ def main():
             raise ValueError(
                 f"music join keys {len(music)} extra {extra} absent {absent} "
                 f"joined {len(joined)} covered {covered} target {target_rows}")
+        filename, _, start, length = target_rows[0]
+        with (data / filename).open("rb") as stream:
+            chunks = list(form(stream, start, length, b"RIFF", b"WAVE", "<"))
+            expected_chunks = [
+                (b"fmt ", start + 0x14, 30), (b"fact", start + 0x3A, 4),
+                (b"data", start + 0x46, length - 0x46),
+            ]
+            if (chunks != expected_chunks or read_at(stream, start + 0x46, 3) == b"ID3"
+                    or read_at(stream, start + length - 128, 3) == b"TAG"):
+                raise ValueError("unmatched track unexpectedly carries RIFF or ID3 metadata")
 
         if find_all(image, b"uhfroze") != [UHFROZE2_AT, UHFROZEN_AT] or find_all(image, b"uhfroze1"):
             raise ValueError("uhfroze spellings in LOL3.DAT changed")
@@ -197,7 +227,8 @@ def main():
         print(f"CHECK name_hash FAILED: {exc}")
         return 1
     print("CHECK name_hash: 40 stems; 31 keys join 37 of 38 music entries; "
-          "0x1D4F73DA has no stored string; 53 path-like names join directory keys")
+          "neither the default stems nor stored strings name 0x1D4F73DA; "
+          "the payload has no name chunk; 53 path-like names join directory keys")
     return 0
 
 
