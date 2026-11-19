@@ -115,8 +115,10 @@ cover four texture banks and their four light maps. The first
 row at file +0x76 is `LEVELS\QWOD0\QWOD0.TEX` (key
 `0xE128E112`), stored at +0x436 with length 0xA0438A. The
 adjacent light map row at +0x8E starts at +0xA047C0 with
-length 0xA0978. The original WSX row for that same texture
-at +0x12 gives relative offset 0x2794C41, so it would select
+length 0xA0978. The ordinary WSX-format row at +0x12 of this cache (its first
+directory, in the 114-byte header it shares with the shipped
+`DAT/cdcache.wsx`)
+gives relative offset 0x2794C41, so it would select
 file +0x2794CB3. The cache allocator uses the second index for
 the actual cached payload. The four texture row offsets are
 +0x76, +0xA6, +0xD6 and +0x106, and their payloads start at

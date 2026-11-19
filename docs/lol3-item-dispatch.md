@@ -392,4 +392,4 @@ not in the grouping table.
 | 120 | `0x4A6500` | 1 | Operation 11. When player +0x24E (`0x5D512E`) is zero and `0x42B850` (`ecx = 0x5831E1`, argument 0x1A; it scans the eight equipped rows for that numeric ID) returns 0, calls `0x413470` with the player. `0x413470` stores 0 at player +0x24E. When `0x42B850` finds no ID 0x116, or player byte +0x2A is nonzero, it also calls `0x416390` with the player and 0x60 and clears bit 22 of player +0x3C0. Every path, including operation 10 and every other operation, returns 0. | CONFIRMED |
 | 121 | `0x4A6540` | 1 | Operation 1. Calls `0x41CCA0` with the player, 0x253 and 1, then adds 5 to player +0x224 (`0x5D5104`). Returns 2. | CONFIRMED |
 | 122 | `0x4A6570` | 2 | Operation 0x11 returns 2. Every other operation returns 0. Writes nothing. | CONFIRMED |
-| 123 | `0x4A6590` | 1 | Operation 0x11 returns 1. Every other operation returns 0. Writes nothing; the body is four instructions and calls nothing. | CONFIRMED |
+| 123 | `0x4A6590` | 1 | Operation 0x11 returns 1. Every other operation returns 0. Writes nothing; the body is five instructions including the return, and calls nothing. | CONFIRMED |

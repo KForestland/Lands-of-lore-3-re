@@ -178,8 +178,9 @@ The original global names occur at `LOL3.DAT+0x147FD0–0x14801D`.
 archives (3,701,411) joins 53 path-like names to directory keys.
 Fifty-two are stored in `LOL3.DAT`. One, `missing.aud`, is stored
 in `locallng.wsx` and is the WAVE at `LOCAL.WSX+0x240FF66`. The
-other 7,364 distinct keys have no stored C string (the 76 constructed
-names are checked separately). The hash is only
+search found no matching path-like string for the other 7,364
+distinct keys in those files; a name stored another way would not be
+found by it. The 76 constructed names are checked separately. The hash is only
 32 bits: one printable run at `LOCAL.WSX+0x147CF1F` collides with
 a key and is not a path. `lol3_name_hash.py --check` re-counts
 this. Music key `0x1D4F73DA` is one of the unnamed keys

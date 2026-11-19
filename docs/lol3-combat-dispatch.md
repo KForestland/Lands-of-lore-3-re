@@ -268,8 +268,8 @@ also clears that bit from the request words after the scan
 is kept apart from the summed loss (`0x4E2846–0x4E285D`); a set
 local +0x1C doubles bit 0 (`0x4E2696–0x4E26A7`).
 
-**CONFIRMED.** Census of the 334 field-3 rows in the 18 level ODFs
-(first row at `BUPP1.WSX+0x1B5E178`; 57 distinct records):
+**CONFIRMED.** Census of the 20-byte mitigation prefixes of 334 field-3 rows in the 18 level ODFs
+(first row at `BUPP1.WSX+0x1B5E178`; 57 distinct prefixes and 334 distinct complete 147-byte rows):
 
 | Selector | Entries | Most common (first mask / second mask: rows) |
 |---:|---:|---|
