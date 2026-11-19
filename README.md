@@ -10,6 +10,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **What you can do today:** unpack every archive, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md) (counts in the [rating](#rating); two of the answers hold for one display or renderer); open points include most item effects, a floor pickup in a save, and other display modes. Some were tried in the [running game](docs/NEEDS_A_RUNNING_GAME.md) (the texture and movie colour formats are answered there); the rest need later-game saves.
+- **What changed lately:** [what's new](docs/WHATS_NEW.md), newest first.
 - **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md)).
 
 ## Rating
@@ -18,7 +19,7 @@ Counted by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
-- **Rules traced:** 255 statements labelled CONFIRMED against the program or the files, 80 labelled UNCONFIRMED, on 71 current pages.
+- **Rules traced:** 255 statements labelled CONFIRMED against the program or the files, 80 labelled UNCONFIRMED, on 72 current pages.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
 - **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
 <!-- rating:end -->
