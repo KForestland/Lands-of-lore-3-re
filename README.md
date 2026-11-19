@@ -53,12 +53,12 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 
 ## What you get
 
-[Walk through one level from its map to its exit](docs/TOUR.md).
+[Walk through one level from its map to its exit](docs/TOUR.md). Search the [JSON documentation index](docs/index.json) by page, question or tool.
 
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-six checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-seven checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -79,7 +79,7 @@ Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the c
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
-python3 tools/check_all.py                  # 26 passed with a matching cache, 23 passed and 3 skipped without one
+python3 tools/check_all.py                  # 27 passed with a matching cache, 24 passed and 3 skipped without one
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository

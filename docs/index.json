@@ -1,0 +1,1214 @@
+{
+  "schema_version": 1,
+  "question_source": "docs/OPEN_QUESTIONS.md",
+  "questions": {
+    "Q1": {
+      "state": "Partly answered",
+      "answer_pages": [
+        "docs/lol3-wsx-reader.md"
+      ]
+    },
+    "Q2": {
+      "state": "Answered",
+      "answer_pages": [
+        "docs/lol3-wsx-reader.md"
+      ]
+    },
+    "Q3": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/lol3-lmf-reader.md"
+      ]
+    },
+    "Q4": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/lol3-map-odf-readers.md"
+      ]
+    },
+    "Q5": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/lol3-map-odf-readers.md"
+      ]
+    },
+    "Q6": {
+      "state": "Answered for supported cache records and one device",
+      "answer_pages": [
+        "docs/NEEDS_A_RUNNING_GAME.md",
+        "docs/lol3-texture-bake.md"
+      ]
+    },
+    "Q7": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/formats/textures.md"
+      ]
+    },
+    "Q8": {
+      "state": "Partly answered",
+      "answer_pages": [
+        "docs/lol3-map-odf-readers.md",
+        "docs/lol3-semantic-phase.md"
+      ]
+    },
+    "Q9": {
+      "state": "Answered for one renderer",
+      "answer_pages": [
+        "docs/NEEDS_A_RUNNING_GAME.md",
+        "docs/formats/vqa.md"
+      ]
+    },
+    "Q10": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/formats/audio.md"
+      ]
+    },
+    "Q11": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/lol3-object-dispatch.md",
+        "docs/lol3-script-opcodes.md"
+      ]
+    },
+    "Q12": {
+      "state": "Partly answered",
+      "answer_pages": [
+        "docs/NEEDS_A_RUNNING_GAME.md",
+        "docs/lol3-combat-dispatch.md",
+        "docs/lol3-dialogue-dispatch.md",
+        "docs/lol3-item-dispatch.md",
+        "docs/lol3-spell-dispatch.md"
+      ]
+    },
+    "Q13": {
+      "state": "Mostly answered",
+      "answer_pages": [
+        "docs/NEEDS_A_RUNNING_GAME.md",
+        "docs/lol3-native-saves.md"
+      ]
+    }
+  },
+  "pages": [
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "title": "Bug report",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/research_note.md",
+      "title": "Research note",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "CHANGELOG.md",
+      "title": "Changelog",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/repo_guard.py"
+      ]
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "title": "Contributing",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/repo_guard.py"
+      ]
+    },
+    {
+      "path": "README.md",
+      "title": "Lands of Lore III: file formats and game data",
+      "answers": [],
+      "question_references": [
+        "Q1",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q9",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/extract_wsx_entries.py",
+        "tools/full_report.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_combat_census.py",
+        "tools/lol3_level_report.py",
+        "tools/lol3_level_schematic.py",
+        "tools/lol3_map_spans.py",
+        "tools/lol3_media_check.py",
+        "tools/lol3_native_checks.py",
+        "tools/lol3_odf_companions.py",
+        "tools/lol3_save_header.py",
+        "tools/lol3_script_browser.py",
+        "tools/lol3_script_notes.py",
+        "tools/lol3_texture_png.py",
+        "tools/rating.py",
+        "tools/repo_guard.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "data/README.md",
+      "title": "Data",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/COOKBOOK.md",
+      "title": "Cookbook",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/extract_wsx_entries.py",
+        "tools/full_report.py",
+        "tools/lol3_level_schematic.py",
+        "tools/lol3_map_spans.py",
+        "tools/lol3_media_check.py",
+        "tools/lol3_odf_companions.py",
+        "tools/lol3_save_header.py",
+        "tools/lol3_script_browser.py",
+        "tools/lol3_texture_palettes.py",
+        "tools/lol3_texture_png.py",
+        "tools/lol3_texture_spans.py"
+      ]
+    },
+    {
+      "path": "docs/EDITED_SAVES.md",
+      "title": "Runs on edited saves",
+      "answers": [],
+      "question_references": [
+        "Q12"
+      ],
+      "tools": []
+    },
+    {
+      "path": "docs/GLOSSARY.md",
+      "title": "Glossary",
+      "answers": [],
+      "question_references": [
+        "Q8"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_script_notes.py",
+        "tools/rating.py"
+      ]
+    },
+    {
+      "path": "docs/HOW_A_LEVEL_IS_PUT_TOGETHER.md",
+      "title": "How a LoL3 level is put together",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/HOW_THE_GAME_WORKS.md",
+      "title": "How Lands of Lore III works",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/HOW_WE_RATE.md",
+      "title": "How we rate this repository",
+      "answers": [],
+      "question_references": [
+        "Q1"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/extract_wsx_entries.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_pht.py",
+        "tools/rating.py"
+      ]
+    },
+    {
+      "path": "docs/NEEDS_A_RUNNING_GAME.md",
+      "title": "LoL3 questions to test in the original Windows game",
+      "answers": [
+        "Q6",
+        "Q9",
+        "Q12",
+        "Q13"
+      ],
+      "question_references": [
+        "Q1",
+        "Q4",
+        "Q5",
+        "Q8",
+        "Q10",
+        "Q11"
+      ],
+      "tools": []
+    },
+    {
+      "path": "docs/NUMBERS.md",
+      "title": "LoL3 numbers at a glance",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_numbers.py"
+      ]
+    },
+    {
+      "path": "docs/OPEN_QUESTIONS.md",
+      "title": "Open questions",
+      "answers": [],
+      "question_references": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8",
+        "Q9",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13"
+      ],
+      "tools": [
+        "tools/lol3_combat_census.py",
+        "tools/lol3_script_framing.py"
+      ]
+    },
+    {
+      "path": "docs/PROGRESSION.md",
+      "title": "Progression",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_progression.py"
+      ]
+    },
+    {
+      "path": "docs/QUICK_REFERENCE.md",
+      "title": "Format quick reference",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/extract_wsx_entries.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_level_report.py",
+        "tools/lol3_media_check.py",
+        "tools/lol3_pht.py",
+        "tools/lol3_save_header.py",
+        "tools/lol3_script_framing.py",
+        "tools/lol3_texture_archive.py",
+        "tools/lol3_texture_png.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/README.md",
+      "title": "Docs",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_numbers.py",
+        "tools/lol3_progression.py"
+      ]
+    },
+    {
+      "path": "docs/START_HERE.md",
+      "title": "Start here, by goal",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/extract_wsx_entries.py",
+        "tools/lol3_level_report.py",
+        "tools/lol3_script_notes.py",
+        "tools/lol3_texture_archive.py",
+        "tools/lol3_texture_png.py",
+        "tools/lol3_texture_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/STATUS.md",
+      "title": "LoL3 reverse-engineering status",
+      "answers": [],
+      "question_references": [
+        "Q1",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8",
+        "Q9",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_save_header.py",
+        "tools/rating.py"
+      ]
+    },
+    {
+      "path": "docs/TOUR.md",
+      "title": "Follow LoL3 QWOD0 from map to exit",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_level_schematic.py",
+        "tools/lol3_numbers.py",
+        "tools/lol3_progression.py",
+        "tools/lol3_script_browser.py"
+      ]
+    },
+    {
+      "path": "docs/WHATS_NEW.md",
+      "title": "What's new",
+      "answers": [],
+      "question_references": [
+        "Q1",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/doc_links.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_claimed_edges.py",
+        "tools/lol3_combat_census.py",
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/lol3_name_hash.py",
+        "tools/lol3_native_checks.py",
+        "tools/lol3_odf_companions.py",
+        "tools/lol3_pht.py",
+        "tools/lol3_progression.py",
+        "tools/lol3_save_header.py",
+        "tools/lol3_script_browser.py",
+        "tools/rating.py"
+      ]
+    },
+    {
+      "path": "docs/closure-summary.md",
+      "title": "Closure Summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/container-inventory.md",
+      "title": "LoL3 retail container inventory",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/extract_wsx_entries.py"
+      ]
+    },
+    {
+      "path": "docs/engine-evolution.md",
+      "title": "How the Lands of Lore engine changed",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/final-closure-memo.md",
+      "title": "Final Closure Memo",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/formats/audio.md",
+      "title": "Music and level sound",
+      "answers": [
+        "Q10"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_media_check.py",
+        "tools/lol3_name_hash.py"
+      ]
+    },
+    {
+      "path": "docs/formats/lmf.md",
+      "title": "LMF light maps",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/formats/map-odf.md",
+      "title": "MAP and ODF entries (table38 header)",
+      "answers": [],
+      "question_references": [
+        "Q4",
+        "Q5"
+      ],
+      "tools": [
+        "tools/lol3_level_schematic.py"
+      ]
+    },
+    {
+      "path": "docs/formats/pht.md",
+      "title": "PHT files",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_pht.py"
+      ]
+    },
+    {
+      "path": "docs/formats/textures.md",
+      "title": "Textures",
+      "answers": [
+        "Q7"
+      ],
+      "question_references": [
+        "Q1"
+      ],
+      "tools": [
+        "tools/lol3_texture_archive.py",
+        "tools/lol3_texture_spans.py"
+      ]
+    },
+    {
+      "path": "docs/formats/vqa.md",
+      "title": "VQA movies",
+      "answers": [
+        "Q9"
+      ],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/formats/wsx.md",
+      "title": "WSX archives",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/extract_wsx_entries.py"
+      ]
+    },
+    {
+      "path": "docs/level-catalog-notes.md",
+      "title": "Level catalog notes (table38 metadata)",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/level-file-types.md",
+      "title": "LoL3 level companion types (from LOL3.DAT strings)",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/BUPP1.md",
+      "title": "BUPP1",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/CKEEP.md",
+      "title": "CKEEP",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/DLOW1.md",
+      "title": "DLOW1",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/EWOD1.md",
+      "title": "EWOD1",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/FLAIR.md",
+      "title": "FLAIR",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/GRULO.md",
+      "title": "GRULO",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/HWHIT.md",
+      "title": "HWHIT",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/ISHAT.md",
+      "title": "ISHAT",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/JUNDR.md",
+      "title": "JUNDR",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/KVOLC.md",
+      "title": "KVOLC",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/LUPP2.md",
+      "title": "LUPP2",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/MLOW2.md",
+      "title": "MLOW2",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/NWOD2.md",
+      "title": "NWOD2",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/OLOW3.md",
+      "title": "OLOW3",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/PWOD3.md",
+      "title": "PWOD3",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/QWOD0.md",
+      "title": "QWOD0",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/README.md",
+      "title": "Level sheets",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py"
+      ]
+    },
+    {
+      "path": "docs/levels/RVOL0.md",
+      "title": "RVOL0",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/SWOD4.md",
+      "title": "SWOD4",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_level_report.py",
+        "tools/lol3_map_spans.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/levels/notes/BUPP1.md",
+      "title": "BUPP1 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/CKEEP.excerpt.md",
+      "title": "CKEEP script excerpt",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/CKEEP.md",
+      "title": "CKEEP script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/DLOW1.md",
+      "title": "DLOW1 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/EWOD1.md",
+      "title": "EWOD1 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/FLAIR.md",
+      "title": "FLAIR script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/GRULO.md",
+      "title": "GRULO script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/HWHIT.md",
+      "title": "HWHIT script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/ISHAT.md",
+      "title": "ISHAT script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/JUNDR.md",
+      "title": "JUNDR script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/KVOLC.md",
+      "title": "KVOLC script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/LUPP2.md",
+      "title": "LUPP2 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/MLOW2.md",
+      "title": "MLOW2 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/NWOD2.md",
+      "title": "NWOD2 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/OLOW3.md",
+      "title": "OLOW3 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/PWOD3.md",
+      "title": "PWOD3 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/QWOD0.md",
+      "title": "QWOD0 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/README.md",
+      "title": "Level script notes",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_script_notes.py"
+      ]
+    },
+    {
+      "path": "docs/levels/notes/RVOL0.md",
+      "title": "RVOL0 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/levels/notes/SWOD4.md",
+      "title": "SWOD4 script summary",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/lmf-size-formula.md",
+      "title": "LMF chunk size ladder",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-combat-dispatch.md",
+      "title": "Native hit requests and resolution",
+      "answers": [
+        "Q12"
+      ],
+      "question_references": [
+        "Q5"
+      ],
+      "tools": [
+        "tools/lol3_combat_census.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-current-status.md",
+      "title": "LoL3 Current Status",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-dialogue-dispatch.md",
+      "title": "Native dialogue and message tables",
+      "answers": [
+        "Q12"
+      ],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-dispatch-search.md",
+      "title": "Script and event dispatch in the native image",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-item-dispatch.md",
+      "title": "Native item definitions and use entry points",
+      "answers": [
+        "Q12"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_combat_census.py",
+        "tools/lol3_native_checks.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-lmf-reader.md",
+      "title": "Native Light Map reader",
+      "answers": [
+        "Q3"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_pht.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-map-odf-readers.md",
+      "title": "Native MAP and ODF readers",
+      "answers": [
+        "Q4",
+        "Q5",
+        "Q8"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_claimed_edges.py",
+        "tools/lol3_map_spans.py",
+        "tools/lol3_odf_companions.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-native-saves.md",
+      "title": "Native LoL3 save slots",
+      "answers": [
+        "Q13"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_native_checks.py",
+        "tools/lol3_save_header.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-object-dispatch.md",
+      "title": "Native object and script dispatch",
+      "answers": [
+        "Q11"
+      ],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-script-events.md",
+      "title": "LoL3 event lists, predicates and timers",
+      "answers": [],
+      "question_references": [
+        "Q11"
+      ],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-script-opcodes.md",
+      "title": "LoL3 MAP script opcodes and framing",
+      "answers": [
+        "Q11"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_script_framing.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-semantic-phase.md",
+      "title": "LoL3 Semantic Phase",
+      "answers": [
+        "Q8"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_claimed_edges.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-spell-dispatch.md",
+      "title": "Native spell inputs and resource selection",
+      "answers": [
+        "Q12"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_native_checks.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-structural-phase.md",
+      "title": "LoL3 Structural Phase",
+      "answers": [],
+      "question_references": [
+        "Q8"
+      ],
+      "tools": []
+    },
+    {
+      "path": "docs/lol3-texture-bake.md",
+      "title": "Native texture colour bake",
+      "answers": [
+        "Q6"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_native_checks.py",
+        "tools/lol3_texture_png.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-texture-palette-sources.md",
+      "title": "Texture cache palette sources",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_texture_archive.py",
+        "tools/lol3_texture_palettes.py"
+      ]
+    },
+    {
+      "path": "docs/lol3-wsx-reader.md",
+      "title": "Native WSX archive and cache reader",
+      "answers": [
+        "Q1",
+        "Q2"
+      ],
+      "question_references": [],
+      "tools": [
+        "tools/extract_wsx_entries.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_name_hash.py"
+      ]
+    },
+    {
+      "path": "docs/map-format.md",
+      "title": "LoL3 .map (WSX entry1) notes",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/provenance.md",
+      "title": "Provenance",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/series-formats.md",
+      "title": "What the three games share",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/series-progress-and-numbers.md",
+      "title": "How the three games gate progress and scale numbers",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/tex-format.md",
+      "title": "LoL3 texture bank witnesses",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/texture-028e-evidence.md",
+      "title": "LoL3 runtime texture evidence: CONVERT 028E",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "docs/tutorial-one-event.md",
+      "title": "Follow one region event in Lands of Lore III",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_script_notes.py"
+      ]
+    },
+    {
+      "path": "docs/wsx-extraction.md",
+      "title": "LoL3 WSX extraction (reproducible)",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/extract_wsx_entries.py"
+      ]
+    },
+    {
+      "path": "evidence/README.md",
+      "title": "Evidence",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "evidence/lol3-semantic-anchor-table.md",
+      "title": "LoL3 Semantic Anchor Table",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "evidence/lol3-witness-map.md",
+      "title": "LoL3 Witness Map",
+      "answers": [],
+      "question_references": [],
+      "tools": []
+    },
+    {
+      "path": "examples/README.md",
+      "title": "Examples",
+      "answers": [],
+      "question_references": [
+        "Q8"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_level_schematic.py"
+      ]
+    },
+    {
+      "path": "tools/README.md",
+      "title": "Tools",
+      "answers": [],
+      "question_references": [
+        "Q1"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/doc_index.py",
+        "tools/doc_links.py",
+        "tools/extract_wsx_entries.py",
+        "tools/full_report.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_claimed_edges.py",
+        "tools/lol3_cli.py",
+        "tools/lol3_combat_census.py",
+        "tools/lol3_level_report.py",
+        "tools/lol3_level_schematic.py",
+        "tools/lol3_map_spans.py",
+        "tools/lol3_media_check.py",
+        "tools/lol3_name_hash.py",
+        "tools/lol3_native_checks.py",
+        "tools/lol3_numbers.py",
+        "tools/lol3_odf_companions.py",
+        "tools/lol3_pht.py",
+        "tools/lol3_progression.py",
+        "tools/lol3_save_header.py",
+        "tools/lol3_script_browser.py",
+        "tools/lol3_script_framing.py",
+        "tools/lol3_script_notes.py",
+        "tools/lol3_texture_archive.py",
+        "tools/lol3_texture_palettes.py",
+        "tools/lol3_texture_png.py",
+        "tools/lol3_texture_spans.py",
+        "tools/rating.py",
+        "tools/repo_guard.py",
+        "tools/walk_lmf_leaves.py"
+      ]
+    }
+  ]
+}

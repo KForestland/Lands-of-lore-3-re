@@ -16,7 +16,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 26 CHECKS PASSED`, or `23 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 27 CHECKS PASSED`, or `24 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX`. `--list` prints key, offset and size and writes nothing | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
@@ -97,3 +97,21 @@ Set `LOL3_DAT` or pass `--data` for the original game's DAT directory. Run `--he
 | `--cache FILE` | This supplies the texture cache the game wrote beside DAT. The three texture cache checks can use an archived cache stored elsewhere. [Cache recipe](../docs/COOKBOOK.md#check-the-texture-cache) |
 | `--summary` for script notes and `--manifest` for WSX export | These select the small notes and a secondary directory listing, respectively. `--out` selects the extracted or full listing output. |
 | `--game-dat` in the WSX tool and `-o` in the LMF tool | Old spellings are kept as aliases and shown in `--help`, so earlier scripts that call the tools keep working. `--game-dat` is the same as `--data`, `-o` the same as `--out`. |
+
+## Documentation index
+
+`doc_index.py` reads the repository's Markdown pages and generates [docs/index.json](../docs/index.json).
+Its `pages` records include the title, original path, question IDs and cited tool source paths.
+`answers` uses the Page or Where column of [Open questions](../docs/OPEN_QUESTIONS.md).
+`question_references` records other references to the same IDs. The top-level `questions`
+object preserves the published state and lists each question's answer pages. Tool citations
+include command examples. The index covers the Markdown files shipped in the repository,
+including the root pages, example and evidence notes, and issue templates. In a git checkout
+it reads only tracked pages, so local untracked notes do not change the check.
+
+```bash
+python3 tools/doc_index.py --out docs/index.json
+python3 tools/doc_index.py --check
+```
+
+The check also runs in `check_all.py` and GitHub Actions. It needs no game data.

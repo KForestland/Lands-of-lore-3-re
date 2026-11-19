@@ -2,7 +2,7 @@
 
 **As of:** 2026-11-19. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (26 checks; all 26 pass on a GOG copy that has run once; on a never-run copy 23 pass and 3 report SKIP).
+Run the checks: `python3 tools/check_all.py --data <DAT>` (27 checks; all 27 pass on a GOG copy that has run once; on a never-run copy 24 pass and 3 report SKIP).
 
 **Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
 
