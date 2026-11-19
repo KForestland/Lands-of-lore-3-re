@@ -20,7 +20,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 420 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 421 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -79,7 +79,7 @@ Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the c
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
-python3 tools/check_all.py                  # 27 passed with a matching cache, 24 passed and 3 skipped without one
+python3 tools/check_all.py                  # 28 passed with a matching cache, 25 passed and 3 skipped without one
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository

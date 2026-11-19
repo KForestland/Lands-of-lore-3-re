@@ -100,12 +100,158 @@ its first global section at +0x2214E. The 38 preview chunks expand
 to 0x4B000 bytes. Its first level block begins at +0x2493A and
 contains 130,702 bytes.
 
-**UNCONFIRMED.** Meaning of every global and level payload and the
-remaining header fields. The native selector entry points and
-archive boundaries above give the starting sites. Name the saved
-state from the individual selector's writers. Then confirm it on two
-game-written slots saved from the same load, one before and one after
-a single controlled change, as in the trials below.
+## Selector payloads
+
+**CONFIRMED.** The global descriptor `0x438140` and the level descriptor `0x438940` name each selector. The global loader calls the first at `0x436D43` and the global writer calls it at `0x43789D`. The level reader `0x437340` calls the second at `0x43745B` and the level writer calls it at `0x437F3A`. Each descriptor compares the selector index with its bound (`0x3C` at `0x438144`, `0x4A` at `0x438944`) and jumps through a table of 4-byte arm addresses (`0x438848`, `0x439460`). That gives 61 global and 75 level selectors, and each table is followed by `90 90 90 90` padding. Each arm writes four results: the live address, the byte count, the unit and a flag byte. The table is those four results for all 61 global selectors and all 75 level selectors. `lol3_save_selectors.py --check` requires the table to match the program.
+
+A zero live pointer skips the section (loader `0x436D4F`, global writer `0x4378B8`, level writer `0x437F53`). Flag bit 0 (value 1) is what the global loader (`0x436D57`) and the level reader (`0x43746F`) test before they read the section. The two writers do not test that bit. Flag bit 1 (value 2) selects the baseline XOR through `0x43C480` (loader `0x436D75`, global writer `0x4378C4`, level writer `0x437F7D`). On that path the save writer calls the global adjuster `0x439590` at `0x437928`, or the level adjuster `0x439B30` at `0x437FDC`, with direction 0 (`0x43791B`, `0x437FD2`). The loader calls the global adjuster on the XOR path at `0x436E14` and on the direct path at `0x436E83`. The level reader `0x437340`, called from the loader at `0x436F2E`, calls the level adjuster at `0x437513` and `0x43757A`. Flag bit 2 (value 4) selects compression: save `0x43C830` (`0x43792D`, `0x437980`, `0x437FE1`, `0x438036`), load `0x43C790` (global loader `0x436DB6`, `0x436E26`; level reader `0x4374A9`, `0x437525`). Flag bit 3 (value 8) is tested only by the level writer, together with the writer's second stack argument, at `0x437F61`. If that argument is zero and bit 3 is clear, the stored length is 0 (`0x43805C`).
+
+Both adjusters return before their jump tables when the live pointer is zero, the byte count is zero, or the index is past the bound (`0x439598` and `0x4395A7`, bound `0x3C` at `0x4395B3`; `0x439B39` and `0x439B48`, bound `0x48` at `0x439B54`). Selectors 73 and 74 are past that bound. `0x43C410` copies one dword when its direction argument is 0, so the file stores the absolute value. When the direction is not 0, a source dword of zero is stored as zero (`0x43C46F`). A nonzero value is matched against 30 ranges. Base i is dword i of the direction object, and the end is that base plus dword i of the length row at direction +0x78 (signed compares). The stored result is the source dword plus the difference between this object's base and the direction object's base. If none of the 30 ranges contains the value, the index stays 30 and the addition still runs (`0x43C44C`).
+
+The last column is which dwords that helper receives, as offsets from the live address. `--check` also counts the helper calls written in each arm. An arm that returns without calling it copies the bytes and does not relocate pointers. Level selector 38's arm calls `0x43A4E0` instead. That function switches on byte +0x64 through the table at `0x43AE70`, bound `0x94`, and those arms are not read here.
+
+<!-- selectors:begin -->
+| Selector | Descriptor | Live bytes | Byte count | Unit | Flags | Adjuster | Dwords passed to the pointer helper |
+|---|---|---|---|---|---|---|---|
+| Global 0 | `0x438154` | `0x5d4ee0` | `0x464` | `0x464` | `0x7` | `0x4395cb` | dwords at +0x104, +0x10C, +0x110, +0x190, +0x118, +0x11C, +0x114, +0x144, +0x148, +0x279, +0x27D, +0x12E, +0x132, +0x242 and +0x309; ten dwords from +0x335 step 4; then +0x10 and +0x14 |
+| Global 1 | `0x43817d` | `[0x5d54c0]` | `[0x5d54c8]` | `0x1` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 2 | `0x4381aa` | `dword([0x6626bc]+0x0)` | `(dword([0x6626bc]+0x8)*dword([0x6626bc]+0xc))` | `dword([0x6626bc]+0xc)` | `0x7` | `0x43978b` | each record's dwords at +0 and +0xC, stride = the unit, while the record start is below the byte count |
+| Global 3 | `0x4381b4` | `dword([0x6626bc]+0x4)` | `(dword([0x6626bc]+0x8)>>3)` | `0x1` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 4 | `0x4381be` | `0x570900` | `0x12fa1` | `0x12fa1` | `0x7` | `0x4397f9` | dwords at +0x205, +0x1115 and +0x12F89 |
+| Global 5 | `0x4381e7` | `0x0` | `0x0` | `0x0` | `0x1` | `0x439abb` | returns without calling the pointer helper |
+| Global 6 | `0x438210` | `0x570174` | `0x4` | `0x4` | `0x1` | `0x439abb` | returns without calling the pointer helper |
+| Global 7 | `0x43821f` | `0x585444` | `0x68` | `0x68` | `0x1` | `0x43984b` | dwords at +0x44 and +0x4C |
+| Global 8 | `0x438248` | `[0x662a90]` | `[0x662a94]` | `0x1` | `0x1` | `0x439abb` | returns without calling the pointer helper |
+| Global 9 | `0x438274` | `0x58cbe2` | `0x30` | `0x30` | `0x3` | `0x439abb` | returns without calling the pointer helper |
+| Global 10 | `0x43829d` | `0x5469b8` | `0xa0` | `0x10` | `0x1` | `0x43987b` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Global 11 | `0x4382c6` | `0x546a58` | `0x50` | `0x10` | `0x1` | `0x43987b` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Global 12 | `0x4382ef` | `0x546ef8` | `0x80` | `0x10` | `0x1` | `0x43987b` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Global 13 | `0x438318` | `0x5479a8` | `0x190` | `0x10` | `0x1` | `0x43987b` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Global 14 | `0x438341` | `0x548568` | `0x190` | `0x10` | `0x1` | `0x43987b` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Global 15 | `0x43836a` | `0x5860f0` | `0x3670` | `0x3670` | `0x7` | `0x4398ba` | dwords at +0x10, +0x14, +0x34, +0x48, +0x4C, +0x3498 and +0x3610; then 0x23 groups of five records, record stride 0x48 and group stride 0x178, from +0xA0, dwords at +0 and +4 |
+| Global 16 | `0x438393` | `0x5838b8` | `0x1b3a` | `0x1b3a` | `0x7` | `0x4399d9` | the dword at +0x1B2A; then 0x13 steps of 0x16E from +0, and each step also passes address 0x660F48 on both sides |
+| Global 17 | `0x4383bc` | `[0x570964]` | `([0x570970]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 18 | `0x4383d2` | `[0x57097c]` | `([0x570988]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 19 | `0x4383e8` | `[0x570994]` | `([0x5709a0]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 20 | `0x4383ff` | `[0x5709ac]` | `([0x5709b8]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 21 | `0x438415` | `[0x5709c4]` | `([0x5709d0]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 22 | `0x43842b` | `[0x570a6c]` | `([0x570a78]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 23 | `0x438442` | `[0x5709dc]` | `([0x5709e8]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 24 | `0x438458` | `[0x5709f4]` | `([0x570a00]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 25 | `0x43846e` | `[0x570a0c]` | `([0x570a18]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 26 | `0x438485` | `[0x570a24]` | `([0x570a30]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 27 | `0x43849b` | `[0x570a54]` | `([0x570a60]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 28 | `0x4384b1` | `[0x570a3c]` | `([0x570a48]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 29 | `0x4384c8` | `[0x570a84]` | `([0x570a90]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 30 | `0x4384de` | `[0x57096c]` | `([0x570970]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 31 | `0x4384f4` | `[0x570984]` | `([0x570988]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 32 | `0x43850b` | `[0x57099c]` | `([0x5709a0]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 33 | `0x438521` | `[0x5709b4]` | `([0x5709b8]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 34 | `0x438537` | `[0x5709cc]` | `([0x5709d0]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 35 | `0x43854e` | `[0x570a74]` | `([0x570a78]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 36 | `0x438564` | `[0x5709e4]` | `([0x5709e8]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 37 | `0x43857a` | `[0x5709fc]` | `([0x570a00]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 38 | `0x438591` | `[0x570a14]` | `([0x570a18]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 39 | `0x4385a7` | `[0x570a2c]` | `([0x570a30]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 40 | `0x4385bd` | `[0x570a5c]` | `([0x570a60]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 41 | `0x4385d4` | `[0x570a44]` | `([0x570a48]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 42 | `0x4385ea` | `[0x570a8c]` | `([0x570a90]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 43 | `0x438600` | `[0x570968]` | `([0x570970]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 44 | `0x438617` | `[0x570980]` | `([0x570988]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 45 | `0x43862d` | `[0x570998]` | `([0x5709a0]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 46 | `0x438643` | `[0x5709b0]` | `([0x5709b8]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 47 | `0x43865a` | `[0x5709c8]` | `([0x5709d0]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 48 | `0x43866d` | `[0x570a70]` | `([0x570a78]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 49 | `0x438683` | `[0x5709e0]` | `([0x5709e8]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 50 | `0x43869a` | `[0x5709f8]` | `([0x570a00]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 51 | `0x4386ad` | `[0x570a10]` | `([0x570a18]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 52 | `0x4386c0` | `[0x570a28]` | `([0x570a30]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 53 | `0x4386d4` | `[0x570a58]` | `([0x570a60]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 54 | `0x438707` | `[0x570a40]` | `([0x570a48]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 55 | `0x43873a` | `[0x570a88]` | `([0x570a90]*0x4)` | `0x4` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 56 | `0x43876e` | `dword([0x6626c4]+0x0)` | `(dword([0x6626c4]+0x8)*dword([0x6626c4]+0xc))` | `dword([0x6626c4]+0xc)` | `0x7` | `0x439a3e` | each record's dwords at +0 and +0xC, stride = the unit, while the record start is below the byte count |
+| Global 57 | `0x43879c` | `dword([0x6626c4]+0x4)` | `(dword([0x6626c4]+0x8)>>3)` | `0x1` | `0x7` | `0x439abb` | returns without calling the pointer helper |
+| Global 58 | `0x4387cb` | `0x546610` | `0x3a8` | `0x24` | `0x1` | `0x439abb` | returns without calling the pointer helper |
+| Global 59 | `0x4387f4` | `0x547308` | `0x69c` | `0x24` | `0x1` | `0x439abb` | returns without calling the pointer helper |
+| Global 60 | `0x43881d` | `0x600858` | `0x4` | `0x4` | `0x1` | `0x439aa9` | the dword at +0 |
+| Level 0 | `0x438954` | `[0x5898b8]` | `([0x5898bc]*0x12)` | `0x0` | `0x4` | `0x43a408` | returns without calling the pointer helper |
+| Level 1 | `0x438984` | `[0x5898d8]` | `0x206c` | `0x0` | `0x9` | `0x43a408` | returns without calling the pointer helper |
+| Level 2 | `0x4389ae` | `[0x5898dc]` | `([0x5898e0]*0x6)` | `0x0` | `0x4` | `0x43a408` | returns without calling the pointer helper |
+| Level 3 | `0x4389de` | `0x5838a8` | `0xc` | `0xc` | `0x7` | `0x439bd7` | dwords at +0 and +4 |
+| Level 4 | `0x438a07` | `[0x5838a8]` | `([0x5838b0]*0x8)` | `0x8` | `0x7` | `0x439b6c` | each record's dwords at +0 and +4, stride = the unit, while the record start is below the byte count |
+| Level 5 | `0x438a1d` | `0x589760` | `0xc` | `0xc` | `0x7` | `0x439bd7` | dwords at +0 and +4 |
+| Level 6 | `0x438a46` | `[0x589760]` | `([0x589768]*0x8)` | `0x8` | `0x7` | `0x439c00` | each record's dwords at +0 and +4, stride = the unit, while the record start is below the byte count |
+| Level 7 | `0x438a5c` | `[0x7dea68]` | `[0x7dee70]` | `0x2` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 8 | `0x438a73` | `[0x7de740]` | `[0x7de744]` | `0x4` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 9 | `0x438a8a` | `[0x600844]` | `[0x600848]` | `0x2` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 10 | `0x438ab6` | `[0x7de738]` | `[0x7de73c]` | `0x4` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 11 | `0x438ae2` | `[0x57018c]` | `([0x5701ac]*0x8)` | `0x8` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 12 | `0x438b15` | `[0x570194]` | `([0x5701b4]*0x38)` | `0x38` | `0x7` | `0x439c6d` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 13 | `0x438b4b` | `[0x570198]` | `([0x5701b8]*0x2c)` | `0x2c` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 14 | `0x438b80` | `[0x570190]` | `([0x5701b0]*0x8)` | `0x8` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 15 | `0x438bb3` | `[0x5701a0]` | `([0x5701c8]*0xc)` | `0x8` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 16 | `0x438be4` | `dword([0x7de720]+0x0)` | `(dword([0x7de720]+0x8)*dword([0x7de720]+0xc))` | `dword([0x7de720]+0xc)` | `0x5` | `0x439ca8` | each record's dwords at +0, +4, +8 and +0xC, stride = the unit, while the record start is below the byte count |
+| Level 17 | `0x438c12` | `dword([0x7de720]+0x4)` | `(dword([0x7de720]+0x8)>>3)` | `0x1` | `0x5` | `0x43a408` | returns without calling the pointer helper |
+| Level 18 | `0x438c41` | `dword([0x659ef4]+0x0)` | `(dword([0x659ef4]+0x8)*dword([0x659ef4]+0xc))` | `dword([0x659ef4]+0xc)` | `0x7` | `0x439d35` | each record's dwords at +0x34, +0x10 and +0x14, stride = the unit, while the record start is below the byte count |
+| Level 19 | `0x438c4b` | `dword([0x65b794]+0x0)` | `(dword([0x65b794]+0x8)*dword([0x65b794]+0xc))` | `dword([0x65b794]+0xc)` | `0x7` | `0x439db1` | each record's dwords at +0x34, +0x38, +0x10 and +0x14, stride = the unit, while the record start is below the byte count |
+| Level 20 | `0x438c55` | `[0x65b798]` | `([0x65b79c]*0x4)` | `0x4` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 21 | `0x438c69` | `dword([0x7d7718]+0x0)` | `(dword([0x7d7718]+0x8)*dword([0x7d7718]+0xc))` | `dword([0x7d7718]+0xc)` | `0x7` | `0x439e42` | each record's dwords at +0x44, +0x68, +0x6C, +0x90, +0xCC, +0x34, +0x10 and +0x14, stride = the unit, while the record start is below the byte count |
+| Level 22 | `0x438c73` | `dword([0x7d77f0]+0x0)` | `(dword([0x7d77f0]+0x8)*dword([0x7d77f0]+0xc))` | `dword([0x7d77f0]+0xc)` | `0x7` | `0x439f27` | each record's dwords at +0x34, +0x38, +0x10 and +0x14, stride = the unit, while the record start is below the byte count |
+| Level 23 | `0x438c7d` | `[0x7d77f4]` | `([0x7d77f8]*0x4)` | `0x4` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 24 | `0x438cb1` | `[0x5d54bc]` | `[0x5d54c4]` | `0x1` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 25 | `0x438cde` | `dword([0x7d7824]+0x0)` | `(dword([0x7d7824]+0x8)*dword([0x7d7824]+0xc))` | `dword([0x7d7824]+0xc)` | `0x7` | `0x439fb8` | each record's dwords at +0x34, +0x10 and +0x14, stride = the unit, while the record start is below the byte count |
+| Level 26 | `0x438ce8` | `[0x5701cc]` | `([0x5701ec]*0x18)` | `0x18` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 27 | `0x438d1a` | `[0x5701dc]` | `([0x5701fc]*0x8)` | `0x8` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 28 | `0x438d4e` | `0x60083c` | `0x4` | `0x4` | `0x1` | `0x43a15d` | the dword at +0 |
+| Level 29 | `0x438d77` | `0x600840` | `0x4` | `0x4` | `0x1` | `0x43a035` | the dword at +0 |
+| Level 30 | `0x438d90` | `0x55d3a0` | `0x30` | `0x30` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 31 | `0x438db9` | `dword([0x6626c0]+0x0)` | `(dword([0x6626c0]+0x8)*dword([0x6626c0]+0xc))` | `dword([0x6626c0]+0xc)` | `0x7` | `0x43a04e` | each record's dwords at +0xC and +0, stride = the unit, while the record start is below the byte count |
+| Level 32 | `0x438de7` | `dword([0x6626c0]+0x4)` | `(dword([0x6626c0]+0x8)>>3)` | `0x1` | `0x7` | `0x43a408` | returns without calling the pointer helper |
+| Level 33 | `0x438e16` | `0x7d75f8` | `0x4` | `0x4` | `0x1` | `0x43a144` | the dword at +0 |
+| Level 34 | `0x438e3f` | `0x7d772c` | `0x4` | `0x4` | `0x1` | `0x43a15d` | the dword at +0 |
+| Level 35 | `0x438e58` | `0x7d7690` | `0x80` | `0x8` | `0x5` | `0x43a0b5` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 36 | `0x438e81` | `0x7d7600` | `0x90` | `0x30` | `0x5` | `0x43a0f0` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 37 | `0x438eaa` | `0x7d7710` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 38 | `0x438ec3` | `dword([0x660ca4]+0x0)` | `dword([0x660ca4]+0x4)` | `0x0` | `0x5` | `0x43a12b` | calls 0x43A4E0, which switches on byte +0x64 through the table at 0x43AE70 (bound 0x94). Those arms are not read here |
+| Level 39 | `0x438eee` | `0x7d779c` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 40 | `0x438f17` | `0x7d7794` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 41 | `0x438f30` | `0x7d7798` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 42 | `0x438f59` | `0x7d77a0` | `0x4` | `0x4` | `0x1` | `0x43a144` | the dword at +0 |
+| Level 43 | `0x438f82` | `0x7d77ac` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 44 | `0x438f9b` | `0x7d77a4` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 45 | `0x438fc4` | `0x7d77a8` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 46 | `0x438fed` | `0x7d77b0` | `0x4` | `0x4` | `0x1` | `0x43a15d` | the dword at +0 |
+| Level 47 | `0x439006` | `0x54bbb4` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 48 | `0x43902f` | `0x662aac` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 49 | `0x439058` | `0x54bbb8` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 50 | `0x439071` | `0x662aa8` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 51 | `0x43909a` | `0x7d77dc` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 52 | `0x4390c3` | `0x7d77d0` | `0xc` | `0xc` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 53 | `0x4390ec` | `0x7d77e0` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 54 | `0x439115` | `0x7d77c4` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 55 | `0x43913e` | `0x54bf58` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 56 | `0x439157` | `0x7d77c8` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 57 | `0x439180` | `0x7d77b8` | `0xc` | `0xc` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 58 | `0x4391a9` | `0x7d77e8` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 59 | `0x4391c2` | `0x7d77e4` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 60 | `0x4391eb` | `0x54bf70` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 61 | `0x4393bc` | `0x662ab0` | `0xd000` | `0x34` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 62 | `0x4393e5` | `0x660ea8` | `0x4c` | `0x4` | `0x1` | `0x43a366` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 63 | `0x43940e` | `0x660f48` | `0x4c` | `0x4` | `0x1` | `0x43a3a1` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 64 | `0x439437` | `0x660ef8` | `0x4c` | `0x4` | `0x1` | `0x43a3d8` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 65 | `0x439214` | `0x589998` | `0x2d54` | `0x2d54` | `0x5` | `0x43a176` | 0x13 dwords from +0x34 step 0x28; 0x100 dwords from +0x32C step 0x28; 0x13 dwords from +0x2B2C step 4; 8 dwords from +0x2B78 step 4; 3 dwords from +0x2B98 step 4; then the dwords at +0x2CDC and +0x2BA4 |
+| Level 66 | `0x4392c1` | `0x6006a0` | `0xc` | `0xc` | `0x3` | `0x43a408` | returns without calling the pointer helper |
+| Level 67 | `0x4392ea` | `[0x6006a0]` | `([0x6006a4]*0x4)` | `0x4` | `0x1` | `0x43a2d1` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 68 | `0x43931e` | `0x6006ac` | `0xc` | `0xc` | `0x3` | `0x43a408` | returns without calling the pointer helper |
+| Level 69 | `0x439347` | `[0x6006ac]` | `([0x6006b0]*0x4)` | `0x4` | `0x1` | `0x43a30c` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
+| Level 70 | `0x43936a` | `0x7e300c` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 71 | `0x439393` | `0x7df0a8` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
+| Level 72 | `0x43923d` | `0x585cb0` | `0x140` | `0x140` | `0x1` | `0x43a347` | the dword at +0x18 |
+| Level 73 | `0x439266` | `[0x65b7c4]` | `([0x65b7c0]*0xc)` | `0xc` | `0x7` | none | index above 0x48, so the adjuster returns before its jump table |
+| Level 74 | `0x439298` | `0x58cb8d` | `0x51` | `0x51` | `0x3` | none | index above 0x48, so the adjuster returns before its jump table |
+<!-- selectors:end -->
+
+**UNCONFIRMED.** What each selector holds in play. The table gives where its bytes live and how they are copied, not what they mean; only the fields isolated by the controlled saves below have a meaning. Also open: the `0x94` arms of `0x43A4E0` and the unnamed header bytes. Test: save the same load before and after one controlled action and compare that selector's bytes ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action)).
 
 ## Controlled save setup
 
@@ -329,8 +475,8 @@ bases.
 
 ### Q13
 
-**What was measured.** All 47 slot files give global selectors 5, 24, 37 and 50 a stored span of 0 bytes. The other 57 global selectors have a nonzero span in every one of those files.
+**What was measured.** All 47 slot files give global selectors 5, 24, 37 and 50 a stored span of 0 bytes. The other 57 global selectors have a nonzero span in every one of those files. The descriptor arms name the live address, byte count, unit and flags of all 61 global selectors and all 75 level selectors, and the adjuster arms name the dwords passed to `0x43C410`.
 
-**What was tried.** This compares the 61 directory offsets in each slot header. The page already records controlled saves for movement, the quick-slot transfer and the floor pickup.
+**What was tried.** This compares the 61 directory offsets in each slot header and reads the descriptor and adjuster arms in the program. The page already records controlled saves for movement, the quick-slot transfer and the floor pickup.
 
-**What would settle it.** The running-game test is not yet run ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). It compares the original save bytes before and after one controlled action for each remaining selector payload.
+**What would settle it.** The running-game test is not yet run ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). It compares the original save bytes before and after one controlled action for each remaining selector payload. What each selector holds in play and the `0x94` arms of `0x43A4E0` are also still open.

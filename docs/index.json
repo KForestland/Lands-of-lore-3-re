@@ -367,6 +367,7 @@
       "tools": [
         "tools/check_all.py",
         "tools/lol3_save_header.py",
+        "tools/lol3_save_selectors.py",
         "tools/rating.py"
       ]
     },
@@ -414,6 +415,7 @@
         "tools/lol3_pht.py",
         "tools/lol3_progression.py",
         "tools/lol3_save_header.py",
+        "tools/lol3_save_selectors.py",
         "tools/lol3_script_browser.py",
         "tools/rating.py"
       ]
@@ -977,7 +979,8 @@
       "question_references": [],
       "tools": [
         "tools/lol3_native_checks.py",
-        "tools/lol3_save_header.py"
+        "tools/lol3_save_header.py",
+        "tools/lol3_save_selectors.py"
       ]
     },
     {
@@ -1198,6 +1201,7 @@
         "tools/lol3_pht.py",
         "tools/lol3_progression.py",
         "tools/lol3_save_header.py",
+        "tools/lol3_save_selectors.py",
         "tools/lol3_script_browser.py",
         "tools/lol3_script_framing.py",
         "tools/lol3_script_notes.py",
