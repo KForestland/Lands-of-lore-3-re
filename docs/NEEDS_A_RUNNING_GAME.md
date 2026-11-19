@@ -9,6 +9,8 @@ compatibility wrapper is in use. `LOL3.DAT` has no relocations and
 always loads at `0x400000`, so the addresses here are used as they
 are; if the module base differs, you are in the wrong process.
 
+Some probes were also tried on edited saves: copies of a game-written save with a few bytes changed. [Edited saves](EDITED_SAVES.md) lists those runs and what a game-written save would still add.
+
 ## Remaining probes
 
 ### Q6. Which bytes does the texture renderer consume?

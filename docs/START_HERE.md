@@ -45,7 +45,7 @@ Follow the engine from startup to saving in [How Lands of Lore III works](HOW_TH
 
 ## I want to read save files
 
-[lol3-native-saves.md](lol3-native-saves.md): slot names, header, directories and compression in the original program.
+[lol3-native-saves.md](lol3-native-saves.md): slot names, header, directories and compression in the original program. [Edited saves](EDITED_SAVES.md) lists the runs where the original game loaded a hand-edited copy, each with a link to its byte table.
 
 ## I want to help
 
