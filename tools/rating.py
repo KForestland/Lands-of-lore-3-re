@@ -40,7 +40,7 @@ def files_read(data_dir):
 
 
 def history(text):
-    return bool(re.search(r"\*\*History\b|^> \*\*History", "\n".join(text.splitlines()[:6]), re.M))
+    return any(line.startswith("> **History") for line in text.splitlines()[:6])
 
 
 def labels():
