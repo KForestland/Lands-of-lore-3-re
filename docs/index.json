@@ -332,6 +332,19 @@
       ]
     },
     {
+      "path": "docs/ROUND_TRIP.md",
+      "title": "Round-trip proof for LoL3",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_lzo_writer.py",
+        "tools/lol3_save_header.py",
+        "tools/lol3_save_writer.py",
+        "tools/lol3_wsx_writer.py"
+      ]
+    },
+    {
       "path": "docs/START_HERE.md",
       "title": "Start here, by goal",
       "answers": [],

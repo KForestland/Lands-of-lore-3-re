@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Read the level archives' light maps and texture banks in DAT (and the SMD frames the game-written cache names), re-encode LZO1X with liblzo2 and re-read.
+"""Read the level archives' light maps and texture banks in DAT and the packed SMD frames those banks name, re-encode LZO1X with liblzo2 and re-read.
 
 This is a real compressor (liblzo2 lzo1x_1_compress), not a copy of the stored
 groups: the new packed bytes differ from the original ones, and the check
-requires the decoded bytes to be identical. Without liblzo2 the check prints
-one SKIP line. Without the game-written cdcache.wsx beside DAT the SMD part is
-skipped and the rest still runs. Writes nothing.
+requires the decoded bytes to be identical. The SMD frames are found from the
+mip directories of the 18 level banks and the two shared banks in LOCAL.WSX;
+a game-written cdcache.wsx beside DAT (or --cache) is optional and only adds
+its own references. Without liblzo2 the check prints one SKIP line. Writes
+nothing.
 """
 from contextlib import ExitStack
 from ctypes import CDLL, POINTER, byref, c_size_t, c_void_p, create_string_buffer
@@ -14,7 +16,7 @@ from pathlib import Path
 import struct
 
 from cli_errors import run_cli
-from extract_wsx_entries import parse_wsx
+from extract_wsx_entries import parse_wsx, wsx_name_hash
 import lol3_cli
 from lol3_texture_archive import cache_rows, chunks, texture_entries
 from lol3_texture_png import SLICE_FLAGS, cache_textures, find_slice_frame, slice_directory, slice_reference, texture_payload
@@ -102,34 +104,30 @@ def write_texture(original, encode, decode):
     reread = [decode(packed, size) for packed, size in chunks(rebuilt)]
     if reread != decoded:
         raise ValueError("rebuilt texture bank block bytes differ")
-    return rebuilt, len(decoded)
+    return rebuilt, decoded
 
 
-def check_slices(data, cache_file, encode, decode):
-    """Re-encode each distinct packed SMD frame that a game-written cache record points at."""
-    cache_file, allocations = cache_rows(data, cache_file)
-    cache = cache_file.read_bytes()
-    seen = set()
+def check_slices(data, allocations, arm, directory, seen, encode, decode):
+    """Follow shipped or cache mip references to their source frame spans."""
     count = 0
-    with ExitStack() as stack:
-        directory = slice_directory(data, stack)
-        for at, length, *_ in cache_textures(cache, allocations.values()):
-            flags, _, _, payload = texture_payload(cache[at:at + length])
-            if flags not in SLICE_FLAGS:
-                continue
-            name, header, start, expanded, stored = slice_reference(payload)
-            if not stored:
-                continue
-            source, position = find_slice_frame(directory, name, header, start, stored)
-            key = source.name, position, stored, expanded
-            if key in seen:
-                continue
-            seen.add(key)
-            source.seek(position + 16)
-            raw = decode(source.read(stored - 16), expanded - 16)
-            if decode(encode(raw), len(raw)) != raw:
-                raise ValueError("rebuilt SMD frame bytes differ")
-            count += 1
+    for at, length, *_ in cache_textures(data, allocations, expected_arm=arm):
+        flags = struct.unpack_from("<I", data, at)[0]
+        if flags not in SLICE_FLAGS:
+            continue
+        _, _, _, payload = texture_payload(data[at:at + length])
+        name, header, start, expanded, stored = slice_reference(payload)
+        if not stored:
+            continue
+        source, position = find_slice_frame(directory, name, header, start, stored)
+        count += 1
+        key = source.name, position, stored, expanded
+        if key in seen:
+            continue
+        seen.add(key)
+        source.seek(position + 16)
+        raw = decode(source.read(stored - 16), expanded - 16)
+        if decode(encode(raw), len(raw)) != raw:
+            raise ValueError("rebuilt SMD frame bytes differ")
     return count
 
 
@@ -164,23 +162,44 @@ def check(data, cache_file, library):
                 light_maps += 1
                 groups += group_count
                 members += member_count
-    banks = blocks = 0
-    for _, original in texture_entries(data):
-        _, count = write_texture(original, encode, decode)
-        banks += 1
-        blocks += count
-    if (light_maps, groups, members, banks, blocks) != (18, 5256, 424288, 18, 465):
+    banks = blocks = references = 0
+    checked_frames = set()
+    with ExitStack() as stack:
+        directory = slice_directory(data, stack)
+        for _, original in texture_entries(data):
+            _, decoded_blocks = write_texture(original, encode, decode)
+            bank = b"".join(decoded_blocks)
+            banks += 1
+            blocks += len(decoded_blocks)
+            references += check_slices(bank, [(0, len(bank))], 3, directory, checked_frames, encode, decode)
+        shared_arms = {wsx_name_hash(f"GLOBAL\\{name}.TEX"): arm for name, arm in (("GLOBAL", 1), ("SPELL", 2))}
+        local = next(path for path in lol3_cli.wsx_files(data) if path.stem.upper() == "LOCAL")
+        shared = [(shared_arms[row["hash"]], row["blob"])
+                  for row in parse_wsx(local)["entries"] if row["hash"] in shared_arms]
+        if sorted(arm for arm, _ in shared) != [1, 2]:
+            raise ValueError("shared texture banks are absent")
+        for arm, bank in shared:
+            references += check_slices(bank, [(0, len(bank))], arm, directory, checked_frames, encode, decode)
+        shipped_frames = len(checked_frames)
+        if cache_file is not None:
+            path, allocations = cache_rows(data, cache_file)
+            from_cache = check_slices(path.read_bytes(), allocations.values(), 3, directory,
+                                      checked_frames, encode, decode)
+    if (light_maps, groups, members, banks, blocks, references, shipped_frames) != (
+            18, 5256, 424288, 18, 465, 33068, 15990):
         raise ValueError("LoL3 LZO1X corpus counts differ")
-    slices = (f"{check_slices(data, cache_file, encode, decode):,} distinct packed SMD frames named by the game-written cache"
-              if cache_file is not None else "SMD frames SKIPPED (no game-written cache)")
+    cache_note = (f"; the game-written cache's {from_cache:,} packed references reach "
+                  f"{len(checked_frames) - shipped_frames} further frames" if cache_file is not None
+                  else "; no game-written cache, its references not followed")
     print(f"CHECK LZO write: liblzo2 re-encodes {members:,} LMF members in {groups:,} groups "
           f"({light_maps - same} of {light_maps} light maps differ from the original packed bytes) "
-          f"and {blocks} texture blocks; {slices}; decoded bytes identical; a changed member re-reads")
+          f"and {blocks} texture blocks; {references:,} packed SMD references in the 20 shipped texture banks, "
+          f"{shipped_frames:,} distinct frames{cache_note}; decoded bytes identical; a changed member re-reads")
 
 
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
-    parser.add_argument("--cache", help="optional game-written cdcache.wsx used to identify SMD frames")
+    parser.add_argument("--cache", help="optional game-written cdcache.wsx whose packed SMD references are also followed")
     args = parser.parse_args()
     if not args.check:
         parser.error("give --check for LZO1X read-back")

@@ -53,8 +53,8 @@ class LzoRoundTrip(unittest.TestCase):
         self.assertEqual((groups, members), (1, 2))
         self.assertEqual(struct.unpack_from("<I", rebuilt, 0x110)[0], 4)
         texture = struct.pack("<2I", len(decoded), len(packed)) + packed + b"\0" * 4
-        rebuilt, count = write_texture(texture, encode, decode)
-        self.assertEqual(count, 1)
+        rebuilt, blocks = write_texture(texture, encode, decode)
+        self.assertEqual(blocks, [decoded])
         self.assertEqual(decode(rebuilt[8:-4], len(decoded)), decoded)
         lzo_mutation_check(lm, encode, decode)
 

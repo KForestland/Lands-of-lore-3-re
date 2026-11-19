@@ -33,15 +33,15 @@ SLICE_FLAGS = frozenset((0x021A, 0x021E, 0x0252, 0x0256))
 UNCONFIRMED_FLAGS = frozenset((0x02AC, 0x82AC))
 
 
-def cache_textures(data, allocations):
-    """Follow the allocator and the bank's descriptor/mip directory."""
+def cache_textures(data, allocations, expected_arm=3):
+    """Follow each allocated bank's descriptor and mip directory."""
     for bank, length in sorted(allocations):
         end = bank + length
         if bank < 0 or length < 12 or end > len(data):
             raise ValueError(f"invalid allocation at {bank:#x}")
         if struct.unpack_from("<III", data, bank) == (0, 38, 0x100):
             continue  # LMF allocation
-        _, directory, pixels, palettes, palette_count, count = bank_directory(data, bank, end)
+        _, directory, pixels, palettes, palette_count, count = bank_directory(data, bank, end, expected_arm)
         for index in range(count):
             descriptor = bank + directory + 58 * index
             arm = data[descriptor + 0xD]
@@ -53,7 +53,7 @@ def cache_textures(data, allocations):
                 offset = bank + pixels + u32(data, descriptor + 0x12 + 4 * mip)
                 if size < 12 or offset + size > bank + palettes:
                     raise ValueError(f"mip {mip} at descriptor {descriptor:#x} exceeds the payload")
-                if arm != 3 or key >= palette_count:
+                if arm != expected_arm or key >= palette_count:
                     raise ValueError(f"unbound palette for descriptor {descriptor:#x}")
                 yield offset, size, bank, descriptor, mip, key, bank + palettes + 512 * key
 

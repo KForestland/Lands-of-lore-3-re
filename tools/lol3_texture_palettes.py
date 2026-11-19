@@ -22,11 +22,12 @@ def u32(data, at):
     return struct.unpack_from("<I", data, at)[0]
 
 
-def bank_directory(data, begin, end):
+def bank_directory(data, begin, end, expected_arm=3):
     if begin < 0 or begin + 0x6A2 > end or end > len(data):
         raise ValueError(f"truncated texture bank at {begin:#x}")
+    expected_fields = (0x4200, 0x20000) if expected_arm == 3 else (0, 0)
     if (u32(data, begin) != 38 or u32(data, begin + 0x40) != 0x300
-            or struct.unpack_from("<II", data, begin + 0x54) != (0x4200, 0x20000)):
+            or struct.unpack_from("<II", data, begin + 0x54) != expected_fields):
         raise ValueError(f"invalid texture bank header at {begin:#x}")
     directory, pixels = struct.unpack_from("<II", data, begin + 0x10)
     palettes, palette_size = u32(data, begin + 0x34), u32(data, begin + 0x70)
