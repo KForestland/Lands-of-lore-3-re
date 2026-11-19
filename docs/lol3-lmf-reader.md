@@ -107,11 +107,25 @@ words match a sample within the 2 × 2 square extending inward from
 the corresponding corner. At the opposite corner, 107,136 match. For comparison, a random 2 × 2
 square of the member's own grid matches 158,693 words, and the previous
 member's grid holds 260,804 of them, so the corner figures are a
-measured tendency, not a rule. `walk_lmf_leaves.py
---check --decode` rechecks all four counts.
+measured tendency, not a rule. Of the same 610,325 words, the
+nearest match to the assigned corner (counted in texels along the
+longer axis) is the corner texel for 108,537, one texel away for
+232,181, two to seven away for 139,039, and 130,568 do not occur
+within the 8 × 8 texels at that corner. 287,177 match the texel one
+step inward on both axes (55,848 of them also match the corner
+texel). The grid colour nearest the numeric mean of the packed words
+in that inward 2 × 2 matches 307,470. A quadrant (the quarter of the
+grid at that corner; an odd middle row or column belongs to both)
+minimum, maximum, most common colour, or colour nearest the numeric
+mean of its packed words matches 46,912, 171,206, 182,804 and
+154,018. The best single point on a 5 × 5 lattice of the rectangle,
+rounded to a texel, matches at most 58,260 for any one of the four
+words. `walk_lmf_leaves.py --check --decode` (which `check_all.py`
+runs when liblzo2 is installed) rechecks all of these counts.
 
 **UNCONFIRMED.** The exact sample selection rule and any consumer that
-interprets these words. The `0x474D85` and `0x47596D` render paths call
+interprets these words. The corner texel, the inward texel, the 2 × 2
+mean and the quadrant summaries above do not reproduce the words. The `0x474D85` and `0x47596D` render paths call
 `0x479D90` for dimensions and `0x479E60` for surface form and projection.
 The `0x47F833`, `0x47FD11` and `0x480438` paths use the parallel pair
 `0x4857C0` and `0x485840`. Their dimension reads are at

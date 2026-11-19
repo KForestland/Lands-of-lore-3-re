@@ -8,8 +8,10 @@
 Every later byte equals the byte that far into the first 0x1010000
 bytes, and the four files share that first block. `CYGNUS.PHT` is six
 full copies plus a remainder; the other three are shorter prefixes of
-the same stream. `lol3_pht.py --check` reads each file through its last
-byte and pins the SHA-256 of the first cycle.
+the same stream. In the first 65,536 bytes, every lag from 1 through
+512 matches fewer than 1 percent of the bytes (a random byte matches
+about 1 in 256). `lol3_pht.py --check` reads each file through its last
+byte, pins the SHA-256 of the first cycle and repeats that lag test.
 
 Nothing is known about what the bytes mean: the 0x1010000-byte block has
 no header or internal structure and its entropy is 7.998 bits per byte.

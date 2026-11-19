@@ -6,6 +6,7 @@ Exit code 0 when all pass.
 """
 from cli_errors import ReaderArgumentParser, run_cli
 import argparse
+from ctypes.util import find_library
 import os
 import subprocess
 import sys
@@ -23,8 +24,10 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     failed = []
     skipped = []
+    # With liblzo2 the light-map check also decodes every member and counts the header-word census.
+    extra = {"walk_lmf_leaves": ["--decode"]} if find_library("lzo2") else {}
     for t in TOOLS:
-        p = subprocess.run([sys.executable, os.path.join(here, t + ".py"), "--check", "--data", a.data],
+        p = subprocess.run([sys.executable, os.path.join(here, t + ".py"), "--check", "--data", a.data, *extra.get(t, [])],
                            capture_output=True, text=True)
         line = (p.stdout.strip().splitlines() or [p.stderr.strip()[-300:]])[-1]
         print(line)

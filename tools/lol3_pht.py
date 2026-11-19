@@ -151,6 +151,15 @@ def main():
         image = programs["LOL3.DAT"]
         if period_is_immediate(image[TEXT_RAW:TEXT_RAW + TEXT_SIZE]):
             raise ValueError("LOL3.DAT code uses 0x1010000 as an immediate")
+        with ordered[0].open("rb") as handle:
+            head = handle.read(65536)
+        if len(head) != 65536:
+            raise ValueError("PHT cycle head is short")
+        for lag in range(1, 513):
+            span = 65536 - lag
+            same = sum(head[index] == head[index + lag] for index in range(span))
+            if same * 100 >= span:
+                raise ValueError(f"PHT lag {lag} repeats {same} of {span} bytes")
         if image[WILD_AT:WILD_AT + len(WILD)] != WILD:
             raise ValueError("save-game search string differs")
         for offset in WILD_PUSHES:

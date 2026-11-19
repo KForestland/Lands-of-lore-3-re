@@ -91,8 +91,13 @@ def walk_bytes(data, name, decode=None):
                 if any(words):
                     grid = unpack_from(f"<{width * height}H", members, at + 0x2C)
                     colors = set(grid)
+                    lattice = {}
+                    for i in range(5):
+                        base = round(i * (width - 1) / 4) * height
+                        for j in range(5):
+                            lattice.setdefault(grid[base + round(j * (height - 1) / 4)], []).append(i * 5 + j)
                     stats["members_with_header_samples"] += 1
-                    for word, (x, y) in zip(words, ((0, 0), (1, 0), (1, 1), (0, 1))):
+                    for slot, (word, (x, y)) in enumerate(zip(words, ((0, 0), (1, 0), (1, 1), (0, 1)))):
                         if not word:
                             continue
                         stats["nonzero_header_samples"] += 1
@@ -104,6 +109,38 @@ def walk_bytes(data, name, decode=None):
                         ]
                         stats["matching_corner"] += any(grid[index] == word for index in near)
                         stats["opposite_corner"] += any(grid[-1 - index] == word for index in near)
+                        corner_x = (width - 1) if x else 0
+                        corner_y = (height - 1) if y else 0
+                        stats["exact_corner"] += grid[corner_x * height + corner_y] == word
+                        inset_x = 1 if corner_x == 0 else width - 2
+                        inset_y = 1 if corner_y == 0 else height - 2
+                        if 0 <= inset_x < width and 0 <= inset_y < height:
+                            inset = grid[inset_x * height + inset_y] == word
+                            stats["inset_corner"] += inset
+                            stats["inset_and_corner"] += inset and grid[corner_x * height + corner_y] == word
+                        cells = [grid[index] for index in near]
+                        mean = sum(cells) / len(cells)
+                        picked = min(set(cells), key=lambda value: (abs(value - mean), value))
+                        stats["mean_corner"] += picked == word
+                        low, high = max(0, corner_y - 7), min(height, corner_y + 8)
+                        stats["corner_far"] += not any(
+                            word in grid[column * height + low:column * height + high]
+                            for column in range(max(0, corner_x - 7), min(width, corner_x + 8)))
+                        # The quarter of the grid at that corner (the middle row or column, when odd,
+                        # belongs to both halves), then four summaries of it.
+                        cols = range(width // 2, width) if x else range((width + 1) // 2)
+                        top, bottom = (height // 2, height) if y else (0, (height + 1) // 2)
+                        quarter = []
+                        for column in cols:
+                            quarter.extend(grid[column * height + top:column * height + bottom])
+                        stats["quarter_min"] += min(quarter) == word
+                        stats["quarter_max"] += max(quarter) == word
+                        stats["quarter_common"] += Counter(quarter).most_common(1)[0][0] == word
+                        mean = sum(quarter) / len(quarter)
+                        stats["quarter_mean"] += min(set(quarter), key=lambda value: (abs(value - mean), value)) == word
+                        # Fixed points of a 5 x 5 lattice over the rectangle, counted per word slot.
+                        for point in lattice.get(word, ()):
+                            stats[f"point_{slot}_{point}"] += 1
                 vectors = [unpack_from("<3h", members, at + 0x14 + 6 * j) for j in range(4)]
                 unit = sum(abs(x * x + y * y + z * z - 32767 * 32767) < 1 << 18 for x, y, z in vectors)  # length 32767-32769
                 if flags:
@@ -161,11 +198,23 @@ def check(data_dir, decode):
         extra += (f"; {stats['nonzero_header_samples']:,} nonzero +0x0C–+0x13 words occur in their own grids "
                   f"({stats['matching_corner']:,} near their corresponding corners, "
                   f"{stats['opposite_corner']:,} near their opposite corners)")
+        nonzero, exact, near, far = (stats["nonzero_header_samples"], stats["exact_corner"],
+                                     stats["matching_corner"], stats["corner_far"])
+        quarters = tuple(stats[key] for key in ("quarter_min", "quarter_max", "quarter_common", "quarter_mean"))
+        best_point = max((value for key, value in stats.items() if str(key).startswith("point_")), default=0)
+        extra += (f"; from the assigned corner: {exact:,} at the corner texel, {near - exact:,} one texel away, "
+                  f"{nonzero - near - far:,} two to seven away, {far:,} eight or more away; "
+                  f"{stats['inset_corner']:,} match the texel one step inward ({stats['inset_and_corner']:,} of them also the corner), "
+                  f"{stats['mean_corner']:,} the 2 x 2 colour nearest its numeric mean; quarter min/max/most common/nearest mean "
+                  f"{quarters[0]:,}/{quarters[1]:,}/{quarters[2]:,}/{quarters[3]:,}; best 5 x 5 lattice point {best_point:,}")
         print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
         return int((files, groups, members, stats[1], stats["vertex_unit"], stats["vertex_zero"], stats[0],
                     stats["face_repeated"], stats["members_with_header_samples"], stats["nonzero_header_samples"],
-                    stats["matching_corner"], stats["opposite_corner"])
-                   != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071, 209545, 610325, 340718, 107136))
+                    stats["matching_corner"], stats["opposite_corner"],
+                    stats["exact_corner"], stats["inset_corner"], stats["mean_corner"], stats["corner_far"],
+                    quarters, best_point)
+                   != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071, 209545, 610325, 340718, 107136,
+                       108537, 287177, 307470, 130568, (46912, 171206, 182804, 154018), 58260))
     print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
     return int((files, groups, members) != (18, 5256, 424288))
 

@@ -69,7 +69,12 @@ executable, in the other programs and DLLs in the install folder, or in
 this installation's game-written cache. The initializer's fill loop
 (`0x4E4E61–0x4E4E95`) writes each 64,000-byte pass from the locked
 screen surface (see the [native reader](../lol3-wsx-reader.md#cache-index-lifecycle)),
-so the block is screen memory, not a stored resource. Its first
+so the block is screen memory, not a stored resource. The shipped
+block uses 209 distinct byte values, and 6,344 of 63,360 pairs
+640 bytes apart are equal, a larger share than at any other distance
+from 1 to 2,000, so its bytes fit 100 rows of 640. That width is
+inferred from the bytes: the fill loop copies 0xFA00 bytes in one
+run and reads no pitch. Its first
 dword is the shipped file's `0xD0BCD8BE` at +0x72, so those bytes
 are not an allocator index (the marker compare at `0x4E5118` re-initializes a cache that lacks `0xF1E2D3C4` through `0x4FE480`). Five directory entries of size 0xD
 land inside the first copy. The file is missing the larger

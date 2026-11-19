@@ -91,9 +91,17 @@ at `0x504589`, and `0x5045B9–0x5045C7` take `lpSurface` from descriptor
 +0x24. The fill is screen surface memory, not a stored resource. This
 installation's game-written cache (114 bytes plus 1,639 × 64,000) ends
 in identical blocks (1,615 to 1,638 checked) that form one 8-bit picture
-with 640-byte rows. The shipped dword at
+with 640-byte rows. The shipped block fits the same row width:
+6,344 of the 63,360 byte pairs 640 apart are equal, which is a
+larger share than at any other distance from 1 to 2,000, and the
+block uses 209 distinct byte values. `0xFA00 / 640` is 100, so at
+that width the 64,000 bytes the fill copies are 100 rows. The width
+is inferred from the bytes: the fill loop (`push 0xFA00` at
+`0x4E4E71`) copies one run from the surface pointer and reads no
+pitch. The shipped dword at
 +0x72 is `0xD0BCD8BE`, the first dword of that block, not the
-live marker `0xF1E2D3C4`.
+live marker `0xF1E2D3C4`. `lol3_cache_seed.py --check` re-counts
+every distance from 1 to 2,000 and the 209 values.
 
 Every reference to the index base `0x7F39F8` lies in
 `0x4FE390–0x4FED37`, and the address of row 0's byte +0x17

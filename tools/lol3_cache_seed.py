@@ -199,6 +199,21 @@ def main():
         if unpack_from("<I", shipped, 0x72)[0] != FILL_MARKER:
             raise ValueError("shipped dword +0x72 is not the fill block")
         block = shipped[HEADER:HEADER + BLOCK]
+        if len(set(block)) != 209:
+            raise ValueError("shipped fill block uses a different number of byte values")
+        # Equal bytes at each distance 1-2000: XOR the two shifted copies and count zero bytes.
+        # The row width is read from these counts; the fill loop copies 0xFA00 bytes and reads no pitch.
+        agreements = {}
+        for pitch in range(1, 2001):
+            span = len(block) - pitch
+            difference = int.from_bytes(block[:span], "big") ^ int.from_bytes(block[pitch:], "big")
+            agreements[pitch] = difference.to_bytes(span, "big").count(0), span
+        if agreements[640] != (6344, 63360):
+            raise ValueError("shipped fill block row stride")
+        same640, span640 = agreements[640]
+        for pitch, (same, span) in agreements.items():
+            if pitch != 640 and same * span640 >= same640 * span:
+                raise ValueError(f"pitch {pitch} matches the row stride at least as often")
         if sha256(block).hexdigest() != BLOCK_SHA or any(
                 shipped[HEADER + index * BLOCK:HEADER + (index + 1) * BLOCK] != block
                 for index in range(COPIES)):
@@ -236,6 +251,8 @@ def main():
         print(f"CHECK cache_seed FAILED: {exc}")
         return 1
     print("CHECK cache_seed: shipped cdcache is 114 bytes plus 51 copies of one 64,000-byte block; "
+          "the block holds 209 byte values and 6,344 of 63,360 byte pairs 640 apart are equal, "
+          "the largest share at any distance 1-2000; "
           f"row byte +0x17 has no code address{witness}; "
           "the fill loop writes 64,000-byte passes from the locked surface")
     return 0
