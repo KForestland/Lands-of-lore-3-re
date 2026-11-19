@@ -139,3 +139,61 @@ MUSIC1.WSX+0x36 size 4157978 key BD4CB6E0 tag 0x55 channels 2 rate 44100 align 1
 ```
 
 One line per music entry follows.
+
+## Change one thing safely
+
+This example adds one to the X coordinate of the first waypoint in
+`QWOD0.MAP` in a copied `QWOD0.WSX`. **CONFIRMED.** The s16 X is
+the first word of that row at archive `+0x733A97` (MAP
+`+0x580C`, located by header `+0xC8`). See the
+[waypoint layout](lol3-map-odf-readers.md#tail-after-the-vertices).
+
+The result is a modified copy for your own tests, not the original game.
+This repository ships no game files and no changed files. The script only
+reads your installation and writes only inside the new folder, so your
+original stays untouched. Keep the changed copy to yourself and do not
+share modified game files.
+
+From this repository's root, set `source` to your game folder containing
+`DAT`. Set `out` to a new directory outside the installation and the
+repository. The script refuses an output folder inside either and needs
+room for a full copy.
+
+```bash
+source="/path/to/LoL3"
+out="/path/to/my-lol3-copy"
+PYTHONPATH=tools python3 - "$source" "$out" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+from extract_wsx_entries import parse_wsx, wsx_name_hash
+from lol3_map_writer import WAYPOINT, waypoints, write_rows
+from lol3_wsx_writer import rows_of, write_wsx
+
+source, out = (Path(arg).resolve() for arg in sys.argv[1:])
+repo = Path.cwd()
+if any(root == out or root in out.parents for root in (source, repo)):
+    raise SystemExit("choose a new output directory outside the source and repo")
+archive = Path("DAT/QWOD0.WSX")
+members = rows_of(parse_wsx(source / archive))
+map_key = wsx_name_hash(r"LEVELS\QWOD0\QWOD0.MAP")
+index, = (i for i, (key, _, _) in enumerate(members) if key == map_key)
+key, offset, body = members[index]
+start, points = waypoints(body)
+x, z, surface, field6, mask = points[0]
+if x != 11063:
+    raise SystemExit("this is not the expected first QWOD0 waypoint")
+points[0] = x + 1, z, surface, field6, mask
+updated = write_rows(points, WAYPOINT)
+members[index] = key, offset, body[:start] + updated + body[start + len(updated):]
+rebuilt = write_wsx(members)
+shutil.copytree(source, out)
+(out / archive).write_bytes(rebuilt)
+PY
+python3 tools/lol3_map_spans.py --data "$out/DAT" --list QWOD0 | sed -n '1,2p'
+```
+
+Expect `waypoint 1: x 11064 z -2943 surface 0xe7 +6 0x2 +7 0x4`.
+The copied archive is the same size as the original, with one byte
+changed at `QWOD0.WSX+0x733A97`.
