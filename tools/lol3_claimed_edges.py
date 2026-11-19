@@ -84,9 +84,16 @@ def check_shared_map_block(image, maps):
             load += b"\x33\xdb"  # first seek also zeros ebx (origin)
         if image[at - len(load):at + 3] != load + bytes((0x53, 0x50 + register, 0x57)):
             raise ValueError(f"MAP seek {va:#x} no longer uses header +{field:#x}")
+    # One nested seek: 0x43EB67 calls 0x4EFE40, whose call at 0x4EFE96 seeks to header +0x30.
+    for va, target in ((0x43EB67, 0x4EFE40), (0x4EFE96, 0x435A90)):
+        at = va - CODE_BIAS
+        if image[at] != 0xE8 or va + 5 + unpack_from("<i", image, at + 1)[0] != target:
+            raise ValueError(f"nested MAP seek call at {va:#x} changed")
     if len(maps) != 18:
         raise ValueError(f"expected 18 MAPs, found {len(maps)}")
     for stem, payload in maps.items():
+        if u32(payload, 0x30) < MAP_VERTICES:
+            raise ValueError(f"{stem}: nested seek (header +0x30) before MAP vertices")
         if (u32(payload, 0xCC), u32(payload, 4)) != (MAP_HEADER, MAP_VERTICES):
             raise ValueError(f"{stem}: shared MAP block bounds changed")
         if any(u32(payload, field) < MAP_VERTICES for field in MAP_SEEKS.values()):
@@ -206,7 +213,7 @@ def main():
     print("CHECK claimed_edges: QWOD0 C5 A5 is 195/2/1/0 across texture, MAP, light map and ODF; "
           f"no MAP column steps from C5 to A5; SWOD4 surface +4 is 0/2/6/0x0B on 2393/14/29/0 rows{decoded}")
     print("CHECK claimed_edges: 18 identical 0x2CE8-byte MAP blocks fit 2,873 four-byte rows; "
-          "all 22 native post-header seeks start at the vertices or later")
+          "all 23 native post-header seeks (22 direct, 1 nested) start at the vertices or later")
     return 0
 
 

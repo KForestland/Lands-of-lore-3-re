@@ -15,9 +15,10 @@ start at byte 1 of zero-based rows 2,204 and 2,205 under that framing.
 **CONFIRMED.** The retail `.map` loader at `0x43E6B0` reads exactly
 0x244 bytes into stack +0x14 (`0x43E7DA–0x43E7EF`). Its first further
 read at `0x43E89A` follows a seek to header +0x28 (`0x43E87B–0x43E884`).
-All 22 calls to the MAP seek helper `0x435A90` take header offsets at
-or beyond the vertices on all 18 maps. These are the call sites and
-header offsets in execution order.
+All 22 direct calls to the MAP seek helper `0x435A90`, and one nested
+seek at `0x4EFE96` inside `0x4EFE40` (called at `0x43EB67`) to header
++0x30, take header offsets at or beyond the vertices on all 18 maps.
+These are the direct call sites and header offsets in execution order.
 
 | Seek calls | Header offsets, in the same order |
 |---|---|
@@ -25,17 +26,20 @@ header offsets in execution order.
 | `0x43EAB9`, `0x43EAE6`, `0x43EB16`, `0x43EB46`, `0x43EB83`, `0x43EBB0`, `0x43EBE3`, `0x43EC57` | `+04`, `+0C`, `+A4`, `+34`, `+08`, `+2C`, `+C8`, `+DC` |
 | `0x43EEB6`, `0x43EEE0`, `0x43EF0A`, `0x43EF34`, `0x43EF5E`, `0x43EF9A` | `+14`, `+18`, `+1C`, `+24`, `+20`, `+48` |
 
-**UNCONFIRMED.** The shared block's purpose, any fields within the
-four-byte rows, and whether another program consumes it. The `.map`
-suffix reference at `0x43E294` leads to `0x43E304`, the direct caller
-of the retail loader above. An exact prefix and suffix search in the
-original `DAT` directory found this block only inside the 18 MAPs.
+**CONFIRMED.** The `.map` suffix is referenced only by the instruction
+at `0x43E293`, which leads to `0x43E304`, the only caller of the retail
+loader above. An exact 24-byte prefix and suffix search of the original
+`DAT` directory and `LOL3.DAT` finds this block only inside the 18 MAPs.
+
+**UNCONFIRMED.** The shared block's purpose, whether the leading u32 is a
+row count, any fields within the four-byte rows, and whether another
+program consumes it.
 To settle it, find a shipped reader that accesses the span at header
 +0xCC, then follow a full row to its first typed use. A future native
 trace on the MAP handle across resource reads at `0x4357A0` can also
 test whether that span is requested elsewhere during a level load.
-`lol3_claimed_edges.py --check` checks the original blocks and the 22
-seek sites.
+`lol3_claimed_edges.py --check` checks the original blocks, the 22
+direct seek sites and the nested seek.
 
 ## MAP section 0
 
@@ -216,7 +220,8 @@ is `CKEEP.WSX+0xD0368C`. Each group is four little-endian u16,
 and every word is below that level's vertex count and below its
 surface count. Read as surface indexes, 113 of the 223 groups
 share no vertex between cyclic neighbors. The loader calls the seek helper sixteen times in
-`0x43E884–0x43EC57`, and each call pushes one stored header
+`0x43E884–0x43EC57` (22 direct calls in the whole function, plus the
+nested seek at `0x4EFE96`; all are listed above), and each call pushes one stored header
 dword. The call at `0x43EA72–0x43EA79` pushes `[esp+0x58]`.
 By the same three-push rule as the waypoint seek at `0x43EBD9`
 (`[esp+0xDC]` is header +0xC8), that dword is header +0x44,

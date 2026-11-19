@@ -108,9 +108,10 @@ surfaces or 8-byte waypoints steps from `C5` to `A5`.
 
 The two MAP copies sit four bytes apart inside a 64-byte run of
 four-byte groups at `QWOD0.WSX+0x730738`. All 18 MAPs have identical
-bytes in the block from +0x244 to +0x2F2C, and its leading count of
-2,873 fits the remaining bytes at four per row. The retail loader's
-22 post-header seeks bypass it (`0x43E884–0x43EF9A`). See the
+bytes in the block from +0x244 to +0x2F2C, and its leading u32
+2,873 equals the number of four-byte rows that follow. The retail loader's
+22 direct post-header seeks (`0x43E884–0x43EF9A`) and its nested seek at
+`0x4EFE96` bypass it. See the
 [block framing and reader search](lol3-map-odf-readers.md#shared-block-before-the-vertices).
 Decoding both light maps (5,364 QWOD0 members
 and 10,232 SWOD4 members; each member is 44 bytes plus two bytes per
