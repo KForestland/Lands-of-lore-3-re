@@ -402,10 +402,14 @@ that G14 rows 11/12 already held for spells `0x59/0x54`
 (decimal 89/84). The middle quick slot keeps `0x57`.
 G11 points the first two pockets at the new rows. The old
 pocket pointers and counts move to G13 rows 12 and 14.
-The two repacked LZO sections grew from 964/48 to 986/63
-bytes, with expanded sizes unchanged. Update their packed-length
-words, add the running 22/37-byte shifts to following global
-starts at slot `+0x4B8`, add 37 to each level start at
+G2 and G3 are stored as LZO chunks (dword expanded length,
+dword packed length, LZO1X data). Only the chunk holding the
+edited bytes was re-encoded, with liblzo2 `lzo1x_1_compress`;
+the other chunks were copied unchanged. G10, G11 and G13 are
+stored unpacked and were edited in place. The two repacked
+sections grew from 964/48 to 986/63 bytes, with expanded sizes
+unchanged. Update their packed-length words, add the running
+22/37-byte shifts to following global starts at slot `+0x4B8`, add 37 to each level start at
 `+0x5B0`, and add 37 to the total length at `+0x2C`.
 [Pointer and directory requirements](lol3-native-saves.md#editing-a-copy-of-an-original-slot)
 
@@ -423,6 +427,12 @@ in the viewport used it through the original handler.
 | Use Mana Cluster | `0x4A6133` led to `0x432AE0`, second counter 0 → 1, return `0x4A6138`. |
 | Key 2, spell `0x57` after Mana Cluster | `0x4A5A3A` passed −1 to the second writer, which changed 1 → 0 and returned to `0x4A5A3F`. The negative ordinary-mana watch had no hit for this cast. |
 
+Mana here is `[0x5D5098]`, the player +0x1B8 cell that the
+ordinary writer stores (ECX `0x5D4EE0`). It read 437 again at
+the next cast after the 415 store. The writer watch logged only
+negative arguments, so the recovery between those casts was not
+traced.
+
 The viewport showed the spell effect during the charged cast.
 At the subsequent save entry `0x43766F`, mana was 437, the
 first and second counters were 35 and 0, and the cursor was
@@ -431,3 +441,13 @@ The edited-save trial establishes both original item writers
 and the alternate debit once the item is available. A native
 save with an acquired Mana Cluster would reproduce the
 path without the inventory setup.
+
+The autosave the game wrote at `0x43766F` (`6bf815a1e022`)
+has new definition and pool bases and keeps the edits that
+were not consumed. Pool rows 39 and 40 are zero again and the
+G3 bytes +0x04/+0x05 are back to `7F 06`. Both G11 pockets
+have a zero pointer and count. G10's three cast keys and G13
+rows 12 and 14 hold the same pool rows as the edited copy
+(rows 12, 18 and 83; rows 35 and 36). So the game cleared both
+used items and translated the remaining pointers to its new
+bases when it saved.

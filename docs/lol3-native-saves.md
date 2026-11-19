@@ -306,8 +306,13 @@ moved into empty pack slots in selector 13, whose arm is
 pool range bases so a stored pointer can be translated on load.
 
 Keep expanded section sizes, LZO chunk lengths and following
-directory offsets consistent with the byte stream. The trial
-changed one chunk in each of global selectors 2 and 3,
+directory offsets consistent with the byte stream. A chunk is
+two dwords (expanded length, packed length) and LZO1X data. The
+trial re-encoded only the edited chunk in each of global
+selectors 2 and 3 with liblzo2 `lzo1x_1_compress`, copied the
+other chunks unchanged and edited the unpacked selectors 10, 11
+and 13 in place. Re-applying the recipe to the source slot this
+way gives the same 1,807,771 bytes (`90099b161497`). The trial
 updated total length at `+0x2C` and added the combined
 37-byte growth to later global and level starts. No level
 block or length changed. Preserve version and data stamps
@@ -315,5 +320,8 @@ checked at `0x43CA0B–0x43CA7E`, and the saved pointer map.
 For XOR-backed cells use the matching `global.img` or level
 baseline. In this trial the base bytes for both edited item
 rows and both occupancy cells were zero. No separate
-payload checksum was recomputed on the accepted copy.
+payload checksum was recomputed on the accepted copy. The game's
+own later autosave cleared the two used item rows and their
+occupancy bits and stored the remaining pointers against its new
+bases.
 [Exact byte changes and original item use](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
