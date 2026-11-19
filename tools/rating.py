@@ -16,6 +16,8 @@ from pathlib import Path
 
 import lol3_cli
 from extract_wsx_entries import parse_wsx
+from lol3_cache_seed import shipped_body_covers
+from lol3_pht import cycle_covers
 
 ROOT = Path(__file__).resolve().parent.parent
 BEGIN, END = "<!-- rating:begin -->", "<!-- rating:end -->"
@@ -23,7 +25,9 @@ BEGIN, END = "<!-- rating:begin -->", "<!-- rating:end -->"
 
 def files_read(data_dir):
     """A WSX archive counts when its directory and entry sizes add up to the file length with no overlap
-    (parse_wsx raises otherwise). Every other file in the folder counts as not read."""
+    (parse_wsx raises otherwise). The shipped cdcache.wsx counts when a 114-byte header plus 51 identical
+    blocks fill the file. A .PHT file counts when every byte belongs to its first cycle of 0x1010000 bytes.
+    Every other file in the folder counts as not read."""
     total = read = total_bytes = read_bytes = 0
     for path in sorted(p for p in Path(data_dir).iterdir() if p.is_file()):
         size = path.stat().st_size
@@ -33,7 +37,13 @@ def files_read(data_dir):
             try:
                 parse_wsx(path)
             except ValueError:
+                if path.name.lower() == "cdcache.wsx" and shipped_body_covers(path):
+                    read += 1
+                    read_bytes += size
                 continue
+            read += 1
+            read_bytes += size
+        elif path.suffix.lower() == ".pht" and cycle_covers(path):
             read += 1
             read_bytes += size
     return read, total, read_bytes, total_bytes
@@ -84,7 +94,7 @@ def rating(data_dir):
     seen, needed = probes()
     answered, mostly, partly, count = questions()
     return [
-        f"- **Files read:** {read} of {total} files in `DAT` ({read_bytes / 2**20:,.1f} of {total_bytes / 2**20:,.1f} MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood).",
+        f"- **Files read:** {read} of {total} files in `DAT` ({read_bytes / 2**20:,.1f} of {total_bytes / 2**20:,.1f} MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory, entry or repeating block (what is inside an entry may still be only partly understood).",
         f"- **Rules traced:** the pages mark {confirmed:,} statements CONFIRMED (proved from the program code or the files) and {unconfirmed:,} UNCONFIRMED (a reading not yet proved), on {pages} current pages; old notes kept as history are not counted.",
         f"- **Seen in the running game:** {seen} of {needed} questions that can only be settled by watching the original game run are settled.",
         f"- **Open questions:** {count} numbered questions: {answered} answered, {mostly} mostly answered, {partly} partly answered.",

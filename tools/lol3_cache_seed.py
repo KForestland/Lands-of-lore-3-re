@@ -14,6 +14,17 @@ BLOCK = 64000
 COPIES = 51
 HEADER = 114
 BLOCK_SHA = "bba1aa5f85ce13bfe9a493a445bea858c270db9bea543bac83d6df6d35730fad"
+
+
+def shipped_body_covers(path):
+    """True when the file is a 114-byte header plus 51 identical 64,000-byte blocks."""
+    data = Path(path).read_bytes()
+    if len(data) != HEADER + COPIES * BLOCK:
+        return False
+    block = data[HEADER:HEADER + BLOCK]
+    return all(
+        data[HEADER + index * BLOCK:HEADER + (index + 1) * BLOCK] == block
+        for index in range(COPIES))
 # Little-endian address of row 0's bytes +0x14 through +0x17 in the code section.
 FLAG_ADDRESSES = {0x7F3A0C: 7, 0x7F3A0D: 6, 0x7F3A0E: 5, 0x7F3A0F: 0}
 

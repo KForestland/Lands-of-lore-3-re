@@ -13,9 +13,14 @@ archive that means the directory, the entry sizes and the data area add up
 to the file length with no overlap (`tools/extract_wsx_entries.py`). It
 does **not** mean that every entry inside is decoded or understood; the
 [STATUS](STATUS.md) table says how far each format is read. Files the game
-writes while it runs (such as a full texture cache) change the count on a
-copy that has been played; the shipped compact `cdcache.wsx` does not
-parse as an ordinary archive and counts as not read (open question Q1).
+writes while it runs (the full texture cache sits in the game folder,
+next to `DAT`) are not part of this count. The shipped compact
+`cdcache.wsx` does not parse as an ordinary archive. It counts when
+`tools/lol3_cache_seed.py` shows that a 114-byte header plus 51 copies of
+one 64,000-byte block fill the file. What writes that block stays open
+(Q1). A `.PHT` file counts when `tools/lol3_pht.py` shows that every byte
+is the shared cycle of 0x1010000 bytes. What the game does with the four
+files stays open.
 
 **Rules traced.** How many statements on the current pages carry the
 evidence label CONFIRMED (backed by a program address or a file offset

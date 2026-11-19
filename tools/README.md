@@ -12,7 +12,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 20 CHECKS PASSED`, or `17 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 21 CHECKS PASSED`, or `18 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header, counts the bit-0 vertex normals and re-counts the +0x0C–+0x13 header words against each member's grid. |
@@ -32,6 +32,7 @@ Run examples outside the repository.
 | `lol3_claimed_edges.py` | `LOL3.DAT`, `QWOD0.WSX` and `swod4.wsx` | where the bytes named by the old QWOD0 and SWOD4 edges occur; `--decode` also checks the light-map sample high bytes |
 | `lol3_name_hash.py` | `LOL3.DAT`, `LOL3.EXE` and the size-checked archives | 40 music stems, the 37/38 music join, and that stored C strings name 53 directory keys and not key `0x1D4F73DA` |
 | `lol3_cache_seed.py` | shipped `DAT/cdcache.wsx`, `cdcache.hdr`, `LOL3.DAT`, and the game-written cache when it is present | 51 copies of the 64,000-byte block; row byte +0x17 has no code address; the witness's 8 occupied rows hold 0x67 |
+| `lol3_pht.py` | the four `.PHT` files, `LOL3.DAT` and `LOL3.EXE` | each file is a prefix of one 0x1010000-byte cycle; the two programs do not contain the names |
 | `lol3_odf_companions.py` | `LOL3.DAT`, the 18 level ODFs and `GLOBAL.WSX` | 630 section-0 names and the skip past them; five AI files, 60 tags join all five; the zero-lookup arm |
 | `lol3_save_header.py` | one save slot you name (a player save, not a game file) | prints the preview, 61 global and 18 level offsets and lengths as JSON; writes nothing; no `--check` |
 
