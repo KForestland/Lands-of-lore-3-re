@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Spell frames.** All 447 original spell frames store zero in word +8, so the effect reader stays on the one auxiliary row ([spell dispatch](lol3-spell-dispatch.md)).
 - **Second spell counter on an edited save (Q12, partly answered).** One run loaded a copy of a game-written save with two items and two cast keys added by hand. Mana Cluster added a second-counter charge, and spell `0x57` then spent it, with no ordinary mana spending recorded for that cast; Ancient's Stone and spell `0x59` did the same for the first counter. [Edited saves](EDITED_SAVES.md) lists what the run showed and what a game-written save would still add; the editing rules are on the [save page](lol3-native-saves.md#editing-a-copy-of-an-original-slot). Open: taking the item in ordinary play, the exact counter on the HUD, each handler's effect and the on-screen names.
 - **Rating.** The running-game line now also says how many answered probes rest on edited saves only; today none do ([how we rate](HOW_WE_RATE.md)).
 - **Floor pickup (Q13, mostly answered).** In the original game, an item put on the ground and picked up again changed the predicted save fields, compared between game-written saves before and after. Open: the meaning of the remaining save fields ([native saves](lol3-native-saves.md#controlled-floor-pickup-in-bupp1)).

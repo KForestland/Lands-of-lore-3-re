@@ -116,6 +116,44 @@ def spell_counter(image, original):
         raise ValueError("missing original spell definition")
     if producers != [(0xCB4F, 0x110, 0xE2F77FE7)]:
         raise ValueError("unexpected original second-counter producers")
+    spell_frames(image, original)
+
+
+def spell_frames(image, archive):
+    """447 spell frames follow the 87-byte rows; every word +8 is zero."""
+    opcode(image, 0x490A03, "66 8b 48 08")
+    opcode(image, 0x4FD57C, "c1 e1 04")
+    opcode(image, 0x4B43AE, "c1 e2 04")
+    base = 0x16BE53
+    offset, count = unpack_from("<II", archive, base + 4)
+    if (offset, count) != (412, 28):
+        raise ValueError("wrong spell table")
+    table = base + offset
+    frames = 0
+    for index in range(count):
+        row = table + 87 * index
+        frames += archive[row + 0x2E]
+        if unpack_from("<I", archive, row + 0x14)[0] != 0:
+            raise ValueError("spell row +0x14 is set in the file")
+    end = table + 87 * count
+    stored, = unpack_from("<I", archive, end)
+    if (stored, frames) != (447, 447):
+        raise ValueError(f"spell frame count {stored} vs row bytes {frames}")
+    blob = archive[end + 4:end + 4 + frames * 16]
+    pool = 0
+    for index in range(frames):
+        word, = unpack_from("<H", blob, index * 16 + 8)
+        if word:
+            raise ValueError(f"spell frame {index} word +8 is {word:#x}")
+        step = blob[index * 16 + 0xD]
+        if step >= 0x80:
+            raise ValueError(f"spell frame {index} byte +0xD is negative")
+        pool += step
+    pool_count, = unpack_from("<I", archive, end + 4 + frames * 16)
+    if (pool_count, pool) != (545, 545):
+        raise ValueError(f"spell frame pool {pool_count} vs byte +0xD sum {pool}")
+    if archive[base + 0x43EC:base + 0x43EC + 8] != bytes(8):
+        raise ValueError("spell auxiliary row is not eight zero bytes")
 
 
 def regular_item_handlers(image, original):

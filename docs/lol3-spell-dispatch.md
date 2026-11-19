@@ -41,9 +41,18 @@ matching entries. Kind byte 0 ends the list and returns the total so
 far. Kind 1 adds byte +2 to the total. Kind 2
 plays sound u16 +2 through `0x422C40` (`0x4909D5–0x490A6F`).
 The one original row is eight zero bytes, so it asks for nothing.
-**UNCONFIRMED.** Whether any spell frame has a nonzero word +8,
-which would read past the single row. Break at `0x490A03` during
-casts and log CX.
+**CONFIRMED.** No original spell frame has a nonzero word +8.
+The 28 rows are followed in the same resource by a count of 447,
+which equals the sum of the 28 frame counts at row +0x2E, then
+a count of 447 at `GLOBAL.WSX+0x16C973`, then 447 frames of 16 bytes at `+0x16C977`. Every frame's
+u16 at +8 is 0. `0x4FD560` reads that count, copies `count × 16`
+bytes (`shl ecx, 4` at `0x4FD57C`) and overwrites only dword +0
+of each frame. The rebinder below slices that array by row +0x2E.
+`0x490A03` (`mov cx, word ptr [eax+8]`) therefore loads 0 from
+every shipped frame and reads the single auxiliary row.
+`lol3_native_checks.py --check` recounts the 447 words, the
+following pool count 545 (the sum of frame byte +0xD) and those
+instruction bytes.
 
 **CONFIRMED.** Definition +0x18 is the identity compared by
 `0x440990–0x4409B4` in the 87-byte table. The resource
