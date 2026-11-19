@@ -63,7 +63,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 
 ## Quick start
 
-You need Python 3.8+ and your own copy of the game: the English GOG release (the script check pins `LOL3.DAT` by its hash). Start the game once before using the tools, so it writes its texture cache; without it, 3 of the 24 checks are skipped. Optional: the system LZO library (`apt install liblzo2-2`) for the `--decode` checks.
+Use Python 3.8 or later and your own copy of the English GOG release. The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu).
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
@@ -74,10 +74,12 @@ Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the c
 ```bash
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
-export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 24 checks, ends with ALL 24 CHECKS PASSED (or 21 passed, 3 skipped if the game has never run)
+export LOL3_DAT="/path/to/your/LoL3/DAT"
+python3 tools/check_all.py                  # 24 passed with a matching cache, 21 passed and 3 skipped without one
+python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
+python3 tools/full_report.py --out "../lol3-out/report"
 ```
 
 The script check prints, for example:
@@ -86,7 +88,7 @@ The script check prints, for example:
 CHECK script_notes: 18 level summaries, 54,940 object and 4,040 region records, 16,876/2,201 direct object/region references
 ```
 
-The `--out` folder then holds one listing per level: every script record with its file offset, opcode, operands and the native effect, for your own copy only.
+The script command writes one listing per level with record offsets, opcodes, operands and the native effect. The report command writes an inventory, level sheets and text counts to the named folder. On Windows, use `py -3` in place of `python3`. Set `$env:LOL3_DAT = 'D:\Games\LoL3\DAT'` in PowerShell, or pass `--data` with a quoted folder path to each tool.
 
 ## Status
 

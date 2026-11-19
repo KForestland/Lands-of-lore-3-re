@@ -283,7 +283,7 @@ def main():
                     "script entries. Offsets are absolute in the original WSX. "
                     "[Summary](CKEEP.md), [schema](README.md).\n\n" + "".join(sample))
             for filename, body in small.items():
-                if args.check and (root / "docs/levels/notes" / filename).read_text() != body:
+                if args.check and (root / "docs/levels/notes" / filename).read_text(encoding="utf-8") != body:
                     raise ValueError(f"stale summary or excerpt: {filename}")
                 if args.summary:
                     (output / filename).write_text(body, encoding="utf-8")
