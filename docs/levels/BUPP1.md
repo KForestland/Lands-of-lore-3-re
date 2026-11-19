@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/BUPP1.WSX` and `DAT/BUPP1S.WSX`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for BUPP1](../PROGRESSION.md#level-bupp1) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `BUPP1.WSX` is 28,712,797 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\BUPP1\BUPP1.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

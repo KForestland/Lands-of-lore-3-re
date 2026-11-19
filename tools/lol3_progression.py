@@ -438,6 +438,28 @@ def graph(rows, archives, names):
     return lines
 
 
+def level_cell(stem, pending):
+    if stem in pending:
+        pending.remove(stem)
+        return f'<a name="level-{stem.lower()}"></a>[{stem}](levels/{stem}.md)'
+    return stem
+
+
+def check_level_sheets(rows):
+    directory = Path(PAGE).parent / "levels"
+    mentioned = {stem for row in rows for stem in row[:2]}
+    sheets = {path.stem for path in directory.glob("*.md")} - {"README"}
+    if sheets != mentioned:
+        raise ValueError(f"without a sheet: {sorted(mentioned - sheets)}; "
+                         f"without a progression row: {sorted(sheets - mentioned)}")
+    for stem in sorted(sheets):
+        text = (directory / f"{stem}.md").read_text(encoding="utf-8")
+        for link in (f"](../PROGRESSION.md#level-{stem.lower()})", "](../NUMBERS.md)"):
+            if link not in text:
+                raise ValueError(f"missing {link[2:-1]} link in {stem}.md")
+    return len(sheets)
+
+
 def page(rows, archives, names):
     sources = {row[0] for row in rows}
     silent = [stem for stem in archives if stem not in sources]
@@ -504,8 +526,13 @@ def page(rows, archives, names):
         "| From | To | Sub | Arg2 | Stream | Group | Command | Event | Guard | Earlier | Taken when |",
         "|---|---|---:|---:|---|---:|---:|---|---|---|---|",
     ]
+    pending = set(archives)
     for row in rows:
-        lines.append("| " + " | ".join(str(part) for part in row) + " |")
+        cells = list(row)
+        cells[0] = level_cell(cells[0], pending)
+        if row[1] not in sources:
+            cells[1] = level_cell(cells[1], pending)
+        lines.append("| " + " | ".join(str(part) for part in cells) + " |")
     lines.append("")
     lines += graph(rows, archives, names)
     return "\n".join(lines)
@@ -524,7 +551,11 @@ def main():
         stored = open(PAGE, encoding="utf-8").read() if os.path.isfile(PAGE) else ""
         if stored != text:
             parser.exit(1, "CHECK progression: docs/PROGRESSION.md differs from the portal table")
-        print(f"CHECK progression: {len(rows)} portals, {guarded} predicates; docs/PROGRESSION.md matches")
+        try:
+            covered = check_level_sheets(rows)
+        except (OSError, ValueError) as error:
+            parser.exit(1, f"CHECK progression: {error}")
+        print(f"CHECK progression: {len(rows)} portals, {guarded} predicates; docs/PROGRESSION.md matches; {covered} linked level sheets")
         return 0
     if args.out:
         with open(args.out, "w", encoding="utf-8") as handle:

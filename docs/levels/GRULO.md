@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/grulo.wsx` and `DAT/GRULOs.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for GRULO](../PROGRESSION.md#level-grulo) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `grulo.wsx` is 13,613,906 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\GRULO\GRULO.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

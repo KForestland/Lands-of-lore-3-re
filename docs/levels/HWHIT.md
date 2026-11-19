@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/hwhit.wsx` and `DAT/HWHITs.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for HWHIT](../PROGRESSION.md#level-hwhit) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `hwhit.wsx` is 18,226,802 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\HWHIT\HWHIT.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

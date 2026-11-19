@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/swod4.wsx` and `DAT/SWOD4s.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for SWOD4](../PROGRESSION.md#level-swod4) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `swod4.wsx` is 6,435,161 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\SWOD4\SWOD4.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

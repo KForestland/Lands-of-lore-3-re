@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/CKEEP.WSX` and `DAT/CKEEPS.WSX`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for CKEEP](../PROGRESSION.md#level-ckeep) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `CKEEP.WSX` is 13,900,854 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\CKEEP\CKEEP.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

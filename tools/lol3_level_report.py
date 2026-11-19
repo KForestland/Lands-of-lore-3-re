@@ -252,6 +252,7 @@ def sheet(L):
              f"Made by `tools/lol3_level_report.py` from `DAT/{L['main']}`"
              + (f" and `DAT/{L['side']}`" if L["side"] else "") + ". Formats: [WSX](../formats/wsx.md), "
              "[LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).", "",
+             f"Related references: [Progression rows for {s}](../PROGRESSION.md#level-{s.lower()}) and [item, spell and creature numbers](../NUMBERS.md).", "",
              "## Level archive", "",
              f"`{L['main']}` is {L['size']:,} bytes with {len(L['rows'])} entries. Each entry is named by the native "
              f"name hash of `LEVELS\\{s}\\{s}.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).", "",

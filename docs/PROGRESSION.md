@@ -14,7 +14,7 @@ Locked doors are not covered by this page: a door inside a level is object state
 
 | From | To | Sub | Arg2 | Stream | Group | Command | Event | Guard | Earlier | Taken when |
 |---|---|---:|---:|---|---:|---:|---|---|---|---|
-| BUPP1 | CKEEP | 27 | 1 | object | 518 | 530 | kind 6 event 25 value 0 | none | — | upstream: no guard here |
+| <a name="level-bupp1"></a>[BUPP1](levels/BUPP1.md) | CKEEP | 27 | 1 | object | 518 | 530 | kind 6 event 25 value 0 | none | — | upstream: no guard here |
 | BUPP1 | CKEEP | 27 | 1 | object | 536 | 542 | kind 6 event 20 value 0 | (object+0x31 == 1) | 455 (object+0x31 == 0) | object+0x31 = 1 |
 | BUPP1 | DLOW1 | 27 | 1 | object | 1930 | 1936 | kind 6 event 20 value 1 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | BUPP1 | DLOW1 | 27 | 1 | region | 3338 | 3350 | region 7505 kind 12 event 2 cond 0 | (shared 14 > 0) | — | shared 14 ≥ 1 |
@@ -41,13 +41,13 @@ Locked doors are not covered by this page: a door inside a level is object state
 | BUPP1 | MLOW2 | 27 | 2 | region | 4386 | 4392 | region 10133 kind 12 event 2 cond 0 | (shared 9 > 1) | 4374 (shared 9 < 2) | shared 9 ≥ 2 |
 | BUPP1 | MLOW2 | 27 | 2 | region | 4410 | 4416 | region 10134 kind 12 event 2 cond 0 | (shared 9 > 1) | 4398 (shared 9 < 2) | shared 9 ≥ 2 |
 | BUPP1 | NWOD2 | 27 | 5 | object | 8140 | 8146 | kind 6 event 20 value 1 | (shared 9 > 1) | 8128 (shared 9 < 2) | shared 9 ≥ 2 |
-| CKEEP | BUPP1 | 27 | 1 | object | 6976 | 6994 | kind 6 event 15 value 0 | none | — | upstream: no guard here |
-| DLOW1 | BUPP1 | 27 | 3 | region | 1810 | 1816 | region 5134 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
+| <a name="level-ckeep"></a>[CKEEP](levels/CKEEP.md) | BUPP1 | 27 | 1 | object | 6976 | 6994 | kind 6 event 15 value 0 | none | — | upstream: no guard here |
+| <a name="level-dlow1"></a>[DLOW1](levels/DLOW1.md) | BUPP1 | 27 | 3 | region | 1810 | 1816 | region 5134 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | DLOW1 | BUPP1 | 27 | 3 | region | 1822 | 1828 | region 5135 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | DLOW1 | BUPP1 | 27 | 4 | object | 24180 | 24186 | kind 5 event 1 value 0 | (object+0x31 == 1) | — | object+0x31 = 1 |
 | DLOW1 | EWOD1 | 27 | 4 | object | 5097 | 5103 | kind 6 event 20 value 2 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | DLOW1 | NWOD2 | 27 | 4 | object | 5109 | 5115 | kind 6 event 20 value 2 | (shared 9 > 1) | 5097 (shared 9 < 2) | shared 9 ≥ 2 |
-| EWOD1 | BUPP1 | 27 | 2 | object | 16172 | 16172 | kind 6 event 15 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
+| <a name="level-ewod1"></a>[EWOD1](levels/EWOD1.md) | BUPP1 | 27 | 2 | object | 16172 | 16172 | kind 6 event 15 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
 | EWOD1 | DLOW1 | 27 | 3 | object | 16190 | 16190 | kind 6 event 15 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | EWOD1 | DLOW1 | 27 | 3 | region | 298 | 298 | region 6342 kind 12 event 2 cond 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | EWOD1 | FLAIR | 27 | 1 | object | 5173 | 5179 | kind 6 event 20 value 0 | (object+0x31 == 1) | 5104 (object+0x31 == 0) | object+0x31 = 1 |
@@ -59,7 +59,7 @@ Locked doors are not covered by this page: a door inside a level is object state
 | EWOD1 | OLOW3 | 27 | 3 | object | 16202 | 16202 | kind 6 event 15 value 0 | (shared 9 > 3) | 16190 (shared 9 < 2), 16196 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | EWOD1 | OLOW3 | 27 | 3 | region | 310 | 310 | region 6342 kind 12 event 2 cond 0 | (shared 9 > 3) | 298 (shared 9 < 2), 304 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | EWOD1 | RVOL0 | 27 | 1 | object | 10522 | 10534 | kind 5 event 1 value 0 | (shared 10 == 0) | — | shared 10 = 0 |
-| FLAIR | EWOD1 | 27 | 2 | object | 17420 | 17426 | kind 6 event 20 value 1 | (shared 9 < 2) | — | shared 9 ≤ 1 |
+| <a name="level-flair"></a>[FLAIR](levels/FLAIR.md) | EWOD1 | 27 | 2 | object | 17420 | 17426 | kind 6 event 20 value 1 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | FLAIR | EWOD1 | 27 | 2 | object | 31780 | 31806 | kind 4 mode 0 invert 0 value 0x00000000 | none | — | upstream: no guard here |
 | FLAIR | EWOD1 | 27 | 2 | object | 31812 | 31838 | kind 5 event 1 value 0 | none | — | upstream: no guard here |
 | FLAIR | EWOD1 | 27 | 3 | region | 3496 | 3502 | region 6701 kind 12 event 2 cond 0 | none | 3448 (shared 9 == 2), 3460 (shared 9 == 3), 3472 (shared 9 == 4), 3484 (shared 9 == 5) | shared 9 ≤ 1 or ≥ 6 |
@@ -69,33 +69,33 @@ Locked doors are not covered by this page: a door inside a level is object state
 | FLAIR | PWOD3 | 27 | 2 | object | 17444 | 17450 | kind 6 event 20 value 1 | (shared 9 > 3) | 17420 (shared 9 < 2), 17432 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | FLAIR | PWOD3 | 27 | 3 | region | 3472 | 3478 | region 6701 kind 12 event 2 cond 0 | (shared 9 == 4) | 3448 (shared 9 == 2), 3460 (shared 9 == 3) | shared 9 = 4 |
 | FLAIR | PWOD3 | 27 | 3 | region | 3484 | 3490 | region 6701 kind 12 event 2 cond 0 | (shared 9 == 5) | 3448 (shared 9 == 2), 3460 (shared 9 == 3), 3472 (shared 9 == 4) | shared 9 = 5 |
-| FLAIR | SWOD4 | 27 | 2 | object | 31926 | 31966 | kind 4 mode 3 invert 0 value 0xAD2C35FB | none | — | upstream: no guard here |
-| GRULO | EWOD1 | 27 | 6 | object | 6810 | 6810 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
+| FLAIR | <a name="level-swod4"></a>[SWOD4](levels/SWOD4.md) | 27 | 2 | object | 31926 | 31966 | kind 4 mode 3 invert 0 value 0xAD2C35FB | none | — | upstream: no guard here |
+| <a name="level-grulo"></a>[GRULO](levels/GRULO.md) | EWOD1 | 27 | 6 | object | 6810 | 6810 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | GRULO | FLAIR | 27 | 4 | object | 15856 | 15902 | kind 4 mode 3 invert 0 value 0x3B676D5C | none | — | upstream: no guard here |
 | GRULO | NWOD2 | 27 | 6 | object | 6816 | 6816 | kind 5 event 1 value 0 | (shared 9 < 4) | 6810 (shared 9 < 2) | shared 9 2–3 |
 | GRULO | PWOD3 | 27 | 6 | object | 6822 | 6822 | kind 5 event 1 value 0 | (shared 9 >= 4) | 6810 (shared 9 < 2), 6816 (shared 9 < 4) | shared 9 ≥ 4 |
-| HWHIT | EWOD1 | 76 | 8 | object | 3887 | 3893 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
+| <a name="level-hwhit"></a>[HWHIT](levels/HWHIT.md) | EWOD1 | 76 | 8 | object | 3887 | 3893 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | HWHIT | FLAIR | 27 | 4 | object | 8986 | 9032 | kind 4 mode 3 invert 0 value 0x3B676D5C | none | — | upstream: no guard here |
 | HWHIT | NWOD2 | 76 | 8 | object | 3899 | 3905 | kind 5 event 1 value 0 | ((shared 9 > 1) and (shared 9 < 4)) | 3887 (shared 9 < 2) | shared 9 2–3 |
 | HWHIT | PWOD3 | 76 | 8 | object | 3911 | 3917 | kind 5 event 1 value 0 | (shared 9 > 3) | 3887 (shared 9 < 2), 3899 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
-| ISHAT | PWOD3 | 76 | 10 | object | 7275 | 7275 | kind 5 event 1 value 0 | none | — | upstream: no guard here |
-| JUNDR | FLAIR | 27 | 4 | object | 44119 | 44165 | kind 4 mode 3 invert 0 value 0x3B676D5C | none | — | upstream: no guard here |
+| <a name="level-ishat"></a>[ISHAT](levels/ISHAT.md) | PWOD3 | 76 | 10 | object | 7275 | 7275 | kind 5 event 1 value 0 | none | — | upstream: no guard here |
+| <a name="level-jundr"></a>[JUNDR](levels/JUNDR.md) | FLAIR | 27 | 4 | object | 44119 | 44165 | kind 4 mode 3 invert 0 value 0x3B676D5C | none | — | upstream: no guard here |
 | JUNDR | NWOD2 | 76 | 9 | object | 14827 | 14827 | kind 6 event 20 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
 | JUNDR | PWOD3 | 76 | 9 | object | 14833 | 14833 | kind 6 event 20 value 0 | (shared 9 >= 4) | 14827 (shared 9 < 4) | shared 9 ≥ 4 |
-| KVOLC | EWOD1 | 27 | 7 | object | 12153 | 12165 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
+| <a name="level-kvolc"></a>[KVOLC](levels/KVOLC.md) | EWOD1 | 27 | 7 | object | 12153 | 12165 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | KVOLC | FLAIR | 27 | 4 | object | 18331 | 18343 | kind 4 mode 3 invert 0 value 0x3B676D5C | none | — | upstream: no guard here |
 | KVOLC | NWOD2 | 27 | 7 | object | 12171 | 12183 | kind 5 event 1 value 0 | (shared 9 < 4) | 12153 (shared 9 < 2) | shared 9 2–3 |
 | KVOLC | PWOD3 | 27 | 7 | object | 12189 | 12201 | kind 5 event 1 value 0 | (shared 9 >= 4) | 12153 (shared 9 < 2), 12171 (shared 9 < 4) | shared 9 ≥ 4 |
-| LUPP2 | DLOW1 | 27 | 1 | region | 24 | 24 | region 5228 kind 11 event 0 | none | — | upstream: no guard here |
+| <a name="level-lupp2"></a>[LUPP2](levels/LUPP2.md) | DLOW1 | 27 | 1 | region | 24 | 24 | region 5228 kind 11 event 0 | none | — | upstream: no guard here |
 | LUPP2 | OLOW3 | 27 | 1 | region | 48 | 60 | region 5692 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | LUPP2 | OLOW3 | 27 | 1 | region | 66 | 78 | region 5701 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | LUPP2 | OLOW3 | 27 | 1 | region | 84 | 96 | region 5702 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | LUPP2 | OLOW3 | 27 | 2 | region | 18 | 18 | region 3853 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | LUPP2 | PWOD3 | 27 | 5 | region | 30 | 42 | region 5687 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
-| MLOW2 | BUPP1 | 27 | 3 | region | 1172 | 1172 | region 5457 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
+| <a name="level-mlow2"></a>[MLOW2](levels/MLOW2.md) | BUPP1 | 27 | 3 | region | 1172 | 1172 | region 5457 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | MLOW2 | BUPP1 | 27 | 4 | object | 13208 | 13214 | kind 5 event 1 value 0 | (object+0x31 == 1) | — | object+0x31 = 1 |
 | MLOW2 | NWOD2 | 27 | 4 | object | 2762 | 2768 | kind 6 event 20 value 2 | none | — | upstream: no guard here |
-| NWOD2 | BUPP1 | 27 | 2 | object | 10493 | 10493 | kind 6 event 15 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
+| <a name="level-nwod2"></a>[NWOD2](levels/NWOD2.md) | BUPP1 | 27 | 2 | object | 10493 | 10493 | kind 6 event 15 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
 | NWOD2 | DLOW1 | 27 | 3 | object | 10511 | 10511 | kind 6 event 15 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | NWOD2 | DLOW1 | 27 | 3 | region | 256 | 256 | region 6360 kind 12 event 2 cond 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | NWOD2 | DLOW1 | 27 | 3 | region | 274 | 274 | region 6361 kind 12 event 2 cond 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
@@ -114,11 +114,11 @@ Locked doors are not covered by this page: a door inside a level is object state
 | NWOD2 | OLOW3 | 27 | 3 | object | 10523 | 10523 | kind 6 event 15 value 0 | (shared 9 > 3) | 10511 (shared 9 < 2), 10517 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | NWOD2 | OLOW3 | 27 | 3 | region | 268 | 268 | region 6360 kind 12 event 2 cond 0 | (shared 9 > 3) | 256 (shared 9 < 2), 262 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | NWOD2 | OLOW3 | 27 | 3 | region | 286 | 286 | region 6361 kind 12 event 2 cond 0 | (shared 9 > 3) | 274 (shared 9 < 2), 280 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
-| OLOW3 | LUPP2 | 27 | 3 | region | 1202 | 1202 | region 5435 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
+| <a name="level-olow3"></a>[OLOW3](levels/OLOW3.md) | LUPP2 | 27 | 3 | region | 1202 | 1202 | region 5435 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | OLOW3 | LUPP2 | 27 | 3 | region | 1208 | 1208 | region 5436 kind 12 event 2 cond 0 | none | — | upstream: no guard here |
 | OLOW3 | LUPP2 | 27 | 4 | object | 11250 | 11256 | kind 5 event 1 value 0 | (object+0x31 == 1) | — | object+0x31 = 1 |
 | OLOW3 | PWOD3 | 27 | 4 | object | 2192 | 2198 | kind 6 event 20 value 2 | none | — | upstream: no guard here |
-| PWOD3 | BUPP1 | 27 | 2 | object | 11602 | 11602 | kind 6 event 15 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
+| <a name="level-pwod3"></a>[PWOD3](levels/PWOD3.md) | BUPP1 | 27 | 2 | object | 11602 | 11602 | kind 6 event 15 value 0 | (shared 9 < 4) | — | shared 9 ≤ 3 |
 | PWOD3 | DLOW1 | 27 | 3 | object | 11620 | 11620 | kind 6 event 15 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | PWOD3 | DLOW1 | 27 | 3 | region | 196 | 196 | region 6357 kind 12 event 2 cond 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | PWOD3 | DLOW1 | 27 | 3 | region | 214 | 214 | region 6358 kind 12 event 2 cond 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
@@ -138,9 +138,9 @@ Locked doors are not covered by this page: a door inside a level is object state
 | PWOD3 | OLOW3 | 27 | 3 | object | 11632 | 11632 | kind 6 event 15 value 0 | (shared 9 > 3) | 11620 (shared 9 < 2), 11626 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | PWOD3 | OLOW3 | 27 | 3 | region | 208 | 208 | region 6357 kind 12 event 2 cond 0 | (shared 9 > 3) | 196 (shared 9 < 2), 202 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
 | PWOD3 | OLOW3 | 27 | 3 | region | 226 | 226 | region 6358 kind 12 event 2 cond 0 | (shared 9 > 3) | 214 (shared 9 < 2), 220 ((shared 9 > 1) and (shared 9 < 4)) | shared 9 ≥ 4 |
-| QWOD0 | BUPP1 | 27 | 1 | object | 176 | 194 | kind 6 event 20 value 0 | (object+0x31 == 0) | — | object+0x31 = 0 |
+| <a name="level-qwod0"></a>[QWOD0](levels/QWOD0.md) | BUPP1 | 27 | 1 | object | 176 | 194 | kind 6 event 20 value 0 | (object+0x31 == 0) | — | object+0x31 = 0 |
 | QWOD0 | BUPP1 | 27 | 1 | object | 230 | 242 | kind 22 name de15a215 | none | — | upstream: no guard here |
-| RVOL0 | EWOD1 | 27 | 7 | object | 279 | 291 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
+| <a name="level-rvol0"></a>[RVOL0](levels/RVOL0.md) | EWOD1 | 27 | 7 | object | 279 | 291 | kind 5 event 1 value 0 | (shared 9 < 2) | — | shared 9 ≤ 1 |
 | RVOL0 | FLAIR | 27 | 2 | object | 1475 | 1481 | kind 5 event 1 value 0 | none | — | upstream: no guard here |
 | RVOL0 | FLAIR | 27 | 2 | object | 1493 | 1499 | kind 4 mode 9 invert 0 value 0x00000005 | none | — | upstream: no guard here |
 | RVOL0 | NWOD2 | 27 | 7 | object | 297 | 309 | kind 5 event 1 value 0 | (shared 9 < 4) | 279 (shared 9 < 2) | shared 9 2–3 |

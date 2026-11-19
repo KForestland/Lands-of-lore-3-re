@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/EWOD1.WSX` and `DAT/EWOD1S.WSX`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for EWOD1](../PROGRESSION.md#level-ewod1) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `EWOD1.WSX` is 26,770,728 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\EWOD1\EWOD1.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

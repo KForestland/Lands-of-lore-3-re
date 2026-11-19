@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/olow3.wsx` and `DAT/OLOW3s.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for OLOW3](../PROGRESSION.md#level-olow3) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `olow3.wsx` is 24,387,703 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\OLOW3\OLOW3.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

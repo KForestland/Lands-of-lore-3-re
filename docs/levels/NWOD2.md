@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/NWOD2.WSX` and `DAT/NWOD2S.WSX`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for NWOD2](../PROGRESSION.md#level-nwod2) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `NWOD2.WSX` is 30,304,516 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\NWOD2\NWOD2.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

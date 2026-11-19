@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/rvol0.wsx` and `DAT/RVOL0s.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for RVOL0](../PROGRESSION.md#level-rvol0) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `rvol0.wsx` is 2,336,324 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\RVOL0\RVOL0.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

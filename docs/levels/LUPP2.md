@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/LUPP2.WSX` and `DAT/LUPP2S.WSX`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for LUPP2](../PROGRESSION.md#level-lupp2) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `LUPP2.WSX` is 23,557,699 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\LUPP2\LUPP2.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

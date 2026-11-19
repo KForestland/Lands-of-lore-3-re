@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/jundr.wsx` and `DAT/JUNDRs.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for JUNDR](../PROGRESSION.md#level-jundr) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `jundr.wsx` is 16,531,924 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\JUNDR\JUNDR.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).

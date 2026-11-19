@@ -2,6 +2,8 @@
 
 Made by `tools/lol3_level_report.py` from `DAT/ishat.wsx` and `DAT/ISHATs.wsx`. Formats: [WSX](../formats/wsx.md), [LMF light maps](../formats/lmf.md), [MAP and ODF](../formats/map-odf.md), [textures](../formats/textures.md).
 
+Related references: [Progression rows for ISHAT](../PROGRESSION.md#level-ishat) and [item, spell and creature numbers](../NUMBERS.md).
+
 ## Level archive
 
 `ishat.wsx` is 15,968,698 bytes with 4 entries. Each entry is named by the native name hash of `LEVELS\ISHAT\ISHAT.<ext>` ([WSX reader](../lol3-wsx-reader.md#resource-name-key)).
