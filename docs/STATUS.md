@@ -7,10 +7,10 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (20 checks; all pass o
 **Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
 
 <!-- rating:begin -->
-- **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
-- **Rules traced:** 255 statements labelled CONFIRMED against the program or the files, 80 labelled UNCONFIRMED, on 72 current pages.
-- **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
-- **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
+- **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood).
+- **Rules traced:** the pages mark 255 statements CONFIRMED (proved from the program code or the files) and 80 UNCONFIRMED (a reading not yet proved), on 72 current pages; old notes kept as history are not counted.
+- **Seen in the running game:** 3 of 5 questions that can only be settled by watching the original game run are settled.
+- **Open questions:** 13 numbered questions: 3 answered, 6 mostly answered, 4 partly answered.
 <!-- rating:end -->
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
