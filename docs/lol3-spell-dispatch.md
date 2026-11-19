@@ -345,7 +345,32 @@ player item pool (`0x4381AA → 0x438773`) and old pointers at
 save `+0x3B4` (definitions) and `+0x3C8` (pool) gave the lookup
 for the 47 available player slots (written by the game, not shipped).
 
+### DLOW1 approach with the native placement live
+
+**CONFIRMED, reachability trial.** The closest available level-4
+source (`df378d294f42`, slot +0x49C/+0x4A0) restored with
+79 mana and counters 3 and 0 at `0x43703E`. The constructor
+`0x4D7380` instantiated the `0xE2F77FE7` item from
+`DLOW1.WSX+0x155A349`, whose coordinates are
+(−635, 4913, 110) and whose surface is 1287. Tile 1287 starts at
+`DLOW1.WSX+0x1504255` and has floor height 110 at +0x18.
+
+Walking around the counter, jumping toward it and clicking from
+both sides left the cursor and second counter zero. The closest
+logged jump pose at `0x43766F` was (−637, 4895, 52) with
+heading `0x041F`. After crossing the horizontal target from the
+lower floor, the next save (`f88f201e77d4`) read approximately
+(−638, 4927, 10), on surface 1255 (slot +0x4A8).
+The watched cluster-use call `0x4A6133` and second-counter
+store `0x432AE0` did not execute in this trial. The runner reached
+the item's horizontal neighbourhood but could not take the
+placement at its height.
+
 **UNCONFIRMED.** The live second-counter debit. Reach the DLOW1
-item from surface 1287 or get the FLAIR placement, use it, then
-cast an ordinary spell that reaches `0x4A46E2`. Watch the grant
-and debit at `0x432AE0` and record the HUD before and after.
+item from surface 1287 or the FLAIR placement on surface 3243
+(`FLAIR.WSX+0x15CB594`, X −12204, Z 8308, height 300). With the
+cursor empty, capture pickup of definition `0xE2F77FE7` at
+`0x4D83A0 → 0x49EDA0`. Use the item to reach `0x4A6133`
+and verify the count at `0x432AE0`. Cast spell 0x57 against
+a valid target and record its −1 debit and mana balance at
+`0x4A5A3A`. Follow the count in the HUD at `0x430C7D`.

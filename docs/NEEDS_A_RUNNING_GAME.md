@@ -51,6 +51,13 @@ The DLOW1 placement was constructed live, but the counter trial from
 the lower floor left the cursor and `0x581A21` at zero.
 [Live casts and original Mana Cluster locations](lol3-spell-dispatch.md#casts-with-a-null-sink)
 
+**CONFIRMED, level-4 approach.** The null-sink retry restored
+the DLOW1 placement (X −635, Z 4913, height 110, surface 1287).
+Native save writes at `0x43766F` sampled the player at (−637, 4895, 52)
+during a jump and (−638, 4927, 10) afterward on the lower
+surface. Normal clicks left the cursor and second counter zero.
+[Placement, trial values and alternate route](lol3-spell-dispatch.md#dlow1-approach-with-the-native-placement-live)
+
 **UNCONFIRMED.** Live second-counter debit and HUD feedback. Save with
 fixed equipment, sufficient mana and spell 0x54 or 0x59 selected.
 Watch `0x570AB9` while using a first-counter item, then cast. For
