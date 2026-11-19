@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-prove that the four loose PHT files are prefixes of one repeating block.
+"""Read the four loose LoL3 PHT files and check their repeated bytes.
 
   lol3_pht.py --data DAT            # size and the first 16 bytes of each file
   lol3_pht.py --data DAT --check
@@ -116,8 +116,6 @@ def head_line(path, count=16):
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
     args = parser.parse_args()
-    if args.out:
-        parser.error("prints only")
     if not args.check:
         data = Path(args.data)
         paths = sorted((p for p in data.iterdir() if p.is_file() and p.suffix.lower() == ".pht"),

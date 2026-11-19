@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the native LoL3 texture archive wrapper and its optional LZO expansion.
+"""Read the LoL3 texture wrapper and optionally expand its banks.
 
   lol3_texture_archive.py --data DAT --check
   lol3_texture_archive.py --data DAT --check --decode   # liblzo2
@@ -127,8 +127,6 @@ def main():
     parser.add_argument("--decode", action="store_true", help="expand each bank and compare the installed copies")
     parser.add_argument("--list", help="print one level's descriptors; requires --decode")
     args = parser.parse_args()
-    if args.out:
-        parser.error("this check reports counts on standard output")
     if args.list:
         if args.check or not args.decode:
             parser.error("--list needs --decode and does not check")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List the native palette source of each LoL3 cache texture span.
+"""Read LoL3 cache texture spans and their palette descriptors.
 
   lol3_texture_palettes.py --data DAT            # one JSON line per span
   lol3_texture_palettes.py --data DAT --check    # verify the native joins

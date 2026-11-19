@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-prove where the claimed QWOD0 and SWOD4 edge bytes sit in the archives.
+"""Read the QWOD0 and SWOD4 MAPs and their native editor limits.
 
   lol3_claimed_edges.py --data DAT --check
   lol3_claimed_edges.py --data DAT --check --decode   # also the light-map samples
@@ -251,8 +251,6 @@ def main():
     ap.add_argument("--span", help="print this level's unidentified MAP span as hex")
     ap.add_argument("--counts", action="store_true", help="print the QWOD0 and SWOD4 byte-pattern counts")
     a = ap.parse_args()
-    if a.out:
-        ap.error("prints only")
     if a.counts:
         if a.check or a.decode or a.span:
             ap.error("--counts only prints the two histograms")

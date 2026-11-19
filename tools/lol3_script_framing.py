@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify LoL3 MAP script framing using the English retail PE size table.
+"""Read LoL3 MAP scripts and the native opcode size table.
 
   lol3_script_framing.py --data DAT          # per-level and per-opcode counts
   lol3_script_framing.py --data DAT --check  # check the retail corpus
@@ -191,8 +191,6 @@ def main():
     parser.add_argument("--subcommands", action="store_true", help="print selector and subcommand counts")
     parser.add_argument("--dispatch", action="store_true", help="print the 28 object opcode slots")
     args = parser.parse_args()
-    if args.out:
-        parser.error("use standard output for the aggregate counts")
     if args.subcommands or args.dispatch:
         if args.check or (args.subcommands and args.dispatch):
             parser.error("pass only one of --subcommands, --dispatch or --check")

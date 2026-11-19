@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Level-to-level table for Lands of Lore 3, from the portal commands.
+"""Read LoL3 MAP scripts to tabulate each portal and its guard.
 
 Opcode 2 with byte +4 equal to 27 or 76 is the player arm at 0x410F98.
 Byte +5 stores a level-table index in the low 5 bits and a second argument

@@ -85,3 +85,15 @@ Check means the tool's `--check` is in the `check_all.py` list above. Inspect is
 | [Name to directory key](../docs/lol3-wsx-reader.md#resource-name-key) | `lol3_name_hash.py`; level sheets print four level keys; `extract_wsx_entries.py --list` prints any archive's keys | yes | text. `--list` prints `stems 40`, `stem 9: uhfrozen key 0x1d4f90da` and `stem 11: uhfroze2 key 0x1d4f74da`. An archive's keys are the WSX listing above. |
 | Program witnesses in `LOL3.DAT` ([pickup](../docs/lol3-item-dispatch.md), [copy mips](../docs/lol3-texture-bake.md), [spell counter](../docs/lol3-spell-dispatch.md)) | `lol3_native_checks.py` | yes. `--decode-copy` is optional and is not what `check_all` runs | text. `--list` prints `world item +0x68 0x4d83a0`, `call 0x4d83ac targets 0x42ef50` and `handler 112 0x4a6120`. |
 | [QWOD0 and SWOD4 byte-pattern counts](../docs/lol3-semantic-phase.md) | `lol3_claimed_edges.py` | yes | text. `--counts` prints `QWOD0 C5 A5: texture 195, MAP 2, light map 1, ODF 0` and `SWOD4 surface +4: 0x0 on 2393, 0x2 on 14, 0x6 on 29, 0xb on 0`. No picture: drawings of those labels were removed because they match no field the readers use. |
+
+## Command-line conventions
+
+Set `LOL3_DAT` or pass `--data` for the original game's DAT directory. Run `--help` for the tool's inputs and modes. Use `--check` for the available read-only validation and `--out` to write a result to a path you choose. Read-only listings print to stdout. `check_all.py` runs the whole suite by default. `doc_links.py` and `repo_guard.py` use repository files and need no game data.
+
+| Difference | Why it remains |
+|---|---|
+| `LOL3_DAT`, where LoL1 uses `LOL1_DATA` and LoL2 uses `LOL2_DAT` | Each name follows the game's own folder: LoL1 keeps its files in `DATA`, LoL2 and LoL3 in `DAT`. Shells and scripts already set these names. |
+| A positional save or LMF file | A single player slot or extracted light map is an explicit input. Corpus checks use DAT to find their other witnesses. |
+| `--cache FILE` | This supplies the texture cache the game wrote beside DAT. The three texture cache checks can use an archived cache stored elsewhere. [Cache recipe](../docs/COOKBOOK.md#check-the-texture-cache) |
+| `--summary` for script notes and `--manifest` for WSX export | These select the small notes and a secondary directory listing, respectively. `--out` selects the extracted or full listing output. |
+| `--game-dat` in the WSX tool and `-o` in the LMF tool | Old spellings are kept as aliases and shown in `--help`, so earlier scripts that call the tools keep working. `--game-dat` is the same as `--data`, `-o` the same as `--out`. |

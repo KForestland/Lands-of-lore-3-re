@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Count the creature mitigation records and the item-use handler indexes in the original files.
+"""Read LoL3 creature mitigation rows and item handler indexes.
 
   lol3_combat_census.py --data DAT          # print the two census tables
   lol3_combat_census.py --data DAT --check  # check the English retail counts
@@ -119,8 +119,6 @@ def main():
     parser.add_argument("--mitigation", action="store_true", help="print mitigation selector and mask fields")
     parser.add_argument("--modes", action="store_true", help="print behavior and action slot values")
     args = parser.parse_args()
-    if args.out:
-        parser.error("use standard output for the counts")
     chosen = [name for name in ("items", "mitigation", "modes") if getattr(args, name)]
     if chosen:
         if args.check or len(chosen) != 1:

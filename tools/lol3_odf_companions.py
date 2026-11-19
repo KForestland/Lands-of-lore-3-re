@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-prove the ODF section-0 names and the AI-file failure arm.
+"""Read the ODF section-0 names and the native AI-file loader.
 
   lol3_odf_companions.py --data DAT --check
   lol3_odf_companions.py --data DAT --list QWOD0   # section-0 names, field-3 words, AI leaves
@@ -123,8 +123,6 @@ def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--list", help="print one level's names, creature fields and AI leaves")
     args = parser.parse_args()
-    if args.out:
-        parser.error("prints only")
     if args.list:
         if args.check:
             parser.error("--check does not list")

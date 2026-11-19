@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bake one cached LoL3 texture to PNG or check the cache in memory.
+"""Read LoL3 texture records from a game-written cache.
 
   lol3_texture_png.py --data DAT --offset 0x12C6E2 --out ../texture.png
   lol3_texture_png.py --data DAT --check

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write one Markdown sheet per LoL3 level from the original WSX archives.
+"""Read the LoL3 level archives and write Markdown level sheets.
 
 For each level stem (an archive in DAT/ that holds a LEVELS\\<STEM>\\<STEM>.LMF entry)
 the sheet lists, all read from the files:

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Re-prove the shipped cdcache body, that its head is absent from the programs
+"""Read the shipped LoL3 cache seed and its program witnesses.
+
+Re-prove the shipped cdcache body, that its head is absent from the programs
 beside the game, and that allocator byte +0x17 has no address.
 
   lol3_cache_seed.py --data DAT            # header bytes and, when present, the second directory
@@ -154,8 +156,6 @@ def written_listing(prefix):
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
     args = parser.parse_args()
-    if args.out:
-        parser.error("prints only")
     if not args.check:
         data = Path(args.data)
         try:

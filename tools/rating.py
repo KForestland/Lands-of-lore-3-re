@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The repository's four-line rating, counted from the game files and the pages.
+"""Read original LoL3 files and documentation to compute the rating.
 
   rating.py --data DAT          # print the four lines
   rating.py --data DAT --check  # also require README.md and docs/STATUS.md to carry them
@@ -133,8 +133,6 @@ def block_of(path):
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
     args = parser.parse_args()
-    if args.out:
-        parser.error("prints only")
     try:
         lines = rating(args.data)
         if not args.check:

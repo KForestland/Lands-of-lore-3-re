@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Peel LoL3 .WSX containers into entry blobs + LMF candidates.
+"""Read original LoL3 WSX archives and list or export entries.
 
 WSX layout (docs/formats/wsx.md; the same as Westwood MIX):
   - u16 count, u32 data size (bytes after the index)

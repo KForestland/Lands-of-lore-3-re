@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Group one level's script commands by opcode and print the page's one-line meaning.
+"""Read a LoL3 MAP's script commands and the native-effect page.
 
   lol3_script_browser.py --data DAT QWOD0
   lol3_script_browser.py --data DAT --check

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw an overhead SVG from one original LoL3 MAP.
+"""Read an original LoL3 MAP and draw an overhead SVG.
 
   lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg
 

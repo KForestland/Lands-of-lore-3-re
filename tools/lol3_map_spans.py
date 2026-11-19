@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-prove the MAP spans tabulated for question Q4.
+"""Read original LoL3 MAP spans, waypoints and path labels.
 
   lol3_map_spans.py --data DAT --check
   lol3_map_spans.py --data DAT --list QWOD0   # waypoint fields and slot bytes; no label text
@@ -269,8 +269,6 @@ def main():
     ap.add_argument("--list", help="print one level's waypoint rows and slot bytes")
     ap.add_argument("--rows", help="print one level's section-1 rows")
     a = ap.parse_args()
-    if a.out:
-        ap.error("prints only")
     if a.list and a.rows:
         ap.error("pass only one of --list and --rows")
     if a.rows:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read the native LoL3 Light Map (LMF) directory and its storage groups.
 
-  walk_lmf_leaves.py FILE.LMF [-o report.json]
+  walk_lmf_leaves.py FILE.LMF [--out report.json]
   walk_lmf_leaves.py --data DAT --stem QWOD0       # that level's LMF directory, from the archive
   walk_lmf_leaves.py --data DAT --check            # check all original WSX entries
   walk_lmf_leaves.py --data DAT --check --decode   # also decode and check members (liblzo2)
@@ -222,10 +222,10 @@ def check(data_dir, decode):
 def main():
     parser = ReaderArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("lmf", type=Path, nargs="?")
-    parser.add_argument("-o", type=Path)
+    parser.add_argument("--out", "-o", dest="o", metavar="FILE", type=Path, help="write the report JSON to this file")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--decode", action="store_true")
-    parser.add_argument("--data", type=Path, default=os.environ.get("LOL3_DAT"))
+    parser.add_argument("--data", type=Path, default=os.environ.get("LOL3_DAT"), help="the game's DAT folder (default: $LOL3_DAT)")
     parser.add_argument("--stem", help="print this level's LMF directory from its archive")
     args = parser.parse_args()
     try:

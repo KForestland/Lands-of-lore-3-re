@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hash stored C strings against WSX directory keys.
+"""Read the LoL3 executable's names and match them to WSX keys.
 
 The music stems are the 40 pointers at file 0x148180. Every other
 name below is a NUL-terminated printable string already stored in
@@ -100,8 +100,6 @@ def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
     parser.add_argument("--list", action="store_true", help="print the 40 music stems and their keys")
     args = parser.parse_args()
-    if args.out:
-        parser.error("prints only")
     if args.list:
         if args.check:
             parser.error("--check does not list")

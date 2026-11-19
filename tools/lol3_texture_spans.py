@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Find and check the row-span texture records (flags 0x028E / 0x828E) in LoL3's texture cache.
+"""Read LoL3 cache texture records with flags 0x028E and 0x828E.
 
 The runtime texture banks sit in cdcache.wsx in the game folder (the parent of
 DAT/). A texture record is u32 flags, u16 width, u16 height, u32 size, then

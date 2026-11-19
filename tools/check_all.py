@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run every LoL3 tool that has a --check against a game DAT folder; one line each.
+"""Read an original LoL3 DAT folder and run the repository checks.
 
   check_all.py --data /path/to/LoL3/DAT     # or set $LOL3_DAT
 Exit code 0 when all pass.
@@ -20,6 +20,7 @@ def main():
     ap = ReaderArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", default=os.environ.get("LOL3_DAT"), help="the game's DAT folder (default: $LOL3_DAT)")
     ap.add_argument("--cache", help="game-written cdcache.wsx (default: next to DAT)")
+    ap.add_argument("--check", action="store_true", help="run all checks (the default)")
     a = ap.parse_args()
     if not a.data:
         ap.error("give --data or set LOL3_DAT")

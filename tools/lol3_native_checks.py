@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check original LoL3 pickup, texture and spell-counter witnesses.
+"""Read LoL3 pickup, texture and spell-counter program witnesses.
 
   lol3_native_checks.py --data DAT --check
   lol3_native_checks.py --data DAT --check --decode-copy   # shipped banks, liblzo2
@@ -266,8 +266,6 @@ def main():
     parser.add_argument("--list", action="store_true", help="print the anchor values the check reads")
     parser.add_argument("--spells", action="store_true", help="print spell rows and special-definition costs")
     args = parser.parse_args()
-    if args.out:
-        parser.error("this check writes counts to standard output")
     if args.list and args.spells:
         parser.error("pass only one of --list and --spells")
     if args.check and (args.list or args.spells):

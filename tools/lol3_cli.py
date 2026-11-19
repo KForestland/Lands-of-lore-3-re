@@ -18,7 +18,8 @@ def tool_args(doc, data=True, out_help="write the result here (default: print on
     if data:
         ap.add_argument("--data", default=DEFAULT_DATA, required=DEFAULT_DATA is None,
                         help="the game's DAT folder (default: $LOL3_DAT)")
-    ap.add_argument("--out", help=out_help if writes else argparse.SUPPRESS)
+    if writes:
+        ap.add_argument("--out", help=out_help)
     ap.add_argument("--check", action="store_true", help="run the tool's check and print one CHECK line; exit 1 on failure")
     return ap
 
