@@ -5,6 +5,9 @@ Addresses refer to the English retail `LOL3.DAT` PE32. Its SHA-256 is
 The PE header at file `0xC8` gives image base `0x400000`. The code
 section in the table at `0x1C0` begins at RVA `0x1000`, file `0x400`,
 so for the VAs in this page file offset is VA minus `0x400C00`.
+The COFF TimeDateStamp at file +0xD0 is `0x37332C6E`, which encodes
+1999-05-07 18:09:50 UTC. That is the field's stored encoding.
+`lol3_pht.py --check` re-reads it.
 
 ## File and group reader
 

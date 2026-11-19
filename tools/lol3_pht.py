@@ -9,7 +9,8 @@ first cycle has the pinned SHA-256 and every later byte equals the byte at
 that distance into the first cycle. The check also requires that LOL3.DAT
 and LOL3.EXE do not contain the names (ASCII, either case, or UTF-16), that
 the cycle length is not a code immediate, and that the stored `$*.*` search
-is the save-game folder. This shows the bytes are one block repeated; what
+is the save-game folder. The same check re-reads the COFF TimeDateStamp at
+`LOL3.DAT` file +0xD0. This shows the photo bytes are one block repeated; what
 they mean and what reads them is unknown.
 """
 from cli_errors import run_cli
@@ -149,6 +150,8 @@ def main():
                 raise ValueError(f"{label} contains {hit}")
             programs[label] = blob
         image = programs["LOL3.DAT"]
+        if int.from_bytes(image[0xD0:0xD4], "little") != 0x37332C6E:
+            raise ValueError("LOL3.DAT COFF timestamp field differs")
         if period_is_immediate(image[TEXT_RAW:TEXT_RAW + TEXT_SIZE]):
             raise ValueError("LOL3.DAT code uses 0x1010000 as an immediate")
         with ordered[0].open("rb") as handle:
