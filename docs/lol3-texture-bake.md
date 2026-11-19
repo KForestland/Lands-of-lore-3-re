@@ -256,6 +256,38 @@ tables store `i*a`, `i*b`, `i*d` and `i*e` at `0x7D7950`, `0x7D7D50`,
 `0x7D8150` and `0x7D8F98`, respectively
 (`0x4E39A3–0x4E3A0A`). The callback treats dword sums modulo 2³².
 
+**CONFIRMED.** The last step of the setup scales the first
+three floats of the affine transform at `0x7D8570` by 65536
+and the next three by 64. `0x4E3883–0x4E3890` supplies those
+two floats to `0x4E3B80`, which constructs a diagonal transform
+`(65536,0,0,0,64,0)`. The x87 multiplication at
+`0x4E3895–0x4E3943` composes it on the left. With source
+floats `M[0..5]`, the six dwords are the truncations of
+`(65536*M[0], 65536*M[1], 65536*M[2], 64*M[3], 64*M[4], 64*M[5])`.
+The first goes directly from the x87 stack to the conversion.
+The remaining five first round through float stores at
+`0x4E38DC`, `0x4E3904`, `0x4E3927`, `0x4E393F` and
+`0x4E3943`.
+
+**CONFIRMED.** Bit 0 of the reference +0x0C folds the input
+angle by subtracting the float at `0x540778` when the angle
+is at least π, or the float at `0x54077C` otherwise
+(`0x4E30D8–0x4E3110`). The second float is −π.
+The row loop selects slices in descending order. Equal heights
+visit `slice_count - 1` through zero (`0x4E3140–0x4E318C`).
+For unequal heights, the setup divides the slice count by the
+effective output height, starts the phase at 0.5, and subtracts
+1.0 while the phase strictly exceeds 1.0, backing up one slice
+each time. It adds the ratio for the next output row
+(`0x4E31E4–0x4E3275`; constants `0x540768/0x54076C`).
+When `[0x7D93AC]` is nonzero on this path, `0x4E2FD0`
+supplies crop fractions `top` and `bottom`. The destination
+pointer is advanced by `trunc(original_height * top) * pitch`
+and effective height becomes
+`trunc(original_height * (1 - (top + bottom)))`
+(`0x4E31A2–0x4E31E0`). Row pitch comes from the surface at
+`0x4E30B8–0x4E30C9`.
+
 | Quantity | Computation | Native witness |
 |---|---|---|
 | Column of initial or updated endpoint | `signed32(a*x + b*y + c) >> 16` | `0x4E3E72–0x4E3E8C`, `0x4E3ECA–0x4E3EFA` |
@@ -306,6 +338,37 @@ bytes at those positions are 0 and 3, respectively. The
 palette bake maps these to `0x8000` and `0x83C0`
 (`0x4826DB–0x482720`). The two alternatives therefore
 give different output even at the first pixel.
+
+**CONFIRMED.** For all 20 original records, the selected
+helper sets start column and row flags to zero and the count
+to the stored width (`0x4E0CA8–0x4E0CD6`). An unscaled bake
+uses each returned byte as an index into the 256-word table
+(`0x48234C–0x48238F`, `0x482409–0x48245C`,
+`0x4824F4–0x48254E`). The byte pointer is earlier than the
+span pixel pointer by `4*(row+1)`, and the last `4*height`
+bytes of the stored payload are outside the unscaled read.
+With scaling, the same helper receives
+`min(input_height-1, (step/2 + out_y*step) >> 16)`,
+where `step = trunc((input_height << 16)/output_height)`
+(`0x482316–0x48238C`, `0x48249A–0x4824AE`).
+The original source dimensions are equal in X and Y at
+each mip, `128,64,32,16,8` in order. Comparing the indexed
+matrices before lookup gives 500, 244, 116, 52 and 24
+different positions per bank, in mip order.
+
+| Original .TE_ file offset | Descriptor in expanded bank | Expanded mip offsets, 0–4 |
+|---|---|---|
+| `QWOD0.WSX+0x36` | +0x1081DC | +0x10E104, +0x112310, +0x11341C, +0x1138A8, +0x1139F4 |
+| `BUPP1.WSX+0x36` | +0x30C3A5 | +0x363D8D, +0x367F99, +0x3690A5, +0x369531, +0x36967D |
+| `EWOD1.WSX+0x36` | +0x1ED42E | +0x2084B0, +0x20C6BC, +0x20D7C8, +0x20DC54, +0x20DDA0 |
+| `RVOL0.WSX+0x36` | +0xABD99 | +0xB11A7, +0xB53B3, +0xB64BF, +0xB694B, +0xB6A97 |
+
+`tools/lol3_native_checks.py --data DAT --check --decode-copy`
+replays the fixed-width and span index reads on the shipped
+archives using liblzo2. It checks the dispatch instructions,
+all row headers, both first indexes, their palette witness
+and the two-matrix difference counts. It needs no game-written
+cache and writes no images.
 
 **CONFIRMED.** In the remap dispatcher, both words masked with 0x211
 give 0x200, selecting `0x42136E` (`0x421326–0x421345`). This path

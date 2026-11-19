@@ -18,7 +18,7 @@ Counted by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
-- **Rules traced:** 246 statements labelled CONFIRMED against the program or the files, 76 labelled UNCONFIRMED, on 71 current pages.
+- **Rules traced:** 251 statements labelled CONFIRMED against the program or the files, 77 labelled UNCONFIRMED, on 71 current pages.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
 - **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
 <!-- rating:end -->

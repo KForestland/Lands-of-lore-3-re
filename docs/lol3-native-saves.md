@@ -187,3 +187,55 @@ At `0x4378C0` and `0x437F79`, identify the outgoing and incoming
 rows by definition identity before decompression and file comparison.
 Account for the selector's base XOR and pointer relocations before
 attributing the decoded differences to the pickup.
+
+### Predicted differences for one loose-item pickup
+
+**CONFIRMED, native path.** World item vtable `0x540580+0x68`
+selects `0x4D83A0`. The handler admits an empty cursor through
+`0x4D83AC → 0x42EF50`, then checks world +0x18 bit 15,
+`[0x5D5378]`, and the item class returned by `0x49F170`
+(`0x4D83FC–0x4D842D`). It sends object event 3 at
+`0x4D8479` and calls player receive at `0x4D8496`. With
+`[0x545540] = 0` the receive mode is 1. The player can reject
+the same world pointer already recorded at player +0x132
+(`0x40B9BB`). The accepted path calls `0x49ED50` at
+`0x40BA1F`, then passes operation 0x13 to the item's handler
+at `0x40BA51`.
+
+**CONFIRMED, immediate stores.** For a successful, ordinary
+nonstacked pickup with a free player row and empty cursor,
+let `i` be the outgoing world row and `j` the allocated
+player row. The following offsets are relative to the section's
+reconstructed bytes after applying the save's XOR base and
+pointer adjustment. The table predicts a save pair if the
+item handler and later game updates leave those values in place.
+
+| Selector and decoded offset | Predicted state change | Native witness |
+|---|---|---|
+| Level 25 + `0x48*i+0x1C` | Set mask 0x80. The world item is skipped by the world lookup and can be reused. | Retirement `0x49EDC3 → 0x4D7370 → 0x4D7520`, store `0x4D75CB–0x4D75CE`, lookup `0x4D770A`, reuse `0x4D7647`. |
+| Level 25 + `0x48*i` | In memory the first dword changes from item vtable `0x540580` to base vtable `0x539AC0`. Check this before section adjustment. | `0x4D75F8 → 0x441383`. |
+| Level 25 + `0x48*i+0x10,+0x14,+0x1C` | Additional cleanup can update links, clear mask 0x2000, and clear masks 0x40000 and 0x04000000 when set. A neighbouring link can also change. | `0x4D7539`, `0x4464D0–0x4464E8`, `0x445EC0–0x445F0B`, `0x445E60 → 0x445D00–0x445D5E`. |
+| Global 2 + `0x10*j` | Destination +0/+4/+8/+9 copy world +0x34/+0x38/+0x3C/+0x3D. Destination +0x0C is a zero dword before item operation 0x13. +0x0A and +0x0B have no store in the copy. | Destination selection `0x49ED81`, copy `0x49ED9A–0x49EDA0 → 0x49E560 → 0x49E910`, +0x0C reset `0x49E56D`. |
+| Global 3 + `j >> 3` | Set bit `1 << (j & 7)` in the player-item bitmap. | `0x49ED89 → 0x4503E0`, bit scan/store `0x450402–0x45041F`. |
+| Global 7 +0x44 and +0x64 | Cursor reference becomes the address of row `j`. Adjacent cursor dword increases by one. | `0x49EDD3` dispatches player vtable `0x538388+0x78`, empty cursor branch `0x40B8E3–0x40B8EB → 0x40B999`, stores `0x4224C6` and `0x4224F3`. |
+
+The retirement path keeps the world row available to the pool lookup.
+The freeing call at `0x445EF5` uses the link pool `[0x7DE720]`.
+The world lookup tests `[0x7D7824]` and the retired flag
+separately (`0x4D76E6–0x4D770E`). The save writer collects the full
+world row range for selector 25, player rows for global 2 and
+the player bitmap for global 3 (`0x439460+25*4`, `0x438DBE`,
+`0x4381AA–0x4381B9`, `0x438773–0x4387CA`). Its level XOR,
+adjustment and compression calls are at `0x437FC0`, `0x437FDC`
+and `0x437FEF`. `tools/lol3_native_checks.py --data DAT --check`
+verifies the vtable, writer selection, calls and store anchors.
+
+**UNCONFIRMED, native slot comparison.** This static pass followed
+the original call and writers. The previous trials exercised an
+inventory transfer and a cursor release. A matched pickup needs a
+save containing a reachable, nonstacked world item, an empty cursor
+and an available player row. In the pickup trial, record both row
+indices at `0x49EDA0`, the world flag at `0x4D75CE`, the destination
+row before and after `0x40BA51`, and the cursor at `0x4224C6`.
+Save immediately, then apply the decoded-offset comparison above
+against the slot saved after an otherwise identical load.
