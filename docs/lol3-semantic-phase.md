@@ -107,9 +107,12 @@ column of the MAP's 8-byte vertices, 8-byte section-1 rows, 56-byte
 surfaces or 8-byte waypoints steps from `C5` to `A5`.
 
 The two MAP copies sit four bytes apart inside a 64-byte run of
-4-byte groups at `QWOD0.WSX+0x730738`, within the unidentified fixed
-block from MAP +0x244 (header end) to +0x2F2C (field 0). No header dword in that MAP
-equals the run's start. Decoding both light maps (5,364 QWOD0 members
+four-byte groups at `QWOD0.WSX+0x730738`. All 18 MAPs have identical
+bytes in the block from +0x244 to +0x2F2C, and its leading count of
+2,873 fits the remaining bytes at four per row. The retail loader's
+22 post-header seeks bypass it (`0x43E884–0x43EF9A`). See the
+[block framing and reader search](lol3-map-odf-readers.md#shared-block-before-the-vertices).
+Decoding both light maps (5,364 QWOD0 members
 and 10,232 SWOD4 members; each member is 44 bytes plus two bytes per
 sample) finds none of `0x0B`, `0xC5`, `0xA5`, `0xAD` or `0xEB` as a
 sample's high byte. The largest high byte is 82 in QWOD0 and 127 in

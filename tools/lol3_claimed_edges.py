@@ -10,7 +10,7 @@ from pathlib import Path
 from struct import unpack_from
 
 import lol3_cli
-from lol3_script_framing import RETAIL_PE, level_map_entries
+from lol3_script_framing import CODE_BIAS, RETAIL_PE, level_map_entries
 
 # Entry hashes of LEVELS\<stem>\<stem>.<suffix>, file offsets of the QWOD0 C5 A5 bytes.
 QWOD0_C5A5 = {
@@ -22,6 +22,17 @@ QWOD0_C5A5 = {
 QWOD0_AT = (0x694783, 0x730744, 0x730748)
 TE_MOD8 = {0: 22, 1: 24, 2: 27, 3: 28, 4: 24, 5: 21, 6: 20, 7: 29}
 SWOD4_PLUS4 = {0: 2393, 2: 14, 6: 29, 0x0B: 0}
+MAP_HEADER = 0x244
+MAP_VERTICES = 0x2F2C
+SHARED_MAP_DIGEST = "5a4e63f1dd12c59cb726c3a133e2acfbdb366a5149a71a0a72bfcbf88631218a"
+MAP_SEEKS = {
+    0x43E884: 0x28, 0x43E927: 0xB4, 0x43E953: 0xBC, 0x43E97D: 0x38,
+    0x43E9BD: 0x3C, 0x43E9FD: 0x40, 0x43EA3D: 0x4C, 0x43EA79: 0x44,
+    0x43EAB9: 0x04, 0x43EAE6: 0x0C, 0x43EB16: 0xA4, 0x43EB46: 0x34,
+    0x43EB83: 0x08, 0x43EBB0: 0x2C, 0x43EBE3: 0xC8, 0x43EC57: 0xDC,
+    0x43EEB6: 0x14, 0x43EEE0: 0x18, 0x43EF0A: 0x1C, 0x43EF34: 0x24,
+    0x43EF5E: 0x20, 0x43EF9A: 0x48,
+}
 
 
 def u32(buf, at):
@@ -47,6 +58,44 @@ def column_hits(payload, start, count, stride, pair):
     return hits
 
 
+def check_shared_map_block(image, maps):
+    header_read = 0x43E7DA - CODE_BIAS
+    if image[header_read:header_read + 21] != bytes.fromhex(
+        "8d 54 24 14 8b f8 68 44 02 00 00 52 57 e8 b4 6f ff ff 83 c4 0c"
+    ):
+        raise ValueError("MAP header read changed")
+    seeks = set()
+    for va in range(0x43E6B0, 0x43F1F4):
+        at = va - CODE_BIAS
+        if image[at] == 0xE8 and va + 5 + unpack_from("<i", image, at + 1)[0] == 0x435A90:
+            seeks.add(va)
+    if seeks != MAP_SEEKS.keys():
+        raise ValueError("MAP loader seek sites changed")
+    for va, field in MAP_SEEKS.items():
+        at = va - CODE_BIAS - 3
+        stack_slot = field + 0x14
+        register = image[at + 1] - 0x50  # push eax, ecx or edx
+        if not 0 <= register <= 2:
+            raise ValueError(f"MAP seek {va:#x} register changed")
+        width = 1 if stack_slot < 0x80 else 4
+        form = 0x44 if width == 1 else 0x84
+        load = bytes((0x8B, form | register << 3, 0x24)) + stack_slot.to_bytes(width, "little")
+        if va == 0x43E884:
+            load += b"\x33\xdb"  # first seek also zeros ebx (origin)
+        if image[at - len(load):at + 3] != load + bytes((0x53, 0x50 + register, 0x57)):
+            raise ValueError(f"MAP seek {va:#x} no longer uses header +{field:#x}")
+    if len(maps) != 18:
+        raise ValueError(f"expected 18 MAPs, found {len(maps)}")
+    for stem, payload in maps.items():
+        if (u32(payload, 0xCC), u32(payload, 4)) != (MAP_HEADER, MAP_VERTICES):
+            raise ValueError(f"{stem}: shared MAP block bounds changed")
+        if any(u32(payload, field) < MAP_VERTICES for field in MAP_SEEKS.values()):
+            raise ValueError(f"{stem}: native seek before MAP vertices")
+        block = payload[MAP_HEADER:MAP_VERTICES]
+        if len(block) != 4 + 4 * u32(block, 0) or sha256(block).hexdigest() != SHARED_MAP_DIGEST:
+            raise ValueError(f"{stem}: shared MAP block contents changed")
+
+
 def file_facts(data_dir):
     image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
@@ -70,6 +119,7 @@ def file_facts(data_dir):
         else:
             at.extend(found)
     maps = {stem: payload for stem, _, payload in level_map_entries(data_dir)}
+    check_shared_map_block(image, maps)
     qw_map = maps["QWOD0"]
     column = 0
     for start, count, stride in (
@@ -155,6 +205,8 @@ def main():
         return 1
     print("CHECK claimed_edges: QWOD0 C5 A5 is 195/2/1/0 across texture, MAP, light map and ODF; "
           f"no MAP column steps from C5 to A5; SWOD4 surface +4 is 0/2/6/0x0B on 2393/14/29/0 rows{decoded}")
+    print("CHECK claimed_edges: 18 identical 0x2CE8-byte MAP blocks fit 2,873 four-byte rows; "
+          "all 22 native post-header seeks start at the vertices or later")
     return 0
 
 

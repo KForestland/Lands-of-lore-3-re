@@ -3,6 +3,40 @@
 VAs are for the English retail [LOL3.DAT image](lol3-lmf-reader.md).
 Header fields are numbered from zero after the leading u32 38.
 
+## Shared block before the vertices
+
+**CONFIRMED.** In all 18 MAPs, header +0xCC is `0x244` and header +0x04
+is `0x2F2C`. The enclosed 11,496 bytes are identical across all levels.
+In `QWOD0.WSX` the block starts at +0x72E4CF and the vertices at +0x7311B7.
+The first u32 is `0xB39` (2,873), and the remaining span fits exactly
+2,873 four-byte rows. The two `C5 A5` hits at +0x730744 and +0x730748
+start at byte 1 of zero-based rows 2,204 and 2,205 under that framing.
+
+**CONFIRMED.** The retail `.map` loader at `0x43E6B0` reads exactly
+0x244 bytes into stack +0x14 (`0x43E7DA–0x43E7EF`). Its first further
+read at `0x43E89A` follows a seek to header +0x28 (`0x43E87B–0x43E884`).
+All 22 calls to the MAP seek helper `0x435A90` take header offsets at
+or beyond the vertices on all 18 maps. These are the call sites and
+header offsets in execution order.
+
+| Seek calls | Header offsets, in the same order |
+|---|---|
+| `0x43E884`, `0x43E927`, `0x43E953`, `0x43E97D`, `0x43E9BD`, `0x43E9FD`, `0x43EA3D`, `0x43EA79` | `+28`, `+B4`, `+BC`, `+38`, `+3C`, `+40`, `+4C`, `+44` |
+| `0x43EAB9`, `0x43EAE6`, `0x43EB16`, `0x43EB46`, `0x43EB83`, `0x43EBB0`, `0x43EBE3`, `0x43EC57` | `+04`, `+0C`, `+A4`, `+34`, `+08`, `+2C`, `+C8`, `+DC` |
+| `0x43EEB6`, `0x43EEE0`, `0x43EF0A`, `0x43EF34`, `0x43EF5E`, `0x43EF9A` | `+14`, `+18`, `+1C`, `+24`, `+20`, `+48` |
+
+**UNCONFIRMED.** The shared block's purpose, any fields within the
+four-byte rows, and whether another program consumes it. The `.map`
+suffix reference at `0x43E294` leads to `0x43E304`, the direct caller
+of the retail loader above. An exact prefix and suffix search in the
+original `DAT` directory found this block only inside the 18 MAPs.
+To settle it, find a shipped reader that accesses the span at header
++0xCC, then follow a full row to its first typed use. A future native
+trace on the MAP handle across resource reads at `0x4357A0` can also
+test whether that span is requested elsewhere during a level load.
+`lol3_claimed_edges.py --check` checks the original blocks and the 22
+seek sites.
+
 ## MAP section 0
 
 **CONFIRMED.** The `.map` suffix at `LOL3.DAT+0x147F6C` reaches
