@@ -163,13 +163,44 @@ omit the 1555 format (result 0) or offer only 4444 (selector 2).
 To settle it for a given driver, run the game on that Windows device
 and read `[0x661640]` and `[0x66163C]` after `0x4951BA`.
 
-This selects an RGB555 texture word with one alpha bit for this
-device. **UNCONFIRMED.** The individual uploaded pixel words, final
-composited screen colour and the choice on other devices remain open.
-They depend on the live device and the window capture.
-To check a content conversion, capture the same texture's locked source
-and destination around `IDirect3DTexture2::Load`. The SMD raster and row
-flags below have their own input and output comparisons.
+### Live level-5 indexed row and upload
+
+**CONFIRMED.** On the same English retail executable and Direct3D
+device choice, a null-sink run selected the level-5 slot
+`df50eda48c27` (+0x498 = 5). With live level byte `[0x5708DB]`
+set to 5 during the load, the original call at `0x495630` sent
+128 indices to `0x495290`. The indexed helper uses the low word
+of `[[0x54AAB8] + 4*index]` (`0x4952B4–0x4952D6`).
+In this sample the table was at `0x65D3F0`, the input at
+`0x02045918` and the destination at `0x02191AD0`.
+At return `0x495635`, all 128 destination words agreed
+with their individual palette lookups.
+
+| Row index byte | First observed staging word | Alpha bit and RGB555 channels |
+|---|---|---|
+| `0xDF` | `0xDAB4` | 1, 22/21/20 |
+| `0x82` | `0xDEF6` | 1, 23/23/22 |
+| `0x46` | `0xEB5B` | 1, 26/26/27 |
+| `0x84` | `0xB18C` | 1, 12/12/12 |
+
+The staging path had a live locked buffer at `[0x66164C]`
+(`0x4955CF–0x4955D9`). The following texture load
+(`0x49658C`) returned 0 at `0x49658F` with selected
+16-bit masks `7C00/03E0/001F/8000`.
+An earlier load sample with the same call and descriptor
+gave the sequence `0x70/0x5F/0x95/0x68` mapping to
+`0x8421/0x9084/0x9CE7/0x98C6`.
+
+**UNCONFIRMED.** Final composition for an identified texel.
+The source and locked staging bytes establish the indexed
+colour conversion and the upload result. To measure the draw,
+record the texture handle stored at `0x4965CE` for this upload.
+Follow that handle to a level draw and choose an interior
+pixel with recorded UV, base word, light-map word or vertex
+colour, filtering, and blend state. Compare the render-target
+word before presentation and the same pixel in the presented
+surface. The device-selection test above covers other formats.
+The SMD raster and row flags below have separate tests.
 
 ## SMD slice frame references
 

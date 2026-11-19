@@ -80,18 +80,19 @@ Direct3D display option selected 16-bit `7C00/03E0/001F/8000`, and
 both sides of a traced texture copy used that descriptor.
 [Live selection and texture-copy evidence](lol3-texture-bake.md#live-direct3d-texture-format)
 
-**UNCONFIRMED.** Final composited colour, conversion of the individual
-words and other devices. To compare another device, load a textured
-level and break at the device format enumeration call
-`0x4950F7`. In the callback at `0x495040`, record descriptor
-dwords +0x58/+0x5C/+0x60 and the alpha mask at +0x64.
-After the call capture the selected copy and follow that
-descriptor into the first texture upload. RGB555 selects the 5-bit
-extraction with the first triple above. RGB444 selects 4-bit
-extraction with the second. A different upload descriptor or
-pixel word identifies a conversion between selection and display.
-If the path enumerates several candidates, keep the upload
-descriptor separate from those candidates.
+**CONFIRMED, level-5 indexed upload.** At `0x495635` all 128
+measured output words agree with their original palette lookups
+at `0x495290`. Index `0xDF` produced `0xDAB4`, and
+`0x49658F` returned 0 with the same selected RGB555-alpha descriptor.
+[Matched colour words and exact next test](lol3-texture-bake.md#live-level-5-indexed-row-and-upload)
+
+**UNCONFIRMED.** Final composited colour for an identified texel.
+Follow the texture handle stored at `0x4965CE` into a level
+draw. Record one pixel's source texel, lighting and blend
+inputs, then read the composed render target and the same
+pixel after presentation. For a different device use
+`0x495040` to record the candidate masks and check which
+descriptor is passed on to the upload.
 
 ### Q9. What colours does the VQA frame callback present?
 
