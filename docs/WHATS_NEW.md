@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Item handlers, fourth batch.** Indexes 76 through 86 and 89 through 93, 95 through 97 and 99 of the use table are read from each handler ([items](lol3-item-dispatch.md#indexes-76-through-86-and-89-through-99)). Indexes 88, 94 and 98 have no regular definition; what their slots do is described there. Q12 stays partly answered.
 - **Item handlers, third batch.** Indexes 53 and 56 through 70 and 72 through 75 of the use table are read from each handler ([items](lol3-item-dispatch.md#indexes-53-and-56-through-75)). Indexes 55 and 71 have no regular definition. Q12 stays partly answered.
 - **Item handlers, second batch.** Indexes 31 through 36 and 39 through 52 of the use table are read from each handler ([items](lol3-item-dispatch.md#indexes-31-through-52)). Q12 stays partly answered.
 - **Item handlers.** Indexes 11 through 30 of the use table are read from each handler: the operation tests, the player flag bits and the calls ([items](lol3-item-dispatch.md#indexes-11-through-30)). Q12 stays partly answered. Open: the remaining indexes, native acquisition, the HUD and the on-screen names.

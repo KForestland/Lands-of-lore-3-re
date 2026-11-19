@@ -469,4 +469,4 @@ bases when it saved.
 
 **What was tried.** This slice follows the display read at `0x430C7D`. The page already records the second-counter debit, the edited-save observation, and the list-8 discounts on keys 10 and 13.
 
-**What would settle it.** The running-game test is not yet run ([test Q12](NEEDS_A_RUNNING_GAME.md#q12-which-live-cast-consumes-an-alternate-resource), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). Still open are native acquisition, the exact HUD feedback, individual handler effects beyond indexes 0–36, 39–70, 72–75, 87 and 112 (37, 38, 55 and 71 have no regular definition), and the on-screen names of slots, keys and mask bits.
+**What would settle it.** The running-game test is not yet run ([test Q12](NEEDS_A_RUNNING_GAME.md#q12-which-live-cast-consumes-an-alternate-resource), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). Still open are native acquisition, the exact HUD feedback, individual handler effects beyond indexes 0–36, 39–70, 72–87, 89–93, 95–97, 99 and 112 (37, 38, 55, 71, 88, 94 and 98 have no regular definition), and the on-screen names of slots, keys and mask bits.
