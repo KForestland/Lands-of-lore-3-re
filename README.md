@@ -9,8 +9,19 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
 - **What you can do today:** unpack every archive, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
-- **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md): 3 of 13 answered (two of them for one display or renderer), 5 mostly, 5 partly; open points include most item effects, a floor pickup in a save, and other display modes. Some were tried in the [running game](docs/NEEDS_A_RUNNING_GAME.md) (the texture and movie colour formats are answered there); the rest need later-game saves.
+- **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md) (counts in the [rating](#rating); two of the answers hold for one display or renderer); open points include most item effects, a floor pickup in a save, and other display modes. Some were tried in the [running game](docs/NEEDS_A_RUNNING_GAME.md) (the texture and movie colour formats are answered there); the rest need later-game saves.
 - **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md)).
+
+## Rating
+
+Counted by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_RATE.md) explains each line and what it does not claim.
+
+<!-- rating:begin -->
+- **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
+- **Rules traced:** 241 statements labelled CONFIRMED against the program or the files, 77 labelled UNCONFIRMED, on 72 current pages.
+- **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
+- **Open questions:** 13: 3 answered, 5 mostly, 5 partly.
+<!-- rating:end -->
 
 Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest.
 
@@ -23,7 +34,7 @@ QWOD0 seen from above. Dark edges occur once in the surface table and pale edges
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Executable pages** in [`docs/`](docs/README.md): the WSX, LMF, texture, MAP/ODF, script, item, spell, dialogue, combat and save readers in the game program `LOL3.DAT`.
-- **Tools** in [`tools/`](tools/README.md): fifteen checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a save-header reader, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
+- **Tools** in [`tools/`](tools/README.md): sixteen checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a save-header reader, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -44,7 +55,7 @@ The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are no
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 15 checks, ends with ALL 15 CHECKS PASSED (or 12 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py                  # 16 checks, ends with ALL 16 CHECKS PASSED (or 13 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```

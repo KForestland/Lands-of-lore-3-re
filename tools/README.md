@@ -12,7 +12,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 15 CHECKS PASSED`, or `12 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 16 CHECKS PASSED`, or `13 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header and counts the bit-0 vertex normals. |
@@ -27,6 +27,7 @@ Run examples outside the repository.
 | `lol3_media_check.py` | the `MOVIES1..4`, `MUSIC1..4` and level sound archives, and `LOL3.DAT` | the 19 named movies and their frame index, the 38 music tracks and 6,696 level sounds; counts only |
 | `lol3_map_spans.py` | `LOL3.DAT` and the 18 MAP entries | waypoint byte +6, the 2,330/39/15 name slots, the 36 path labels, the 1,784 bytes before field 16 and the 167,942 section-1 rows |
 | `lol3_combat_census.py` | `LOL3.DAT`, the 18 level ODFs and `GLOBAL.WSX` | the 334 creature mitigation records (57 distinct, selector counts) and the 258 regular item definitions on 114 handler indexes |
+| `rating.py` | the `DAT` folder and the pages | prints the four rating lines ([how we rate](../docs/HOW_WE_RATE.md)); `--check` requires README and STATUS to carry them |
 | `lol3_claimed_edges.py` | `LOL3.DAT`, `QWOD0.WSX` and `swod4.wsx` | where the bytes named by the old QWOD0 and SWOD4 edges occur; `--decode` also checks the light-map sample high bytes |
 | `lol3_save_header.py` | one save slot you name (a player save, not a game file) | prints the preview, 61 global and 18 level offsets and lengths as JSON; writes nothing; no `--check` |
 

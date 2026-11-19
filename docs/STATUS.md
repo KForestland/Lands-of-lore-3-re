@@ -2,7 +2,16 @@
 
 **As of:** 2026-11-19. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. This table replaces the earlier "closure" wording; the older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (15 checks; all pass on the English GOG copy).
+Run the checks: `python3 tools/check_all.py --data <DAT>` (16 checks; all pass on the English GOG copy).
+
+**Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
+
+<!-- rating:begin -->
+- **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
+- **Rules traced:** 241 statements labelled CONFIRMED against the program or the files, 77 labelled UNCONFIRMED, on 72 current pages.
+- **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
+- **Open questions:** 13: 3 answered, 5 mostly, 5 partly.
+<!-- rating:end -->
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
