@@ -195,7 +195,7 @@ def check(data_dir, decode):
     if decode:
         extra += (f"; bit 0 set on {stats[1]:,} members whose {stats['vertex_unit']:,} vertex normals are unit length "
                   f"({stats['vertex_zero']} zero), one repeated vector on {stats['face_repeated']:,} of {stats[0]:,} others")
-        extra += (f"; {stats['nonzero_header_samples']:,} nonzero +0x0C–+0x13 words occur in their own grids "
+        extra += (f"; {stats['nonzero_header_samples']:,} nonzero +0x0C..+0x13 words occur in their own grids "
                   f"({stats['matching_corner']:,} near their corresponding corners, "
                   f"{stats['opposite_corner']:,} near their opposite corners)")
         nonzero, exact, near, far = (stats["nonzero_header_samples"], stats["exact_corner"],
