@@ -24,7 +24,8 @@ LEAF_VA = {
 # call 0x420300, then call 0x4FD780, for the five leaves in order.
 JOIN_AT = (0x4FD99F, 0x4FD9C1, 0x4FD9E3, 0x4FDA05, 0x4FDA30)
 LOAD_AT = (0x4FD9A8, 0x4FD9CA, 0x4FD9EC, 0x4FDA0E, 0x4FDA39)
-# (address, rows, address, columns) of the two size pushes for each leaf.
+# (address, columns, address, rows) of the two size pushes for each leaf: the first push is the
+# column count (argument 4, inner loop at 0x4FD83B), the second the row count (argument 3, 0x4FD815).
 SIZES = (
     (0x4FD975, 1, 0x4FD977, 0x20),
     (0x4FD9B4, 0x0E, 0x4FD9B6, 0x2E),
@@ -113,9 +114,9 @@ def main():
         for at in LOAD_AT:
             if not call_to(image, at, 0x4FD780):
                 raise ValueError(f"call at {at:#x} is not the AI loader")
-        for row_at, rows, col_at, columns in SIZES:
-            if not push_imm(image, row_at, rows) or not push_imm(image, col_at, columns):
-                raise ValueError(f"size pushes at {row_at:#x} are not {rows} by {columns:#x}")
+        for col_at, columns, row_at, rows in SIZES:
+            if not push_imm(image, col_at, columns) or not push_imm(image, row_at, rows):
+                raise ValueError(f"size pushes at {col_at:#x} are not {rows:#x} rows by {columns:#x} columns")
 
         slots = names = cd = mixed = 0
         seen = set()

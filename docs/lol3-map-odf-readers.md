@@ -237,8 +237,13 @@ Each is a NUL-terminated printable name, padded with `0x00` or
 at entry +0x5DC and is `Floor39`. The loader seeks to field 0
 (`0x43FCCE`, call `0x435A90` at `0x43FCD6`) and `0x4AB420` reads
 exactly 24 times the count (`0x4AB42E`). The timed walk steps
-`0x18` (`0x4AB682`). The next seek is field 1 (`0x43FD3D`,
-`0x43FD45`), so this loader does not read the names. Section 4
+`0x18` (`0x4AB682`). The next seeks go to field 20 (`0x43FD09`, when field 19 is
+nonzero) and then field 1 (`0x43FD45`), so this loader does not read
+the names. A scan of the code section for another 22-byte stride found
+only `add edi, 0x16` at `0x45D9D9`, a screen spacing, so no reader of
+the names is known. **UNCONFIRMED:** most of the 630 names read as
+material names (454 are `Floor` plus digits), which suggests a
+material or sound lookup. Section 4
 ends at the start of section 3 in all 18 entries.
 
 ### Creature definitions in field 3
@@ -274,8 +279,9 @@ calls build five resources: `stat.csv`, `goals.csv`,
 (`0x4FD975–0x4FDA39`; leaf strings at `0x551BE4`, `0x551BD8`,
 `0x551BCC`, `0x551BBC` and `0x551BB0`). Each call joins the
 directory and the leaf at `0x420300`, then loads at `0x4FD780`.
-The five grid sizes, rows by columns, are 1×`0x20`, `0x0E`×`0x2E`,
-`0x0F`×`0x2E`, `0x20`×`0x3A` and `0x95`×`0x2E`, stored at object
+The five grid sizes, rows by columns, are `0x20`×1, `0x2E`×`0x0E`,
+`0x2E`×`0x0F`, `0x3A`×`0x20` and `0x2E`×`0x95` (row loop bound at
+`0x4FD815`, column loop bound at `0x4FD83B`), stored at object
 +8, +0x28, +0x2AC, +0x55E and +0xC9E. The lookup increments
 the cached object's count at +0x2774 (`0x4FDF4E–0x4FDF56`).
 
@@ -292,9 +298,10 @@ payload starts in the order above are `GLOBAL.WSX+0x1FDBA3`,
 of the type tag without assigning gameplay meaning to every tag.
 
 **CONFIRMED** (the miss arm). **UNCONFIRMED** (what sets the two
-flag fields). `0x420300` begins after four `nop`s. It copies the
-directory, the backslash at `0x546318`, and the leaf into the
-destination, or into `0x5D5818` when that pointer is null, and
+flag fields). `0x420300` begins after `nop` padding. It copies the
+directory, the backslash at `0x546318` when the directory does not
+already end in one, and the leaf into the destination, or into
+`0x5D5818` when that pointer is null (always here), and
 returns the buffer. It does not look the name up. `0x4FD780`
 begins after `ret` and two `nop`s at `0x4FD77D`. It zeros the
 row-by-column product, then calls `0x435880`, which returns the

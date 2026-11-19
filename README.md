@@ -18,7 +18,7 @@ Counted by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
-- **Rules traced:** 246 statements labelled CONFIRMED against the program or the files, 75 labelled UNCONFIRMED, on 71 current pages.
+- **Rules traced:** 246 statements labelled CONFIRMED against the program or the files, 76 labelled UNCONFIRMED, on 71 current pages.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
 - **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
 <!-- rating:end -->
@@ -76,7 +76,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md).
 |------|-------|
 | WSX archives | Layout documented; 51 of 52 `DAT/*.WSX` parse; `cdcache.wsx` does not (Q1) |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
-| MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers. Section-1 bytes each have a reader; waypoint byte +6, the label spans and the bytes before field 16 are measured (Q4 mostly, Q5) |
+| MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers. Section-1 bytes each have a reader; waypoint byte +6, the label spans and the bytes before field 16 are measured (Q4, Q5 mostly) |
 | Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values need further work. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
 | Movies, music | VQA containers, seek tables, LCW and 4×4 pointers traced; under Wine on a 16-bit display the intro converts 5-5-5 codebook words to 5-6-5 (Q9); 38 MP3-in-WAVE music tracks streamed through Miles (Q10) |
 | Level sounds | RIFF WAVE, format 17 (IMA ADPCM) in the 18 sidecar archives ([level sheets](docs/levels/README.md)) |
