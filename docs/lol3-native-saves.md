@@ -282,3 +282,38 @@ To find it, watch that dword between the control save and click.
 The decoded values for selectors 2, 3 and 25 are XOR data.
 Retirement, allocation and cursor values agree with the predicted
 changes above. The new-game route was not needed for this comparison.
+
+## Editing a copy of an original slot
+
+**CONFIRMED, edited-save run.** English retail 1.07a loaded a
+copy of the BUPP1 slot `5ae559b2cabe` with two new item rows
+and two reassigned quick-cast references. The file grew from
+1,807,734 to 1,807,771 bytes. The original loader reached
+`0x43703E` and restored the intended references. It later wrote
+a new autosave (`6bf815a1e022`, 1,821,427 bytes) through
+`0x43766F`. All three headers passed the directory checks.
+
+The source pointer map for this trial uses the definition
+base at slot `+0x3B4` and pool base at `+0x3C8`. A definition
+pointer uses the 139-byte stride at `0x4ACD17`. An item
+reference uses a 16-byte row in global selector 2. Set the
+matching bit in selector 3 when adding a row. The quick-cast
+slots in selector 10 and quick item pockets in selector 11
+contain pointers into that pool (descriptor arms
+`0x43829D–0x4382EE`). The two existing pocket entries were
+moved into empty pack slots in selector 13, whose arm is
+`0x438318–0x438340`. Preserve the original definition and
+pool range bases so a stored pointer can be translated on load.
+
+Keep expanded section sizes, LZO chunk lengths and following
+directory offsets consistent with the byte stream. The trial
+changed one chunk in each of global selectors 2 and 3,
+updated total length at `+0x2C` and added the combined
+37-byte growth to later global and level starts. No level
+block or length changed. Preserve version and data stamps
+checked at `0x43CA0B–0x43CA7E`, and the saved pointer map.
+For XOR-backed cells use the matching `global.img` or level
+baseline. In this trial the base bytes for both edited item
+rows and both occupancy cells were zero. No separate
+payload checksum was recomputed on the accepted copy.
+[Exact byte changes and original item use](lol3-spell-dispatch.md#casts-with-edited-quick-slots)

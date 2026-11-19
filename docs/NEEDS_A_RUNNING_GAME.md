@@ -61,7 +61,7 @@ reach the placement's height. The linked section names the
 FLAIR placement on surface 3243 as the other route.
 [Placement, trial values and alternate route](lol3-spell-dispatch.md#dlow1-approach-with-the-native-placement-live)
 
-**UNCONFIRMED.** Live second-counter debit and HUD feedback. Save with
+**UNCONFIRMED.** Native acquisition control and exact HUD feedback. Save with
 fixed equipment, sufficient mana and spell 0x54 or 0x59 selected.
 Watch `0x570AB9` while using a first-counter item, then cast. For
 the second counter use Mana Cluster and spell ID 0x57 (`GLOBAL.WSX+0x67F2`), whose
@@ -72,6 +72,15 @@ a −1 argument identifies the alternate counter to follow.
 A negative debit at `0x40FFE0` and changed player +0x1B8
 are the ordinary mana control. Keep any run where admission
 fails separate from a successful alternate payment.
+
+**CONFIRMED, edited-save run.** Ancient's Stone supplied the first
+charge and `0x59` spent one. Mana Cluster supplied the second charge
+at `0x4A6133`. Spell `0x57` then took the second counter from 1 to 0
+at `0x432AE0`. The ordinary mana writer recorded a 22-mana cost
+for `0x57` with the selector zero and no negative write in the
+charged cast. A native acquisition control and exact HUD indicator
+remain open.
+[Exact bytes and native debit trace](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
 
 ## Answered probes
 

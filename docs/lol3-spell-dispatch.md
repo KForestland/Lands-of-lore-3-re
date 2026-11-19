@@ -374,3 +374,60 @@ cursor empty, capture pickup of definition `0xE2F77FE7` at
 and verify the count at `0x432AE0`. Cast spell 0x57 against
 a valid target and record its −1 debit and mana balance at
 `0x4A5A3A`. Follow the count in the HUD at `0x430C7D`.
+
+### Casts with edited quick slots
+
+**CONFIRMED, edited-save run.** The BUPP1 source slot
+`5ae559b2cabe` was copied and loaded by the English retail
+original under Wine with a private software renderer and
+null sink. The copied slot (`90099b161497`) kept both counters
+as written by the game. The recipe changes the following
+bytes. Offsets in each row are relative to that selector's
+expanded payload and the source slot start is in parentheses.
+
+| Selector | Offset and old → new |
+|---|---|
+| G2 (`0x1A441`) | `+0x270: 00 00 00 00→5C 3C E5 21`, `+0x280: 00 00 00 00→19 B1 E5 21` |
+| G3 (`0x1A805`) | `+0x04: 7F→FF`, `+0x05: 06→07` |
+| G10 (`0x1AD22`) | `+0x50: 80 4A→10 4B`, `+0x70: B0 4B→80 4F` |
+| G11 (`0x1ADC2`) | `+0x00: 80→C0`, `+0x04: 03→01`, `+0x10: 90→D0` |
+| G13 (`0x1AE92`) | `+0xC0: 00 00 00 00 00→80 4C 71 02 03`, `+0xE0: 00 00 00 00 00→90 4C 71 02 01` |
+
+At G2, new rows 39 and 40 reference original definition
+indices 52 (Ancient's Stone, `0x36`) and 267 (Mana Cluster,
+`0x110`). The corresponding original definition offsets
+are `GLOBAL.WSX+0x5692/+0xCB4F`. G3 marks both rows occupied.
+G10's first and third cast keys take the pool references
+that G14 rows 11/12 already held for spells `0x59/0x54`
+(decimal 89/84). The middle quick slot keeps `0x57`.
+G11 points the first two pockets at the new rows. The old
+pocket pointers and counts move to G13 rows 12 and 14.
+The two repacked LZO sections grew from 964/48 to 986/63
+bytes, with expanded sizes unchanged. Update their packed-length
+words, add the running 22/37-byte shifts to following global
+starts at slot `+0x4B8`, add 37 to each level start at
+`+0x5B0`, and add 37 to the total length at `+0x2C`.
+[Pointer and directory requirements](lol3-native-saves.md#editing-a-copy-of-an-original-slot)
+
+At `0x43703E` the live cast-key IDs were `59/57/54`, pocket
+IDs `36/110`, mana 437 and counters 35/0. A left click on
+each pocket transferred its item to the cursor. Right click
+in the viewport used it through the original handler.
+
+| Original action | Native observation |
+|---|---|
+| Key 2, spell `0x57` with no second charge | The ordinary writer `0x410014` stored 415, −22 from mana 437, returning to `0x4A5A52`. |
+| Use Ancient's Stone | `0x49FB23` led to `0x4329D0`, first counter 35 → 36, return `0x49FB28`. |
+| Key 1, spell `0x59` | `0x4A5A20` led to `0x4329D0`, first counter 36 → 35 with mana 437 at cast admission. |
+| Key 3, spell `0x54` | The cast reached `0x4A46C1` with first counter 35. The view reported no enemy to attack and neither debit writer fired. |
+| Use Mana Cluster | `0x4A6133` led to `0x432AE0`, second counter 0 → 1, return `0x4A6138`. |
+| Key 2, spell `0x57` after Mana Cluster | `0x4A5A3A` passed −1 to the second writer, which changed 1 → 0 and returned to `0x4A5A3F`. The negative ordinary-mana watch had no hit for this cast. |
+
+The viewport showed the spell effect during the charged cast.
+At the subsequent save entry `0x43766F`, mana was 437, the
+first and second counters were 35 and 0, and the cursor was
+empty. The exact charged HUD indicator remains **UNCONFIRMED**.
+The edited-save trial establishes both original item writers
+and the alternate debit once the item is available. A native
+save with an acquired Mana Cluster would reproduce the
+path without the inventory setup.
