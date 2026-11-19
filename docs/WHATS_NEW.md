@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Cross-series check.** The shared format pages already stated the same archive, movie, music and cache figures as the current notes, and the name-hash note now states the shift of 6 ([engine](engine-evolution.md)). The shared glossary words are the same text in each game ([glossary](GLOSSARY.md)).
 - **Settling tests.** Two open statements now name the test that would settle them: the sound name the `HWHIT` record requests in play, and a read watch on the four light-map header words ([dialogue](lol3-dialogue-dispatch.md), [light maps](formats/lmf.md)).
 - **Close-out.** Ten open questions (Q1, Q3, Q4, Q5, Q7, Q8, Q10, Q11, Q12, Q13) each end with what was measured, what was tried, and what would settle the rest. States stay as they are. The five unread files stay unread ([open questions](OPEN_QUESTIONS.md)).
 - **Program timestamp field.** The COFF TimeDateStamp at `LOL3.DAT` file +0xD0 is `0x37332C6E`, which encodes 1999-05-07 18:09:50 UTC ([light maps](lol3-lmf-reader.md)).

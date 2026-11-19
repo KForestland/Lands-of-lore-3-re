@@ -59,7 +59,7 @@ evidence to it.
 answered. *Answered*: nothing is left to settle from the files or the
 program. *Mostly answered*: the main question is settled; named details
 remain. *Partly answered*: part is settled; the main point is open. A row
-that says "answered for" a setup (one renderer, one device) counts as
+that says 'answered for' a setup (one renderer, one device) counts as
 answered for that setup only.
 
 ## What the rating does not say
