@@ -20,7 +20,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 397 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 420 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -110,7 +110,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md). "Q11" and the like
 | Movies, music | Movie files (VQA) decoded; on a 16-bit display under Wine the intro's colours are converted from 15-bit to 16-bit (Q9); the 38 music tracks are MP3 inside WAV files, played through the Miles sound library (Q10) |
 | Level sounds | WAV files using IMA ADPCM compression, in the 18 per-level sound archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (only the on-screen look of effect objects is open); per-level summaries (Q11) |
-| Items, spells, dialogue, combat | Traced in the program: 343 item rows, 92 of the 113 nonzero regular item handlers read one by one, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: most per-item effects and mitigation names (Q12) |
+| Items, spells, dialogue, combat | Traced in the program: 343 item rows, all 113 nonzero regular item handlers read one by one, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: what the objects the handlers build do on screen, and mitigation names (Q12) |
 | Saves | Header, directories and compression mapped from 47 of our own saved games, written by the original program (not included, so no tool here can re-check them); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
 
 ## Repository layout
