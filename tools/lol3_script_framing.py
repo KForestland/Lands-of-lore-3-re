@@ -18,6 +18,10 @@ CODE_BIAS = 0x400C00
 GROUP_HEADER = 0xF0
 RESUME_COMMAND = 0x1B
 EXPECTED = (18, 431_495, 54_966, 54_940, 12_306, 33, 14, 1_654)
+# Stored indirect object commands by (opcode, selector byte +1); the selector is the object type
+# (docs/lol3-script-opcodes.md#per-class-effects-of-the-indirect-commands).
+EXPECTED_SELECTORS = {(0x01, 32): 1_175, (0x03, 1): 1_021, (0x03, 2): 346, (0x03, 16): 16, (0x03, 192): 416,
+                      (0x0D, 2): 5_213, (0x0D, 3): 56}
 
 
 def u32(data, at):
@@ -103,6 +107,16 @@ def frame(payload, sizes):
     return len(stream), len(offsets), len(starts), opcodes, embedded_headers, zero_resume_counts
 
 
+def selector_counts(payload, sizes):
+    """(opcode, selector) counts for the +0xC0 commands 0x01, 0x03 and 0x0D in one MAP's stream."""
+    stream, counts, pos = map_range(payload, 0x44, 0x8C), Counter(), 0
+    while pos < len(stream):
+        if stream[pos] in (0x01, 0x03, 0x0D):
+            counts[stream[pos], stream[pos + 1]] += 1
+        pos += sizes[stream[pos]]
+    return counts
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
     args = parser.parse_args()
@@ -112,7 +126,7 @@ def main():
         data_dir = Path(args.data).resolve()
         sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
         maps = total_bytes = refs = records = embedded = resume = 0
-        opcodes = Counter()
+        opcodes, selectors = Counter(), Counter()
         for stem, payload in level_maps(data_dir):
             try:
                 length, entries, count, frequency, has_header, zero_resume = frame(payload, sizes)
@@ -125,14 +139,18 @@ def main():
             embedded += has_header
             resume += zero_resume
             opcodes.update(frequency)
+            selectors.update(selector_counts(payload, sizes))
             if not args.check:
                 print(f"{stem}: {length:,} bytes, {entries:,} index entries, {count:,} record boundaries")
         metrics = (maps, total_bytes, refs, records, opcodes[GROUP_HEADER], len(opcodes), embedded, resume)
         if args.check:
             if metrics != EXPECTED:
                 raise ValueError(f"retail corpus totals {metrics} differ from {EXPECTED}")
+            if dict(selectors) != EXPECTED_SELECTORS:
+                raise ValueError(f"indirect command selectors {dict(selectors)} differ from {EXPECTED_SELECTORS}")
             print(f"CHECK script_framing: {maps} MAPs, {total_bytes:,} bytes, {refs:,} index entries on "
-                  f"{records:,} boundaries, {opcodes[GROUP_HEADER]:,} group headers, {len(opcodes)} of 39 opcodes occur")
+                  f"{records:,} boundaries, {opcodes[GROUP_HEADER]:,} group headers, {len(opcodes)} of 39 opcodes occur; "
+                  f"opcodes 0x01/0x03/0x0D by target type match ({sum(selectors.values()):,} records)")
         else:
             for opcode, size in sizes.items():
                 print(f"0x{opcode:02X}: {size} bytes, {opcodes[opcode]:,} occurrences")
