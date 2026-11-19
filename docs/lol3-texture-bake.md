@@ -166,15 +166,22 @@ and read `[0x661640]` and `[0x66163C]` after `0x4951BA`.
 ### Live level-5 indexed row and upload
 
 **CONFIRMED.** On the same English retail executable and Direct3D
-device choice, a null-sink run selected the level-5 slot
-`df50eda48c27` (+0x498 = 5). With live level byte `[0x5708DB]`
-set to 5 during the load, the original call at `0x495630` sent
-128 indices to `0x495290`. The indexed helper uses the low word
+device choice, one null-sink instance ran from a disposable
+copy on private 16-bit Xvfb. Before launch, the copied autosave
+was `df50eda48c27` (+0x498 = 5). The trace did not log a
+slot identity at restore. During the selected Load Autosave
+path, the debugger sampled the first `0x495290` invocation with
+live level byte `[0x5708DB]` equal to 5, at least eight input
+indices and a non-grey first palette word. The original call
+at `0x495630` passed 128 indices. The indexed helper uses the low word
 of `[[0x54AAB8] + 4*index]` (`0x4952B4–0x4952D6`).
 In this sample the table was at `0x65D3F0`, the input at
 `0x02045918` and the destination at `0x02191AD0`.
 At return `0x495635`, all 128 destination words agreed
-with their individual palette lookups.
+with their individual lookups in memory. The trace printed
+the first 16 input and output words and the match count for
+all 128. The live table has no confirmed join to a particular
+cache record or documented palette source.
 
 | Row index byte | First observed staging word | Alpha bit and RGB555 channels |
 |---|---|---|
@@ -183,8 +190,8 @@ with their individual palette lookups.
 | `0x46` | `0xEB5B` | 1, 26/26/27 |
 | `0x84` | `0xB18C` | 1, 12/12/12 |
 
-The staging path had a live locked buffer at `[0x66164C]`
-(`0x4955CF–0x4955D9`). The following texture load
+The staging path checks the static lock-pointer cell
+`0x66164C` (`0x4955CF–0x4955D9`). The following texture load
 (`0x49658C`) returned 0 at `0x49658F` with selected
 16-bit masks `7C00/03E0/001F/8000`.
 An earlier load sample with the same call and descriptor

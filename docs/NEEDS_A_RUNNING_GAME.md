@@ -88,8 +88,8 @@ both sides of a traced texture copy used that descriptor.
 [Live selection and texture-copy evidence](lol3-texture-bake.md#live-direct3d-texture-format)
 
 **CONFIRMED, level-5 indexed upload.** At `0x495635` all 128
-measured output words agree with their original palette lookups
-at `0x495290`. Index `0xDF` produced `0xDAB4`, and
+measured output words agree with lookups in the live table
+`[0x54AAB8]` at `0x495290`. Index `0xDF` produced `0xDAB4`, and
 `0x49658F` returned 0 with the same selected RGB555-alpha descriptor.
 [Matched colour words and exact next test](lol3-texture-bake.md#live-level-5-indexed-row-and-upload)
 
@@ -138,8 +138,10 @@ moved its reference from global selector 11 +0 to selector 7 +0x44,
 leaving both position groups unchanged.
 [Autosave offsets, hashes and writer traces](lol3-native-saves.md#controlled-saves-with-a-null-sink)
 
-**ANSWERED for a controlled floor pickup, CONFIRMED.** A copied
-level-2 slot restored at `0x43703E` with the null sink. An item was
+**ANSWERED for a controlled floor pickup, CONFIRMED.** One
+instance ran from a disposable game copy with a private 16-bit
+Xvfb display and null audio. A copied original level-2 player
+slot restored at `0x43703E`. An item was
 placed on the ground using normal input, then picked up with an
 empty-hand left click. The native transfer at `0x49EDA0` copied
 world row 489 to player row 4. Native saves before and after agree

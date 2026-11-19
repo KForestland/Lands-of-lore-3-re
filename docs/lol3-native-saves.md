@@ -186,8 +186,8 @@ be used for position and inventory controls.
 2 and 3 use the player-item pool at `[0x6626BC]`
 (`0x4381AA–0x4381B9`, `0x438773–0x43879B`,
 `0x4387A1–0x4387C4`). To settle the floor pickup, use one original
-slot within reach of a visible loose item, restore it for both
-trials, and save after clicking only the item in the second trial.
+slot within reach of a visible loose item, restore it once, save with the cursor empty, then save
+again after clicking the loose item.
 At `0x4378C0` and `0x437F79`, identify the outgoing and incoming
 rows by definition identity before decompression and file comparison.
 Account for the selector's base XOR and pointer relocations before
@@ -238,8 +238,10 @@ verifies the vtable, writer selection, calls and store anchors.
 ### Controlled floor pickup in BUPP1
 
 **CONFIRMED.** The original English retail game restored a copied
-level-2 player slot (SHA-256 prefix `802f83893758`) with a private
-16-bit Xvfb display and a PulseAudio null sink. The progress sound
+original player slot (SHA-256 prefix `802f83893758`)
+in one instance from a disposable game copy. Level ID 2 selects
+BUPP1 (`LOL3.DAT+0x14716E` points to the level-asset path).
+The game used a private 16-bit Xvfb display and a PulseAudio null sink. The progress sound
 returned 0 at `0x46F59F` and the restore reached `0x43703E`.
 In an outdoor area, an item was moved from the first quick slot
 to the cursor and placed on the floor with the original left click
@@ -247,7 +249,7 @@ while looking down. F10 then wrote the floor control with an empty
 cursor. One left click on the visible loose item reached
 `0x4D83A0`; F10 saved the result at `0x43766F`.
 
-The live world pool had 1,216 rows of 72 bytes. At `0x49EDA0`,
+In this run the live world pool had 1,216 rows of 72 bytes. At `0x49EDA0`,
 row 489 (`0x09D03F20`) supplied definition pointer `0x09A96E59`
 and three zero dwords from +0x34. The allocator returned player
 row 4 (`0x01BF5E18`), initially zero. After the click, its first
@@ -265,9 +267,16 @@ copy, retirement and cursor handoff of one definition.
 | Global 11 | `+0x19A99` / `+0x1989F` | All 80 quick-slot bytes agree. The item is on the cursor after pickup. |
 | Level 25 | `+0x408CA` / `+0x40701` | All 13 changed bytes are in world row 489 at decoded +0x8988. At row +0 the changed XOR dword is `0x00079F40`, equal to `0x540580 XOR 0x539AC0`. Row +0x1C changes `0x03` → `0x83` in XOR data. Bytes in the two link dwords +0x10/+0x14 and the flags at +0x1E also change. |
 
-The native slots have SHA-256 prefixes `64b5d9ec325a` and
+The two native slots were written in sequence from the same
+restore. Their SHA-256 prefixes are `64b5d9ec325a` and
 `2acfada073b0`. Slot +0x498 is 2 in both, and the first position
 group `+0x49C..+0x4A9` agrees. The second position group changes.
+The flags byte at world row +0x1E combines two changes. The
+retirement path clears mask `0x40000` between the entry at
+`0x4D83A0` and the retirement store at `0x4D75CE`. The other
+changed bit, mask `0x100000`, was already set at the click.
+The control-to-click producer of that bit is **UNCONFIRMED**.
+To find it, watch that dword between the control save and click.
 The decoded values for selectors 2, 3 and 25 are XOR data.
 Retirement, allocation and cursor values agree with the predicted
 changes above. The new-game route was not needed for this comparison.
