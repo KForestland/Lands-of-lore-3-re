@@ -7,7 +7,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 ## At a glance
 
 - **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
-- **What you can do today:** unpack every archive the game ships with, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level outline, and follow one level event from entry to effect.
+- **What you can do today:** unpack every archive the game ships with, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level plan with waypoints and placements, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md), counted in the [rating](#rating). Open points include most item effects, how an item picked up from the floor is stored in a save, and some display settings; two answers were checked on one display setting only. Some questions can only be settled by watching the [original game run](docs/NEEDS_A_RUNNING_GAME.md); the texture and movie colour formats were settled that way, and the rest need saved games from later in the game.
 - **What changed lately:** [what's new](docs/WHATS_NEW.md), newest first.
@@ -24,9 +24,9 @@ These are counts of work done, not a percentage of how complete the project is. 
 - **Open questions:** 13 numbered questions: 3 answered, 6 mostly answered, 4 partly answered.
 <!-- rating:end -->
 
-![Overhead QWOD0 schematic from MAP surface edges](docs/images/qwod0-schematic.svg)
+![Overhead QWOD0 schematic from MAP edges, waypoints and placements](docs/images/qwod0-schematic.svg)
 
-The level QWOD0 seen from above, drawn from its map file: each line is an edge of a surface in the level geometry; dark edges belong to one surface, pale edges are shared by several. Heights are not drawn. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
+The level QWOD0 seen from above, drawn from its map file: each line is an edge of a surface; dark edges belong to one surface and pale edges are shared. Squares are waypoints, dashed lines are paths (this level has none), and numbered dots are placements. Heights are not drawn. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
 
 ## What you get
 

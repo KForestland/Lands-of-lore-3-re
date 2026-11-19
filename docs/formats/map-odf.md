@@ -70,8 +70,12 @@ The drawing projects the stored X/Z coordinates with the same scale
 on both axes. It joins each surface's consecutive corner positions,
 including the closing edge, and discards edges of zero length.
 Edges used by multiple surfaces are pale. The colour measures
-edge reuse in the projection. Heights and collision are outside
-the drawing. See [the native surface fields](../lol3-map-odf-readers.md#map-sections-1-and-2).
+edge reuse in the projection. Squares are waypoints and dashed
+lines are paths. Numbered dots are the type 3, type 16, creature
+and item rows, one number series per kind, and the legend under
+the plan names them. Heights and collision are outside the
+drawing. See [the native surface fields](../lol3-map-odf-readers.md#map-sections-1-and-2)
+and [the waypoint and path rows](../lol3-map-odf-readers.md#tail-after-the-vertices).
 
 ```bash
 python3 tools/lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg

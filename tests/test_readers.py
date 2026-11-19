@@ -15,6 +15,7 @@ from lol3_pht import cycle_covers, pht_covers
 from lol3_save_header import HEADER_SIZE, parse_header
 from lol3_script_framing import frame
 from lol3_texture_archive import chunks
+from lol3_level_schematic import map_geometry, schematic_svg
 from lol3_texture_png import decode_texture, png_bytes, rgba_palette
 from walk_lmf_leaves import lzo_decoder
 
@@ -119,3 +120,51 @@ class ReaderTests(unittest.TestCase):
         changed[HEADER + 2 * size + 6] ^= 1
         self.assertFalse(body_covers(bytes(changed), **pins))
         self.assertFalse(body_covers(data, **dict(pins, block_sha="0" * 64)))
+
+    def test_schematic_marks_need_no_game_files(self):
+        header = bytearray(0x244)
+        struct.pack_into("<I", header, 0, 38)
+        vertex_start = 0x244
+        point_start = vertex_start + 8 * 4
+        path_start = point_start + 34
+        field1 = path_start + 35
+        surface = field1
+        surface_end = surface + 56
+        tables = surface_end
+        strides = (0x25, 0x21, 0x38, 0x25)
+        offsets = []
+        for stride in strides:
+            offsets.append(tables)
+            tables += stride
+        struct.pack_into("<6I", header, 4, vertex_start, field1, surface, 0, 0, 0)
+        struct.pack_into("<I", header, 4 + 16 * 4, surface_end)
+        struct.pack_into("<3I", header, 4 + 19 * 4, 4, 0, 1)
+        struct.pack_into("<II", header, 0xC4, 1, point_start)
+        struct.pack_into("<II", header, 0xD8, 1, path_start)
+        for at, offset, count_at in zip((0x14, 0x18, 0x1C, 0x20), offsets, (0x60, 0x64, 0x68, 0x6C)):
+            struct.pack_into("<I", header, at, offset)
+            struct.pack_into("<I", header, count_at, 1)
+        body = bytearray(tables)
+        body[:0x244] = header
+        scale = 10 << 16
+        for index, (x, z) in enumerate(((0, 0), (scale, 0), (scale, scale), (0, scale))):
+            struct.pack_into("<ii", body, vertex_start + 8 * index, x, z)
+        struct.pack_into("<hhHH", body, point_start, 5, 5, 0, 0)
+        struct.pack_into("<HBB", body, path_start, 0, 1, 0)
+        struct.pack_into("<4H", body, surface + 0x10, 0, 1, 2, 3)
+        struct.pack_into("<H", body, surface + 0x1E, 0xFFFF)
+        for offset, (x, z) in zip(offsets, ((2, 3), (4, 6), (7, 1), (8, 8))):
+            struct.pack_into("<hh", body, offset, x, z)
+        vertices, surfaces, waypoints, routes, placed = map_geometry(bytes(body))
+        self.assertEqual(len(vertices), 4)
+        self.assertEqual(waypoints, [(5 << 16, 5 << 16)])
+        self.assertEqual(routes, [[(5 << 16, 5 << 16)]])
+        self.assertEqual([item[:2] for item in placed],
+                         [("type 3", 1), ("type 16", 1), ("creature", 1), ("item", 1)])
+        drawing = schematic_svg("SYN", vertices, surfaces, waypoints, routes, placed)
+        self.assertIn("waypoint (1)", drawing)
+        self.assertIn("path (1)", drawing)
+        self.assertIn('stroke-dasharray="5 3"', drawing)
+        self.assertIn("<title>SYN MAP schematic</title>", drawing)
+        self.assertIn(">1</text>", drawing)
+        self.assertIn("numbered", drawing)
