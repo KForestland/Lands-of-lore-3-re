@@ -72,8 +72,7 @@ See also:
 
 ## Visual Aids
 
-- [`../examples/lol3-qwod0-semantic-spine.svg`](../examples/lol3-qwod0-semantic-spine.svg)
-- [`../examples/lol3-swod4-semantic-spine.svg`](../examples/lol3-swod4-semantic-spine.svg)
+- The two diagrams that used to be linked here were removed on 2026-11-19: the byte-pattern labels they drew match no field the native readers consume (see the section below and open question Q8).
 
 ## Native MAP and ODF cross-check
 

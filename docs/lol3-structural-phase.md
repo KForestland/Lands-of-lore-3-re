@@ -46,4 +46,4 @@ Useful regime states:
 
 ## Visual Aid
 
-- see [`../examples/lol3-typed-region-regime-path.svg`](../examples/lol3-typed-region-regime-path.svg)
+- The diagram that used to be linked here was removed on 2026-11-19: the byte-pattern labels it drew match no field the native readers consume (open question Q8).

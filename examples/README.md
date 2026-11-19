@@ -1,14 +1,5 @@
 # Examples
 
-Small visual aids for the public LoL3 checkpoint.
+This folder no longer holds images. Three hand-drawn diagrams of byte-pattern "spines" were removed on 2026-11-19: the labels they drew match no field the native readers consume ([open question Q8](../docs/OPEN_QUESTIONS.md)), so they misled.
 
-Current diagrams:
-
-- `lol3-typed-region-regime-path.svg`
-  - shared outer typed-region and regime-path view
-- `lol3-qwod0-semantic-spine.svg`
-  - current durable `QWOD0` byte-level semantic spine
-- `lol3-swod4-semantic-spine.svg`
-  - current durable `SWOD4` byte-level semantic spine
-
-These are explanatory diagrams, not raw game assets.
+The one picture the repository shows, the [QWOD0 schematic](../docs/images/qwod0-schematic.svg), is made by `python3 tools/lol3_level_schematic.py --data DAT QWOD0 --out docs/images/qwod0-schematic.svg`; its `--check` (part of `check_all.py`) regenerates it and fails unless the tracked file is byte-identical.
