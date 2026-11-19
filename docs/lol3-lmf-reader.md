@@ -143,7 +143,7 @@ returns the scratch copy through `0x44EEAB–0x44EEC3`.
 
 Checked without a hit: `0x44EB40` itself, `0x44EC90`, the first 45
 instructions after each of the 15 calls to `0x44EB40`, the size path
-`0x479D90` and the surface renderer around `0x4980D8`. A future read watch on the two dwords +0x0C/+0x10 of a nonzero member
+`0x479D90` and the surface renderer around `0x4980D8`. A read watch on the two dwords +0x0C/+0x10 of a nonzero member
 returned by `0x44EB40` (`EAX` at `0x44EC7D` or `0x44EC83`) can isolate
 the consumer. If `0x44ED16` or
 `0x44EEA2` copies the member, move the watch to the same offsets in the

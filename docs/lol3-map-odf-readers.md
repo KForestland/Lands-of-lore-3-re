@@ -60,7 +60,7 @@ row count, the fields within the proposed four-byte rows, and whether a
 separate program consumes them. The conversion option, editor flag,
 `.map` suffix and seek paths were checked in the shipped image. To settle
 the layout, find an original reader that accesses the span at header
-+0xCC and follow a row to its first typed use. A future trace of the MAP
++0xCC and follow a row to its first typed use. A trace of the MAP
 handle at `0x4357A0` can test for reads from an indirect caller during
 level load. `lol3_claimed_edges.py --check` verifies the block in the
 original archives, pins the bytes of the conversion guard and the

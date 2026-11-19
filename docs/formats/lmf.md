@@ -4,7 +4,7 @@
 the resulting name to `0x440B40` at `0x43E1BD`. The loader uses the
 label `Light Map` at file offset `0x1480E4` (`0x440CD7–0x440CE5`).
 The directory indexes groups of light-map data. The reader and the
-**UNCONFIRMED** member fields are on the [native LMF page](../lol3-lmf-reader.md).
+**UNCONFIRMED** member fields are on the [native LMF page](../lol3-lmf-reader.md). That page names the read watch on +0x0C/+0x10 of a member returned by `0x44EB40` that would settle them.
 
 ## Layout
 
