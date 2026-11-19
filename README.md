@@ -58,7 +58,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-seven checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all thirty-one checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -79,7 +79,7 @@ Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the c
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
-python3 tools/check_all.py                  # 30 passed with a matching cache, 27 passed and 3 skipped without one
+python3 tools/check_all.py                  # 31 passed with a matching cache and your own saves; a never-run copy: 27 passed, 4 skipped
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
@@ -111,7 +111,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md). "Q11" and the like
 | Level sounds | WAV files using IMA ADPCM compression, in the 18 per-level sound archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (only the on-screen look of effect objects is open); per-level summaries (Q11) |
 | Items, spells, dialogue, combat | Traced in the program: 343 item rows, all 113 nonzero regular item handlers read one by one, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: what the objects the handlers build do on screen, and mitigation names (Q12) |
-| Saves | Header, directories and compression mapped from 47 of our own saved games, written by the original program (not included, so no tool here can re-check them); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
+| Saves | Header, directories and compression mapped from 47 of our own saved games, written by the original program (not included; `lol3_save_writer.py --check` rebuilds your own byte for byte); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
 
 ## Repository layout
 

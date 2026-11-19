@@ -100,6 +100,15 @@ its first global section at +0x2214E. The 38 preview chunks expand
 to 0x4B000 bytes. Its first level block begins at +0x2493A and
 contains 130,702 bytes.
 
+`lol3_save_writer.py --check` reads each game-written slot into
+fields, using the compression bit (value 4) of the [selector
+flags](#selector-payloads), and writes it again with every directory offset, block
+header and length recomputed. All 47 slots come back byte for byte:
+416 level blocks and 59,654 stored LZO packets. The packets are
+copied, not compressed again, so this checks the container layout,
+not a compressor. With liblzo2 each packet must also decode to its
+expanded length; the decoded bytes are not compared with anything.
+
 ## Selector payloads
 
 **CONFIRMED.** The global descriptor `0x438140` and the level descriptor `0x438940` name each selector. The global loader calls the first at `0x436D43` and the global writer calls it at `0x43789D`. The level reader `0x437340` calls the second at `0x43745B` and the level writer calls it at `0x437F3A`. Each descriptor compares the selector index with its bound (`0x3C` at `0x438144`, `0x4A` at `0x438944`) and jumps through a table of 4-byte arm addresses (`0x438848`, `0x439460`). That gives 61 global and 75 level selectors, and each table is followed by `90 90 90 90` padding. Each arm writes four results: the live address, the byte count, the unit and a flag byte. The table is those four results for all 61 global selectors and all 75 level selectors. `lol3_save_selectors.py --check` requires the table to match the program.

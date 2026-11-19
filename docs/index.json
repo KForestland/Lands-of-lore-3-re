@@ -155,6 +155,7 @@
         "tools/lol3_native_checks.py",
         "tools/lol3_odf_companions.py",
         "tools/lol3_save_header.py",
+        "tools/lol3_save_writer.py",
         "tools/lol3_script_browser.py",
         "tools/lol3_script_notes.py",
         "tools/lol3_texture_png.py",
@@ -417,6 +418,7 @@
         "tools/lol3_progression.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_selectors.py",
+        "tools/lol3_save_writer.py",
         "tools/lol3_script_browser.py",
         "tools/lol3_wsx_writer.py",
         "tools/rating.py"
@@ -984,7 +986,8 @@
       "tools": [
         "tools/lol3_native_checks.py",
         "tools/lol3_save_header.py",
-        "tools/lol3_save_selectors.py"
+        "tools/lol3_save_selectors.py",
+        "tools/lol3_save_writer.py"
       ]
     },
     {
@@ -1207,6 +1210,7 @@
         "tools/lol3_progression.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_selectors.py",
+        "tools/lol3_save_writer.py",
         "tools/lol3_script_browser.py",
         "tools/lol3_script_framing.py",
         "tools/lol3_script_notes.py",

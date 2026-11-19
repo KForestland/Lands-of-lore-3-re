@@ -57,3 +57,40 @@ class LzoRoundTrip(unittest.TestCase):
         self.assertEqual(count, 1)
         self.assertEqual(decode(rebuilt[8:-4], len(decoded)), decoded)
         lzo_mutation_check(lm, encode, decode)
+
+
+class SaveRoundTrip(unittest.TestCase):
+    def test_untouched_packets_and_recomputed_level_directory(self):
+        from dataclasses import replace
+        from lol3_save_header import parse_header
+        from lol3_save_writer import SYNTHETIC_FLAGS as flags, read_slot, synthetic_slot, write_slot
+        slot = synthetic_slot()
+        origin = write_slot(slot)
+        self.assertEqual(read_slot(origin, *flags), slot)
+        level = replace(slot.levels[0], sections=(b"more raw bytes",) + slot.levels[0].sections[1:])
+        changed = replace(slot, levels=(level,) + slot.levels[1:])
+        rewritten = write_slot(changed)
+        self.assertEqual(read_slot(rewritten, *flags), changed)
+        old_directory = parse_header(origin, len(origin))
+        directory = parse_header(rewritten, len(rewritten))
+        self.assertEqual(directory["levels"][0][1] - old_directory["levels"][0][1], len(b"more raw bytes") - 3)
+        a, n = directory["preview"]
+        self.assertEqual(rewritten[a:a + n], origin[a:a + n])
+
+    def test_reject_truncated_packed_chunk(self):
+        from lol3_save_writer import read_packed
+        with self.assertRaises(ValueError):
+            read_packed(struct.pack("<2I", 1, 4) + b"!")
+
+    def test_header_edit_reads_back_through_the_save_header_reader(self):
+        from dataclasses import replace
+        from lol3_save_header import report
+        from lol3_save_writer import SYNTHETIC_FLAGS, read_slot, synthetic_slot, write_slot
+        slot = synthetic_slot()
+        origin = write_slot(slot)
+        positions = (slot.positions[0], slot.positions[1] + 0x10000) + slot.positions[2:]
+        edited = write_slot(replace(slot, positions=positions))
+        self.assertEqual(len(edited), len(origin))
+        self.assertEqual([at for at in range(len(origin)) if origin[at] != edited[at]], [0x49E])
+        self.assertIn(f"player +0x49c: x {positions[1]} ", report(edited))
+        self.assertEqual(read_slot(edited, *SYNTHETIC_FLAGS).positions, positions)

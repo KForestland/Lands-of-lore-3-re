@@ -13,7 +13,7 @@ import sys
 
 CACHE_CHECKS = {"lol3_texture_spans", "lol3_texture_palettes", "lol3_texture_png"}
 TOOLS = ["repo_guard", "extract_wsx_entries", "lol3_wsx_writer", "walk_lmf_leaves", "lol3_lzo_writer", "lol3_texture_spans", "lol3_texture_palettes", "lol3_texture_png",
-         "lol3_script_framing", "lol3_texture_archive", "lol3_script_notes", "lol3_level_report", "lol3_progression", "lol3_media_check", "lol3_level_schematic", "lol3_map_spans", "lol3_combat_census", "lol3_claimed_edges", "lol3_name_hash", "rating", "lol3_cache_seed", "lol3_odf_companions", "lol3_native_checks", "lol3_pht", "lol3_save_header", "lol3_save_selectors", "lol3_script_browser", "lol3_numbers", "doc_index", "doc_links"]
+         "lol3_script_framing", "lol3_texture_archive", "lol3_script_notes", "lol3_level_report", "lol3_progression", "lol3_media_check", "lol3_level_schematic", "lol3_map_spans", "lol3_combat_census", "lol3_claimed_edges", "lol3_name_hash", "rating", "lol3_cache_seed", "lol3_odf_companions", "lol3_native_checks", "lol3_pht", "lol3_save_header", "lol3_save_writer", "lol3_save_selectors", "lol3_script_browser", "lol3_numbers", "doc_index", "doc_links"]
 
 
 def main():
@@ -27,6 +27,7 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     failed = []
     skipped = []
+    last_line = {}
     # With liblzo2 the light-map check also decodes every member and counts the header-word census.
     extra = {"walk_lmf_leaves": ["--decode"]} if find_library("lzo2") else {}
     for t in TOOLS:
@@ -35,11 +36,14 @@ def main():
                            capture_output=True, text=True)
         line = (p.stdout.strip().splitlines() or [p.stderr.strip()[-300:]])[-1]
         print(line)
+        last_line[t] = line
         if p.returncode != 0:
             failed.append(t)
         elif t in CACHE_CHECKS and line.startswith(f"CHECK {t[5:]}: SKIP:"):
             skipped.append(t)
         elif t == "lol3_lzo_writer" and line.startswith("CHECK LZO write: SKIP:"):
+            skipped.append(t)
+        elif t == "lol3_save_writer" and line.startswith("CHECK save_write: SKIP:"):
             skipped.append(t)
     if failed:
         print(f"{len(failed)} of {len(TOOLS)} checks FAILED: {', '.join(failed)}")
@@ -49,8 +53,10 @@ def main():
             reasons.append("no game-written cache")
         if "lol3_lzo_writer" in skipped:
             reasons.append("no liblzo2")
+        if "lol3_save_writer" in skipped:
+            reasons.append("no liblzo2" if "no liblzo2" in last_line["lol3_save_writer"] else "no game-written saves")
         print(f"{len(TOOLS) - len(skipped)} CHECKS PASSED, {len(skipped)} SKIPPED "
-              f"({', '.join(reasons)}): {', '.join(skipped)}")
+              f"({', '.join(dict.fromkeys(reasons))}): {', '.join(skipped)}")
     else:
         print(f"ALL {len(TOOLS)} CHECKS PASSED")
     return 0 if not failed else 1
