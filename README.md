@@ -20,7 +20,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 308 statements CONFIRMED (proved from the program code or the files) and 64 UNCONFIRMED (a reading not yet proved), on 78 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 311 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -52,6 +52,8 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | A saved game you made | `python3 tools/lol3_save_header.py --data "$LOL3_DAT" "$LOL3_SLOT"` |
 
 ## What you get
+
+[Walk through one level from its map to its exit](docs/TOUR.md).
 
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
