@@ -12,7 +12,8 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 21 CHECKS PASSED`, or `18 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 22 CHECKS PASSED`, or `19 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `doc_links.py` | `README.md` and `docs/` | every relative link and anchor resolves |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `walk_lmf_leaves.py` | the LMF entries inside the WSX files | checks directory coverage for all 18. Optional `--decode` with liblzo2 checks every member header, counts the bit-0 vertex normals and re-counts the +0x0C–+0x13 header words against each member's grid. |

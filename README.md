@@ -33,7 +33,7 @@ The level QWOD0 seen from above, drawn from its map file: each line is an edge o
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, a texture-to-PNG exporter, a level drawer, a save-header reader and the level-sheet and script-notes writers; `check_all.py` runs all twenty-one checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, a texture-to-PNG exporter, a level drawer, a save-header reader and the level-sheet and script-notes writers; `check_all.py` runs all twenty-two checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -42,7 +42,7 @@ The level QWOD0 seen from above, drawn from its map file: each line is an edge o
 
 ## Quick start
 
-You need Python 3.8+ and your own copy of the game: the English GOG release (the script check pins `LOL3.DAT` by its hash). Start the game once before using the tools, so it writes its texture cache; without it, 3 of the 21 checks are skipped. Optional: the system LZO library (`apt install liblzo2-2`) for the `--decode` checks.
+You need Python 3.8+ and your own copy of the game: the English GOG release (the script check pins `LOL3.DAT` by its hash). Start the game once before using the tools, so it writes its texture cache; without it, 3 of the 22 checks are skipped. Optional: the system LZO library (`apt install liblzo2-2`) for the `--decode` checks.
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
@@ -54,7 +54,7 @@ The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are no
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 21 checks, ends with ALL 21 CHECKS PASSED (or 18 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py                  # 22 checks, ends with ALL 22 CHECKS PASSED (or 19 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```
