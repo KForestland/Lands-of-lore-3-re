@@ -240,7 +240,8 @@ verifies the vtable, writer selection, calls and store anchors.
 **CONFIRMED.** The original English retail game restored a copied
 original player slot (SHA-256 prefix `802f83893758`)
 in one instance from a disposable game copy. Level ID 2 selects
-BUPP1 (`LOL3.DAT+0x14716E` points to the level-asset path).
+BUPP1: the second 27-byte entry of the level table, after AGLOB,
+holds at `LOL3.DAT+0x14716E` the pointer `0x5496C0` to `levels\bupp1\bupp1`.
 The game used a private 16-bit Xvfb display and a PulseAudio null sink. The progress sound
 returned 0 at `0x46F59F` and the restore reached `0x43703E`.
 In an outdoor area, an item was moved from the first quick slot
@@ -271,8 +272,9 @@ The two native slots were written in sequence from the same
 restore. Their SHA-256 prefixes are `64b5d9ec325a` and
 `2acfada073b0`. Slot +0x498 is 2 in both, and the first position
 group `+0x49C..+0x4A9` agrees. The second position group changes.
-The flags byte at world row +0x1E combines two changes. The
-retirement path clears mask `0x40000` between the entry at
+The flags byte at world row +0x1E combines two changes: byte
+bit 0x04 is flag mask `0x40000` and byte bit 0x10 is mask `0x100000`. The
+retirement path clears mask `0x40000`, as predicted, between the entry at
 `0x4D83A0` and the retirement store at `0x4D75CE`. The other
 changed bit, mask `0x100000`, was already set at the click.
 The control-to-click producer of that bit is **UNCONFIRMED**.

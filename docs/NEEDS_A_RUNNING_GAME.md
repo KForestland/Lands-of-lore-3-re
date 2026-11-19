@@ -56,6 +56,9 @@ the DLOW1 placement (X −635, Z 4913, height 110, surface 1287).
 Native save writes at `0x43766F` sampled the player at (−637, 4895, 52)
 during a jump and (−638, 4927, 10) afterward on the lower
 surface. Normal clicks left the cursor and second counter zero.
+This probe is blocked until a run takes the item: the runner could not
+reach the placement's height. The linked section names the
+FLAIR placement on surface 3243 as the other route.
 [Placement, trial values and alternate route](lol3-spell-dispatch.md#dlow1-approach-with-the-native-placement-live)
 
 **UNCONFIRMED.** Live second-counter debit and HUD feedback. Save with
