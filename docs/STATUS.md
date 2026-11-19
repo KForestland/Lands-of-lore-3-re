@@ -8,7 +8,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (26 checks; all 26 pas
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 311 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 353 statements CONFIRMED (proved from the program code or the files) and 65 UNCONFIRMED (a reading not yet proved), on 79 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
