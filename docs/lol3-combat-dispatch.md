@@ -27,8 +27,9 @@ packet through vtable +0x80. The object path at `0x446584–0x4465B7`
 passes the old quantity from +0x9C, invokes the resolver and applies
 new minus old through vtable +0x98.
 
-**UNCONFIRMED.** Concrete virtual-slot meanings by class, all
-mitigation masks, and the initial hit request for each weapon and
+**UNCONFIRMED.** Concrete virtual-slot meanings by class, the
+names of the mitigation mask bits (creature records are traced
+[below](#where-the-mitigation-records-come-from)), and the initial hit request for each weapon and
 spell are still open. For the creature class, +0x98/+0x9C are
 resolved below; other classes remain open.
 
@@ -223,10 +224,56 @@ it dispatches through `0x4E299C`
 | 9 | Gives the same slot ceil(v / 65536) and zeroes the contribution (`0x4E27D0–0x4E27E9`). |
 | 10 | `trunc(v/4)` at `0x4E274F` |
 
-Arms 5, 6, 7 and 10 also check the resolver's local +0x18
-condition and request second-word bit 0x10. With the local
-condition set and that bit clear, they keep `v` unchanged.
-The game-facing names of the mask families are
+Arms 5, 6, 7 and 10 also check the resolver's local +0x18,
+which is request word +2 masked with 0x10 (`0x4E25F7–0x4E25FC`),
+against bit 0x10 of the entry's second mask word (`0x4E26E1–0x4E26E3`).
+With the request bit set and the entry bit clear, they keep `v`
+unchanged.
+
+### Where the mitigation records come from
+
+**CONFIRMED.** The resolver's second argument is a null-terminated
+list of 20-byte records: four selector bytes, then four pairs of
+u16 (first mask, second mask) at +4 (`0x4E26BA–0x4E26E1`,
+`0x4E27F3–0x4E2817`). The creature receiver passes its definition
+pointer +0x34 as the first record (`0x4B9348–0x4B934D`, call at
+`0x4B98C9–0x4B98D0`), so the record is bytes +0x00–+0x13 of the
+147-byte ODF field-3 row. A second, temporary record follows when
+status byte +0xE5 is nonzero or +0x110 bits 24–25 are set: byte
++0xE5 − 0x27 (index bytes `0x4B9D54`, slots `0x4B9D34`) selects
+one entry such as selector 7 with first mask 0 and second mask 1
+(`0x4B93A7–0x4B93B5`), and the +0x110 states add selector-4 and
+selector-7 entries on mask 0x104 (`0x4B9447–0x4B949B`).
+
+**CONFIRMED.** Before the scan the hit value is divided by the
+number of set bits in request word +0 times the number of set bits
+in word +2 outside mask 0x18 (`0x4E251E–0x4E258D`). The scan then
+takes each set bit of word +0 with each set bit of word +2 as one
+contribution (`0x4E262B–0x4E2692`). An entry applies when its first
+mask is 0 or contains the current word-0 bit and its second mask is
+0 or contains the current word-2 bit (`0x4E26F6–0x4E271C`). Arm 7
+also clears that bit from the request words after the scan
+(`0x4E281F–0x4E2842`, `0x4E2881–0x4E2894`). The word-0 bit 0x1000
+is kept apart from the summed loss (`0x4E2846–0x4E285D`); a set
+local +0x1C doubles bit 0 (`0x4E2696–0x4E26A7`).
+
+**CONFIRMED.** Census of the 334 field-3 rows in the 18 level ODFs
+(first row at `BUPP1.WSX+0x1B5E178`; 57 distinct records):
+
+| Selector | Entries | Most common (first mask / second mask: rows) |
+|---:|---:|---|
+| 2 | 58 | 0x0104 / 0x0004: 18; 0x0008 / 0x0004: 13 |
+| 3 | 52 | 0x0010 / 0: 34; 0x0020 / 0: 18 |
+| 4 | 35 | 0x0020 / 0: 21; 0x0001 / 0: 8 |
+| 5 | 71 | 0x0104 / 0x0004: 31; 0 / 0x0003: 11 |
+| 6 | 26 | 0 / 0x0040: 14; 0x0106 / 0x0004: 6 |
+| 7 | 176 | 0x0010 / 0: 27; 0 / 0x00E0: 26; 0 / 0x0060: 24; 0x0080 / 0: 22 |
+| 8 | 2 | 0x0010 / 0: 2 |
+| 9 | 9 | 0x0010 / 0: 7 |
+| 10 | 35 | 0 / 0x0020: 14; 0x1104 / 0: 7 |
+
+`lol3_combat_census.py --check` recounts these rows.
+The game-facing names of the mask bits are
 **UNCONFIRMED**. Match both mask words from an original
 animation payload to the tested mask pair, then compare
 the contribution at its table arm before assigning the

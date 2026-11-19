@@ -161,10 +161,40 @@ debit takes priority at `0x4A5A0D–0x4A5A25`. The ordinary path
 can check the second counter at `0x4A46DE–0x4A46F3` and spend
 one charge at `0x4A5A27–0x4A5A3F`.
 
-**UNCONFIRMED.** A live cast after either consumable and the final
-cost-discount selector names. On an ordinary successful cast, log
-the two `0x433C80` results and the corresponding level byte at
-`0x4A59A1` or `0x4A59EF`.
+### The two cost discounts
+
+**CONFIRMED.** `0x433C80(list, key)` rejects lists above 12, then
+calls `0x45AB20` on the 24-byte record at `ECX + 24 × list + 4`
+(`0x433C84–0x433C9B`). That record holds a count at +0, a key array
+pointer at +4 and a value array pointer at +0xC; the helper returns
+the value paired with the key, or 0 when the key is absent
+(`0x45AB20–0x45AB4C`). With ECX `0x57095C`, list 0 holds spell IDs
+(the callers at `0x418C0F–0x418FD0` test 0x55–0x59 and 0x82–0x86),
+list 7 keys 0–3 and list 8 keys 4–0x15 (69 direct callers in all).
+The two discounts test list 8 keys 10 and 13.
+
+**CONFIRMED.** The level bytes belong to four parallel slots: a
+joined flag at `0x5D50C8 + k`, a level at `0x5D50BC + k` and a dword
+at `0x5D50AC + 4k`. The guard predicates `0x4F0540`, `0x4F0570`,
+`0x4F0590` and `0x4F05B0` return 0 unless slot k's flag is set and
+otherwise compare its level with their argument
+(`0x4F0540–0x4F05C3`); `0x458247–0x45824D` reads both by slot.
+`0x5D50BD` and `0x5D50BE` are the levels of slots 1 and 2.
+
+**CONFIRMED.** The selector at stack +0x18 starts at 1
+(`0x4A4571`). The effect switch on definition +0x73 − 0x50
+(index bytes `0x4A5CE0`, slots `0x4A5BD4`, `0x4A478D–0x4A47A4`)
+writes 0 to it only in the arms for IDs 0x5E (`0x4A4B94`),
+0x60 (`0x4A4C0B`), 0x7D–0x81 (`0x4A5479`), and on some paths
+of 0x98–0x9B (`0x4A583A`) and 0x9C–0x9F (`0x4A5877`). So every
+other spell ID takes the list-8 key 10 discount scaled by slot-1
+level, and those IDs take the key 13 discount scaled by slot-2
+level.
+
+**UNCONFIRMED.** What the four slots and list-8 keys 10 and 13 are
+called on screen, and a live cast after either consumable. On an
+ordinary successful cast, log the two `0x433C80` results and the
+corresponding level byte at `0x4A59A1` or `0x4A59EF`.
 
 ## Live cast setup
 

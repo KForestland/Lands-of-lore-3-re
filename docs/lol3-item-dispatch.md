@@ -162,5 +162,23 @@ of the player +0x32D and +0x224 values and the class-specific effect
 of the template 0x7C variants remain open. Follow the update slot
 on the object generated at `0x49F766` or `0x4A1C5E`. Trace the
 readers of `0x5D520D` and `0x5D5104` to their first display or
-gameplay use. The other 106 regular indexes still need their own
-witnesses and destinations.
+gameplay use. The other 105 regular indexes are listed by their direct
+calls below; their individual effects are still open.
+
+**CONFIRMED.** Direct calls in the 113 nonzero regular handlers
+(from each destination in `[0x54B918 + 4 × index]` to the next
+one), with indexes:
+
+| Direct call | Handlers | Indexes |
+|---|---:|---|
+| Effect heap `0x4B3040` (builds a type-5 object) | 33 | 1, 2, 3, 5, 7, 8, 15, 16, 26, 27, 30, 35, 36, 50, 54, 56, 57, 58, 60, 62, 63, 68, 70, 75, 83, 84, 85, 100, 106, 109, 111, 113, 114 |
+| Sound `0x422C40` | 66 | 1–10, 16, 20–22, 27–32, 39, 41–43, 45, 46, 50, 56, 62–64, 67–70, 72, 73, 75–87, 89, 90, 92, 93, 95, 96, 100, 102, 105, 106, 109–114 |
+| Player +0x32D update `0x418AE0` | 22 | 4, 9, 20, 31, 39, 41, 43, 46, 67, 69, 74, 76, 79, 80, 82, 86, 87, 89, 92, 93, 95, 113 |
+| Mana change `0x40FFE0` | 6 | 32, 39, 43, 90, 92, 95 |
+| Player hit `0x40AED0` | 5 | 10, 42, 48, 77, 87 |
+| No direct call (inline state only) | 24 | 12, 13, 14, 17, 19, 23, 24, 25, 40, 44, 47, 49, 51, 52, 53, 61, 65, 97, 101, 103, 107, 118, 119, 122 |
+
+`lol3_combat_census.py --check` recounts the definitions per index.
+Index 115 calls `0x48EBE0` on the object at `0x5860F0` (the
+[opcode 0x1A](lol3-script-opcodes.md#per-class-effects-of-the-indirect-commands)
+receiver), and index 123 reads a file through `0x4357A0`.

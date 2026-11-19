@@ -26,6 +26,7 @@ Run examples outside the repository.
 | `lol3_script_notes.py` | `LOL3.DAT` and the 18 MAP entries | `--check` re-derives the tracked summaries; `--out DIR` (outside the repository) writes the full per-record listings for your own copy; `--summary DIR` writes the summaries |
 | `lol3_media_check.py` | the `MOVIES1..4`, `MUSIC1..4` and level sound archives, and `LOL3.DAT` | the 19 named movies and their frame index, the 38 music tracks and 6,696 level sounds; counts only |
 | `lol3_map_spans.py` | `LOL3.DAT` and the 18 MAP entries | waypoint byte +6, the 2,330/39/15 name slots, the 36 path labels, the 1,784 bytes before field 16 and the 167,942 section-1 rows |
+| `lol3_combat_census.py` | `LOL3.DAT`, the 18 level ODFs and `GLOBAL.WSX` | the 334 creature mitigation records (57 distinct, selector counts) and the 258 regular item definitions on 114 handler indexes |
 | `lol3_save_header.py` | one save slot you name (a player save, not a game file) | prints the preview, 61 global and 18 level offsets and lengths as JSON; writes nothing; no `--check` |
 
 `lol3_cli.py` is a shared library for the options above, not a command.
