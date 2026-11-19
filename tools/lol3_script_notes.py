@@ -4,6 +4,7 @@
   lol3_script_notes.py --data DAT --out DIR    # full local notes outside the checkout
   lol3_script_notes.py --data DAT --summary DIR # reproduce the small summaries
   lol3_script_notes.py --data DAT --check     # verify the checked-in summaries
+  lol3_script_notes.py --data DAT --timers QWOD0
 """
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -217,10 +218,35 @@ def _inside(path, folder):
         return False
 
 
+def timer_lines(stem, walks):
+    """Kind 2 is the timer matcher. Other kinds stay in the written summary."""
+    lines = [f"{stem} timers"]
+    for space, walked in walks.items():
+        lines.append(f"{space} kind 2 timer expires: {walked[3][2]}")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__, out_help="external directory for full listings")
     parser.add_argument("--summary", type=Path, help="write the small checked-in notes")
+    parser.add_argument("--timers", help="print one level's kind-2 timer counts")
     args = parser.parse_args()
+    if args.timers:
+        if args.check or args.out or args.summary:
+            parser.error("--timers only prints")
+        try:
+            data_dir = Path(args.data).resolve()
+            sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
+            stem = args.timers.upper()
+            found = [item for item in level_map_entries(data_dir) if item[0] == stem]
+            if len(found) != 1:
+                raise ValueError(f"expected one MAP for {stem}")
+            _name, map_base, payload = found[0]
+            walks = {space: walk(payload, map_base, space, sizes) for space in STREAMS}
+            print(timer_lines(stem, walks), end="")
+        except (OSError, ValueError, KeyError, struct_error) as error:
+            parser.exit(1, f"script notes: {error}\n")
+        return 0
     if sum(bool(x) for x in (args.check, args.out, args.summary)) != 1:
         parser.error("choose --check, --out DIR or --summary DIR")
     try:

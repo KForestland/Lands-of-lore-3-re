@@ -3,6 +3,8 @@
 
   lol3_script_framing.py --data DAT          # per-level and per-opcode counts
   lol3_script_framing.py --data DAT --check  # check the retail corpus
+  lol3_script_framing.py --data DAT --subcommands
+  lol3_script_framing.py --data DAT --dispatch
 """
 from collections import Counter
 from hashlib import sha256
@@ -117,12 +119,94 @@ def selector_counts(payload, sizes):
     return counts
 
 
+OBJECT_SLOTS = 0x449A1C
+ARRAY_OPCODES = (0xC6, 0xC7, 0xCE, 0xCF)
+
+
+def object_slot_lines(image):
+    """The 28 object-opcode slots. Region byte-index length is not a named constant here."""
+    lines = ["object opcode slots 28"]
+    base = OBJECT_SLOTS - CODE_BIAS
+    for index in range(28):
+        value, = unpack_from("<I", image, base + 4 * index)
+        lines.append(f"slot {index + 1} opcode 0x{index + 1:02X}: {value:#x}")
+    return "\n".join(lines) + "\n"
+
+
+def subcommand_lines(pairs, sizes):
+    """Class selectors, creature and effect subcommands, 0xC4 flag bits and array indexes.
+
+    Counts are the object stream at header +0x44, the stream the opcode page tabulates.
+    """
+    selectors, creature, effect = Counter(), Counter(), Counter()
+    arrays = Counter()
+    c4_bits, c4_n, c4_speed0 = Counter(), 0, 0
+    effect_n = n1c = bit0 = bit1 = 0
+    for _stem, payload in pairs:
+        selectors.update(selector_counts(payload, sizes))
+        stream, pos = map_range(payload, 0x44, 0x8C), 0
+        while pos < len(stream):
+            opcode = stream[pos]
+            row = stream[pos:pos + sizes[opcode]]
+            if opcode == 0x0D and row[1] == 2:
+                creature[row[4]] += 1
+            elif opcode == 0x0F:
+                effect[row[4]] += 1
+                effect_n += 1
+            elif opcode == 0x1C:
+                n1c += 1
+                word, = unpack_from("<H", row, 4)
+                bit0 += word & 1
+                bit1 += (word >> 1) & 1
+            elif opcode == 0xC4:
+                c4_n += 1
+                for bit in (0, 2, 3, 5, 6):
+                    c4_bits[bit] += (row[6] >> bit) & 1
+                c4_speed0 += row[7] == 0
+            elif opcode in ARRAY_OPCODES:
+                arrays[opcode, row[4]] += 1
+            pos += sizes[opcode]
+    lines = ["selectors"]
+    for (opcode, selector), count in sorted(selectors.items()):
+        lines.append(f"opcode 0x{opcode:02X} selector {selector}: {count}")
+    lines.append("creature opcode 0x0D selector 2 subcommand +4")
+    for value in range(33):
+        lines.append(f"subcommand {value}: {creature[value]}")
+    lines.append(f"effect opcode 0x0F actions {effect_n}")
+    for value, count in sorted(effect.items()):
+        lines.append(f"action {value}: {count}")
+    lines.append(f"opcode 0x1C records {n1c} u16+4 bit0 {bit0} bit1 {bit1}")
+    lines.append(f"opcode 0xC4 records {c4_n} speed +7 zero {c4_speed0}")
+    for bit in (0, 2, 3, 5, 6):
+        lines.append(f"opcode 0xC4 byte+6 bit {bit}: {c4_bits[bit]}")
+    lines.append("array byte +4")
+    for (opcode, index), count in sorted(arrays.items()):
+        lines.append(f"opcode 0x{opcode:02X} index {index}: {count}")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
+    parser.add_argument("--subcommands", action="store_true", help="print selector and subcommand counts")
+    parser.add_argument("--dispatch", action="store_true", help="print the 28 object opcode slots")
     args = parser.parse_args()
     if args.out:
         parser.error("use standard output for the aggregate counts")
+    if args.subcommands or args.dispatch:
+        if args.check or (args.subcommands and args.dispatch):
+            parser.error("pass only one of --subcommands, --dispatch or --check")
     try:
+        if args.dispatch or args.subcommands:
+            data_dir = Path(args.data).resolve()
+            image = (data_dir.parent / "LOL3.DAT").read_bytes()
+            if args.dispatch:
+                if sha256(image).hexdigest() != RETAIL_PE:
+                    raise ValueError("LOL3.DAT does not match the documented English retail executable")
+                print(object_slot_lines(image), end="")
+                return 0
+            sizes = native_sizes(image)
+            print(subcommand_lines(level_maps(data_dir), sizes), end="")
+            return 0
         data_dir = Path(args.data).resolve()
         sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
         maps = total_bytes = refs = records = embedded = resume = 0

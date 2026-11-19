@@ -79,6 +79,14 @@ def parse_wsx(path: Path) -> dict:
     }
 
 
+def directory_lines(parsed):
+    """Key, file offset and size for each entry. No entry bytes."""
+    lines = [f"count {parsed['count']} data_base {parsed['payload_base']:#x}"]
+    for entry in parsed["entries"]:
+        lines.append(f"key {entry['hash']:#010x} offset {entry['offset']:#x} size {entry['size']}")
+    return "\n".join(lines) + "\n"
+
+
 def write_entries(parsed: dict, out_dir: Path, stem: str, max_blob_write: int | None) -> list[dict]:
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = []
@@ -117,6 +125,7 @@ KNOWN_OPEN = {"CDCACHE.WSX"}
 
 USAGE = """
   extract_wsx_entries.py --data DAT --out DIR [--stems CKEEP ...]   # write entry blobs and a manifest
+  extract_wsx_entries.py --data DAT --list [--stems QWOD0]          # print key, offset and size; write nothing
   extract_wsx_entries.py --data DAT --check                         # parse every WSX, write nothing
 """
 
@@ -168,6 +177,7 @@ def main() -> int:
                     help="the game's DAT folder (default: $LOL3_DAT)")
     ap.add_argument("--out", type=Path)
     ap.add_argument("--check", action="store_true", help="parse every WSX of --data, print one CHECK line, write nothing")
+    ap.add_argument("--list", action="store_true", help="print key, file offset and size; write nothing")
     ap.add_argument("--stems", nargs="*", default=None, help="If omitted, peel every *.WSX in DAT")
     ap.add_argument("--manifest", type=Path)
     ap.add_argument(
@@ -180,9 +190,28 @@ def main() -> int:
     if args.game_dat is None:
         ap.error("give --data (the game's DAT folder) or set LOL3_DAT")
     if args.check:
+        if args.list:
+            ap.error("--check does not list")
         return check(args.game_dat)
+    if args.list:
+        if args.out is not None or args.manifest is not None:
+            ap.error("--list writes nothing")
+        import lol3_cli
+        files = lol3_cli.wsx_files(args.game_dat)
+        if args.stems:
+            wanted = {stem.upper() for stem in args.stems}
+            files = [path for path in files if path.stem.upper() in wanted]
+            if not files:
+                ap.error("no archive matches --stems")
+        for path in files:
+            try:
+                print(path.name)
+                print(directory_lines(parse_wsx(path)), end="")
+            except ValueError as exc:
+                print(f"FAIL {path.name}")
+        return 0
     if args.out is None:
-        ap.error("--out is required unless --check is given")
+        ap.error("--out is required unless --check or --list is given")
 
     if args.stems:
         stems = args.stems

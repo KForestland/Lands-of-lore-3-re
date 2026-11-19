@@ -4,6 +4,7 @@
   lol3_texture_png.py --data DAT --offset 0x12C6E2 --out ../texture.png
   lol3_texture_png.py --data DAT --check
   lol3_texture_png.py --data DAT --check --decode-slices   # liblzo2
+  lol3_texture_png.py --data DAT --list-slices             # one frame's slice offsets
 
 An offset is an absolute texture-record position in the game-folder cdcache.wsx.
 --check counts every occupied bank's populated mip records, checks linked SMD
@@ -112,6 +113,16 @@ def find_slice_frame(directory, name, header, start, length):
     raise ValueError(f"no matching SMD frame header in slice\\{name}")
 
 
+def slice_directory_lines(frame, slices, name):
+    """u32 offsets at frame +0x10. Run bytes are not printed."""
+    if 16 + 4 * slices > len(frame):
+        raise ValueError(f"{name}: slice directory exceeds the frame")
+    lines = [f"{name} slices {slices}"]
+    for index in range(slices):
+        lines.append(f"slice {index} +{u32(frame, 16 + 4 * index):#x}")
+    return "\n".join(lines) + "\n"
+
+
 def slice_run_count(frame, slices):
     """Check the row directory and the native bit-0x20 run layout."""
     cursor = 16 + 4 * slices
@@ -198,10 +209,14 @@ def main(stack):
     parser.add_argument("--offset", type=lambda value: int(value, 0))
     parser.add_argument("--decode-slices", action="store_true",
                         help="with --check, expand original SMD frames and check every run (liblzo2)")
+    parser.add_argument("--list-slices", action="store_true",
+                        help="print the first cached SMD frame's slice offsets")
     args = parser.parse_args()
+    if args.list_slices and (args.check or args.offset is not None or args.out or args.decode_slices):
+        parser.error("--list-slices only prints one slice directory")
     if args.check and (args.offset is not None or args.out):
         parser.error("--check takes neither --offset nor --out")
-    if not args.check and (args.offset is None or not args.out):
+    if not args.check and not args.list_slices and (args.offset is None or not args.out):
         parser.error("give --offset and --out to export a texture")
     if args.decode_slices and not args.check:
         parser.error("--decode-slices requires --check")
@@ -213,6 +228,26 @@ def main(stack):
             raise ValueError("game-folder cdcache.wsx is absent")
         path, allocations = cache_rows(args.data)
         cache = path.read_bytes()
+        if args.list_slices:
+            decode = lzo_decoder()
+            directory = slice_directory(args.data, stack)
+            for offset, size, _bank, _descriptor, _mip, _key, _source in cache_textures(cache, allocations.values()):
+                record = cache[offset:offset + size]
+                flags, _width, _height, payload = texture_payload(record)
+                if flags not in SLICE_FLAGS:
+                    continue
+                name, header, start, expanded, stored = slice_reference(payload)
+                length = stored or expanded
+                source, position = find_slice_frame(directory, name, header, start, length)
+                source.seek(position)
+                frame = source.read(length)
+                if len(frame) != length:
+                    raise ValueError("truncated SMD frame")
+                if stored:
+                    frame = frame[:16] + decode(frame[16:], expanded - 16)
+                print(slice_directory_lines(frame, u32(payload, 0x2C), name), end="")
+                return 0
+            raise ValueError("no SMD reference in the game-written cache")
         decoded = Counter()
         slice_frames = Counter()
         slice_runs = Counter()

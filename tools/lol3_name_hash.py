@@ -6,6 +6,7 @@ name below is a NUL-terminated printable string already stored in
 LOL3.DAT, LOL3.EXE or an archive. Nothing is written.
 
   lol3_name_hash.py --data DAT --check
+  lol3_name_hash.py --data DAT --list     # 40 music stems and their directory keys
 """
 import mmap
 import re
@@ -85,9 +86,34 @@ def check_music_lookup(image):
         raise ValueError("score override switch changed")
 
 
+def stem_lines(stems):
+    """Stored stem and the MUSIC\\\\stem.aud key. No archive bytes."""
+    lines = [f"stems {len(stems)}"]
+    for index, stem in enumerate(stems):
+        key = wsx_name_hash("MUSIC\\%s.aud" % stem)
+        lines.append(f"stem {index}: {stem} key {key:#010x}")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
+    parser.add_argument("--list", action="store_true", help="print the 40 music stems and their keys")
     args = parser.parse_args()
+    if args.out:
+        parser.error("prints only")
+    if args.list:
+        if args.check:
+            parser.error("--check does not list")
+        try:
+            image = (Path(args.data).resolve().parent / "LOL3.DAT").read_bytes()
+            if sha256(image).hexdigest() != RETAIL_PE:
+                raise ValueError("LOL3.DAT does not match the documented English retail executable")
+            if image[FORMAT_AT:FORMAT_AT + 12] != b"MUSIC\\%s.aud":
+                raise ValueError("music format string changed")
+            print(stem_lines(c_strings(image, STEMS_AT, 40)), end="")
+        except (OSError, ValueError) as exc:
+            parser.exit(1, f"name hash: {exc}\n")
+        return 0
     if not args.check:
         parser.error("this tool only checks; pass --check")
     data = Path(args.data)

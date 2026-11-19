@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Re-prove that the four loose PHT files are prefixes of one repeating block.
 
+  lol3_pht.py --data DAT            # size and the first 16 bytes of each file
   lol3_pht.py --data DAT --check
 
 A file passes when its name and size are one of the four retail files, its
@@ -60,13 +61,27 @@ def pht_covers(path, sizes=SIZES, period=PERIOD, cycle_sha=CYCLE_SHA):
     return cycle_covers(path, period, cycle_sha)
 
 
+def head_line(path, count=16):
+    """File size and the first bytes. No field names."""
+    with Path(path).open("rb") as handle:
+        head = handle.read(count)
+    return f"{Path(path).name} {Path(path).stat().st_size} bytes +0: " + " ".join(f"{byte:02x}" for byte in head)
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
     args = parser.parse_args()
     if args.out:
         parser.error("prints only")
     if not args.check:
-        parser.error("this tool only checks; pass --check")
+        data = Path(args.data)
+        paths = sorted((p for p in data.iterdir() if p.is_file() and p.suffix.lower() == ".pht"),
+                       key=lambda path: path.name.lower())
+        if not paths:
+            parser.error("no .PHT files in the DAT folder")
+        for path in paths:
+            print(head_line(path))
+        return 0
     data = Path(args.data)
     try:
         paths = [p for p in data.iterdir() if p.is_file() and p.suffix.lower() == ".pht"]

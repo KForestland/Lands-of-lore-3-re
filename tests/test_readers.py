@@ -1,15 +1,30 @@
+import io
 import struct
 import sys
 import tempfile
 import unittest
 import zlib
+from collections import Counter
 from ctypes.util import find_library
 from hashlib import sha256
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from extract_wsx_entries import parse_wsx, wsx_name_hash
+from extract_wsx_entries import directory_lines, parse_wsx, wsx_name_hash
+from lol3_cache_seed import shipped_listing, written_listing
+from lol3_claimed_edges import MAP_HEADER, MAP_VERTICES, pattern_lines, shared_block_text
+from lol3_combat_census import item_lines, mitigation_lines
+from lol3_map_spans import row_listing, section1_listing
+from lol3_media_check import movie_chunk_lines, trr_lines
+from lol3_name_hash import stem_lines
+from lol3_odf_companions import name_listing
+from lol3_pht import head_line
+from lol3_script_framing import object_slot_lines, subcommand_lines
+from lol3_script_notes import timer_lines
+from lol3_texture_archive import descriptor_lines
+from lol3_texture_png import slice_directory_lines
+from walk_lmf_leaves import directory_text
 from lol3_cache_seed import FILL_MARKER, HEADER, body_covers
 from lol3_pht import cycle_covers, pht_covers
 from lol3_save_header import HEADER_SIZE, parse_header, report, synthetic_slot
@@ -101,6 +116,50 @@ class ReaderTests(unittest.TestCase):
         struct.pack_into("<I", broken, HEADER_SIZE + 8 + 0xF4 + 4, 0)
         with self.assertRaises(ValueError):
             report(bytes(broken))
+
+    def test_directory_listings_need_no_game_files(self):
+        key = wsx_name_hash("test.txt")
+        archive = struct.pack("<HIIII", 1, 3, key, 0, 3) + b"abc"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "synthetic.wsx"
+            path.write_bytes(archive)
+            listed = directory_lines(parse_wsx(path))
+            head = Path(directory) / "a.pht"
+            head.write_bytes(bytes(range(20)))
+            self.assertEqual(head_line(head),
+                             "a.pht 20 bytes +0: 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f")
+        self.assertIn(f"key {key:#010x} offset 0x12 size 3", listed)
+        self.assertNotIn("abc", listed)
+        table, table_size, pool_size, count = 0x100, 16, 4, 1
+        pool = table + table_size
+        header = struct.pack("<7I", 0, 38, table, pool, table_size, pool_size, count)
+        data = header + bytes(table - len(header)) + struct.pack("<4I", 0, 4, 0, 4) + b"abcd"
+        listing = directory_text(data, "SYN")
+        self.assertIn("SYN: 276 bytes, directory rows 1, groups 1", listing)
+        self.assertIn("group row 0 offset 0x110 packed 4 expanded 4 members 1", listing)
+        self.assertNotIn("abcd", listing)
+        block = bytearray(MAP_VERTICES)
+        struct.pack_into("<3I", block, 0, 38, MAP_VERTICES, 0)
+        struct.pack_into("<I", block, 0xCC, MAP_HEADER)
+        block[MAP_HEADER:MAP_HEADER + 2] = b"\xab\xcd"
+        span = shared_block_text(bytes(block))
+        self.assertIn(f"span +{MAP_HEADER:#x}..+{MAP_VERTICES:#x}: {MAP_VERTICES - MAP_HEADER} bytes", span)
+        self.assertIn("+0x244: ab cd", span)
+        self.assertNotIn("count", span)
+        self.assertNotIn("row", span)
+        payload = bytearray(0x180)
+        struct.pack_into("<II", payload, 0xC4, 1, 0x100)
+        struct.pack_into("<hhHBB", payload, 0x100, 5, -6, 7, 2, 0)
+        payload[0x108:0x122] = b"Secret\x00" + bytes(19)
+        struct.pack_into("<II", payload, 0xD8, 1, 0x130)
+        struct.pack_into("<HBB", payload, 0x130, 0, 1, 4)
+        payload[0x134:0x153] = b"Hidden" + bytes(25)
+        rows = row_listing(bytes(payload), "SYN")
+        self.assertIn("waypoint 1: x 5 z -6 surface 0x7 +6 0x2 +7 0x0", rows)
+        self.assertIn("53 65 63 72 65 74", rows)
+        self.assertIn("path 1: first 0 count 1 flags 0x4", rows)
+        self.assertNotIn("Secret", rows)
+        self.assertNotIn("Hidden", rows)
 
     def test_script_browser_groups_opcodes_without_game_files(self):
         sizes = {0x01: 6, 0x16: 18, 0xF0: 6}
@@ -213,3 +272,89 @@ class ReaderTests(unittest.TestCase):
         self.assertIn("<title>SYN MAP schematic</title>", drawing)
         self.assertIn(">1</text>", drawing)
         self.assertIn("numbered", drawing)
+
+    def test_remaining_listings_need_no_game_files(self):
+        header = bytearray(0x76)
+        header[0:2] = b"\xab\xcd"
+        struct.pack_into("<I", header, 0x72, 0xD0BCD8BE)
+        shipped = shipped_listing(bytes(header))
+        self.assertIn("header 114 bytes", shipped)
+        self.assertIn("dword +0x72 0xd0bcd8be", shipped)
+        self.assertIn("+0x0: ab cd", shipped)
+        self.assertNotIn("field", shipped)
+        prefix = bytearray(0x76 + 40 * 0x18)
+        struct.pack_into("<I", prefix, 0x72, 0xF1E2D3C4)
+        struct.pack_into("<5I", prefix, 0x76, 0x436, 4, 0xE128E112, 3, 9)
+        prefix[0x76 + 0x14:0x76 + 0x18] = bytes((1, 2, 0, 0x67))
+        written = written_listing(bytes(prefix))
+        self.assertIn("position 0x436 span 0x4 key 0xe128e112", written)
+        self.assertIn("generation index 2 pin 0 +0x17 0x67", written)
+        payload = bytearray(0x60)
+        struct.pack_into("<II", payload, 0x08, 0x40, 0)
+        struct.pack_into("<I", payload, 0x54, 1)
+        struct.pack_into("<HBBBBBB", payload, 0x40, 0xFFFF, 1, 2, 128, 0x14, 8, 0)
+        rows = section1_listing(bytes(payload), "SYN")
+        self.assertIn("SYN section-1 rows 1", rows)
+        self.assertIn("row 1: +0 0xffff +2 0x1 +3 0x2 +4 0x80 +5 0x14 +5&0x1f 0x14 +6 0x8 +7 0x0", rows)
+        odf = bytearray(0x200)
+        struct.pack_into("<I", odf, 4, 0x80)
+        struct.pack_into("<I", odf, 0x3C, 1)
+        struct.pack_into("<I", odf, 0x10, 0xAE)
+        struct.pack_into("<I", odf, 0x48, 1)
+        odf[0x80 + 24:0x80 + 31] = b"Floor39"
+        odf[0xAE + 0x87:0xAE + 0x8D] = b"SPIDER"
+        struct.pack_into("<HH", odf, 0xAE + 0x59, 750, 500)
+        listed, tags = name_listing(bytes(odf), "SYN")
+        self.assertEqual(tags, ["SPIDER"])
+        self.assertIn("name 1: Floor39", listed)
+        self.assertIn("creature 1: tag SPIDER +0x59 750 +0x5b 500", listed)
+        bank = bytearray(0x2AC + 58)
+        struct.pack_into("<I", bank, 0x10, 0x2AC)
+        struct.pack_into("<I", bank, 0x2A8, 1)
+        struct.pack_into("<H", bank, 0x2AC + 2, 0x15)
+        bank[0x2AC + 0xD] = 3
+        self.assertIn("descriptor 1: +0x2ac key 0x15 arm 3", descriptor_lines(bytes(bank), "SYN"))
+        frame = bytearray(24)
+        struct.pack_into("<II", frame, 16, 0x130, 0x142)
+        directory = slice_directory_lines(bytes(frame), 2, "a.smd")
+        self.assertIn("slice 0 +0x130", directory)
+        self.assertIn("slice 1 +0x142", directory)
+        blob = struct.pack("<IIII", 1, 7, 0x10, 0x14) + b"HELLO"
+        dialogue = trr_lines(blob, "qevent.trr")
+        self.assertIn("id 7 boundary 0x10", dialogue)
+        self.assertNotIn("HELLO", dialogue)
+        self.assertIn("key 0x%08x" % wsx_name_hash("MUSIC\\Tune.aud"), stem_lines(["Tune"]).replace("0x", "0x"))
+        record = bytes((2, 0, 0, 0)) + struct.pack("<8H", 0x104, 4, 0, 0, 0, 0, 0, 0)
+        self.assertIn("selectors 0x2 0x0 0x0 0x0 masks 0x104/0x4", mitigation_lines(Counter({record: 3})))
+        archive = bytearray(0x3A56 + 139 * 343)
+        for index in range(1, 343):
+            archive[0x3A56 + 139 * index + 0x3F] = 2
+        archive[0x3A56 + 0x73:0x3A56 + 0x77] = struct.pack("<I", 0x50)
+        archive[0x3A56 + 0x4B:0x3A56 + 0x4F] = struct.pack("<I", 1)
+        text = item_lines(bytes(archive))
+        self.assertIn("definition 0: +0x73 0x50", text)
+        self.assertIn("regular definitions 1", text)
+        image = bytearray(0x48E1C + 28 * 4)
+        struct.pack_into("<I", image, 0x48E1C, 0x447F31)
+        self.assertIn("slot 1 opcode 0x01: 0x447f31", object_slot_lines(bytes(image)))
+        payload = bytearray(0xC0)
+        struct.pack_into("<I", payload, 0x44, 0xA0)
+        struct.pack_into("<I", payload, 0x8C, 8)
+        payload[0xA0:0xA8] = bytes((0x0D, 2, 0, 0, 2, 0, 0, 0))
+        struct.pack_into("<I", payload, 0x3C, 0xA8)
+        struct.pack_into("<I", payload, 0x84, 12)
+        payload[0xA8:0xB4] = bytes((0xC4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0))
+        listed = subcommand_lines([("SYN", bytes(payload))],
+                                  {0x0D: 8, 0x0F: 8, 0x1C: 38, 0xC4: 12, 0xC6: 6, 0xC7: 6, 0xCE: 6, 0xCF: 6})
+        self.assertIn("subcommand 2: 1", listed)
+        self.assertIn("opcode 0xC4 records 0", listed)
+        timers = timer_lines("SYN", {"object": (None, None, None, Counter({2: 2}))})
+        self.assertIn("object kind 2 timer expires: 2", timers)
+        body = b"VQHD" + struct.pack(">I", 42) + bytes(42)
+        form = b"FORM" + struct.pack(">I", 4 + len(body)) + b"WVQA" + body
+        chunks = movie_chunk_lines(io.BytesIO(form), 0, len(form))
+        self.assertEqual(chunks, [f"VQHD +0xc size 42"])
+        counted = pattern_lines({"counts": {0xE128E119: 1, 0xD0B8E10A: 2, 0x00A8E101: 3, 0xDCD8E100: 0},
+                                 "plus4": Counter({0: 4, 2: 5, 6: 6, 0x0B: 0})})
+        self.assertIn("QWOD0 C5 A5: texture 1, MAP 2, light map 3, ODF 0", counted)
+        self.assertIn("0xb on 0", counted)

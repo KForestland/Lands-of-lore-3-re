@@ -2,6 +2,7 @@
 """Read the native LoL3 Light Map (LMF) directory and its storage groups.
 
   walk_lmf_leaves.py FILE.LMF [-o report.json]
+  walk_lmf_leaves.py --data DAT --stem QWOD0       # that level's LMF directory, from the archive
   walk_lmf_leaves.py --data DAT --check            # check all original WSX entries
   walk_lmf_leaves.py --data DAT --check --decode   # also decode and check members (liblzo2)
 """
@@ -123,6 +124,20 @@ def walk(path: Path):
     return walk_bytes(path.read_bytes(), path.name)
 
 
+def directory_text(data, name):
+    """Header fields and one line per stored group. Member bytes are not printed."""
+    groups = list(lmf_groups(data))
+    zero, version, table, pool, table_size, pool_size, count = unpack_from("<7I", data)
+    lines = [
+        f"{name}: {len(data)} bytes, directory rows {count}, groups {len(groups)}",
+        f"+0 {zero} +4 {version} +8 {table:#x} +0xc {pool:#x} +0x10 {table_size:#x} +0x14 {pool_size:#x} +0x18 {count}",
+    ]
+    for group in groups:
+        lines.append(f"group row {group['first_row']} offset {group['offset']:#x} "
+                     f"packed {group['packed']} expanded {group['expanded']} members {len(group['lengths'])}")
+    return "\n".join(lines) + "\n"
+
+
 def check(data_dir, decode):
     files = groups = members = 0
     stats = Counter()
@@ -161,9 +176,24 @@ def main():
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--decode", action="store_true")
     parser.add_argument("--data", type=Path, default=os.environ.get("LOL3_DAT"))
+    parser.add_argument("--stem", help="print this level's LMF directory from its archive")
     args = parser.parse_args()
     try:
         decode = lzo_decoder() if args.decode else None
+        if args.stem:
+            if args.check or args.decode or args.lmf is not None:
+                parser.error("--stem only prints the directory")
+            if args.data is None:
+                parser.error("give --data (the game's DAT folder) or set LOL3_DAT")
+            stem = args.stem.upper()
+            archive = next((path for path in wsx_files(args.data) if path.stem.upper() == stem), None)
+            if archive is None:
+                raise ValueError(f"no archive for level {stem}")
+            lights = [entry for entry in parse_wsx(archive)["entries"] if entry["is_lmf"]]
+            if len(lights) != 1:
+                raise ValueError(f"{archive.name} has {len(lights)} light-map entries")
+            print(directory_text(lights[0]["blob"], archive.name), end="")
+            return 0
         if args.check:
             if args.data is None:
                 parser.error("give --data (the game's DAT folder) or set LOL3_DAT")

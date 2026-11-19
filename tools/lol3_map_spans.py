@@ -2,6 +2,8 @@
 """Re-prove the MAP spans tabulated for question Q4.
 
   lol3_map_spans.py --data DAT --check
+  lol3_map_spans.py --data DAT --list QWOD0   # waypoint fields and slot bytes; no label text
+  lol3_map_spans.py --data DAT --rows QWOD0   # section-1 bytes the page names
 """
 from collections import Counter
 from hashlib import sha256
@@ -220,9 +222,78 @@ def mismatches(got):
     return bad
 
 
+def row_listing(payload, stem):
+    """Waypoint fields, and the following slots as hex. Label text is not decoded."""
+    count, start = u32(payload, 0xC4), u32(payload, 0xC8)
+    paths, path_at = u32(payload, 0xD8), u32(payload, 0xDC)
+    slot_at = start + 8 * count
+    label_at = path_at + 4 * paths
+    need = max(slot_at + 26 * count, label_at + 31 * paths)
+    if need > len(payload):
+        raise ValueError(f"{stem}: waypoint rows run past the MAP")
+    lines = [f"{stem} waypoints {count} paths {paths}"]
+    for index in range(count):
+        row = payload[start + 8 * index:start + 8 * index + 8]
+        horizontal_x, horizontal_z, surface = unpack_from("<hhH", row)
+        lines.append(f"waypoint {index + 1}: x {horizontal_x} z {horizontal_z} "
+                     f"surface {surface:#x} +6 {row[6]:#x} +7 {row[7]:#x}")
+        slot = payload[slot_at + 26 * index:slot_at + 26 * index + 26]
+        lines.append(f"slot {index + 1}: " + " ".join(f"{byte:02x}" for byte in slot))
+    for index in range(paths):
+        first, path_count, flags = unpack_from("<HBB", payload, path_at + 4 * index)
+        lines.append(f"path {index + 1}: first {first} count {path_count} flags {flags:#x}")
+        label = payload[label_at + 31 * index:label_at + 31 * index + 31]
+        lines.append(f"path slot {index + 1}: " + " ".join(f"{byte:02x}" for byte in label))
+    return "\n".join(lines) + "\n"
+
+
+def section1_listing(payload, stem):
+    """Section-1 bytes named on the reader page. No names for the bits whose meaning is open."""
+    start, count = u32(payload, 0x08), u32(payload, 0x54)
+    if start + 8 * count > len(payload):
+        raise ValueError(f"{stem}: section-1 rows run past the MAP")
+    lines = [f"{stem} section-1 rows {count}"]
+    for index in range(count):
+        row = payload[start + 8 * index:start + 8 * index + 8]
+        word, = unpack_from("<H", row)
+        lines.append(
+            f"row {index + 1}: +0 {word:#x} +2 {row[2]:#x} +3 {row[3]:#x} "
+            f"+4 {row[4]:#x} +5 {row[5]:#x} +5&0x1f {row[5] & 0x1F:#x} "
+            f"+6 {row[6]:#x} +7 {row[7]:#x}")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     ap = lol3_cli.tool_args(__doc__)
+    ap.add_argument("--list", help="print one level's waypoint rows and slot bytes")
+    ap.add_argument("--rows", help="print one level's section-1 rows")
     a = ap.parse_args()
+    if a.list and a.rows:
+        ap.error("pass only one of --list and --rows")
+    if a.rows:
+        if a.check:
+            ap.error("--check does not list")
+        try:
+            stem = a.rows.upper()
+            found = [item for item in level_map_entries(a.data) if item[0] == stem]
+            if len(found) != 1:
+                raise ValueError(f"expected one MAP for {stem}")
+            print(section1_listing(found[0][2], stem), end="")
+        except (OSError, ValueError) as exc:
+            ap.exit(1, f"map spans: {exc}\n")
+        return 0
+    if a.list:
+        if a.check:
+            ap.error("--check does not list")
+        try:
+            stem = a.list.upper()
+            found = [item for item in level_map_entries(a.data) if item[0] == stem]
+            if len(found) != 1:
+                raise ValueError(f"expected one MAP for {stem}")
+            print(row_listing(found[0][2], stem), end="")
+        except (OSError, ValueError) as exc:
+            ap.exit(1, f"map spans: {exc}\n")
+        return 0
     if not a.check:
         ap.error("this tool only checks; pass --check")
     try:

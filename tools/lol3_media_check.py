@@ -221,6 +221,49 @@ def keys(path):
         return {key for key, _, _ in struct.iter_unpack("<III", stream.read(12 * count))}
 
 
+TRR_AT = {
+    "qevent.trr": 0x5987786,
+    "qtext.trr": 0x5987AF5,
+    "devent.trr": 0x58E4F95,
+    "dtext.trr": 0x58F7444,
+}
+STEMS_AT = 0x148180
+
+
+def movie_chunk_lines(stream, start, size):
+    """Top-level chunk tag, header offset and size. Frame pixels are not read out."""
+    lines = []
+    for tag, at, length in form(stream, start, size, b"FORM", b"WVQA", ">"):
+        lines.append(f"{tag.decode('ascii')} +{at - 8:#x} size {length}")
+    return lines
+
+
+def wave_fields(stream, start, size):
+    fmt = None
+    for tag, at, length in form(stream, start, size, b"RIFF", b"WAVE", "<"):
+        if tag == b"fmt ":
+            fmt = read_at(stream, at, length)
+    if fmt is None or len(fmt) < 16:
+        raise ValueError("missing WAVE format chunk")
+    return struct.unpack_from("<HHIIHH", fmt)
+
+
+def trr_lines(blob, name):
+    """Count, ids and stored boundaries. Payload bytes are not printed."""
+    count, = struct.unpack_from("<I", blob)
+    bound_at = 4 + 4 * count
+    directory = bound_at + 4 * (count + 1)
+    if count > 100000 or directory > len(blob):
+        raise ValueError(f"{name} directory exceeds the entry")
+    ids = struct.unpack_from(f"<{count}I", blob, 4) if count else ()
+    bounds = struct.unpack_from(f"<{count + 1}I", blob, bound_at)
+    lines = [f"{name} count {count} directory {directory} bytes"]
+    for ident, boundary in zip(ids, bounds):
+        lines.append(f"id {ident} boundary {boundary:#x}")
+    lines.append(f"end boundary {bounds[-1]:#x}")
+    return "\n".join(lines) + "\n"
+
+
 def check(data, summary):
     names = movie_names((data.parent / "LOL3.DAT").read_bytes())
     files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
@@ -272,10 +315,87 @@ def main():
     parser.add_argument("--data", type=Path, default=os.environ.get("LOL3_DAT"),
                         required="LOL3_DAT" not in os.environ, help="original game's DAT folder")
     parser.add_argument("--check", action="store_true", help="verify all entries in place")
+    parser.add_argument("--movie", help="print one movie's top-level chunks")
+    parser.add_argument("--tracks", action="store_true", help="print each music entry's format and stem")
+    parser.add_argument("--samples", help="print one level sidecar's sample offsets and format fields")
+    parser.add_argument("--trr", help="print one dialogue directory: ids and boundaries, no payload")
     args = parser.parse_args()
+    chosen = [name for name in ("movie", "tracks", "samples", "trr") if getattr(args, name)]
+    if chosen and (args.check or len(chosen) != 1):
+        parser.error("pass only one of --movie, --tracks, --samples, --trr or --check")
     try:
-        return check(args.data, summary=not args.check)
-    except (OSError, ValueError, KeyError, struct.error) as exc:
+        if not chosen:
+            return check(args.data, summary=not args.check)
+        data = Path(args.data)
+        image = (data.parent / "LOL3.DAT").read_bytes()
+        if args.trr:
+            name = args.trr.lower()
+            if name not in TRR_AT:
+                raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
+            path = next(path for path in data.iterdir() if path.name.lower() == "locallng.wsx")
+            with path.open("rb") as stream:
+                rows = wsx_rows(stream)
+                match = [row for row in rows if row[1] == TRR_AT[name]]
+                if len(match) != 1:
+                    raise ValueError(f"{name} is not at the documented offset")
+                _key, start, size = match[0]
+                print(trr_lines(read_at(stream, start, size), name), end="")
+            return 0
+        if args.movie or args.tracks:
+            from lol3_level_report import c_strings
+            names = movie_names(image) if args.movie else {}
+        if args.movie:
+            wanted = args.movie.upper()
+            found = [(key, name) for key, name in names.items() if wanted in name.upper()]
+            if len(found) != 1:
+                raise ValueError(f"{args.movie} matches {len(found)} movie names")
+            key, name = found[0]
+            files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
+            hit = None
+            for stem in sorted(path for path in files if path.startswith("MOVIES")):
+                with files[stem].open("rb") as stream:
+                    for row_key, start, size in wsx_rows(stream):
+                        if row_key == key:
+                            hit = (files[stem], stream.name, start, size)
+                            chunks = movie_chunk_lines(stream, start, size)
+                            break
+                if hit:
+                    break
+            if hit is None:
+                raise ValueError(f"no archive entry for {name}")
+            print(f"{hit[0].name}+0x{hit[2]:X} {name} chunks {len(chunks)}")
+            print("\n".join(chunks))
+            return 0
+        if args.tracks:
+            from lol3_level_report import c_strings
+            stems = c_strings(image, STEMS_AT, 40)
+            by_key = {}
+            for stem in stems:
+                by_key.setdefault(wsx_name_hash("MUSIC\\%s.aud" % stem), []).append(stem)
+            files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
+            for stem in sorted(path for path in files if path.startswith("MUSIC")):
+                with files[stem].open("rb") as stream:
+                    for key, start, size in wsx_rows(stream):
+                        tag, channels, rate, _byterate, align, bits = wave_fields(stream, start, size)
+                        stored = ",".join(by_key.get(key, ())) or "absent"
+                        print(f"{files[stem].name}+0x{start:X} size {size} key {key:08X} "
+                              f"tag {tag:#x} channels {channels} rate {rate} align {align} bits {bits} "
+                              f"stem {stored}")
+            return 0
+        stem = args.samples.upper()
+        files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
+        path = files.get(stem + "S")
+        if path is None:
+            raise ValueError(f"no sidecar for {stem}")
+        with path.open("rb") as stream:
+            rows = wsx_rows(stream)
+            print(f"{path.name} samples {len(rows)}")
+            for key, start, size in rows:
+                tag, channels, rate, _byterate, align, bits = wave_fields(stream, start, size)
+                print(f"+0x{start:X} size {size} key {key:08X} tag {tag:#x} "
+                      f"channels {channels} rate {rate} align {align} bits {bits}")
+        return 0
+    except (OSError, ValueError, KeyError, struct.error, StopIteration) as exc:
         print(f"CHECK media failed: {exc}", file=sys.stderr)
         return 1
 

@@ -3,6 +3,8 @@
 
   lol3_native_checks.py --data DAT --check
   lol3_native_checks.py --data DAT --check --decode-copy   # shipped banks, liblzo2
+  lol3_native_checks.py --data DAT --list
+  lol3_native_checks.py --data DAT --spells
 """
 from collections import Counter
 from hashlib import sha256
@@ -168,25 +170,89 @@ def verify_copy_banks(data_dir):
             seen[name, mip] += 1
     if seen != {(name, mip): 1 for name in COPY_BANKS for mip in range(5)}:
         raise ValueError("missing or duplicate shipped copy mips")
-    return sum(seen.values())
+    return seen
+
+
+def data_dword(image, va):
+    return unpack_from("<I", image, va - DATA_BIAS)[0]
+
+
+def call_target(image, address):
+    at = address - CODE_BIAS
+    return address + 5 + unpack_from("<i", image, at + 1)[0]
+
+
+def witness_lines(image):
+    """Values the anchor checks read. Instruction bytes are not dumped."""
+    lines = [
+        f"world item +0x68 {data_dword(image, 0x5405E8):#x}",
+        f"world item +0x114 {data_dword(image, 0x540694):#x}",
+        f"player receive {data_dword(image, 0x538400):#x}",
+        f"call 0x4d83ac targets {call_target(image, 0x4D83AC):#x}",
+        f"second-counter call 0x4a5a3a targets {call_target(image, 0x4A5A3A):#x}",
+        f"second-counter call 0x4a6133 targets {call_target(image, 0x4A6133):#x}",
+        f"handler 112 {data_dword(image, 0x54BAD8):#x}",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def spell_lines(archive):
+    """28 spell rows, the 8-byte auxiliary row, and special-definition costs."""
+    offset, count = unpack_from("<II", archive, 0x16BE53 + 4)
+    if (offset, count) != (412, 28):
+        raise ValueError(f"spell table is offset {offset} count {count}")
+    lines = [f"spell rows {count}"]
+    base = 0x16BE53 + offset
+    for index in range(count):
+        row = archive[base + 87 * index:base + 87 * (index + 1)]
+        identity, = unpack_from("<I", row, 0x18)
+        lines.append(f"row {index + 1}: +0x18 {identity:#x} +0x2e {row[0x2E]:#x}")
+    auxiliary = archive[0x16BE53 + 0x43EC:0x16BE53 + 0x43EC + 8]
+    lines.append("auxiliary: " + " ".join(f"{byte:02x}" for byte in auxiliary))
+    costs = []
+    for index in range(343):
+        row = archive[0x3A56 + 139 * index:0x3A56 + 139 * (index + 1)]
+        if row[0x3F] & 2:
+            identity, = unpack_from("<I", row, 0x73)
+            cost, = unpack_from("<I", row, 0x5B)
+            costs.append(f"definition {index}: +0x73 {identity:#x} +0x5b {cost}")
+    lines.append(f"special definition costs {len(costs)}")
+    lines.extend(costs)
+    return "\n".join(lines) + "\n"
 
 
 def main():
     parser = lol3_cli.tool_args(__doc__)
     parser.add_argument("--decode-copy", action="store_true", help="compare all 20 shipped copy mips")
+    parser.add_argument("--list", action="store_true", help="print the anchor values the check reads")
+    parser.add_argument("--spells", action="store_true", help="print spell rows and special-definition costs")
     args = parser.parse_args()
     if args.out:
         parser.error("this check writes counts to standard output")
+    if args.list and args.spells:
+        parser.error("pass only one of --list and --spells")
+    if args.check and (args.list or args.spells):
+        parser.error("--check does not list")
     try:
         data_dir = Path(args.data).resolve()
         image = (data_dir.parent / "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
+        if args.spells:
+            print(spell_lines(global_wsx(data_dir)), end="")
+            return 0
         pickup_and_renderer(image)
         original = global_wsx(data_dir)
         spell_counter(image, original)
         regular_item_handlers(image, original)
-        detail = f"; {verify_copy_banks(data_dir)} shipped copy mips" if args.decode_copy else ""
+        seen = verify_copy_banks(data_dir) if args.decode_copy else None
+        if args.list:
+            print(witness_lines(image), end="")
+            if seen is not None:
+                for (name, mip) in sorted(seen):
+                    print(f"copy {name} mip {mip}: mismatches {COPY_MISMATCHES[mip]}")
+            return 0
+        detail = f"; {sum(seen.values())} shipped copy mips" if seen is not None else ""
         print(f"CHECK native: pickup, renderer, second-counter and six item-handler anchors{detail}")
     except (OSError, ValueError, StructError, RuntimeError) as error:
         parser.exit(1, f"native checks: {error}\n")

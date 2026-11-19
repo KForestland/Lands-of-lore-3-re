@@ -3,6 +3,7 @@
 
   lol3_texture_archive.py --data DAT --check
   lol3_texture_archive.py --data DAT --check --decode   # liblzo2
+  lol3_texture_archive.py --data DAT --list QWOD0 --decode   # one bank's descriptors
 """
 from pathlib import Path
 from struct import error as struct_error, iter_unpack, unpack_from
@@ -104,12 +105,44 @@ def shared_joins(data_dir):
     return counts
 
 
+def descriptor_lines(data, stem):
+    """One line per 58-byte descriptor: directory offset, u16 key and arm byte."""
+    if len(data) < 0x2AC:
+        raise ValueError(f"{stem}: texture bank header is short")
+    directory, = unpack_from("<I", data, 0x10)
+    count, = unpack_from("<I", data, 0x2A8)
+    if directory + 58 * count > len(data):
+        raise ValueError(f"{stem}: descriptors exceed the bank")
+    lines = [f"{stem} descriptors {count}"]
+    for index in range(count):
+        at = directory + 58 * index
+        key, = unpack_from("<H", data, at + 2)
+        lines.append(f"descriptor {index + 1}: +{at:#x} key {key:#x} arm {data[at + 0xD]}")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
     parser.add_argument("--decode", action="store_true", help="expand each bank and compare the installed copies")
+    parser.add_argument("--list", help="print one level's descriptors; requires --decode")
     args = parser.parse_args()
     if args.out:
         parser.error("this check reports counts on standard output")
+    if args.list:
+        if args.check or not args.decode:
+            parser.error("--list needs --decode and does not check")
+        try:
+            stem = args.list.upper()
+            found = [item for item in texture_entries(args.data) if item[0] == stem]
+            if len(found) != 1:
+                raise ValueError(f"expected one .TE_ for {stem}")
+            decode = lzo_decoder()
+            expanded = b"".join(decode(blob, size) for blob, size in chunks(found[0][1]))
+            joined_palettes(expanded, 3)
+            print(descriptor_lines(expanded, stem), end="")
+        except (OSError, ValueError, struct_error, StopIteration) as error:
+            parser.exit(1, f"texture archive: {error}\n")
+        return 0
     try:
         data_dir = Path(args.data)
         decode = lzo_decoder() if args.decode else None

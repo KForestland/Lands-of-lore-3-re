@@ -33,7 +33,7 @@ The level QWOD0 seen from above, drawn from its map file: each line is an edge o
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-four checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-four checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)

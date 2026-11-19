@@ -3,6 +3,7 @@
 
   lol3_claimed_edges.py --data DAT --check
   lol3_claimed_edges.py --data DAT --check --decode   # also the light-map samples
+  lol3_claimed_edges.py --data DAT --span QWOD0       # hex of the unidentified span; no field names
 """
 from collections import Counter
 from hashlib import sha256
@@ -216,10 +217,59 @@ def decode_facts(data_dir):
     return out
 
 
+def shared_block_text(payload):
+    """Hex of the span between header +0xCC and header +4. Bytes inside it are not named."""
+    if len(payload) < MAP_VERTICES or unpack_from("<I", payload, 0)[0] != 38:
+        raise ValueError("MAP header does not reach the shared span")
+    start = unpack_from("<I", payload, 0xCC)[0]
+    end = unpack_from("<I", payload, 4)[0]
+    if (start, end) != (MAP_HEADER, MAP_VERTICES) or end > len(payload):
+        raise ValueError(f"shared span is +{start:#x}..+{end:#x}")
+    blob = payload[start:end]
+    lines = [f"span +{start:#x}..+{end:#x}: {len(blob)} bytes"]
+    for offset in range(0, len(blob), 16):
+        chunk = blob[offset:offset + 16]
+        lines.append(f"+{start + offset:#x}: " + " ".join(f"{byte:02x}" for byte in chunk))
+    return "\n".join(lines) + "\n"
+
+
+def pattern_lines(got):
+    """The page's C5 A5 placements and the SWOD4 surface +4 histogram. No picture."""
+    labels = (
+        (0xE128E119, "texture"), (0xD0B8E10A, "MAP"),
+        (0x00A8E101, "light map"), (0xDCD8E100, "ODF"),
+    )
+    parts = [f"{label} {got['counts'][key]}" for key, label in labels]
+    plus = ", ".join(f"{value:#x} on {got['plus4'][value]}" for value in (0, 2, 6, 0x0B))
+    return "QWOD0 C5 A5: " + ", ".join(parts) + f"\nSWOD4 surface +4: {plus}\n"
+
+
 def main():
     ap = lol3_cli.tool_args(__doc__)
     ap.add_argument("--decode", action="store_true", help="also decode the two light maps")
+    ap.add_argument("--span", help="print this level's unidentified MAP span as hex")
+    ap.add_argument("--counts", action="store_true", help="print the QWOD0 and SWOD4 byte-pattern counts")
     a = ap.parse_args()
+    if a.counts:
+        if a.check or a.decode or a.span:
+            ap.error("--counts only prints the two histograms")
+        try:
+            print(pattern_lines(file_facts(a.data)), end="")
+        except (OSError, ValueError) as exc:
+            ap.exit(1, f"claimed edges: {exc}\n")
+        return 0
+    if a.span:
+        if a.check or a.decode:
+            ap.error("--span only prints the hex")
+        try:
+            stem = a.span.upper()
+            found = [item for item in level_map_entries(a.data) if item[0] == stem]
+            if len(found) != 1:
+                raise ValueError(f"expected one MAP for {stem}")
+            print(shared_block_text(found[0][2]), end="")
+        except (OSError, ValueError) as exc:
+            ap.exit(1, f"claimed edges: {exc}\n")
+        return 0
     if not a.check:
         ap.error("this tool only checks; pass --check")
     try:

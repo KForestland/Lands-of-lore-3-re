@@ -2,6 +2,7 @@
 """Re-prove the ODF section-0 names and the AI-file failure arm.
 
   lol3_odf_companions.py --data DAT --check
+  lol3_odf_companions.py --data DAT --list QWOD0   # section-0 names, field-3 words, AI leaves
 """
 from hashlib import sha256
 from pathlib import Path
@@ -73,9 +74,73 @@ def level_odfs(data):
     return found
 
 
+def name_listing(odf, stem):
+    """Section-0 names and the field-3 words the page names. Other row bytes stay out."""
+    off0 = unpack_from("<I", odf, 4)[0]
+    count = unpack_from("<I", odf, 0x3C)[0]
+    base = off0 + 24 * count
+    if base + 22 * count > len(odf):
+        raise ValueError(f"{stem}: name slots run past the ODF")
+    lines = [f"{stem} section-0 names {count}"]
+    for index in range(count):
+        slot = odf[base + 22 * index:base + 22 * index + 22]
+        text, _, _ = slot.partition(b"\x00")
+        if text and all(32 <= byte <= 126 for byte in text):
+            lines.append(f"name {index + 1}: {text.decode('ascii')}")
+        else:
+            lines.append("name %d: %s" % (index + 1, " ".join(f"{byte:02x}" for byte in slot)))
+    start, nrows = unpack_from("<I", odf, 0x10)[0], unpack_from("<I", odf, 0x48)[0]
+    if start + 147 * nrows > len(odf):
+        raise ValueError(f"{stem}: field-3 rows run past the ODF")
+    lines.append(f"{stem} field-3 rows {nrows}")
+    tags = []
+    for index in range(nrows):
+        row = odf[start + 147 * index:start + 147 * index + 147]
+        raw = row[0x87:0x93].split(b"\x00", 1)[0]
+        tag = raw.decode("ascii") if raw and all(32 <= byte <= 126 for byte in raw) else ""
+        tags.append(tag)
+        word_a, word_b = unpack_from("<HH", row, 0x59)
+        shown = tag if tag else " ".join(f"{byte:02x}" for byte in raw)
+        lines.append(f"creature {index + 1}: tag {shown} +0x59 {word_a} +0x5b {word_b} +0x81 {row[0x81]:#x}")
+    return "\n".join(lines) + "\n", tags
+
+
+def ai_lines(tags, keys):
+    """Which of the five AI leaves join this level's tags."""
+    lines = []
+    seen = []
+    for tag in tags:
+        if tag and tag not in seen:
+            seen.append(tag)
+    for tag in seen:
+        leaves = [leaf for leaf in LEAVES if wsx_name_hash(f"global\\ai\\{tag}\\{leaf}") in keys]
+        lines.append(f"ai {tag}: {', '.join(leaves) if leaves else 'none'}")
+    return "\n".join(lines) + ("\n" if lines else "")
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__)
+    parser.add_argument("--list", help="print one level's names, creature fields and AI leaves")
     args = parser.parse_args()
+    if args.out:
+        parser.error("prints only")
+    if args.list:
+        if args.check:
+            parser.error("--check does not list")
+        try:
+            stem = args.list.upper()
+            found = [item for item in level_odfs(args.data) if item[0] == stem]
+            if len(found) != 1:
+                raise ValueError(f"expected one ODF for {stem}")
+            text, tags = name_listing(found[0][1], stem)
+            global_wsx = next(path.read_bytes() for path in lol3_cli.wsx_files(args.data)
+                              if path.name.upper() == "GLOBAL.WSX")
+            directory = unpack_from("<H", global_wsx)[0]
+            keys = {unpack_from("<I", global_wsx, 6 + 12 * index)[0] for index in range(directory)}
+            print(text + ai_lines(tags, keys), end="")
+        except (OSError, ValueError, StopIteration) as exc:
+            parser.exit(1, f"odf companions: {exc}\n")
+        return 0
     if not args.check:
         parser.error("this tool only checks; pass --check")
     data = Path(args.data)
