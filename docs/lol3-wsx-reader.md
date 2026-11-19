@@ -124,8 +124,16 @@ The original global names occur at `LOL3.DAT+0x147FD0–0x14801D`.
 `python3 tools/extract_wsx_entries.py --data DAT --check` verifies the
 76 name/key pairs in the installed archive directories.
 
-**UNCONFIRMED.** A complete list of names for the many entries outside
-these 76 witnesses remains open. The hash is only 32 bits. A matching
-hash is a useful test for executable resource names and offsets of
-the expected format. To recover names for other archives, follow each
-resource-opening caller back to the filename construction.
+**CONFIRMED.** Hashing every NUL-terminated printable ASCII string of
+4–180 characters in
+`LOL3.DAT` (2,374), `LOL3.EXE` (222) and the 51 size-checked
+archives (3,701,411) joins 53 path-like names to directory keys.
+Fifty-two are stored in `LOL3.DAT`. One, `missing.aud`, is stored
+in `locallng.wsx` and is the WAVE at `LOCAL.WSX+0x240FF66`. The
+other 7,364 distinct keys have no stored C string (the 76 constructed
+names are checked separately). The hash is only
+32 bits: one printable run at `LOCAL.WSX+0x147CF1F` collides with
+a key and is not a path. `lol3_name_hash.py --check` re-counts
+this. Music key `0x1D4F73DA` is one of the unnamed keys
+([music](formats/audio.md)). To name another entry, follow the
+caller that builds its filename.

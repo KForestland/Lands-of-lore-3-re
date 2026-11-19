@@ -31,13 +31,44 @@ using 31 distinct keys. Several discs carry the same key. For
 example, index 14 resolves to `uewoods0` and key `0xBD4CB6E0`,
 at `MUSIC1.WSX+0x36`.
 
-**UNCONFIRMED.** The remaining entry is key `0x1D4F73DA` at
-`music4.wsx+0x11FD49A`. It matches the candidate
-`MUSIC\uhfroze1.aud`. The executable's slot 11 instead holds
-`uhfroze2` at `LOL3.DAT+0x148330`, whose key `0x1D4F74DA`
-is absent from the four music archives. Establishing a spelling
-for the remaining key requires a second original name witness,
-or a captured resolved name at `0x44A7F5` for that key.
+**CONFIRMED** (what is stored). **UNCONFIRMED** (a name for the
+remaining key). Slot 9 is `uhfrozen` at `LOL3.DAT+0x148348`
+(key `0x1D4F90DA`). Slot 11 is `uhfroze2` at `LOL3.DAT+0x148330`
+(key `0x1D4F74DA`). Those are the only two `uhfroze` spellings in
+`LOL3.DAT`. `LOL3.EXE` has none. The same ASCII bytes, the
+upper-case bytes `UHFROZE` followed by `1`, and the UTF-16LE spelling `uhfroze1` are absent
+from the 51 size-checked archives and from the shipped
+`cdcache.wsx`. The four music archives hold 38 entries and 32
+distinct keys. Thirty-one of those keys are `MUSIC\%s.aud` for
+the alphanumeric stems other than `None` and `uhfroze2`, and
+they cover 37 entries. The remaining key is `0x1D4F73DA`, the
+directory dword at `music4.wsx+0x8A`. Its payload is
+`music4.wsx+0x11FD49A`, 6,530,290 bytes. That key equals the hash
+of the computed candidate `MUSIC\uhfroze1.aud`, and that spelling
+is not stored.
+
+Hashing every NUL-terminated printable ASCII string of 4–180
+characters (a longer run is hashed as its last 180; 2,374 in
+`LOL3.DAT`, 222 in `LOL3.EXE`, 3,701,411 in the 51 archives)
+joins 53 path-like names to directory keys. Fifty-two of the
+names are stored in `LOL3.DAT`. `LOL3.EXE` adds none. The other
+name, `missing.aud`, is stored at `locallng.wsx+0x58C6636` and
+`+0x58C6646`. Its key `0x2E02FD5E` is the 1,160-byte WAVE at
+`LOCAL.WSX+0x240FF66` (directory row `+0x11A`). One further
+printable run, at `LOCAL.WSX+0x147CF1F`, collides with a
+directory key and has no separator and no extension, so it is
+not a name. No stored string hashes to `0x1D4F73DA`. This search
+hashes whole stored strings and the one computed name above; it
+does not join other prefixes or suffixes and does not read UTF-16
+strings. The hash upper-cases its input, so case does not matter.
+A wider review search (runs of 3 or more characters, UTF-16LE runs,
+path components, and twelve folder prefixes with seven extensions)
+also found no name for the key.
+
+`lol3_name_hash.py --check` re-counts the stems, the music join
+and the stored-string hits. A stored spelling, or the resolved
+name at `0x44A7F5` for that key, is the settling test. The 76
+constructed level and global names stay with the WSX check.
 
 ## Level sample data
 
