@@ -10,6 +10,7 @@ from pathlib import Path
 from struct import error as StructError, pack, unpack_from
 
 import lol3_cli
+from lol3_combat_census import DATA_BIAS, HANDLERS, ITEM_STRIDE, ITEM_TABLE, global_wsx
 from lol3_script_framing import CODE_BIAS, RETAIL_PE
 from lol3_texture_archive import chunks, texture_entries
 from lol3_texture_png import UNCONFIRMED_FLAGS, cache_textures, texture_payload
@@ -62,7 +63,7 @@ def pickup_and_renderer(image):
         raise ValueError("wrong level save selector 25")
 
 
-def spell_counter(image, data_dir):
+def spell_counter(image, original):
     # The executable's .text virtual bytes (file offsets 0x400 through 0x1366E4).
     start, end = 0x400, 0x1366E5
     target = 0x432AD0
@@ -97,7 +98,6 @@ def spell_counter(image, data_dir):
         if first != FIRST_COUNTER_IDS:
             raise ValueError(f"unexpected first-counter route at {selector:#x}")
 
-    original = (data_dir / "GLOBAL.WSX").read_bytes()
     odf = 0x3866
     item_offset, = unpack_from("<I", original, odf + 4)
     count, = unpack_from("<I", original, odf + 0x34)
@@ -114,6 +114,32 @@ def spell_counter(image, data_dir):
         raise ValueError("missing original spell definition")
     if producers != [(0xCB4F, 0x110, 0xE2F77FE7)]:
         raise ValueError("unexpected original second-counter producers")
+
+
+def regular_item_handlers(image, original):
+    witnesses = {
+        1: (0x49F660, (0x40DA,)),
+        3: (0x4A28D0, (0xA5D8,)),
+        4: (0x49F7B0, (0x9A71,)),
+        5: (0x49F8C0, (0x924C, 0x9EC9)),
+        7: (0x49FB60, (0xC80D,)),
+        8: (0x49FC40, (0x5833,)),
+    }
+    for index, (handler, offsets) in witnesses.items():
+        if unpack_from("<I", image, HANDLERS - DATA_BIAS + 4 * index)[0] != handler:
+            raise ValueError(f"wrong regular item handler {index}")
+        for at in offsets:
+            if (at - ITEM_TABLE) % ITEM_STRIDE or original[at + 0x3F] & 2:
+                raise ValueError(f"invalid regular item row at {at:#x}")
+            if unpack_from("<I", original, at + 0x4B)[0] != index:
+                raise ValueError(f"wrong regular item index at {at:#x}")
+    for address, target in (
+        (0x49F6C6, 0x4EAC90), (0x4A29B9, 0x4B1BA0), (0x49F874, 0x431740),
+        (0x49FAB0, 0x4EC800), (0x49FC08, 0x4C35E0), (0x49FCBC, 0x4C1DF0),
+    ):
+        direct_call(image, address, target)
+    opcode(image, 0x49F86C, "c7 40 04 3c 00 00 00")
+    opcode(image, 0x49FCCC, "89 0d fc 50 5d 00")
 
 
 def verify_copy_banks(data_dir):
@@ -157,9 +183,11 @@ def main():
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
         pickup_and_renderer(image)
-        spell_counter(image, data_dir)
+        original = global_wsx(data_dir)
+        spell_counter(image, original)
+        regular_item_handlers(image, original)
         detail = f"; {verify_copy_banks(data_dir)} shipped copy mips" if args.decode_copy else ""
-        print(f"CHECK native: pickup, renderer and second-counter anchors{detail}")
+        print(f"CHECK native: pickup, renderer, second-counter and six item-handler anchors{detail}")
     except (OSError, ValueError, StructError, RuntimeError) as error:
         parser.exit(1, f"native checks: {error}\n")
     return 0
