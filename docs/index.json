@@ -172,6 +172,23 @@
       "tools": []
     },
     {
+      "path": "docs/CHECK_AUDIT.md",
+      "title": "Check audit",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/check_all.py",
+        "tools/doc_format_offsets.py",
+        "tools/lol3_cache_seed.py",
+        "tools/lol3_map_spans.py",
+        "tools/lol3_map_writer.py",
+        "tools/lol3_native_checks.py",
+        "tools/lol3_save_writer.py",
+        "tools/lol3_script_framing.py",
+        "tools/lol3_wsx_writer.py"
+      ]
+    },
+    {
       "path": "docs/COOKBOOK.md",
       "title": "Cookbook",
       "answers": [],
@@ -1214,6 +1231,7 @@
       ],
       "tools": [
         "tools/check_all.py",
+        "tools/doc_format_offsets.py",
         "tools/doc_index.py",
         "tools/doc_links.py",
         "tools/extract_wsx_entries.py",

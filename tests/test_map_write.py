@@ -48,6 +48,12 @@ class MapWriteTests(unittest.TestCase):
         # command 4 + 1 operand byte, waypoint row 8, path row 4, placement X/Z 4
         self.assertEqual(counts["field bytes"], 21)
 
+    def test_path_count_and_flags_are_unsigned(self):
+        raw = synthetic_map()
+        struct.pack_into("<HBB", raw, 0x272, 0, 0xFF, 0x80)
+        fields = read_fields(raw, {0x10: 6})
+        self.assertEqual(fields["paths"][1], [(0, 255, 128)])
+
     def test_edited_fields_change_only_their_bytes(self):
         raw = synthetic_map()
         fields = read_fields(raw, {0x10: 6})

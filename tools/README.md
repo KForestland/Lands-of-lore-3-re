@@ -16,7 +16,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 33 CHECKS PASSED`, or `29 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
+| `check_all.py` | all checks below | prints each line, then `ALL 34 CHECKS PASSED`, or `30 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX`. `--list` prints key, offset and size and writes nothing | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
@@ -90,7 +90,7 @@ Check means the tool's `--check` is in the `check_all.py` list above. Inspect is
 | [Level blocks and `.LSV`](../docs/lol3-native-saves.md#level-blocks-and-chunking) | `lol3_save_header.py` | yes | text: a block of at least 0x34C bytes lists its size, 75 relative starts, 75 expanded lengths and each stored span. A shorter block is named and is not read as a header. Payloads are not expanded. |
 | [Selector payloads](../docs/lol3-native-saves.md#selector-payloads) | `lol3_save_selectors.py` | yes | text: one row per global and level selector, with the live address, byte count, unit, flags, adjuster and the dwords passed to the pointer helper. |
 | [Name to directory key](../docs/lol3-wsx-reader.md#resource-name-key) | `lol3_name_hash.py`; level sheets print four level keys; `extract_wsx_entries.py --list` prints any archive's keys | yes | text. `--list` prints `stems 40`, `stem 9: uhfrozen key 0x1d4f90da` and `stem 11: uhfroze2 key 0x1d4f74da`. An archive's keys are the WSX listing above. |
-| Program witnesses in `LOL3.DAT` ([pickup](../docs/lol3-item-dispatch.md), [copy mips](../docs/lol3-texture-bake.md), [spell counter](../docs/lol3-spell-dispatch.md)) | `lol3_native_checks.py` | yes. `--decode-copy` is optional and is not what `check_all` runs | text. `--list` prints `world item +0x68 0x4d83a0`, `call 0x4d83ac targets 0x42ef50` and `handler 112 0x4a6120`. |
+| Program witnesses in `LOL3.DAT` ([pickup](../docs/lol3-item-dispatch.md), [copy mips](../docs/lol3-texture-bake.md), [spell counter](../docs/lol3-spell-dispatch.md)) | `lol3_native_checks.py` | yes. `check_all` adds `--decode-copy` when liblzo2 is available | text. `--list` prints `world item +0x68 0x4d83a0`, `call 0x4d83ac targets 0x42ef50` and `handler 112 0x4a6120`. |
 | [QWOD0 and SWOD4 byte-pattern counts](../docs/lol3-semantic-phase.md) | `lol3_claimed_edges.py` | yes | text. `--counts` prints `QWOD0 C5 A5: texture 195, MAP 2, light map 1, ODF 0` and `SWOD4 surface +4: 0x0 on 2393, 0x2 on 14, 0x6 on 29, 0xb on 0`. No picture: drawings of those labels were removed because they match no field the readers use. |
 
 ## Command-line conventions
@@ -122,3 +122,7 @@ python3 tools/doc_index.py --check
 ```
 
 The check also runs in `check_all.py` and GitHub Actions. It needs no game data.
+
+`doc_format_offsets.py` checks six format-page offsets against the readers that decode those fields, using small synthetic files. It runs in `check_all.py` and needs no game data. [Check audit](../docs/CHECK_AUDIT.md)
+
+`check_all.py --quick` skips the LMF member walk, LZO writer, name-hash scan and WSX writer. It lists each skip and reports the total elapsed time for the checks it ran.

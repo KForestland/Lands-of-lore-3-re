@@ -79,6 +79,10 @@ def waypoints(raw):
     return read_rows(raw, 0xC8, 0xC4, WAYPOINT)
 
 
+def paths(raw):
+    return read_rows(raw, 0xDC, 0xD8, PATH)
+
+
 def write_rows(rows, layout):
     return b"".join(layout.pack(*row) for row in rows)
 
@@ -116,7 +120,7 @@ def read_fields(raw, lengths):
         fields["commands"][space] = (u32(raw, location), [
             read_command(stream[start:start + lengths[stream[start]]]) for start in starts])
     fields["waypoints"] = waypoints(raw)
-    fields["paths"] = read_rows(raw, 0xDC, 0xD8, PATH)
+    fields["paths"] = paths(raw)
     for name, location, count, stride, _ in PLACEMENTS:
         fields["placements"][name] = read_rows(raw, location, count, placement_layout(stride))
     return fields

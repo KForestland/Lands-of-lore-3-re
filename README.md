@@ -20,7 +20,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 431 statements CONFIRMED (proved from the program code or the files) and 66 UNCONFIRMED (a reading not yet proved), on 80 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 431 statements CONFIRMED (proved from the program code or the files) and 66 UNCONFIRMED (a reading not yet proved), on 81 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -58,7 +58,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all thirty-one checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all 34 checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -73,18 +73,21 @@ The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
 - `cdcache.wsx`, a large cache the game writes there when it runs. The three cache texture checks report SKIP if it is missing.
 
-Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the cache starts from), which `lol3_cache_seed.py` reads. The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are not read by the tools (the copies in `DAT/` are).
+Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the cache starts from), which `lol3_cache_seed.py` reads. The archive writer and text checks also read the shipped duplicate archives beside `DAT/`.
 
 ```bash
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
-python3 tools/check_all.py                  # 31 passed with a matching cache and your own saves; a never-run copy: 27 passed, 4 skipped
+python3 tools/check_all.py --quick              # lists the checks it skips
+python3 tools/check_all.py                      # full suite of 34 checks with a matching cache and saves
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 python3 tools/full_report.py --out "../lol3-out/report"
 ```
+
+On the reference installation with liblzo2, an existing cache and saves, the full suite took about 93 seconds and `--quick` took about 21. Quick mode skips the LMF member walk, LZO writer, name-hash scan and WSX writer and prints each skip. Each run prints the time per check and the total. [Check audit](docs/CHECK_AUDIT.md)
 
 The `check_all` line prints `51/52 WSX files parse … failing: cdcache.wsx`. That file is a cache, not an archive ([Q1](docs/OPEN_QUESTIONS.md)), and `unexpected failures: none` means the check passed.
 
