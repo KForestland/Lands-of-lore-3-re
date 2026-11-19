@@ -124,8 +124,8 @@ checks write no files.
 `1024x768` Xvfb display at 16-bit depth, the English retail `LOL3.DAT` (SHA-256 prefix
 `9a9eb04c8f40`) reached its menu with the native `-WINDOW -MIJAS`
 options. `-WINDOW` sets the flag at `0x4083CE`. `-MIJAS` skips the
-logo call at `0x407574`. In Video Controls, choose `Direct3D: display`
-and accept the `1024x768x32` mode offered in that run. Then load the
+logo call at `0x407574`. In Video Controls, the run chose `Direct3D: display`
+and accept the `1024x768x32` mode that Wine offered in that run (on the 16-bit X display). It then loaded the
 game-written player autosave (not shipped, not tracked) with SHA-256 prefix `df50eda48c27` (slot +0x498 = 5).
 The trace used GDB through `winedbg --gdb` and Wine's
 `WINEDEBUG=-all,+ddraw` log.
@@ -137,16 +137,25 @@ The trace used GDB through `winedbg --gdb` and Wine's
 | Loaded level, selector at `0x66163C` and result at `0x661640` | Selector 0 and result 1 persisted, with a live device pointer in `0x65F434`. |
 | Texture copy in Wine's DirectDraw trace | `IDirect3DTexture2::Load` copied between two 32×32 surfaces. Both `CreateSurface` descriptors requested the same 16-bit `7C00/03E0/001F/8000` format. |
 
-**CONFIRMED.** `[0x65F460]` was zero when the callback accepted the
-RGB555 candidate. This follows from the observed 555 descriptor and
-the only 555 copy path at `0x495070–0x495092`, which rejects the
-candidate when the flag is nonzero. The `-D3DUSEARGB4444` option
-(`LOL3.DAT+0x149360`) sets the flag at `0x472AC1–0x472AD8`.
-An enumerated RGB444 candidate can still reach `0x4950B1–0x4950C6`.
-**UNCONFIRMED.** Which candidate the tested device supplies with
-that option and whether the upload proceeds.
+**CONFIRMED (derived, not read in the debugger).** `[0x65F460]` was
+zero when the callback accepted the RGB555 candidate. This follows
+from the observed 555 descriptor and the only 555 copy path at
+`0x495070–0x495092`, which skips the candidate when the flag is
+nonzero. The flag is cleared at `0x472A6F` and read only at
+`0x495072`. Four command-line options set it: `-D3DUSEARGB4444`
+(string at `0x54AB60`) directly at `0x472AC1–0x472AD8`, and
+`-D3DMONOLIGHTMAPS`, `-D3DNOVERTEXCOLOR` or `-D3DPERMEDIA2` (strings
+at `0x54ABC4`, `0x54ABB0`, `0x54AB80`) through `[0x65F45C]`, which
+`0x472A6A–0x472A79` copies into the flag. An enumerated RGB444
+candidate reaches `0x4950B1–0x4950C6` without a flag test and does
+not stop the enumeration (the callback returns 1).
+**UNCONFIRMED.** Whether Wine's DirectDraw list contains an
+`F00/0F0/00F` format, and whether a texture upload succeeds with the
+flag set.
 
-This is one device: Wine's DirectDraw translation layer enumerates its own format list. A native Windows driver may omit the 1555 format (result 0) or offer only 4444 (selector 2).
+This is one device: Wine's DirectDraw translation layer enumerates
+its own format list. **UNCONFIRMED.** A native Windows driver could
+omit the 1555 format (result 0) or offer only 4444 (selector 2).
 
 This selects an RGB555 texture word with one alpha bit for this
 device. **UNCONFIRMED.** The individual uploaded pixel words, final
