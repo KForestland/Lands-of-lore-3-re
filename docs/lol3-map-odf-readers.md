@@ -41,16 +41,19 @@ operands referencing this option are at `0x43F742`, `0x43FC96`,
 `0x44051B`, `0x440608` and `0x440BCE`, in the level texture, level ODF,
 shared definition and light-map loaders.
 
-**CONFIRMED.** Editor flag byte `[0x5D5380]` changes two arena limits
-before the MAP header read. Zero gives limits of 200 and 300. A nonzero
-flag gives 100 and 200 (`0x43E6E0–0x43E6F5`, `0x43E73B–0x43E74D`).
+**CONFIRMED.** Editor flag byte `[0x5D5380]` changes two table sizes
+(entries at `0x5838B0` and `0x589768`) before the MAP header read. Zero
+gives 200 and 300. A nonzero flag gives 100 and 200 (`0x43E6E0–0x43E6F5`, `0x43E73B–0x43E74D`).
 Both values use the same MAP open and read at `0x43E7D2` and `0x43E7E7`.
 The flag also selects `c:\leved\` shared bank paths at
 `0x43FFE4–0x44000D` and disables cache-name resolution at
 `0x4E4599–0x4E45A0 → 0x4E4AF3`; the resource wrapper then uses the
 supplied path at `0x4356D3–0x4356DB`. The separate `-LEVED` string at
 `LOL3.DAT+0x144608` has one direct code reference, the check at
-`0x40E84C–0x40E85B`. These branches add no MAP reads in the loader above.
+`0x40E84C–0x40E85B`. These branches add no MAP reads in the loader above. In editor mode the
+MAP is opened from the supplied plain path, so the seek sites are the
+same but the 18-map byte check below covers the shipped archive entries,
+not an editor-side file.
 
 **UNCONFIRMED.** The shared block's purpose, whether the leading u32 is a
 row count, the fields within the proposed four-byte rows, and whether a
@@ -60,7 +63,8 @@ the layout, find an original reader that accesses the span at header
 +0xCC and follow a row to its first typed use. A future trace of the MAP
 handle at `0x4357A0` can test for reads from an indirect caller during
 level load. `lol3_claimed_edges.py --check` verifies the block in the
-original archives, the conversion and editor branches and the 23 seek sites.
+original archives, pins the bytes of the conversion guard and the
+editor-limit code, and checks the 23 seek sites.
 
 ## MAP section 0
 
@@ -186,9 +190,7 @@ FLAIR 2, HWHIT 1, KVOLC 21, LUPP2 1, NWOD2 3, PWOD3 3 and
 SWOD4 3. One starts at `BUPP1.WSX+0x181EEA2`. The `BadName`
 records are BUPP1 index 35 at `BUPP1.WSX+0x181E940`, FLAIR
 indexes 1 and 3, and LUPP2 indexes 3, 5–14 and 35. 
-The loader's waypoint read is 8 × the +0xC4 count and its path
-read is 4 × the +0xD8 count, so both label spans sit outside
-those reads. The 31-byte slots, 36 in all, are printable C
+The 31-byte slots, 36 in all, are printable C
 strings. Thirty-two are filled out with `0xCD`. `Vic` and `Sam`,
 each in BUPP1 and again in LUPP2, have one extra NUL and then
 `0xCD`. The first label starts at `BUPP1.WSX+0x181E90C`. There are 19

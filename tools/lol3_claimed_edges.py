@@ -250,7 +250,7 @@ def main():
     print("CHECK claimed_edges: 18 identical 0x2CE8-byte MAP blocks fit 2,873 four-byte rows; "
           "all 23 native post-header seeks (22 direct, 1 nested) start at the vertices or later")
     print("CHECK claimed_edges: the two editor limits and conversion guard match the executable; "
-          "the 23 seek sites and read widths exclude both label spans on all 18 MAPs; "
+          "the 23 seek sites and read widths exclude every nonempty label span in the 18 MAPs; "
           "waypoint predicate 41 uses row byte +6")
     return 0
 
