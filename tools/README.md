@@ -2,6 +2,8 @@
 
 To write the inventory, level sheets and text counts together, use `full_report.py`. [Cookbook](../docs/COOKBOOK.md#write-a-full-report)
 
+Run `python3 tools/lol3_numbers.py --check` to compare the original item, spell and creature numbers with the generated page. It prints `CHECK lol3_numbers: LoL3 tables match docs/NUMBERS.md`. [Numbers at a glance](../docs/NUMBERS.md)
+
 ## Common options
 
 The tools follow one set of rules:
@@ -14,7 +16,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 24 CHECKS PASSED`, or `21 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 25 CHECKS PASSED`, or `22 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX`. `--list` prints key, offset and size and writes nothing | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
@@ -39,6 +41,7 @@ Run examples outside the repository.
 | `lol3_pht.py` | the four `.PHT` files, `LOL3.DAT` and `LOL3.EXE`. Without `--check` it prints each file's size and first 16 bytes | each file is a prefix of one 0x1010000-byte cycle; lags 1 through 512 in the first 65,536 bytes each match under 1 percent; the two programs do not contain the names as ASCII or UTF-16 in any case; the cycle length is not a code immediate; the stored `$*.*` search is the save-game folder; the COFF timestamp field at LOL3.DAT+0xD0 is 0x37332C6E |
 | `lol3_odf_companions.py` | `LOL3.DAT`, the 18 level ODFs and `GLOBAL.WSX`. `--list LEVEL` prints section-0 names, field-3 tags and which AI leaves join | 630 section-0 names and the skip past them; five AI files, 60 tags join all five; the zero-lookup arm |
 | `lol3_save_header.py` | one save slot you name (a player save the game wrote, not a shipped file), plus the DAT folder | prints the named header fields, both directories, level-block section spans, and the other header bytes as hex with offsets: +0x94..+0x98, +0x3A8..+0x498, +0x5AC..+0x5B0, +0x5F8..+0x600, +0x648..+0x64C and the display-name bytes after the NUL. `--out` writes that report outside the game tree and this repository. `--check` prints `CHECK save_header: synthetic slot names version +0x30/+0x34: 38 310, both position groups, 61 global spans, 18 level spans and one 75-section block; unnamed header bytes are hex; LOL3.DAT+0x3BE0B is the version 310 compare and +0x3BE17 is the version 38 compare` |
+| `lol3_numbers.py` | `LOL3.DAT`, `GLOBAL.WSX` and the 18 level ODFs. Without `--check` it prints the page; `--out FILE` writes it | regenerates `docs/NUMBERS.md` (343 item definitions, 28 spell effect rows, the nine first-hit magnitudes and 334 field-3 creature definitions) and compares it byte for byte; prints `CHECK lol3_numbers: LoL3 tables match docs/NUMBERS.md` |
 
 `lol3_cli.py` is a shared library for the options above, not a command.
 
