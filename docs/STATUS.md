@@ -2,7 +2,7 @@
 
 **As of:** 2026-11-19. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. This table replaces the earlier "closure" wording; the older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (22 checks; all pass on the English GOG copy).
+Run the checks: `python3 tools/check_all.py --data <DAT>` (23 checks; all pass on the English GOG copy, and 3 skip when the game-written cache is missing).
 
 **Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
 

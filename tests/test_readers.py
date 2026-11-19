@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from extract_wsx_entries import parse_wsx, wsx_name_hash
 from lol3_cache_seed import FILL_MARKER, HEADER, body_covers
 from lol3_pht import cycle_covers, pht_covers
-from lol3_save_header import HEADER_SIZE, parse_header
+from lol3_save_header import HEADER_SIZE, parse_header, report, synthetic_slot
 from lol3_script_framing import frame
 from lol3_texture_archive import chunks
 from lol3_level_schematic import map_geometry, schematic_svg
@@ -68,9 +68,38 @@ class ReaderTests(unittest.TestCase):
         parsed = parse_header(header, end)
         self.assertEqual(parsed["preview"], (HEADER_SIZE, 3))
         self.assertEqual(parsed["levels"][0], (HEADER_SIZE + 8, 4))
+        short = report(bytes(header) + bytes(12))
+        self.assertIn("version +0x30: 38", short)
+        self.assertIn("layout +0x34: 310", short)
+        self.assertIn("+0x94: 00 00 00 00", short)
+        self.assertIn("shorter than the 0x34c block header", short)
+        self.assertNotIn("section 0:", short)
         struct.pack_into("<I", header, 0x600, 9)
         with self.assertRaises(ValueError):
             parse_header(header, end)
+
+    def test_save_report_needs_no_game_files(self):
+        blob = synthetic_slot()
+        text = report(blob)
+        self.assertIn("display name +0: Reader", text)
+        self.assertIn(f"file length +0x2c: {len(blob)}", text)
+        self.assertIn("version +0x30: 38", text)
+        self.assertIn("layout +0x34: 310", text)
+        self.assertIn("+0x94: aa bb cc dd", text)
+        self.assertIn("+0x648: 10 20 30 40", text)
+        self.assertIn("player +0x49c: x 65536 (1.0000) z -131072 (-2.0000) heading 0x8000 region 0x18", text)
+        self.assertIn("second object +0x4aa: x 196608 (3.0000) z 262144 (4.0000) heading 0x100 region 0xffff", text)
+        self.assertIn("global 0 +0x650 length 4", text)
+        self.assertEqual(sum(line.startswith("global ") and line[7].isdigit() for line in text.splitlines()), 61)
+        self.assertIn("level index 0 section 0: stored +0x34c length 8, expanded 16, not expanded", text)
+        self.assertEqual(sum(line.startswith("level index 0 section ") for line in text.splitlines()), 75)
+        self.assertEqual(text.count(": empty"), 17)
+        self.assertNotIn("PAYLOAD", text)
+        self.assertNotIn("50 41 59 4c", text)
+        broken = bytearray(blob)
+        struct.pack_into("<I", broken, HEADER_SIZE + 8 + 0xF4 + 4, 0)
+        with self.assertRaises(ValueError):
+            report(bytes(broken))
 
     def test_texture_bake_to_png(self):
         source = struct.pack("<256H", 0, 0x7C00, *([0] * 254))

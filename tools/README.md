@@ -12,7 +12,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 22 CHECKS PASSED`, or `19 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
+| `check_all.py` | all checks below | prints each line, then `ALL 23 CHECKS PASSED`, or `20 CHECKS PASSED, 3 SKIPPED` when the game-written cache is missing |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX` | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
@@ -35,7 +35,7 @@ Run examples outside the repository.
 | `lol3_cache_seed.py` | shipped `DAT/cdcache.wsx`, `cdcache.hdr`, `LOL3.DAT`, and the game-written cache when it is present | 51 copies of the 64,000-byte block; row byte +0x17 has no code address; the witness's 8 occupied rows hold 0x67 |
 | `lol3_pht.py` | the four `.PHT` files, `LOL3.DAT` and `LOL3.EXE` | each file is a prefix of one 0x1010000-byte cycle; the two programs do not contain the names |
 | `lol3_odf_companions.py` | `LOL3.DAT`, the 18 level ODFs and `GLOBAL.WSX` | 630 section-0 names and the skip past them; five AI files, 60 tags join all five; the zero-lookup arm |
-| `lol3_save_header.py` | one save slot you name (a player save, not a game file) | prints the preview, 61 global and 18 level offsets and lengths as JSON; writes nothing; no `--check` |
+| `lol3_save_header.py` | one save slot you name, plus the DAT folder | prints the named header fields, both directories, level-block section spans, and the other header bytes as hex. `--out` writes that report outside the game tree and this repository. `--check` prints `CHECK save_header: synthetic slot names version 38, layout 310, both position groups, 61 global spans, 18 level spans and one 75-section block; unnamed header bytes are hex; LOL3.DAT+0x3BE0B is the layout 310 compare and +0x3BE17 is the version 38 compare` |
 
 `lol3_cli.py` is a shared library for the options above, not a command.
 
@@ -71,8 +71,8 @@ Check means the tool's `--check` is in the `check_all.py` list above. Inspect is
 | [Spell tables](../docs/lol3-spell-dispatch.md#definition-tables) | `lol3_native_checks.py` (counter anchors only) | yes | **gap.** The check line does not list definitions or costs. |
 | [Dialogue and message tables](../docs/lol3-dialogue-dispatch.md) (`.TRR`) | none. [Quick reference](../docs/QUICK_REFERENCE.md) runs one inline read of a single count | no | **gap.** No directory tool. A listing must not print payload text. |
 | [Combat mitigation and hit modes](../docs/lol3-combat-dispatch.md) | `lol3_combat_census.py` | yes | text: selector counts, plus the item-handler lines above. **gap:** mitigation fields and hit-mode rows are not printed. |
-| [Save slot header and directories](../docs/lol3-native-saves.md#slot-header-and-stream) | `lol3_save_header.py` | **gap.** No `--check`, and `check_all` does not run it. It takes a positional file, not `--data` | JSON of the preview span, 61 global spans and 18 level spans. **gap:** display name, version, stamps, the two position groups and the current level are not printed, and unnamed header bytes are not shown as hex with offsets. |
-| [Level blocks and `.LSV`](../docs/lol3-native-saves.md#level-blocks-and-chunking) | the same header tool, offsets only | no | **gap.** A block's 75 section starts and lengths are not printed. |
+| [Save slot header and directories](../docs/lol3-native-saves.md#slot-header-and-stream) | `lol3_save_header.py` | yes | text: display name, version, layout, stamps, preview, current level, both position groups, 61 global spans and 18 level spans. Unnamed header bytes are hex with offsets. |
+| [Level blocks and `.LSV`](../docs/lol3-native-saves.md#level-blocks-and-chunking) | `lol3_save_header.py` | yes | text: a block of at least 0x34C bytes lists its size, 75 relative starts, 75 expanded lengths and each stored span. A shorter block is named and is not read as a header. Payloads are not expanded. |
 | [Name to directory key](../docs/lol3-wsx-reader.md#resource-name-key) | `lol3_name_hash.py`; level sheets print four level keys | yes | sheets cover one level's four names. **gap:** no listing of music stems, or of an arbitrary archive. |
 | Program witnesses in `LOL3.DAT` (pickup, copy mips, spell counter) | `lol3_native_checks.py` | yes. `--decode-copy` is optional and is not what `check_all` runs | **gap.** Check line only. |
 | [QWOD0 and SWOD4 byte-pattern counts](../docs/lol3-semantic-phase.md) | `lol3_claimed_edges.py` | yes | **gap.** Check line only. No picture: drawings of those labels were removed because they match no field the readers use. |
