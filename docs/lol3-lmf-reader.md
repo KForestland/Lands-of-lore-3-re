@@ -8,6 +8,8 @@ so for the VAs in this page file offset is VA minus `0x400C00`.
 The COFF TimeDateStamp at file +0xD0 is `0x37332C6E`, which encodes
 1999-05-07 18:09:50 UTC. That is the field's stored encoding.
 `lol3_pht.py --check` re-reads it.
+File +0xE0 is `0B 01`, the PE32 optional-header magic `0x010B`.
+The same check re-reads those two bytes.
 
 ## File and group reader
 

@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Optional-header magic.** `LOL3.DAT` at file +0xE0 is `0B 01`, the PE32 magic `0x010B`. `lol3_pht.py --check` re-reads those two bytes ([light maps](lol3-lmf-reader.md)).
 - **Cross-series check.** The shared format pages already stated the same archive, movie, music and cache figures as the current notes, and the name-hash note now states the shift of 6 ([engine](engine-evolution.md)). The shared glossary words are the same text in each game ([glossary](GLOSSARY.md)).
 - **Settling tests.** Two open statements now name the test that would settle them: the sound name the `HWHIT` record requests in play, and a read watch on the four light-map header words ([dialogue](lol3-dialogue-dispatch.md), [light maps](formats/lmf.md)).
 - **Close-out.** Ten open questions (Q1, Q3, Q4, Q5, Q7, Q8, Q10, Q11, Q12, Q13) each end with what was measured, what was tried, and what would settle the rest. States stay as they are. The five unread files stay unread ([open questions](OPEN_QUESTIONS.md)).
