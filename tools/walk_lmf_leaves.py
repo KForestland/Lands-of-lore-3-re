@@ -85,6 +85,13 @@ def walk_bytes(data, name, decode=None):
                 if flags not in (0, 1) or size != 44 + 2 * width * height:
                     raise ValueError(f"{name}: unexpected decoded member at {source:#x}+{at:#x}")
                 stats[flags] += 1
+                vectors = [unpack_from("<3h", members, at + 0x14 + 6 * j) for j in range(4)]
+                unit = sum(abs(x * x + y * y + z * z - 32767 * 32767) < 1 << 18 for x, y, z in vectors)  # length 32767-32769
+                if flags:
+                    stats["vertex_unit"] += unit          # bit 0: four per-vertex normals at +0x14
+                    stats["vertex_zero"] += vectors.count((0, 0, 0))
+                elif len(set(vectors)) == 1:
+                    stats["face_repeated"] += 1           # bit 0 clear: one vector, repeated
                 at += size
     samples = [
         {**{key: value for key, value in group.items() if key != "lengths"},
@@ -101,6 +108,7 @@ def walk(path: Path):
 
 def check(data_dir, decode):
     files = groups = members = 0
+    stats = Counter()
     for path in wsx_files(data_dir):
         try:
             archive = parse_wsx(path)
@@ -112,7 +120,14 @@ def check(data_dir, decode):
                 files += 1
                 groups += result["groups"]
                 members += result["members"]
+                stats.update(result["decoded_flags"])
     extra = ", every group decoded and every member header checked" if decode else ""
+    if decode:
+        extra += (f"; bit 0 set on {stats[1]:,} members whose {stats['vertex_unit']:,} vertex normals are unit length "
+                  f"({stats['vertex_zero']} zero), one repeated vector on {stats['face_repeated']:,} of {stats[0]:,} others")
+        print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
+        return int((files, groups, members, stats[1], stats["vertex_unit"], stats["vertex_zero"], stats[0],
+                    stats["face_repeated"]) != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071))
     print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
     return int((files, groups, members) != (18, 5256, 424288))
 

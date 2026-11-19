@@ -69,11 +69,34 @@ member dword +8 and accumulates its three low bytes as separate
 16.16 values. The helper also tests whether +8 is nonzero when
 selecting an additional processing path (`0x44EC54–0x44EC75`).
 
-**UNCONFIRMED.** The individual roles of the member's original
-bit 0 and the bytes at +0x0C–+0x2B remain open. The conversion
-helper and its copy/upscale continuation establish where samples
-begin. Follow their first render call, for example
-`0x47451E → 0x479D90 → 0x479E60`, and record which header
-offsets affect the generated span. For +8, the accumulation
-at `0x4C00DD` is established and the final channel assignment
-still needs its caller traced.
+**CONFIRMED.** Disk bit 0 marks per-vertex normals. The surface
+renderer tests member +0 bit 0 at `0x4980D8`; when it is set it reads
+three s16 values per vertex from +0x14 + 6 × vertex, doubles them and
+passes each vector to `0x44E090` and the vertex-light routine
+`0x4BFBE0` (`0x498102–0x49815F`). When it is clear it uses the
+surface's own words +0x32/+0x36 instead (`0x498167–0x49818D`). So
++0x14–+0x2B hold four vectors of three s16. In the original files the
+131,217 members with bit 0 set carry 524,865 vectors of length
+32,767–32,769 (unit normals scaled by 32,767) and 3 zero vectors; in
+all 293,071 members with bit 0 clear the four vectors are one vector
+repeated. `walk_lmf_leaves.py --check --decode` recounts these.
+
+**CONFIRMED.** Dword +8 is a colour stored as `0x00RRGGBB`. The
+routine `0x4C0030` averages bytes 0, 1 and 2 of +8 over the light maps
+of the surfaces it visits (row slots +0x20 and +0x22, base ID +0x2A,
+`0x4C00A7–0x4C01BF`) and keeps byte 2 at `0x7D7740`, byte 1 at
+`0x7D7744` and byte 0 at `0x7D7748` (`0x4C01D6–0x4C04AB`). Its caller
+adds a dynamic light's RGB555 word +0x14 to that triple component by
+component: bits 10–14 to the byte-2 value, bits 5–9 to byte 1 and
+bits 0–4 to byte 0 (`0x4C06DE–0x4C072A`). `0x4BFF00` turns the
+triple into one intensity (largest plus a quarter of the other two).
+
+The render size path `0x47451E → 0x479D90` reads only +4 and +6,
+rounding each up to a power of two no larger than 256 with an aspect
+limit of 8 (`0x479D90–0x479E2E`).
+
+**UNCONFIRMED.** The four s16 values at +0x0C–+0x13. They are all zero
+in 214,743 members and vary in the rest; no reader on the member has
+been found yet. Follow the remaining `0x44EB40` callers
+(`0x474D85`, `0x47596D`, `0x47F833`, `0x47FD11`, `0x480438`,
+`0x499C42`) for a read of member +0x0C.
