@@ -28,6 +28,26 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 The level QWOD0 seen from above, drawn from its map file: each line is an edge of a surface; dark edges belong to one surface and pale edges are shared. Hollow squares are waypoints, dashed lines are paths (this level has none), and dots are the rows of the five placement tables (type 3, type 16, creature, mover, item), numbered from 1; numbers that would overlap are left out and counted under the legend. Heights are not drawn. [MAP evidence and drawing command](docs/formats/map-odf.md#overhead-schematic).
 
+## Tools at a glance
+
+What you can look at with your own copy of the game. Run from the clone with `export LOL3_DAT=/path/to/your/LoL3/DAT` (and `LOL3_SLOT` set to one of your own save files for the last line); pictures and files go only where you point them (here `../lol3-out`, outside the clone). The texture line needs the cache the game writes when it first runs. Every tool and option is in [`tools/README.md`](tools/README.md), with a table of every format and how to look at it.
+
+| To see | Command |
+|---|---|
+| A level drawn from above, with waypoints and placements | `python3 tools/lol3_level_schematic.py --data "$LOL3_DAT" QWOD0 --out ../lol3-out/qwod0.svg` |
+| Level sheets | `python3 tools/lol3_level_report.py --data "$LOL3_DAT" --out ../lol3-out/levels` |
+| A level's script commands by opcode, with their meaning | `python3 tools/lol3_script_browser.py --data "$LOL3_DAT" QWOD0` |
+| A level's waypoints and paths | `python3 tools/lol3_map_spans.py --data "$LOL3_DAT" --list QWOD0` |
+| A level's object names and AI files | `python3 tools/lol3_odf_companions.py --data "$LOL3_DAT" --list QWOD0` |
+| An archive's directory | `python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --list --stems QWOD0` |
+| A light-map directory | `python3 tools/walk_lmf_leaves.py --data "$LOL3_DAT" --stem QWOD0` |
+| Item definitions and their handlers | `python3 tools/lol3_combat_census.py --data "$LOL3_DAT" --items` |
+| Spell rows | `python3 tools/lol3_native_checks.py --data "$LOL3_DAT" --spells` |
+| A movie's chunks | `python3 tools/lol3_media_check.py --data "$LOL3_DAT" --movie mvolc` |
+| Music tracks | `python3 tools/lol3_media_check.py --data "$LOL3_DAT" --tracks` |
+| A texture as PNG (after the game has run once) | `python3 tools/lol3_texture_png.py --data "$LOL3_DAT" --offset 1222718 --out ../lol3-out/texture.png` |
+| A saved game you made | `python3 tools/lol3_save_header.py --data "$LOL3_DAT" "$LOL3_SLOT"` |
+
 ## What you get
 
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
