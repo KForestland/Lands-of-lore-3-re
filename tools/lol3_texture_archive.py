@@ -5,6 +5,7 @@
   lol3_texture_archive.py --data DAT --check --decode   # liblzo2
   lol3_texture_archive.py --data DAT --list QWOD0 --decode   # one bank's descriptors
 """
+from cli_errors import run_cli
 from pathlib import Path
 from struct import error as struct_error, iter_unpack, unpack_from
 
@@ -184,4 +185,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

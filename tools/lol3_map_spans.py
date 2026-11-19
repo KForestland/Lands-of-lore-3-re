@@ -5,6 +5,7 @@
   lol3_map_spans.py --data DAT --list QWOD0   # waypoint fields and slot bytes; no label text
   lol3_map_spans.py --data DAT --rows QWOD0   # section-1 bytes the page names
 """
+from cli_errors import run_cli
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -312,4 +313,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

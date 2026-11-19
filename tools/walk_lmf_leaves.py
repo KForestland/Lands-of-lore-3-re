@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+from cli_errors import ReaderArgumentParser, run_cli
 import argparse
 import json
 import os
@@ -170,7 +171,7 @@ def check(data_dir, decode):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = ReaderArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("lmf", type=Path, nargs="?")
     parser.add_argument("-o", type=Path)
     parser.add_argument("--check", action="store_true")
@@ -212,4 +213,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

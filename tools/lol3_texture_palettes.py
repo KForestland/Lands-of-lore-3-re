@@ -7,6 +7,7 @@
 Offsets are relative to the game-folder cdcache.wsx. No palette or pixel
 bytes are emitted.
 """
+from cli_errors import run_cli
 import json
 import re
 import struct
@@ -102,4 +103,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

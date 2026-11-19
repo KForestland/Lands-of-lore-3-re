@@ -14,6 +14,7 @@ file +0x3BE0B (VA 0x43CA0B, cmp immediate 310) and +0x3BE17 (VA 0x43CA17,
 cmp immediate 38). A level block header is 0x34C bytes: size at +0, 75
 relative starts at +0xF4, 75 expanded lengths at +0x220.
 """
+from cli_errors import run_cli
 import struct
 from pathlib import Path
 
@@ -257,4 +258,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

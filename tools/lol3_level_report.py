@@ -18,6 +18,7 @@ File roles, ids and counts only; no game text, pictures or sound.
   lol3_level_report.py --data DAT --out DIR      # all levels + README.md
   lol3_level_report.py --check --data DAT        # one line
 """
+from cli_errors import run_cli
 import os
 import struct
 import sys
@@ -411,4 +412,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(run_cli(main))

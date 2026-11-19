@@ -4,6 +4,7 @@
   lol3_odf_companions.py --data DAT --check
   lol3_odf_companions.py --data DAT --list QWOD0   # section-0 names, field-3 words, AI leaves
 """
+from cli_errors import run_cli
 from hashlib import sha256
 from pathlib import Path
 from struct import unpack_from
@@ -243,4 +244,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

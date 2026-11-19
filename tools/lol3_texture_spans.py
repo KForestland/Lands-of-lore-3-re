@@ -12,6 +12,7 @@ game files.
   lol3_texture_spans.py --check --data DAT          # one CHECK line
   lol3_texture_spans.py --data DAT --list 10        # first records: offset, flags, size
 """
+from cli_errors import run_cli
 import os
 import re
 import struct
@@ -63,8 +64,11 @@ def main():
     if path is None:
         print("CHECK texture_spans: SKIP: no game-folder cdcache.wsx next to the DAT folder (the game writes this cache when it runs; the shipped DAT/cdcache.wsx holds no texture records)")
         return 0
-    blob = open(path, "rb").read()
+    with open(path, "rb") as source:
+        blob = source.read()
     recs = list(records(blob))
+    if not recs:
+        raise ValueError(f"{path}: no complete span records in the texture cache")
     if a.list:
         for r in sorted(recs)[:a.list]:
             print(f"offset {r[0]:,}  flags 0x{r[1]:04X}  {r[2]}x{r[3]}  size {r[4]:,}  exact {r[5]}")
@@ -77,4 +81,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(run_cli(main))

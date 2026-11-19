@@ -6,6 +6,7 @@
   lol3_native_checks.py --data DAT --list
   lol3_native_checks.py --data DAT --spells
 """
+from cli_errors import run_cli
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -298,4 +299,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

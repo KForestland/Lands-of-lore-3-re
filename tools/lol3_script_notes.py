@@ -6,6 +6,7 @@
   lol3_script_notes.py --data DAT --check     # verify the checked-in summaries
   lol3_script_notes.py --data DAT --timers QWOD0
 """
+from cli_errors import run_cli
 from collections import Counter, defaultdict
 from pathlib import Path
 from struct import error as struct_error, iter_unpack, unpack_from
@@ -300,4 +301,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

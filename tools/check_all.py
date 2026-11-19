@@ -4,6 +4,7 @@
   check_all.py --data /path/to/LoL3/DAT     # or set $LOL3_DAT
 Exit code 0 when all pass.
 """
+from cli_errors import ReaderArgumentParser, run_cli
 import argparse
 import os
 import subprocess
@@ -14,7 +15,7 @@ TOOLS = ["repo_guard", "extract_wsx_entries", "walk_lmf_leaves", "lol3_texture_s
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = ReaderArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", default=os.environ.get("LOL3_DAT"), help="the game's DAT folder (default: $LOL3_DAT)")
     a = ap.parse_args()
     if not a.data:
@@ -41,4 +42,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(run_cli(main))

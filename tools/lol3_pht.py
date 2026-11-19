@@ -12,6 +12,7 @@ the cycle length is not a code immediate, and that the stored `$*.*` search
 is the save-game folder. This shows the bytes are one block repeated; what
 they mean and what reads them is unknown.
 """
+from cli_errors import run_cli
 from hashlib import sha256
 from pathlib import Path
 
@@ -166,4 +167,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

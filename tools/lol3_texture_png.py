@@ -12,6 +12,7 @@ frame headers, requires the full-width span shape for flags 0x02AC and 0x82AC
 (a mismatch counts as a failure), and reports classes whose pixel route is open.
 It writes no images.
 """
+from cli_errors import run_cli
 import struct
 import zlib
 from collections import Counter, defaultdict
@@ -318,4 +319,4 @@ def main(stack):
 
 if __name__ == "__main__":
     with ExitStack() as stack:
-        raise SystemExit(main(stack))
+        raise SystemExit(run_cli(main, stack))

@@ -13,6 +13,7 @@ overlap one already drawn, are left out and counted in the footer
 write those outside the repository.
 No texture, sprite, light map or game image is opened for drawing.
 """
+from cli_errors import run_cli
 import struct
 from collections import Counter
 from html import escape
@@ -225,4 +226,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

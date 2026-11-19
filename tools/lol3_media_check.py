@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check original LoL3 movie names, VQA chunk framing and WAVE audio in place."""
-import argparse
+from cli_errors import ReaderArgumentParser, run_cli
 from collections import Counter
 import hashlib
 import os
@@ -248,8 +248,8 @@ def wave_fields(stream, start, size):
     return struct.unpack_from("<HHIIHH", fmt)
 
 
-def trr_lines(blob, name):
-    """Count, ids and stored boundaries. Payload bytes are not printed."""
+def trr_directory(blob, name):
+    """Read ids and relative boundaries and verify that they fit the entry."""
     count, = struct.unpack_from("<I", blob)
     bound_at = 4 + 4 * count
     directory = bound_at + 4 * (count + 1)
@@ -257,11 +257,36 @@ def trr_lines(blob, name):
         raise ValueError(f"{name} directory exceeds the entry")
     ids = struct.unpack_from(f"<{count}I", blob, 4) if count else ()
     bounds = struct.unpack_from(f"<{count + 1}I", blob, bound_at)
-    lines = [f"{name} count {count} directory {directory} bytes"]
+    if bounds[0] != directory - 4 or bounds[-1] != len(blob) - 4:
+        raise ValueError(f"{name} boundaries disagree with the directory or entry size")
+    if any(start > end for start, end in zip(bounds, bounds[1:])):
+        raise ValueError(f"{name} has out-of-order boundaries")
+    return ids, bounds
+
+
+def trr_lines(blob, name):
+    """Count, ids and stored boundaries. Payload bytes are not printed."""
+    ids, bounds = trr_directory(blob, name)
+    lines = [f"{name} count {len(ids)} directory {8 + 8 * len(ids)} bytes"]
     for ident, boundary in zip(ids, bounds):
         lines.append(f"id {ident} boundary {boundary:#x}")
     lines.append(f"end boundary {bounds[-1]:#x}")
     return "\n".join(lines) + "\n"
+
+
+def localized_trr(data, names):
+    path = next((path for path in data.iterdir() if path.name.lower() == "locallng.wsx"), None)
+    if path is None:
+        raise FileNotFoundError("LOCALLNG.WSX is missing from the DAT folder")
+    tables = {}
+    with path.open("rb") as stream:
+        directory = {start: size for _, start, size in wsx_rows(stream)}
+        for name in names:
+            start = TRR_AT[name]
+            if start not in directory:
+                raise ValueError(f"{name} is not at the documented offset")
+            tables[name] = read_at(stream, start, directory[start])
+    return path, tables
 
 
 def check(data, summary):
@@ -311,7 +336,7 @@ def check(data, summary):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = ReaderArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=os.environ.get("LOL3_DAT"),
                         required="LOL3_DAT" not in os.environ, help="original game's DAT folder")
     parser.add_argument("--check", action="store_true", help="verify all entries in place")
@@ -327,20 +352,14 @@ def main():
         if not chosen:
             return check(args.data, summary=not args.check)
         data = Path(args.data)
-        image = (data.parent / "LOL3.DAT").read_bytes()
         if args.trr:
             name = args.trr.lower()
             if name not in TRR_AT:
                 raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
-            path = next(path for path in data.iterdir() if path.name.lower() == "locallng.wsx")
-            with path.open("rb") as stream:
-                rows = wsx_rows(stream)
-                match = [row for row in rows if row[1] == TRR_AT[name]]
-                if len(match) != 1:
-                    raise ValueError(f"{name} is not at the documented offset")
-                _key, start, size = match[0]
-                print(trr_lines(read_at(stream, start, size), name), end="")
+            _, tables = localized_trr(data, (name,))
+            print(trr_lines(tables[name], name), end="")
             return 0
+        image = (data.parent / "LOL3.DAT").read_bytes()
         if args.movie or args.tracks:
             from lol3_level_report import c_strings
             names = movie_names(image) if args.movie else {}
@@ -401,4 +420,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(run_cli(main))

@@ -5,6 +5,7 @@
   lol3_claimed_edges.py --data DAT --check --decode   # also the light-map samples
   lol3_claimed_edges.py --data DAT --span QWOD0       # hex of the unidentified span; no field names
 """
+from cli_errors import run_cli
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -308,4 +309,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

@@ -336,9 +336,9 @@ class ReaderTests(unittest.TestCase):
         directory = slice_directory_lines(bytes(frame), 2, "a.smd")
         self.assertIn("slice 0 +0x130", directory)
         self.assertIn("slice 1 +0x142", directory)
-        blob = struct.pack("<IIII", 1, 7, 0x10, 0x14) + b"HELLO"
+        blob = struct.pack("<IIII", 1, 7, 0x0C, 0x12) + b"HELLO\0"
         dialogue = trr_lines(blob, "qevent.trr")
-        self.assertIn("id 7 boundary 0x10", dialogue)
+        self.assertIn("id 7 boundary 0xc", dialogue)
         self.assertNotIn("HELLO", dialogue)
         self.assertIn("key 0x%08x" % wsx_name_hash("MUSIC\\Tune.aud"), stem_lines(["Tune"]).replace("0x", "0x"))
         record = bytes((2, 0, 0, 0)) + struct.pack("<8H", 0x104, 4, 0, 0, 0, 0, 0, 0)

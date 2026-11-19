@@ -8,6 +8,7 @@ LOL3.DAT, LOL3.EXE or an archive. Nothing is written.
   lol3_name_hash.py --data DAT --check
   lol3_name_hash.py --data DAT --list     # 40 music stems and their directory keys
 """
+from cli_errors import run_cli
 import mmap
 import re
 from hashlib import sha256
@@ -259,4 +260,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

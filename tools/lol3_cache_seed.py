@@ -5,6 +5,7 @@ beside the game, and that allocator byte +0x17 has no address.
   lol3_cache_seed.py --data DAT            # header bytes and, when present, the second directory
   lol3_cache_seed.py --data DAT --check
 """
+from cli_errors import run_cli
 from hashlib import sha256
 from pathlib import Path
 from struct import unpack_from
@@ -241,4 +242,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

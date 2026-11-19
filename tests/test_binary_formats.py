@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from extract_wsx_entries import wsx_name_hash
 from lol3_level_report import read_level
-from lol3_media_check import form, wave_fields, wsx_rows
+from lol3_media_check import form, trr_directory, wave_fields, wsx_rows
 from lol3_native_checks import CODE_BIAS, direct_call, opcode
 from lol3_script_notes import STREAMS, walk
 from lol3_texture_palettes import bank_directory, palette_sources
@@ -50,6 +50,12 @@ def map_with_one_command():
 
 
 class BinaryFormats(unittest.TestCase):
+    def test_dialogue_directory_reaches_entry_end(self):
+        data = struct.pack("<4I", 1, 5, 12, 14) + b"T\0"
+        self.assertEqual(trr_directory(data, "sample"), ((5,), (12, 14)))
+        with self.assertRaises(ValueError):
+            trr_directory(data[:-1], "sample")
+
     def test_streamed_wsx_one_member(self):
         data = archive([(0x11223344, b"end")])
         self.assertEqual(wsx_rows(io.BytesIO(data)), [(0x11223344, 18, 3)])

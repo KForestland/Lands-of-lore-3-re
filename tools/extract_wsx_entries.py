@@ -11,6 +11,7 @@ GLOBAL, movies, music, and slice CDs. cdcache.wsx is a known exception.
 """
 from __future__ import annotations
 
+from cli_errors import ReaderArgumentParser, run_cli
 import argparse
 import hashlib
 import json
@@ -172,7 +173,7 @@ def check(data_dir: Path) -> int:
 def main() -> int:
     import os, sys
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    ap = argparse.ArgumentParser(description=(__doc__ or "") + USAGE, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = ReaderArgumentParser(description=(__doc__ or "") + USAGE, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", "--game-dat", dest="game_dat", type=Path, default=os.environ.get("LOL3_DAT"),
                     help="the game's DAT folder (default: $LOL3_DAT)")
     ap.add_argument("--out", type=Path)
@@ -205,9 +206,12 @@ def main() -> int:
                 ap.error("no archive matches --stems")
         for path in files:
             try:
+                listing = directory_lines(parse_wsx(path))
                 print(path.name)
-                print(directory_lines(parse_wsx(path)), end="")
+                print(listing, end="")
             except ValueError as exc:
+                if args.stems or path.name.upper() not in KNOWN_OPEN:
+                    raise ValueError(f"{path.name}: {exc}") from exc
                 print(f"FAIL {path.name}")
         return 0
     if args.out is None:
@@ -272,4 +276,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

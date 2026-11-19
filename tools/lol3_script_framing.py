@@ -6,6 +6,7 @@
   lol3_script_framing.py --data DAT --subcommands
   lol3_script_framing.py --data DAT --dispatch
 """
+from cli_errors import run_cli
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -244,4 +245,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

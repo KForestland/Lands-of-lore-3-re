@@ -15,6 +15,7 @@ clear, and the 124 handler pointers at 0x54B918 in LOL3.DAT
 (docs/lol3-item-dispatch.md#regular-handler-examples). The census prints counts.
 The other flags print the named fields.
 """
+from cli_errors import run_cli
 from collections import Counter
 from pathlib import Path
 from struct import iter_unpack, unpack_from
@@ -161,4 +162,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))
