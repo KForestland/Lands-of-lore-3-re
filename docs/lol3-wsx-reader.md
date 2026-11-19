@@ -112,9 +112,11 @@ have their own stores, listed on the format page. In this
 installation all 8 occupied rows hold 0x67 at +0x17, as do 12
 empty rows, and 17 of the 40 rows have +0x17 equal to +0x16.
 `lol3_cache_seed.py --check` re-counts the copies, the address
-tallies and that witness. A program or installer input that
-contains the 64,000-byte block, and a cache saved before any
-texture write, are the settling tests.
+tallies and that witness. Which screen the shipped block shows is settled by
+locking the same surface at the fill loop (`0x4E4E34`) in a running
+game and comparing its first 64,000 bytes with the shipped block, or
+by rendering the block with the palette that was active when the
+shipped copy was made.
 
 On the first run the read at `0x4FE4FA` loads fill bytes, and the
 reset loop `0x4FE596–0x4FE5B4` writes row bytes +0, +4, +8, +0x10,
