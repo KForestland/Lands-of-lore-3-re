@@ -320,13 +320,18 @@ takes the range return (`0x4E58F4–0x4E592F`,
 `0x4E59A7–0x4E59B0`). A parser can preserve the raw
 boundaries. **CONFIRMED.** They are not a recursive tree. The 14
 headers form seven chains A → B → C, where B is A's last counted
-record and C is B's first record. In every chain the object-event
-pool references A and C once each and B never (MLOW2 indices 1766,
-1769, 1770 for the example). A run of A sends B to queue `0x589760`.
-The high switch returns 0 for 0xF0 (`0x4E59A7–0x4E59B0`, `0x4E5A77`),
-so B's records do not run, and the entry is not passed to
-`0x4F0860`, which receives completed entries (`0x4E5934–0x4E593E`). C runs only from its
-own event.
+record and C is B's first record. In the example chain (MLOW2
+indices 1766, 1769, 1770) the object-event pool references A and C
+once each and B never. The other six chains differ: only B is
+referenced in 1883/1887/1888, 1905/1909/1910 and 1934/1938/1939;
+B and C in 1956/1959/1960 and 1976/1979/1980; only A in
+2153/2157/2158. A run of A sends B to queue `0x589760`. The high
+switch returns 0 for 0xF0 (`0x4E59A7–0x4E59B0`, `0x4E5A77`), so B's
+records do not run as part of A, and the entry is not passed to
+`0x4F0860`, which receives completed entries (`0x4E5934–0x4E593E`).
+A B that has its own event runs as an ordinary group, and its first
+record C is then skipped the same way. A C runs only from its own
+event; the C of 1883, 1905, 1934 and 2153 has none.
 
 Run `python3 tools/lol3_script_framing.py --data DAT --check` on
 the English retail files. The tool reads the size table directly

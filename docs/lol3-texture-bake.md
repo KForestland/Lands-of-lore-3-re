@@ -98,8 +98,7 @@ has an all-zero scratch word.
 
 The [two ambiguous row flags](#two-ambiguous-row-flags) have
 contradictory storage and dispatch evidence. **CONFIRMED.** The PNG tool
-`--check` counts those 20 records as unconfirmed (`0x02ac=15, 0x82ac=5`,
-re-run 2026-11-19) and does not render them.
+`--check` counts those 20 records as unconfirmed (`0x02ac=15, 0x82ac=5`) and does not render them.
 
 **CONFIRMED.** Device texture-format enumeration tests RGB555
 masks 0x7C00/0x03E0/0x001F and an alternate RGB444 mask set
@@ -394,7 +393,9 @@ before the bake remains **UNCONFIRMED**. The remap routine `0x421320`
 has two callers. `0x44B440` is inside the resource resolver `0x44B130`.
 It runs only when the resolver's third argument is nonzero, the dword
 `[0x549C0C]` is nonzero (stored value 1; other code
-rewrites it) and record bit 0x100 is clear (`0x44B39D–0x44B3FC`).
+rewrites it) and record bit 0x100 is clear (`0x44B39D–0x44B3FC`); it is also skipped when
+source word +8 has both bits of 0x4010 set, a path that copies bit 0x100
+from the other record (`0x44B3B6–0x44B3F3`).
 The other caller, `0x4E7CC3`, remaps the record at `[0x7E3120]`.
 A static search did not bind the bake's record to either path.
 To settle it, break at `0x421326` and compare `EBX` with the record

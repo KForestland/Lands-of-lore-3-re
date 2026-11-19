@@ -29,7 +29,8 @@ new minus old through vtable +0x98.
 
 **CONFIRMED.** For the player, vtable `0x538388` (installed at
 `0x40A504`) gives +0x8C `0x40AED0`, +0x98 `0x40FF80` (adds the
-signed argument to dword +0x1C0, clamped to 0..+0x1BC), +0x9C
+signed argument to dword +0x1C0, clamped to 0..+0x1BC; no change while
++0x1C0 is 0 or +0x3C0 bit 0x2000000 is set), +0x9C
 `0x40FEA0` (reads +0x1C0) and +0xA0 `0x40FEB0` (returns the +0x1BC
 ceiling, lowered by half of +0x331 when +0x231 bit 0x80 is set).
 The creature class is resolved below.

@@ -91,7 +91,9 @@ records across the 18 indexed command streams, 1,010 match
 the native +0x18 identity column. **CONFIRMED.** The eleven others
 are ten in `BUPP1.WSX` (`+0x18CFF33` to `+0x18CFFA3` in steps of
 16, `+0x18D0123`, `+0x18D0143`) and one at `HWHIT.WSX+0x1110029`.
-Their identities occur nowhere else in DAT or LOL3.DAT, and in
+Their identities occur in no structured data in DAT or LOL3.DAT
+(three appear once each only as chance byte matches inside compressed
+media), and in
 neither definition key column. For such an identity `0x440930`
 returns 0 (`0x440953`). `0x49EE8D` then reads definition +0x73
 through that null pointer. With guard `[0x5D5378]` clear
@@ -191,9 +193,12 @@ The tooltip at `0x42B107–0x42B12F` picks text key 0x274F below
 entry at `locallng.wsx+0x598AD7C` these are "Not hungry", "Hungry"
 and "Starving". Above 9,000 the mana ceiling `0x40FF00` (player
 vtable +0xB0) drops by (value − 9,000)/30, to at least 1. Player
-+0x224 (`0x5D5104`) is consumed at `0x40D668–0x40D70F`. A step
-based on 30 × the value (`0x46E6E0`) is added to +0x1C0, capped
-by vtable +0xA0, and +0x224 is then cleared. +0x1C0 is the
++0x224 (`0x5D5104`) is consumed at `0x40D668–0x40D715`. While
++0x1C0 and +0x224 are nonzero and +0x208 is zero, each pass adds a
+time-scaled step of 30 × the value (`0x46E6E0`) to +0x1C0, capped by
+vtable +0xA0. +0x224 is cleared, and byte +0x1EC raised by it, only
+once +0x1C0 passes byte +0x1EC + value or reaches the cap
+(`0x40D6D1–0x40D70F`); otherwise it stays for the next pass. +0x1C0 is the
 quantity the player's hit slots +0x98/+0x9C change and read
 (`0x40FF80`, `0x40FEA0`).
 
@@ -201,8 +206,8 @@ quantity the player's hit slots +0x98/+0x9C change and read
 name of player +0x1C0, and the class-specific effect
 of the template 0x7C variants remain open. Follow the update slot
 on the object generated at `0x49F766` or `0x4A1C5E`. Trace the
-readers of `0x5D520D` and `0x5D5104` to their first display or
-gameplay use (for indexes 1, 3, 5, 7 and 8 the admission, arguments
+readers of +0x1C0 to its first display (the readers of `0x5D520D` and
+`0x5D5104` are traced above; for indexes 1, 3, 5, 7 and 8 the admission, arguments
 and immediate writes are mapped in the table above).
 Template-specific effects and presentation still need the
 first update of the objects constructed at `0x49F6C6`,

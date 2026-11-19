@@ -33,10 +33,12 @@ An independent offset pair holds one 8-byte auxiliary row at
 +0x43EC, file `GLOBAL.WSX+0x17023F`, read through
 `0x440611–0x440648`. **CONFIRMED.** The loader stores that
 row's pointer at world +0x78 (`0x440642`, VA `0x5701E8`). The
-only absolute reader is `0x4909D5` in `0x4909A0`, which the spell
-effect update calls at `0x4C4725`. It indexes the rows by frame
-word +8 and reads a list of 8-byte entries. Kind byte 0 ends the
-list and returns 0. Kind 1 adds byte +2 to the result. Kind 2
+only absolute reader is `0x4909D5` in `0x4909A0`, which has 48
+direct callers, among them the spell effect update at `0x4C4725`.
+It picks the row by frame word +8, skips 8-byte entries until byte
++1 equals object byte +0x60 (`0x490A11–0x490A2F`), then handles the
+matching entries. Kind byte 0 ends the list and returns the total so
+far. Kind 1 adds byte +2 to the total. Kind 2
 plays sound u16 +2 through `0x422C40` (`0x4909D5–0x490A6F`).
 The one original row is eight zero bytes, so it asks for nothing.
 **UNCONFIRMED.** Whether any spell frame has a nonzero word +8,

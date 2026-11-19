@@ -67,8 +67,9 @@ The one unmatched record is `HWHIT.WSX+0x111423D`.
 tag is `eh2` plus a NUL. Its group (index 2860, `HWHIT.WSX+0x1114219`)
 is run by the kind-6 event at `HWHIT.WSX+0x111BE27`. Under the prefix that matches the other names,
 `HWHITs.wsx` has no `LEVELS\HWHIT\dh09eh2.aud` entry, while `dh09eh26.aud` exists and
-no opcode-0x16 record names it. A lost last digit is the likely cause; the intended
-digit is **UNCONFIRMED**. The region stream holds one more opcode-0x16
+no opcode-0x16 record names it. Files `dh09eh20`, `21` and `23`–`26` exist; records
+name `20`, `21`, `23`–`25` and `dh09eh2`; neither uses `22`. Whether a last digit was
+lost, and which, is **UNCONFIRMED** (`26` is the only file without a record). The region stream holds one more opcode-0x16
 record, `PWOD3.WSX+0x1BC8883`, whose four-character tag `hwl2` also
 matches no dialogue tag. Archive names
 are case-insensitive; the files are stored in lower case.
