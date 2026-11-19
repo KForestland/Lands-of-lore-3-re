@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 19 November 2026
 
+- **Machine word.** `LOL3.DAT` at file +0xCC is `4C 01`, the COFF machine word `0x014C`. `lol3_pht.py --check` re-reads those two bytes ([light maps](lol3-lmf-reader.md)).
 - **Progression.** The 18 MAP scripts hold 131 portal commands, 82 of them with a predicate over a shared slot or the bound object's byte at +0x31. The event walkers take the first row that matches, so 49 rows also need every earlier row's guard to fail; 46 rows have neither a guard nor an earlier row (gate upstream, UNCONFIRMED). The page adds the level-to-level graph: all 18 levels are reached from QWOD0 along portal edges, 14 along guarded edges only. `lol3_progression.py --check` requires [progression](PROGRESSION.md) to equal the tool output.
 - **Optional-header magic.** `LOL3.DAT` at file +0xE0 is `0B 01`, the PE32 magic `0x010B`. `lol3_pht.py --check` re-reads those two bytes ([light maps](lol3-lmf-reader.md)).
 - **Cross-series check.** The shared format pages already stated the same archive, movie, music and cache figures as the current notes, and the name-hash note now states the shift of 6 ([engine](engine-evolution.md)). The shared glossary words are the same text in each game ([glossary](GLOSSARY.md)).

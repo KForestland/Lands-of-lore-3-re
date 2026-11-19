@@ -10,6 +10,8 @@ The COFF TimeDateStamp at file +0xD0 is `0x37332C6E`, which encodes
 `lol3_pht.py --check` re-reads it.
 File +0xE0 is `0B 01`, the PE32 optional-header magic `0x010B`.
 The same check re-reads those two bytes.
+File +0xCC is `4C 01`, the COFF machine word `0x014C`.
+The same check re-reads those two bytes.
 
 ## File and group reader
 

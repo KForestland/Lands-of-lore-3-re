@@ -154,6 +154,8 @@ def main():
             raise ValueError("LOL3.DAT COFF timestamp field differs")
         if image[0xE0:0xE2] != b"\x0b\x01":
             raise ValueError("LOL3.DAT optional-header magic differs")
+        if image[0xCC:0xCE] != b"\x4c\x01":
+            raise ValueError("LOL3.DAT COFF machine word differs")
         if period_is_immediate(image[TEXT_RAW:TEXT_RAW + TEXT_SIZE]):
             raise ValueError("LOL3.DAT code uses 0x1010000 as an immediate")
         with ordered[0].open("rb") as handle:
