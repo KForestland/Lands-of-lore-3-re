@@ -44,7 +44,7 @@ The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are no
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 13 checks, ends with ALL 13 CHECKS PASSED (or 10 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py                  # 14 checks, ends with ALL 14 CHECKS PASSED (or 11 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```

@@ -95,9 +95,33 @@ surface rows with +4 equal to zero, 14 equal to 2, 29 equal to 6 and
 zero equal to 0x0B. These counts come from the 56-byte surface
 stride at `0x43EADF–0x43EB04`.
 
-**UNCONFIRMED.** The old pattern labels above lack original byte
-positions tied to the input window and its grouping rule. A settling
-test needs the underlying window start and record stride for one
-claimed edge, then a mapping of both endpoint bytes to the native
-sections. A gameplay interpretation would require a native consumer
-using those fields to make that transition. See [native readers](lol3-map-odf-readers.md).
+**CONFIRMED (where the named bytes occur). UNCONFIRMED (a window
+the program reads).** The adjacent bytes `C5 A5` occur 195 times in
+the texture entry at `QWOD0.WSX+0x36` (6,871,261 bytes), twice in the
+MAP at `QWOD0.WSX+0x730744` and `+0x730748`, once in the light map at
+`QWOD0.WSX+0x694783`, and not at all in the ODF. The retail executable
+image contains that byte pair once, at file `0xBC607`. Residues 0 through 7 of those 195 texture offsets hold 22, 24, 27,
+28, 24, 21, 20 and 29, and no distance between them repeats more
+than twice. No byte
+column of the MAP's 8-byte vertices, 8-byte section-1 rows, 56-byte
+surfaces or 8-byte waypoints steps from `C5` to `A5`.
+
+The two MAP copies sit four bytes apart inside a 64-byte run of
+4-byte groups at `QWOD0.WSX+0x730738`. No header dword in that MAP
+equals the run's start. Decoding both light maps (5,364 QWOD0 members
+and 10,232 SWOD4 members; each member is 44 bytes plus two bytes per
+sample) finds none of `0x0B`, `0xC5`, `0xA5`, `0xAD` or `0xEB` as a
+sample's high byte.
+
+Whole-archive mode changes were counted for windows of 64, 256, 1,024,
+4,096 and 16,384 bytes. `C5` to `A5` occurs once, at the 64-byte size
+in `QWOD0.WSX`, and at none of the larger sizes. The history note's
+span `0768-1280` is not a field stored in either MAP header.
+
+`lol3_claimed_edges.py --check` re-counts the archive placements, the
+MAP columns and the SWOD4 surface byte +4 histogram above. Adding
+`--decode` re-checks the light-map high bytes. The window start, the
+window length and the step used when these edges were named are not
+in the files. Those three numbers are the settling test. The MAP, ODF
+and light-map readers cited on the format pages consume the structured
+fields, and none of those fields is this transition.
