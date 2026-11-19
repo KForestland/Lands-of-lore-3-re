@@ -23,7 +23,7 @@ coefficients, the predicted indexed output rows. The
 first-pixel predictions for the two unresolved row flags. Use those tests to
 identify the source buffer and output words before testing display conversion.
 
-Parked (not run); see [Parked probes](#parked-probes-not-run).
+Not yet run; see [Probes not yet run](#probes-not-yet-run).
 
 ### Q12. Which live cast consumes an alternate resource?
 
@@ -86,14 +86,13 @@ charged cast. A native acquisition control and exact HUD indicator
 remain open.
 [Exact bytes and native debit trace](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
 
-Parked (not run); see [Parked probes](#parked-probes-not-run).
+Not yet run; see [Probes not yet run](#probes-not-yet-run).
 
-## Parked probes (not run)
+## Probes not yet run
 
-These running-game tests were planned and then parked. No one will run
-them here. Each one is "not run": it has no result and the question it
-belongs to keeps its state. A reader with the original game and a
-debugger can do it. Addresses are `LOL3.DAT` virtual addresses, used as
+These running-game tests have no result yet. A reader with the original
+game and a debugger can run them; the question each belongs to keeps its
+state until then. Addresses are `LOL3.DAT` virtual addresses, used as
 they are (see the top of this page).
 
 Common setup: load a game-written slot, for example the level-5

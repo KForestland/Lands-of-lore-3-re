@@ -13,7 +13,7 @@ The layout is the same as Westwood's MIX archive in Lands of Lore II:
 | 6 | n × 12 bytes | rows: u32 key, u32 offset from the start of the data, u32 size |
 | 6 + 12n | data size | entry data |
 
-All little-endian. `extract_wsx_entries.py --check` re-ran on 2026-11-18. CONFIRMED on the 52 files:
+All little-endian. Checked by `extract_wsx_entries.py --check`. CONFIRMED on the 52 files:
 - **Data size:** in 51 files, 6 + 12n + data size equals the file size.
 - **Offsets:** every row's offset and size lie inside the data in those 51 files, and no two entries overlap.
 - **Coverage:** the entries cover the data exactly, with no gaps.

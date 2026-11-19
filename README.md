@@ -16,7 +16,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 
 ## Rating
 
-These are counts of work done, not a percentage of how complete the project is. Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest. The lines are produced by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_RATE.md) explains each line and what it does not claim.
+These are counts of work done, not a percentage of how complete the project is. They are produced by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_RATE.md) explains each line and what it does not claim.
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
@@ -31,7 +31,7 @@ The level QWOD0 seen from above, drawn from its map file: each line is an edge o
 
 ## Tools at a glance
 
-What you can look at with your own copy of the game. Run from the clone with `export LOL3_DAT=/path/to/your/LoL3/DAT` (and `LOL3_SLOT` set to one of your own save files for the last line); pictures and files go only where you point them (here `../lol3-out`, outside the clone). The texture line needs the cache the game writes when it first runs. Every tool and option is in [`tools/README.md`](tools/README.md), with a table of every format and how to look at it.
+What you can look at with your own copy of the game. Run from the clone with `export LOL3_DAT=/path/to/your/LoL3/DAT` (and `LOL3_SLOT` set to one of your own save files for the last line); pictures and files go only where you point them (here `../lol3-out`, outside the clone; make it first with `mkdir -p ../lol3-out`). The texture line needs the cache the game writes when it first runs. Every tool and option is in [`tools/README.md`](tools/README.md), with a table of every format and how to look at it.
 
 | To see | Command |
 |---|---|
@@ -51,7 +51,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 
 ## What you get
 
-- **Format pages** in [`docs/formats/`](docs/README.md): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
+- **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
 - **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all twenty-four checks.
@@ -63,7 +63,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 
 ## Quick start
 
-Use Python 3.8 or later and your own copy of the English GOG release. The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu).
+Use Python 3.8 or later and your own copy of the English GOG release (`LOL3.DAT`, SHA-256 starting `9a9eb04c8f404ebf`; the tools that read the program check it by its hash). The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu).
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
@@ -82,13 +82,15 @@ python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # fu
 python3 tools/full_report.py --out "../lol3-out/report"
 ```
 
+The `check_all` line prints `51/52 WSX files parse … failing: cdcache.wsx`. That file is a cache, not an archive ([Q1](docs/OPEN_QUESTIONS.md)), and `unexpected failures: none` means the check passed.
+
 The script check prints, for example:
 
 ```text
 CHECK script_notes: 18 level summaries, 54,940 object and 4,040 region records, 16,876/2,201 direct object/region references
 ```
 
-The script command writes one listing per level with record offsets, opcodes, operands and the native effect. The report command writes an inventory, level sheets and text counts to the named folder. On Windows, use `py -3` in place of `python3`. Set `$env:LOL3_DAT = 'D:\Games\LoL3\DAT'` in PowerShell, or pass `--data` with a quoted folder path to each tool.
+The script command writes two listings per level (object and region), 36 in all, with record offsets, opcodes, operands and the native effect. The report command writes an inventory, level sheets and text counts to the named folder. On Windows, use `py -3` in place of `python3`. Set `$env:LOL3_DAT = 'D:\Games\LoL3\DAT'` in PowerShell, or pass `--data` with a quoted folder path to each tool.
 
 ## Status
 
@@ -100,7 +102,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md). "Q11" and the like
 | Loose PHT files | Four files, each a prefix of one repeating block, listed separately in the rating ([PHT](docs/formats/pht.md)). What the bytes mean and what reads them is open |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers. Section-1 bytes each have a reader; waypoint byte +6, the label spans and the bytes before field 16 are measured (Q4, Q5 mostly) |
-| Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values need further work. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
+| Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values are still open. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
 | Movies, music | Movie files (VQA) decoded; on a 16-bit display under Wine the intro's colours are converted from 15-bit to 16-bit (Q9); the 38 music tracks are MP3 inside WAV files, played through the Miles sound library (Q10) |
 | Level sounds | WAV files using IMA ADPCM compression, in the 18 per-level sound archives ([level sheets](docs/levels/README.md)) |
 | Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (only the on-screen look of effect objects is open); per-level summaries (Q11) |
@@ -113,16 +115,11 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md). "Q11" and the like
 - [`docs/levels/`](docs/levels/README.md): one sheet per level; [`docs/levels/notes/`](docs/levels/notes/README.md): script summaries.
 - [`tools/`](tools/README.md): readers and checks.
 - [`evidence/`](evidence): lists of program addresses and files that back up the pages.
-- [`examples/`](examples/README.md): no images now; it says where the one level drawing comes from and how it is checked.
+- [`examples/`](examples/README.md): where the level drawing above comes from and how it is checked.
 
 ## Asset policy
 
-No game files and no dumps of extracted game media are included; short byte excerpts appear in the documentation as examples. `tools/check_all.py` includes `repo_guard.py`, which fails on:
-- a committed game file, media file or stray image;
-- a file over 300 KB or a generated script listing;
-- a machine path, or a word from an optional local word list (`.git/info/private_words`, never tracked).
-
-The release procedure also checks every commit identity (`repo_guard.py --check --release`, see [CONTRIBUTING](CONTRIBUTING.md)).
+No game files and no dumps of extracted game media are included; short byte excerpts appear in the documentation as examples. `tools/check_all.py` includes `repo_guard.py`, which fails if a game file, media file, stray image, large file or machine path is committed.
 
 ## The other Lands of Lore games
 

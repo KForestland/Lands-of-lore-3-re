@@ -12,9 +12,11 @@ repository accounts for to the last byte, by count and by size. For a WSX
 archive that means the directory, the entry sizes and the data area add up
 to the file length with no overlap (`tools/extract_wsx_entries.py`). It
 does **not** mean that every entry inside is decoded or understood; the
-[STATUS](STATUS.md) table says how far each format is read. Files the game
-writes while it runs (the full texture cache sits in the game folder,
-next to `DAT`) are not part of this count. The shipped compact
+[STATUS](STATUS.md) table says how far each format is read. The count
+looks only at the files directly inside `DAT`. The files the game writes
+while it runs (the full texture cache next to `DAT`, the saves in
+`SAVEGAME`) are outside that folder, so playing the game does not change
+the count. The shipped compact
 `cdcache.wsx` does not parse as an ordinary archive, and the four `.PHT`
 files have no known layout. These five files are **not** counted as read.
 They are listed separately as repeated blocks: `tools/lol3_cache_seed.py`
@@ -41,7 +43,7 @@ have more than one probe, and a probe need not belong to a numbered
 question. Each answer holds for the setup it names (one
 display, one renderer, one save). Most documented facts were never
 observed in a running game; they are proved from the program and the files
-instead, and this line does **not** count them.
+instead, and this line does **not** count them. Probes listed under "Probes not yet run" are not counted in either number.
 
 The same line says how many answered probes rest on edited saves only.
 An edited save is a copy of a game-written save with a few bytes
@@ -54,7 +56,11 @@ evidence to it.
 
 **Open questions.** The state words of the At-a-glance table in
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md): answered, mostly answered, partly
-answered. A question may be answered for one setup only; the table says so.
+answered. *Answered*: nothing is left to settle from the files or the
+program. *Mostly answered*: the main question is settled; named details
+remain. *Partly answered*: part is settled; the main point is open. A row
+that says "answered for" a setup (one renderer, one device) counts as
+answered for that setup only.
 
 ## What the rating does not say
 

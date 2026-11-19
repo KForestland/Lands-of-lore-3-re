@@ -90,8 +90,7 @@ to the required size.
 **CONFIRMED.** All 47 files have matching total length and version,
 monotonic global and level directories, and consistent level lengths.
 Their 1,786 preview chunks decode to 640×480 bytes per slot. In the
-`SAVEGAME` folder as it stands on 19 November 2026 (the autosave
-`$AUTOSAV.XXX` last rewritten 26 September 2026), `lol3_save_header.py`
+`SAVEGAME` folder of our copy, `lol3_save_header.py`
 lists 416 nonempty level blocks with 26,964 nonempty sections, whose
 stored spans and declared expanded lengths are in the block directory.
 The earlier count of 417 blocks and 27,038 sections predates that

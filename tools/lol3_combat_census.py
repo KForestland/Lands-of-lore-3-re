@@ -128,7 +128,7 @@ def main():
     try:
         data_dir = Path(args.data).resolve()
         image = (data_dir.parent / "LOL3.DAT").read_bytes()
-        native_sizes(image)  # pins the retail executable by hash
+        native_sizes(image)  # checks the retail executable by its hash
         if args.modes:
             print(mode_lines(image), end="")
             return 0

@@ -26,6 +26,7 @@ These words mean the same thing in the notes for all three Lands of Lore games.
 | Save slot | One file the original game wrote for a game in progress. Tools may read it; this repository does not store it. |
 | Probe | One check that needs the original game running. |
 | Rating | The four counted lines near the top of the README, written by `tools/rating.py`. |
+| Answered / Mostly answered / Partly answered | State words of the [open questions](OPEN_QUESTIONS.md). *Answered*: nothing is left to settle from the files or the program. *Mostly answered*: the main question is settled; named details remain. *Partly answered*: part is settled; the main point is open. A row that says "answered for" a setup (one renderer, one device) counts as answered for that setup only. |
 | Files read | A file whose every byte a tool here assigns to a known header, directory, entry or other named part; what is inside an entry may still be only partly understood. Files the game writes while it runs are not counted as read. |
 | History page | A page marked **History** at its top: an older note kept as a record. The rating does not count it; where it differs, the current pages are right. |
 | File offset | The position of a byte in a file on disk. |

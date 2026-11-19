@@ -78,7 +78,7 @@ def column_hits(payload, start, count, stride, pair):
 
 
 def check_shared_map_block(image, maps):
-    for va, raw in (MAP_MODE_CODE | MAP_TAIL_CODE).items():
+    for va, raw in {**MAP_MODE_CODE, **MAP_TAIL_CODE}.items():
         at = va - CODE_BIAS
         expected = bytes.fromhex(raw)
         if image[at:at + len(expected)] != expected:

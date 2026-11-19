@@ -1,8 +1,8 @@
 # LoL3 reverse-engineering status
 
-**As of:** 2026-11-19. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. This table replaces the earlier "closure" wording; the older pages are kept as history.
+**As of:** 2026-11-19. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (24 checks; all pass on the English GOG copy, and 3 skip when the game-written cache is missing).
+Run the checks: `python3 tools/check_all.py --data <DAT>` (24 checks; all 24 pass on a GOG copy that has run once; on a never-run copy 21 pass and 3 report SKIP).
 
 **Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
 
@@ -17,7 +17,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (24 checks; all pass o
 
 **Running-game results.** Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](NEEDS_A_RUNNING_GAME.md#answered-probes). Runs on hand-edited copies of a game-written save: [edited saves](EDITED_SAVES.md).
 
-| Area | Pages | Tool check (re-run 2026-11-18) | Open |
+| Area | Pages | Tool check | Open |
 |---|---|---|---|
 | WSX archives | [format page](formats/wsx.md), [wsx-extraction](wsx-extraction.md) (history), [container inventory](container-inventory.md) (history) | `extract_wsx_entries`: 51 of 52 `DAT/*.WSX` parse (count, 12-byte records, payload sizes sum to the file), 7,549 entries and 76 native names match their keys. Both cache copies fail the ordinary exact-size check (`check_all` tests the shipped `DAT/` copy). `lol3_cache_seed`: the shipped file is 114 bytes plus 51 copies of one 64,000-byte block (listed separately in the rating), and allocator byte +0x17 has no code address | Q1 |
 | Loose PHT files | [format page](formats/pht.md) | `lol3_pht`: four files, each shown byte for byte to be a prefix of one pinned 0x1010000-byte cycle (listed separately in the rating). `LOL3.DAT` and `LOL3.EXE` do not contain the names in any case | Purpose of the bytes and their reader unknown |
@@ -29,6 +29,6 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (24 checks; all pass o
 | Movies, music, sound | [movies (VQA)](formats/vqa.md), [music and sound](formats/audio.md), [container inventory](container-inventory.md) (history) | `lol3_media_check`: 19 named VQA movies, 26,357 indexed frames, 38 MP3-in-WAVE music tracks, 6,696 IMA ADPCM level sounds; LINF/CINF rows join all 270 codebooks, and each frame holds one pointer stream. `lol3_name_hash`: 31 stem keys join 37 of those tracks; no stored C string hashes to the remaining key | Q9, Q10 |
 | Executable (`LOL3.DAT`) | [MAP and ODF readers](lol3-map-odf-readers.md), [texture palette sources](lol3-texture-palette-sources.md), [WSX](lol3-wsx-reader.md), [LMF](lol3-lmf-reader.md), [texture bake](lol3-texture-bake.md), [dispatch search](lol3-dispatch-search.md) | — | Q11 |
 | Game logic: script dispatch, objects, items, spells, dialogue, combat | [script opcodes and framing](lol3-script-opcodes.md), [object and script dispatch](lol3-object-dispatch.md), [items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md), [events, predicates and timers](lol3-script-events.md), [level script summaries](levels/notes/README.md) | measured: all 18 MAP command streams (54,966 offsets) frame exactly with the native size decoder; native entry points traced; `lol3_script_notes`: 18 summaries, 54,940 object and 4,040 region records, 16,876/2,201 direct references; 2,641 of 2,642 dialogue commands join a dialogue tag | Q11, Q12 |
-| Saves | [native saves](lol3-native-saves.md) | Native slot directories measured in 47 original saves with 416 level blocks (the `SAVEGAME` folder on 19 November 2026; `lol3_save_header.py` counts them). Four further autosaves isolate the first position group's heading and Z coordinate and one item transfer from the quick slot to the cursor. [Writer traces and offsets](lol3-native-saves.md#controlled-saves-with-a-null-sink) | Q13 |
+| Saves | [native saves](lol3-native-saves.md) | Native slot directories measured in 47 original saves with 416 level blocks (`lol3_save_header.py` counts them). Four further autosaves isolate the first position group's heading and Z coordinate and one item transfer from the quick slot to the cursor. [Writer traces and offsets](lol3-native-saves.md#controlled-saves-with-a-null-sink) | Q13 |
 
-A row is done when it has a page, a working reader, a passing check and no open point. Today none of the rows meets that; WSX, LMF and the row-span textures have readers with checks.
+A row is done when it has a page, a working reader, a passing check and no open point. Today none of the rows meets that; WSX archives, LMF light maps and the textures in the game-written cache have readers with checks, but each still has an open point.

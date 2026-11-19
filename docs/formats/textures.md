@@ -58,7 +58,7 @@ height rows of:
     B bytes          palette indices placed from the start column
 ```
 
-`lol3_texture_spans.py --check --data <DAT>` re-ran on 2026-11-18 over the whole `cdcache.wsx` in the game folder (104,896,114 bytes). It found 854 record headers with these flags. All 854 consume exactly `height` rows, every row fits inside the width, and the last row ends at the payload end: 815 with flags `0x028E` and 39 with `0x828E`. CONFIRMED. The older pages tested 26 samples; this check covers every record.
+`lol3_texture_spans.py --check --data <DAT>` runs over the whole `cdcache.wsx` in the game folder (104,896,114 bytes). It found 854 record headers with these flags. All 854 consume exactly `height` rows, every row fits inside the width, and the last row ends at the payload end: 815 with flags `0x028E` and 39 with `0x828E`. CONFIRMED. The older pages tested 26 samples; this check covers every record.
 
 ## Worked example
 
