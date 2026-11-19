@@ -54,8 +54,8 @@ the lower floor left the cursor and `0x581A21` at zero.
 **UNCONFIRMED.** Live second-counter debit and HUD feedback. Save with
 fixed equipment, sufficient mana and spell 0x54 or 0x59 selected.
 Watch `0x570AB9` while using a first-counter item, then cast. For
-the second counter use Mana Cluster and a spell whose admission
-reaches `0x4A46E2`. Compare the same cast before and after each
+the second counter use Mana Cluster and spell ID 0x57, whose admission
+reaches `0x4A46E2` (`GLOBAL.WSX+0x67F2`). Compare the same cast before and after each
 consumable. Record the producer, the new selector value, the
 next accounting routine and the visible HUD change. A hit at `0x4329C0` or `0x432AD0` with
 a −1 argument identifies the alternate counter to follow.

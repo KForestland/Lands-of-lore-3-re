@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check original LoL3 pickup and texture witnesses.
+"""Check original LoL3 pickup, texture and spell-counter witnesses.
 
   lol3_native_checks.py --data DAT --check
   lol3_native_checks.py --data DAT --check --decode-copy   # shipped banks, liblzo2
@@ -7,7 +7,7 @@
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
-from struct import error as StructError, unpack_from
+from struct import error as StructError, pack, unpack_from
 
 import lol3_cli
 from lol3_script_framing import CODE_BIAS, RETAIL_PE
@@ -17,6 +17,8 @@ from walk_lmf_leaves import lzo_decoder
 
 COPY_BANKS = {"BUPP1", "EWOD1", "QWOD0", "RVOL0"}
 COPY_MISMATCHES = (500, 244, 116, 52, 24)
+FIRST_COUNTER_IDS = {0x54, 0x59, 0x5E, 0x63, 0x68, 0x6D, 0x72, 0x77, 0x7C,
+                     0x81, 0x86, 0x8B, 0x9C, 0x9D, 0x9E, 0x9F, 0x15A}
 
 
 def opcode(image, address, encoding):
@@ -60,6 +62,60 @@ def pickup_and_renderer(image):
         raise ValueError("wrong level save selector 25")
 
 
+def spell_counter(image, data_dir):
+    # The executable's .text virtual bytes (file offsets 0x400 through 0x1366E4).
+    start, end = 0x400, 0x1366E5
+    target = 0x432AD0
+    callers = tuple(at + CODE_BIAS for at in range(start, end - 4)
+                    if image[at] == 0xE8
+                    and at + CODE_BIAS + 5 + unpack_from("<i", image, at + 1)[0] == target)
+    if callers != (0x4A5A3A, 0x4A6133) or pack("<I", target) in image:
+        raise ValueError("unexpected references to the second-counter writer")
+    for address, encoding in (
+        (0x432AD8, "8b 8e 21 11 01 00 03 cf 89 8e 21 11 01 00"),
+        (0x432AED, "85 ff 7e 61"),
+        (0x432B52, "8b 86 21 11 01 00 85 c0 75 0d 8b 46 28 c7 80 58 03 00 00 1f 00 00 00"),
+        (0x42E759, "89 be 21 11 01 00"), (0x4326B7, "89 be 21 11 01 00"),
+        (0x43470B, "a1 21 1a 58 00 85 c0 74 02"), (0x4A46E2, "a1 21 1a 58 00 85 c0 74 0a"),
+        (0x4A5A33, "6a ff b9 00 09 57 00"), (0x4A612C, "6a 01 b9 00 09 57 00"),
+    ):
+        opcode(image, address, encoding)
+    direct_call(image, 0x432AE8, 0x432CC0)
+    if unpack_from("<I", image, 0x54BAD8 - 0x401800)[0] != 0x4A6120:
+        raise ValueError("wrong regular item handler 112")
+
+    for selector, targets, expected_first in (
+        (0x4A5E20, 0x4A5DEC, 0x4A5BB0),
+        (0x434790, 0x43475C, 0x43474F),
+    ):
+        table = unpack_from("<13I", image, targets - CODE_BIAS)
+        begin = selector - CODE_BIAS
+        first = {0x54, 0x59} | {
+            index + 0x5E for index, case in enumerate(image[begin:begin + 0xFD])
+            if table[case] == expected_first
+        }
+        if first != FIRST_COUNTER_IDS:
+            raise ValueError(f"unexpected first-counter route at {selector:#x}")
+
+    original = (data_dir / "GLOBAL.WSX").read_bytes()
+    odf = 0x3866
+    item_offset, = unpack_from("<I", original, odf + 4)
+    count, = unpack_from("<I", original, odf + 0x34)
+    if (item_offset, count) != (0x1F0, 343):
+        raise ValueError("wrong original item directory")
+    producers, special = [], set()
+    for at in range(odf + item_offset, odf + item_offset + 139 * count, 139):
+        identity, = unpack_from("<I", original, at + 0x73)
+        if original[at + 0x3F] & 2:
+            special.add(identity)
+        elif unpack_from("<I", original, at + 0x4B)[0] == 112:
+            producers.append((at, identity, unpack_from("<I", original, at + 0x18)[0]))
+    if not FIRST_COUNTER_IDS <= special or 0x57 not in special:
+        raise ValueError("missing original spell definition")
+    if producers != [(0xCB4F, 0x110, 0xE2F77FE7)]:
+        raise ValueError("unexpected original second-counter producers")
+
+
 def verify_copy_banks(data_dir):
     decode = lzo_decoder()
     seen = Counter()
@@ -101,8 +157,9 @@ def main():
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
         pickup_and_renderer(image)
+        spell_counter(image, data_dir)
         detail = f"; {verify_copy_banks(data_dir)} shipped copy mips" if args.decode_copy else ""
-        print(f"CHECK native: pickup and renderer anchors{detail}")
+        print(f"CHECK native: pickup, renderer and second-counter anchors{detail}")
     except (OSError, ValueError, StructError, RuntimeError) as error:
         parser.exit(1, f"native checks: {error}\n")
     return 0

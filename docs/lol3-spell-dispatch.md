@@ -126,12 +126,14 @@ between zero and the vtable +0xB0 return, then refreshes
 the HUD (`0x40FFE0–0x410052`). The failed-effect branch
 at `0x4A5A41–0x4A5A54` skips this debit.
 
-**CONFIRMED.** For IDs 0x54 and 0x59, a nonzero
-`[0x570AB9]` can select a different payment route, which
-calls `0x4329C0(-1)` on success. The other bypass tests
-`[0x581A21]` and can call `0x432AD0(-1)` instead
-(`0x4A46C1–0x4A46F3`, `0x4A5BB0–0x4A5BCE`,
-`0x4A5A0D–0x4A5A54`).
+**CONFIRMED.** The cast can pay from one of two counters.
+Entry `0x4A4520` clears both payment locals at stack +0x30
+and +0x34 (`0x4A4533–0x4A453F`). The first-counter route
+requires nonzero `[0x570AB9]`, sets +0x30 and skips the
+second-counter test. The other route tests the dword at
+`[0x581A21]`: a nonzero value sets +0x34 and skips the
+mana affordability comparison (`0x4A46C1–0x4A46FF`,
+`0x4A5B93–0x4A5BCE`).
 
 ### Producers of the alternate counters
 
@@ -146,20 +148,73 @@ Both then refresh HUD groups 3–7 via `0x432CC0–0x432CD5`.
 | `0x570AB9`, `0x4A5A20` | Ancient's Stone (ID `0x36`, `GLOBAL.WSX+0x5692`, name at `locallng.wsx+0x596B2C8`) and Force Pod (ID `0xE7`, `GLOBAL.WSX+0xB597`, name at `+0x5977225`) | Both use regular index 6 (`0x54B930 → 0x49FB10`). Operation 1 adds one at `0x49FB23`. |
 | `0x581A21`, `0x4A5A3A` | Mana Cluster (ID `0x110`, `GLOBAL.WSX+0xCB4F`, name at `locallng.wsx+0x597A8A0`) | Regular index 112 (`0x54BAD8 → 0x4A6120`). Operation 1 adds one at `0x4A6133`. |
 
-The item numeric key is at definition +0x73. The original name reader
-uses that key at `0x4AD169–0x4AD1B4`. For a positive second-counter
-addition, `0x432AF1–0x432B06` also gets the player's mana ceiling
-via `0x40FF00` (player vtable +0xB0 at `0x538438`) and passes it
-as an increase to `0x40FFE0`. A negative
-argument skips that refill (`0x432AE8–0x432AEF`).
+**CONFIRMED.** The item numeric key is at definition +0x73.
+The original name reader uses that key at `0x4AD169–0x4AD1B4`.
+Scanning all 343 original rows from `GLOBAL.WSX+0x3A56`
+finds one regular definition whose +0x4B is 112, Mana Cluster
+at +0xCB4F. Its +0x3F is 0x40. The native dispatcher
+reads both fields at `0x49E969–0x49E992` before the regular
+table lookup at `0x49EA08`. The complete `.text` virtual range
+(`LOL3.DAT+0x400..+0x1366E4`, VA `0x401000..0x5372E4`)
+contains two `E8 rel32` encodings targeting `0x432AD0`:
+`0x4A6133` passes +1 after regular handler 112 accepts
+operation 1, and `0x4A5A3A` passes −1. A whole-file search
+finds no literal dword pointer to the writer. These checks
+cover encoded direct calls, literal pointers and the original
+item table. Indirect or computed targets remain **UNCONFIRMED**.
 
-**CONFIRMED.** The `0x54` and `0x59` admission arm requires a
-nonzero first counter. Zero queues message `0x5B` and goes to the
-failure return (`0x4A5BB0–0x4A5BCE`, `0x4A470A–0x4A4727`).
-When the same successful cast has that charge selected, the first
-debit takes priority at `0x4A5A0D–0x4A5A25`. The ordinary path
-can check the second counter at `0x4A46DE–0x4A46F3` and spend
-one charge at `0x4A5A27–0x4A5A3F`.
+#### Second-counter debit
+
+**CONFIRMED.** The first-counter admissions are IDs 0x54 and
+0x59 by direct comparisons, and 0x5E, 0x63, 0x68, 0x6D,
+0x72, 0x77, 0x7C, 0x81, 0x86, 0x8B, 0x9C–0x9F and
+0x15A by the byte index at `0x4A5E20` and jump slots at
+`0x4A5DEC`. All 17 are special definitions in the original
+item table at `GLOBAL.WSX+0x3A56`. They go to the
+dedicated admission `0x4A5BB0`; zero queues message 0x5B
+through `0x4A5BC7–0x4A5BCE`. The preflight called by
+`0x421D35` and `0x425B95` uses the same IDs
+(`0x4346F0–0x434759`, tables `0x434790` and `0x43475C`).
+Other IDs can use the second counter. ID 0x57 at
+`GLOBAL.WSX+0x67F2` is one such original spell.
+
+**CONFIRMED.** After the spell effect, `0x4A5A0D–0x4A5A25`
+pays the first counter when selected and the effect succeeded.
+The second branch at `0x4A5A27–0x4A5A3F` requires stack
++0x34 set and the effect result in EBX nonzero. It pushes
+−1 and ECX `0x570900`; `0x432AD8–0x432AE0` reads,
+adds and stores the counter modulo 2³² at
+`0x570900+0x11121 = 0x581A21`. The helper calls the
+refresh loop for groups 3–7 (`0x432AE8 → 0x432CC0`)
+and skips the positive-only refill. When the resulting
+counter is zero it writes 0x1F at `[ESI+0x28]+0x358`
+(`0x432B52–0x432B66`). The debit then rejoins at
+`0x4A5A7D`, past the ordinary mana debit at `0x4A5A4D`.
+A failed effect takes `0x4A5A31 → 0x4A5A54` and
+skips the counter store.
+
+**CONFIRMED.** A positive argument refills mana by passing
+the ceiling from player vtable +0xB0 (`0x538438 → 0x40FF00`)
+as an increase to `0x40FFE0`. It also sets state +0x12F8D
+to 1 and may emit feedback via `0x422C40`
+(`0x432AF1–0x432B4D`). The zeroing paths use EDI = 0
+at `0x42E613 → 0x42E759` and `0x4325AC → 0x4326B7`.
+The display path reads the same relative offset at
+`0x430C7D` and formats a positive count in decimal
+at `0x430C87–0x430C8F`.
+
+Run `tools/lol3_native_checks.py --data DAT --check` to
+recheck the direct calls, counter store and guards, both
+admission tables, and the 343 definition rows.
+
+**UNCONFIRMED, live witness.** The earlier attempt at the
+DLOW1 placement left the cursor and counter at zero. For a
+successful second-counter trial start with Mana Cluster in
+inventory, use it and check `0x4A6133` for +1. Then cast
+ID 0x57 against a valid target. At `0x4A5A3A` record
+counter and mana, check the new counter at `0x432AE0` and
+check the zero-state store at `0x432B5F` when starting
+from one charge. Observe the display after both calls.
 
 ### The two cost discounts
 
