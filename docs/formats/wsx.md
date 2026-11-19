@@ -63,7 +63,13 @@ The large game-folder copy measured here was last written by the game when it ra
 `cdcache.hdr` share bytes +0x00–+0x71. Their ordinary WSX index
 declares 9 rows and 52,663,679 data bytes at +0/+2. The
 ordinary exact-size check expects 52,663,793 bytes. The DAT copy
-is 3,264,114 bytes and is missing some of the declared ranges.
+is 3,264,114 bytes. After the shared 114 bytes it is 51 copies of
+one 64,000-byte block, and that block is not a byte string in the
+executable or in this installation's game-written cache. Its first
+dword is the shipped file's `0xD0BCD8BE` at +0x72, so those bytes
+are not an allocator index. Five directory entries of size 0xD
+land inside the first copy. The file is missing the larger
+declared ranges.
 The game-folder copy is 104,896,114 bytes and has a second directory
 and separately allocated storage. The original initializer copies
 the header and writes in 64,000-byte blocks. Its default target is
@@ -89,7 +95,7 @@ after the index (`0x4FE56A–0x4FE58A`).
 | +0x14 | u8 | Allocated flag, set on allocation and cleared on invalidation (`0x4FE92A`, `0x4FE804`) |
 | +0x15 | u8 | Index for the generation array. Value 0x11 bypasses the token comparison (`0x4FE7D2–0x4FE7DB`, `0x4FE93D`). |
 | +0x16 | u8 | Pin flag, set and cleared by payload position (`0x4FE77B–0x4FE786`, `0x4FE85B–0x4FE866`). Skipped by the ordinary eviction-candidate walk (`0x4FEA40–0x4FEA4C`). |
-| +0x17 | u8 | **UNCONFIRMED.** The rows are loaded, moved and saved whole. Its meaning is open. See the [native reader](../lol3-wsx-reader.md#cache-index-lifecycle). |
+| +0x17 | u8 | No instruction names it. It travels inside the 0x3C0-byte index read and write and the 6-dword row copy. In this cache, 0x67 on all 8 occupied rows and on 12 empty rows. See the [native reader](../lol3-wsx-reader.md#cache-index-lifecycle). |
 
 **CONFIRMED.** In the installed witness, eight occupied rows
 cover four texture banks and their four light maps. The first

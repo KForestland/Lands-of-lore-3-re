@@ -18,9 +18,9 @@ Counted by `tools/rating.py` on the English GOG copy; [how we rate](docs/HOW_WE_
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) are accounted for to the last byte by a reader here.
-- **Rules traced:** 244 statements labelled CONFIRMED against the program or the files, 76 labelled UNCONFIRMED, on 71 current pages.
+- **Rules traced:** 245 statements labelled CONFIRMED against the program or the files, 75 labelled UNCONFIRMED, on 71 current pages.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered.
-- **Open questions:** 13: 3 answered, 5 mostly, 5 partly.
+- **Open questions:** 13: 3 answered, 6 mostly, 4 partly.
 <!-- rating:end -->
 
 Every page says what was measured, which program address or file offset proves it (CONFIRMED) or what is still a reading (UNCONFIRMED), and what would settle the rest.
@@ -34,7 +34,7 @@ QWOD0 seen from above. Dark edges occur once in the surface table and pale edges
 - **Format pages** in [`docs/formats/`](docs/formats): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Executable pages** in [`docs/`](docs/README.md): the WSX, LMF, texture, MAP/ODF, script, item, spell, dialogue, combat and save readers in the game program `LOL3.DAT`.
-- **Tools** in [`tools/`](tools/README.md): seventeen checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a save-header reader, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
+- **Tools** in [`tools/`](tools/README.md): eighteen checks (`check_all.py`), a WSX reader, an LMF light-map checker, texture record, palette and `.TE_` wrapper checkers, a texture-to-PNG exporter, a level schematic drawer, a movie and audio check, a shipped-cache check, a save-header reader, a script framing check, the level-sheet writer, the script-notes writer and `repo_guard.py`.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -55,7 +55,7 @@ The duplicate copies of `LOCAL.WSX` and `locallng.wsx` next to `LOL3.DAT` are no
 git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT=/path/to/your/LoL3/DAT      # the game's DAT folder
-python3 tools/check_all.py                  # 17 checks, ends with ALL 17 CHECKS PASSED (or 14 passed, 3 skipped if the game has never run)
+python3 tools/check_all.py                  # 18 checks, ends with ALL 18 CHECKS PASSED (or 15 passed, 3 skipped if the game has never run)
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 ```

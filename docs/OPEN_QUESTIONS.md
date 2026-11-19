@@ -10,7 +10,7 @@ One line per question: its state and what would settle what is left. Device colo
 
 | # | State | What would settle the rest |
 |---|---|---|
-| Q1 | Partly | Explain the origin of the shipped compact `DAT/cdcache.wsx` and byte +0x17 of the allocator rows |
+| Q1 | Mostly | The shipped file is a 114-byte header plus 51 copies of a block absent from the program. What writes that block, and what leaves 0x67 at byte +0x17, remain open |
 | Q2 | Answered | 53 directory keys match a stored C string. The other keys have no stored C string (76 constructed names are checked separately); the caller that builds one would name it |
 | Q3 | Mostly | Disk bit 0 = per-vertex normals at +0x14–+0x2B, +8 = `0x00RRGGBB` colour, samples from +0x2C; find a reader of the four s16 at +0x0C–+0x13 |
 | Q4 | Mostly | Section-1 bytes each have a reader. A seek to the 26-byte names, the 31-byte path labels, or field 2 + 56×field 21, or a read of waypoint byte +6, would name what remains |
@@ -28,7 +28,7 @@ One line per question: its state and what would settle what is left. Device colo
 
 | # | Question | Where |
 |---|---|---|
-| Q1 | `cdcache.wsx`: two different files carry this name. Only the one in `DAT/` (3,264,114 bytes) ships; the one in the game folder (104,896,114 bytes) is written by the game when it runs. They both have a 9-entry header covering 52,663,793 bytes. The game-folder copy holds the 854 texture records, 420 of them after the area the header covers ([formats/textures.md](formats/textures.md)). Native expansion and the secondary allocator directory are confirmed, including eight occupied spans. Open: the origin of the shipped compact `DAT/` copy and row byte +0x17 | [Native WSX reader](lol3-wsx-reader.md) |
+| Q1 | **Mostly answered.** The shipped `DAT/cdcache.wsx` (3,264,114 bytes) is the shared 114-byte header plus 51 copies of one 64,000-byte block. That block is not in the executable or in the game-written cache, and the shipped bytes at +0x76 are not allocator rows. Byte +0x17 has no instruction; this installation's 8 occupied rows hold 0x67 there. Open: what writes the block, and what leaves 0x67 | [Native WSX reader](lol3-wsx-reader.md) |
 | Q2 | **Answered.** Native rotate-right name hash, case normalization and 76 exact name/key joins. A scan of every stored C string joins 53 path-like names; the other directory keys have no stored C string (the 76 constructed names are checked separately) | [Native WSX reader](lol3-wsx-reader.md#resource-name-key) |
 | Q3 | LMF light maps. **Mostly answered:** native directory, grouped LZO1X and decoded member sizes confirmed; samples begin at +0x2C; disk bit 0 selects four per-vertex unit normals at +0x14–+0x2B (otherwise one repeated face vector); +8 is an RGB colour averaged into the surface light. Open: the four s16 at +0x0C–+0x13 | [Native LMF reader](lol3-lmf-reader.md) |
 | Q4 | **Mostly answered.** Waypoints, paths and surfaces are read natively. Section-1's eight bytes each have a reader or a writer. The 26-byte slots and 31-byte slots are printable labels outside those reads; waypoint byte +6 is tabulated and travels in the saved row; the 1,784 bytes before field 16 are 223 groups of four u16 with no seek. Open: a reader of byte +6, of either label span, and of field 2 + 56×field 21 | [Native MAP reader](lol3-map-odf-readers.md) |

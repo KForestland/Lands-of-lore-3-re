@@ -74,16 +74,28 @@ spans. Shutdown writes the index back to its stored position
 (`0x4FE667–0x4FE680`). Payload writes have their own path
 (`0x4E4854–0x4E487F`).
 
-**UNCONFIRMED.** The compact DAT seed's production process and
-the role of index row byte +0x17 are open. The installed
-eight occupied rows all carry 0x67 at +0x17, while rows with
-zero span vary. The native allocator writes +0x14–+0x16
-individually and copies whole rows at `0x4FE9BA`. To
-settle +0x17, trace reads of that byte after a write-backed
-allocation and check whether the byte is ever initialized
-apart from the whole-index clear at `0x4FE4AF`. For the
-seed, the next static check is to compare its first data
-ranges against the installer's input media.
+**CONFIRMED** (the shipped body and the missing instruction).
+**UNCONFIRMED** (what produces the block, and what leaves 0x67).
+`DAT/cdcache.wsx` is 114 bytes plus 51 copies of one 64,000-byte
+block. The block is not present in `LOL3.DAT`, `LOL3.EXE`, or
+this installation's game-written cache. The shipped dword at
++0x72 is `0xD0BCD8BE`, the first dword of that block, not the
+live marker `0xF1E2D3C4`.
+
+Every reference to the index base `0x7F39F8` lies in
+`0x4FE390–0x4FED37`. Across `0x4FE390–0x4FEE7D` no operand is
++0x17, and the address of row 0's byte +0x17 (`0x7F3A0F`) does
+not occur in the code section. The byte is inside the 0x3C0-byte
+read at `0x4FE4EF`, the matching write at `0x4FE675`, the
+0xF0-dword clear at `0x4FE4AF` (the read then replaces it), and
+the 6-dword row copy at `0x4FE9BA`. Bytes +0x14, +0x15 and +0x16
+have their own stores, listed on the format page. In this
+installation all 8 occupied rows hold 0x67 at +0x17, as do 12
+empty rows, and 17 of the 40 rows have +0x17 equal to +0x16.
+`lol3_cache_seed.py --check` re-counts the copies, the address
+tallies and that witness. A program or installer input that
+contains the 64,000-byte block, and a cache saved before any
+texture write, are the settling tests.
 
 ## Resource name key
 
