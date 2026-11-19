@@ -356,7 +356,7 @@ source (`df378d294f42`, slot +0x49C/+0x4A0) restored with
 `DLOW1.WSX+0x1504255` and has floor height 110 at +0x18.
 
 Walking around the counter, jumping toward it and clicking from
-both sides left the cursor and second counter zero. The closest
+two angles left the cursor and second counter zero. The closest
 logged jump pose at `0x43766F` was (−637, 4895, 52) with
 heading `0x041F`. After crossing the horizontal target from the
 lower floor, the next save (`f88f201e77d4`) read approximately
