@@ -1,5 +1,14 @@
 # Tools
 
+Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
+
+## Setup
+
+- Python 3.8 or later. The readers and the synthetic tests need only the standard library.
+- The optional system LZO library (`apt install liblzo2-2` on Debian or Ubuntu) for the light-map decode and the LZO checks; without it those checks print one SKIP line.
+- Your own copy of the English GOG release; point `--data` or `$LOL3_DAT` at its `DAT` folder.
+- Three checks need the texture cache the game writes beside `DAT` on its first run, and the save writer needs the game's own saves; without them they report SKIP ([cookbook](../docs/COOKBOOK.md)).
+
 To write the inventory, level sheets and text counts together, use `full_report.py`. [Cookbook](../docs/COOKBOOK.md#write-a-full-report)
 
 Run `python3 tools/lol3_numbers.py --check` to compare the original item, spell and creature numbers with the generated page. It prints `CHECK lol3_numbers: LoL3 tables match docs/NUMBERS.md`. [Numbers at a glance](../docs/NUMBERS.md)
