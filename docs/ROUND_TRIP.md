@@ -35,6 +35,10 @@ Five writers read the original files, build a replacement in memory and compare 
 
 **CONFIRMED.** A TRR is a u32 count, the u32 IDs, then count + 1 u32 boundaries (counted from +4), then the NUL-terminated fields. The writer rebuilds the whole table from (ID, field) rows; IDs may repeat and be out of order. It finds the TRR-shaped members of both `locallng.wsx` copies and the loose `.trr` files, and stops unless there are 53 and the four quest and dialogue tables are among them. A field changed in memory changes the length and the later boundaries and reads back through the same directory reader `lol3_media_check.py` uses (synthetic test). [Writing the stored tables](lol3-dialogue-dispatch.md#writing-the-stored-tables)
 
+## Generated PHT stream
+
+`LOL3.DAT` holds the recurrence at VA `0x51B655–0x51B67C` (file `+0x11AA55`). Its low output byte, with each LF written as CR LF, reproduces the four PHT files. `lol3_pht.py --check` generates the cycle in memory and checks the four files through EOF; it writes nothing. The file-producing path is open; see [PHT byte generation](formats/pht.md#byte-generation).
+
 ## Run the checks
 
 ```bash

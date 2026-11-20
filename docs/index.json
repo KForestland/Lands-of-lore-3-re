@@ -368,6 +368,7 @@
         "tools/lol3_lzo_writer.py",
         "tools/lol3_map_writer.py",
         "tools/lol3_media_check.py",
+        "tools/lol3_pht.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_writer.py",
         "tools/lol3_script_notes.py",
