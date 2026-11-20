@@ -30,6 +30,12 @@ many answered probes rest on edited saves only.
   `0x432AE0`. The watch on ordinary mana spending had no hit for that
   cast. The game later wrote its own
   autosave from that state.
+- **Loaded again (2026-11-20):** the same edited copy
+  (`90099b161497`, no further bytes changed), with two live edits in
+  the cache initializer. The three casts gave the same results; the
+  items were not used
+  ([record](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run), under
+  "Remaining native casts").
 - **A native save would add:** the item taken in ordinary play (the
   [DLOW1 try](lol3-spell-dispatch.md#dlow1-approach-with-the-native-placement-live)
   could not reach it), and the exact counter shown on the HUD.

@@ -432,7 +432,7 @@ in the viewport used it through the original handler.
 | Key 2, spell `0x57` with no second charge | The ordinary writer `0x410014` stored 415, −22 from mana 437, returning to `0x4A5A52`. |
 | Use Ancient's Stone | `0x49FB23` led to `0x4329D0`, first counter 35 → 36, return `0x49FB28`. |
 | Key 1, spell `0x59` | `0x4A5A20` led to `0x4329D0`, first counter 36 → 35 with mana 437 at cast admission. |
-| Key 3, spell `0x54` | The cast reached `0x4A46C1` with first counter 35. The view reported no enemy to attack and neither debit writer fired. |
+| Key 3, spell `0x54` | The cast reached `0x4A46C1` with first counter 35. The view reported no enemy to attack and neither debit writer fired. Static reason: the `0x54` arm `0x4A4860` calls `0x4AE850(4, 0x5D4EE0)`; a zero result clears EBX and the first-counter flag at stack +0x30 and sets text key 0x277B ("No enemy to attack" in the tooltip table at `locallng.wsx+0x598AD7C`), so the gate at `0x4A5A0D–0x4A5A43` skips both the counter and the mana debit. |
 | Use Mana Cluster | `0x4A6133` led to `0x432AE0`, second counter 0 → 1, return `0x4A6138`. |
 | Key 2, spell `0x57` after Mana Cluster | `0x4A5A3A` passed −1 to the second writer, which changed 1 → 0 and returned to `0x4A5A3F`. The negative ordinary-mana watch had no hit for this cast. |
 

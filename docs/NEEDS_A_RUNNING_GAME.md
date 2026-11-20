@@ -260,7 +260,7 @@ play bounds that stretch only.
   ran no script toward an opcode-0x1A record; the call was not fetched
   in about two seconds of play. A game-written BUPP1 slot
   (`5ae559b2cabe`) was among the copies.
-- **Final colour of one textured wall pixel (not run).** Settles the
+- **Final colour of one textured wall pixel (not run; a 2026-11-20 launch did not test it).** Settles the
   final composition in [Q6](OPEN_QUESTIONS.md). Watch: record the
   texture handle stored at `0x4965CE` for one upload, as in the
   [level-5 upload test](lol3-texture-bake.md#live-level-5-indexed-row-and-upload).
@@ -270,6 +270,34 @@ play bounds that stretch only.
   before presentation with the same pixel on the presented screen.
   A match with the uploaded texture word means the draw added nothing;
   a difference is what the light map, filtering or blending added.
+  Setup: these sites belong to the Direct3D renderer, so choose a
+  Direct3D driver in Video Controls (the level-5 upload test chose
+  `Direct3D: display`). All four use the device pointer `[0x65F434]`:
+  the handle query `0x4965AE` before the store at `0x4965CE`, the draw
+  wrapper `0x47A8B0` (method +0x74 on the vertices at `0x65CB68`) and
+  the end-of-scene wrapper `0x472DB0`, which returns early while the
+  pointer is zero (`0x472DB9–0x472DC0`); the indexed upload at
+  `0x495635` lies on the staging path that returns early while the lock
+  cell `[0x66164C]` is zero (`0x4955CF–0x4955D9`). The pointer is set
+  only by the device creation at `0x472801` (out pointer pushed at
+  `0x4727E7`, driver GUID from `0x65C9E8 + 16 × [0x65F470]`). The
+  start-up code reads `[Video] Video_3D_Driver` from `options.ini`
+  (`0x4F308C`) and passes it to `0x409D70`; the value `SoFtWaRe`
+  (`0x545A44`) returns driver 1, mode 1 at `0x409DA7–0x409DC5`
+  without consulting the Glide or Direct3D lists, stored in
+  `[0x5D4EDA]`/`[0x5D4ED9]` (`0x4F314A`, `0x4F3167`).
+  *2026-11-20, edited-save run with two live edits (not a test):* the
+  copy's `options.ini`, as the game left it after the run, held
+  `Video_3D_Driver=SoFtWaRe` and
+  `Video_Resolution=640x480x8`, so the game drew with its software
+  renderer. The four Direct3D sites above were not fetched, which is
+  expected on that path and says nothing about the composition. The
+  second live edit (`0x4E4E34` → `0x4E4EAF`, see the
+  [run above](#run-of-2026-11-20-dlow1-autosave-with-two-live-edits))
+  changes one jump inside the cache initializer only; it does not
+  disable `0x5046E0` elsewhere and does not explain the result. Next:
+  delete `cdcache2.smf`, select the Direct3D driver, check
+  `[0x65F434]` is nonzero in the level, then run the watch.
 - **Remaining native casts (not run).** Settles native acquisition and
   the HUD feedback in [Q12](OPEN_QUESTIONS.md). Full test:
   [Q12](#q12-which-live-cast-consumes-an-alternate-resource). Setup:
@@ -282,6 +310,20 @@ play bounds that stretch only.
   ordinary play, then cast before and after each. Result: the producer,
   the new counter value and the visible HUD change. A −1 call at
   `0x4329C0` or `0x432AD0` shows which counter paid.
+  *2026-11-20, edited-save run with two live edits:* a second load of
+  the same edited BUPP1 copy (`90099b161497`, no new bytes changed; the
+  two cache-initializer edits of the
+  [run above](#run-of-2026-11-20-dlow1-autosave-with-two-live-edits)
+  were made again) repeated the
+  [edited-save results](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
+  without using the items. Key 1, spell `0x59`: `0x4329C0` was entered
+  with −1 from `0x4A5A20`, the first counter read 34 instead of 35 at
+  the next cast and mana stayed 437. Key 2, spell `0x57`: the ordinary
+  writer stored 415 at `0x410014` (437 − 22). Key 3, spell `0x54`: the
+  cast was entered with mana 415 and counters 34/0, the screen showed
+  "No enemy to attack" and no debit was logged before the session was
+  stopped seconds later. No new state; native acquisition and the HUD
+  indicator stay open.
 
 ## Answered probes
 
