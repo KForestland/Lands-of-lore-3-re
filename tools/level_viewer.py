@@ -7,6 +7,7 @@ import struct
 from cli_errors import run_cli
 from level_html import Plan, main
 from level_move_ui import sections
+from level_edit_data import placement_name
 from lol3_level_schematic import PLACEMENTS, map_geometry
 from lol3_progression import collect
 from lol3_script_framing import level_map_entries
@@ -76,7 +77,8 @@ def view(data, stem, gates):
     for name, i, x, z, _ in placed:
         kind, color, prefix = MARKS[name]
         start, stride = tables[name]
-        plan.dot((x, z), f"{prefix}-{i}", f"{name.capitalize()} {i}", kind,
+        title = placement_name(data, payload, name, i, start + stride * (i - 1))
+        plan.dot((x, z), f"{prefix}-{i}", title or f"{name.capitalize()} {i}", kind,
                  {"Row (starts at 1)": i, "X / Z": f"{x >> 16} / {z >> 16}",
                   "Source": f"{stem}.WSX +{base + start + stride * (i - 1):#x}"}, color, f"{prefix}{i}")
     for i, row in enumerate(gates, 1):

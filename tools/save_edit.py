@@ -107,7 +107,7 @@ def page_fields(raw):
              ("Current level ID", level), ("Stored region", region),
              ("Saved level blocks", sum(bool(size) for _, size in header["levels"]))]
     return [("name", "Slot name", name, name, 43, status("name")),
-            ("heading", "Heading word", f"{heading:#06x}", heading, 65535, status("heading")),
+            ("heading", "Heading word", f"{heading:#06x}", f"{heading:#06x}", 65535, status("heading")),
             ("position-from", "Position group", shown("position-from", raw), None, None, status("position-from"))], facts
 
 

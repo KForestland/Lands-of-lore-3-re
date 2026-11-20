@@ -1,4 +1,5 @@
 """LoL3 TRR tables in the original installation."""
+from filecmp import cmp
 from struct import iter_unpack
 
 import modkit
@@ -8,7 +9,38 @@ from extract_wsx_entries import wsx_name_hash
 
 # Directory keys from DAT/LOCALLNG.WSX. The keys stay fixed when text moves.
 TEXT_NAMES = {0xE363A4C3: "dtext.trr", 0xE370A4C3: "qtext.trr",
-              0xE3E4F49B: "devent.trr", 0xE3E5289B: "qevent.trr"}
+              0xE3E4F49B: "devent.trr", 0xE3E5289B: "qevent.trr",
+              0x5FB4088C: "itemjt.trr"}
+
+
+CHARSET = "the mapped game font encoding"
+
+
+def warning_fonts(file, label):
+    if label.lower() == "dtext.trr":
+        return lambda name: name.upper().endswith("/STD8P.FNT")
+    return None
+
+
+def preserve_controls(original, text):
+    """Carry leading formatting codes into a normal full-cell replacement."""
+    if text and ord(text[0]) < 32:
+        return text
+    at = 0
+    while at < len(original) and 0 < ord(original[at]) < 32:
+        code = original[at]
+        at += 1
+        if code in ("\x02", "\x03") and at < len(original) and "0" <= original[at] <= "9":
+            at += 1
+    return original[:at] + text
+
+
+def mirror_files(base, name):
+    path = base / name
+    if path.parent == base or path.name.upper() != "LOCALLNG.WSX" or path.parent.name.upper() != "DAT":
+        return ()
+    return tuple(p.name for p in base.iterdir() if p.is_file() and
+                 p.name.upper() == "LOCALLNG.WSX" and cmp(path, p, shallow=False))
 
 
 def font_sources(base):
@@ -66,7 +98,11 @@ def sources(base):
     dat = next((p for p in base.iterdir() if p.is_dir() and p.name.upper() == "DAT"), None)
     if dat is None:
         raise ValueError(f"Give --data {modkit.FOLDER}.")
+    archives = (path for path in dat.iterdir() if path.name.upper() == "LOCALLNG.WSX")
+    duplicates = {base / name for path in archives for name in mirror_files(base, path.relative_to(base))}
     for path, index, key, at, blob in trr_sources(dat, indexed=True):
+        if path in duplicates:
+            continue
         label = path.name if key is None else TEXT_NAMES.get(key, f"{key:08X}.trr")
         yield path.relative_to(base).as_posix(), index, label, at, blob
 
@@ -84,7 +120,7 @@ def write(label, blob, changes):
         try:
             value = encode(text)
         except UnicodeError:
-            raise ValueError(f"Row {i + 1} has a character outside the mapped glyphs. Choose a character listed by translate fonts.") from None
+            raise ValueError(f"CSV row {i + 2} has a character outside the mapped glyphs. Choose a character listed by translate fonts.") from None
         rows[i] = rows[i][0], value
     if sum(len(value) + 1 for _, value in rows) + 8 * len(rows) + 4 > 0xFFFFFFFF:
         raise ValueError("This TRR exceeds the 32-bit offset range. Shorten the new text.")

@@ -1,8 +1,11 @@
 """LoL3 WSX placement fields used by the level editor."""
+from functools import lru_cache
 from struct import unpack_from
 
 from extract_wsx_entries import wsx_name_hash
 from lol3_cli import wsx_files
+from lol3_media_check import read_at, wsx_rows
+from lol3_text_writer import read_trr
 from lol3_level_schematic import PLACEMENTS, map_geometry
 from lol3_script_framing import level_map_entries
 
@@ -41,3 +44,44 @@ def fields(raw):
             count, = unpack_from("<I", raw, count_at)
             records.extend((f"{PREFIX[name]}-{i + 1}", offset + i * stride) for i in range(count))
     return outline, records
+
+
+def entry(data, archive_name, *, key):
+    files = (path for path in wsx_files(data) if path.name.upper() == archive_name)
+    for path in files:
+        with path.open("rb") as archive:
+            for current, at, size in wsx_rows(archive):
+                if current == key:
+                    return read_at(archive, at, size)
+    return None
+
+
+@lru_cache(maxsize=1)
+def item_names(data):
+    odf = entry(data, "GLOBAL.WSX", key=wsx_name_hash("GLOBAL\\GLOBAL.ODF"))
+    trr = entry(data, "LOCALLNG.WSX", key=0x5FB4088C)
+    if odf is None:
+        return {}
+    names = {key: value[4:].split(b"\x02", 1)[0].decode("cp437").strip()
+             for key, value in read_trr(trr)} if trr is not None else {}
+    start, = unpack_from("<I", odf, 4)
+    count, = unpack_from("<I", odf, 0x34)
+    out = {}
+    for index in range(count):
+        at = start + 139 * index
+        identity, = unpack_from("<I", odf, at + 0x18)
+        text_key, = unpack_from("<I", odf, at + 0x73)
+        out[identity] = names.get(text_key) or f"Item definition {index}"
+    return out
+
+
+def placement_name(data, raw, kind, row, at):
+    if kind == "item":
+        identity, = unpack_from("<I", raw, at + 0x20)
+        label = item_names(data).get(identity, f"Item identity {identity:#010x}")
+    elif kind in ("type 3", "type 16"):
+        definition, = unpack_from("<H" if kind == "type 3" else "<B", raw, at + 0x20)
+        label = f"Prop {kind} · definition {definition}"
+    else:
+        return None
+    return f"{label} · row {row}"

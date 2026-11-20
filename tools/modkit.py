@@ -40,6 +40,14 @@ def repack(rows, previous, _size):
     return write_wsx(relayout(relative) if rows is not previous else relative)
 
 
+def patch_validator(name, key, _blob):
+    stem = Path(name).stem.upper()
+    if key == wsx_name_hash(f"LEVELS\\{stem}\\{stem}.MAP"):
+        from level_edit import validate_coordinates
+        return validate_coordinates
+    return None
+
+
 def layout(name, key, blob):
     stem = Path(name).stem.upper()
     if stem == "GLOBAL" and key == ITEMS_KEY:

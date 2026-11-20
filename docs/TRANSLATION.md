@@ -19,8 +19,8 @@ blank. Build rereads each changed archive. Verify compares every output byte to
 the result computed from the original and your CSVs. To try the output, copy it
 over a separate copy of your game.
 
-**The CSVs contain original game text. Keep them, the export manifest and the
-rebuilt archives private. Share only a patch made from your own changes.**
+**Keep your CSVs, the manifest and the rebuilt files private. The CSVs
+contain original game text.**
 
 **CONFIRMED.** The export includes loose TRRs and matching tables in the WSX
 directories. `LOCALLNG.WSX+0x58F7444` and `+0x5987AF5` hold the dialogue and
@@ -29,17 +29,28 @@ See [dialogue dispatch](lol3-dialogue-dispatch.md) and the
 [round-trip page](ROUND_TRIP.md). “No limit” means there is no fixed per-string
 field size. The file and archive offset ranges still apply.
 
+**CONFIRMED.** The retail `LOCALLNG.WSX` beside the game and in `DAT/`
+are byte-identical, including the dialogue and quest offsets above.
+The export lists the `DAT/` tables once and the build writes both copies.
+If the archives differ, the tool keeps both versions in the export.
+A normal full-cell edit of a text row preserves its leading control
+bytes, including their numeric arguments. The `itemjt.trr` name reader
+at `0x4AD172` skips the four leading bytes of an item record, witnessed
+in the table at `DAT/LOCALLNG.WSX+0x5968140`. If you enter an explicit leading control sequence, the build uses
+it. The `dtext` reader seeks the local text at native VA `0x454E10`.
+[Dialogue lookup](lol3-dialogue-dispatch.md)
+
 ## Check characters before building
 
 ```sh
 python3 tools/lol.py translate fonts --data "/path/to/game"
 ```
 
-The list comes from the installed bitmap fonts. Build warns if a replacement
-uses a character absent from any listed font. Shorten or reword the translation
-with characters the fonts have, or leave the original row. A glyph warning
-still allows a copy to build. An input character the writer cannot encode stops
-the build. A drawn glyph can look different across fonts.
+The list comes from the installed bitmap fonts. Build checks each edited
+row against the font or fonts identified for that table. The warning names
+the CSV row and suggests a substitute when one is available. An input
+character the writer cannot encode stops the build. For a table whose
+font is still unconfirmed, use the font listing to check likely choices.
 
 **CONFIRMED.** `LOL3.DAT+0x143990`, `+0x143AD8` and `+0x143AE4`
 name three of the fonts. In `DAT/LOCAL.WSX`, the standard fonts start at
@@ -47,21 +58,22 @@ name three of the fonts. In `DAT/LOCAL.WSX`, the standard fonts start at
 option fonts at `+0x24ACF1A` and `+0x24B0781`. Each has signature
 `0x0500` at `+0x02` and last glyph index `0xB8` at `+0x11`.
 An additional FNT with this signature starts at `DAT/LOCAL.WSX+0x24AC75C`
-and is listed by its key, `214918EA`. The standard and option fonts use
+and is listed by its key, `214918EA`. The dialogue history selects
+`Std8P.FNT` through the cell loaded at `0x407BA2–0x407BC5` and read
+at `0x454FA9–0x454FAF`. The standard and option fonts use
 the same indexed accents as LoL2.
 The editor keeps bytes from `0xB0` onward as escapes. Leave those escapes
 in place when unsure what they mean in the original text.
 
-## Make a small translation patch
+## Verify a private translation patch
 
 ```sh
 python3 tools/lol.py patch make "/path/to/translated files" --data "/path/to/game" --title "My translation" --out "/path/to/translation.json"
 python3 tools/lol.py patch apply "/path/to/translation.json" --data "/path/to/game" --out "/path/to/test copy"
 ```
 
-The patch checks old bytes and makes a matching undo file. It carries the old
-and new bytes for the changes, so keep it small and share it only where you
-have permission to share those bytes. If the size limit rejects the patch,
+The patch checks old bytes and makes a matching undo file. Keep both
+files private while this format stores original bytes. If the size limit rejects the patch,
 use smaller batches or keep replacements the same encoded size. A single
 longer early row can shift enough offsets to hit the limit. You can still
 keep the rebuilt files for your private copy.

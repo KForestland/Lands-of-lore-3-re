@@ -16,16 +16,18 @@ the preview.
 
 Give the downloaded file and your original game to the writer. Use a new
 output folder whose parent exists. The writer prints the file and number of
-verified moves.
+verified moves. Add `--patch` to create `level-patch.json` and a private
+`undo.json` beside the copied `DAT/` folder. The undo can restore the
+original archive through the [patch apply command](formats/patch.md#make-apply-and-undo).
 
 ```sh
-python3 tools/level_edit.py "/path/to/downloaded moves.json" --data "/path/to/game" --out "/path/to/edited level"
+python3 tools/level_edit.py "/path/to/downloaded moves.json" --data "/path/to/game" --out "/path/to/edited level" --patch
 python3 tools/level_edit.py "/path/to/downloaded moves.json" --data "/path/to/game" --out "/path/to/edited level" --verify
 ```
 
 Verification compares every archive byte. An empty move file produces an
 identical archive. To try an edited level, put the verified archive in place of
-the matching archive in a separate copy of the game.
+the matching archive under `DAT/` in a separate copy of the game.
 
 The available rows have coordinates within their stored surface. Moves stay
 inside that same surface and keep height, heading, type, events, and all other
@@ -38,3 +40,9 @@ verified by the reader. Their in-game behavior has yet to be observed.
 placement reader `0x4411F0`, which consumes the signed X/Z words at `+0/+2`
 and surface word at `+0x0A`. The editor writes the two coordinates.
 See [the native MAP readers](lol3-map-odf-readers.md#surface-and-placement-reads-and-the-largest-retained-ranges).
+
+**CONFIRMED.** Item names come from the native `itemjt.trr` lookup
+(`DAT/LOCALLNG.WSX+0x5968140`, reader VA `0x4AD110`) through the
+definition joined by identity. Prop rows use the definition numbers
+read at `0x44FBCD` and `0x4698E7`. A source display name for those
+prop definitions remains **UNCONFIRMED**. [Item names and IDs](lol3-item-dispatch.md#definition-directory)
