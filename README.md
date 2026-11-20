@@ -11,7 +11,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
 - **What you can do today:** unpack every archive the game ships with, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level plan with waypoints and placements, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
-- **Recipes:** [cookbook](docs/COOKBOOK.md), seven short runs with the command and the first lines it prints.
+- **Recipes:** [cookbook](docs/COOKBOOK.md), short recipes with the command and the first lines it prints.
 - **Change the game, safely:** [change a number in your own copy](#change-a-number-in-your-own-copy) with the mod kit, share it as a small [patch](docs/formats/patch.md) that can be undone, or change a field in a copy of a save; your game folder is only read.
 - **Patches:** [original faults, with no patch file in this tree](patches/README.md).
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md), counted in the [rating](#rating). Open points include some item effects, how the second spell counter is filled in ordinary play, and final screen composition; two answers were checked on one display setting only. Some questions can only be settled by watching the original game run. Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](docs/NEEDS_A_RUNNING_GAME.md#answered-probes). Some probes were also tried on [edited saves](docs/EDITED_SAVES.md), copies of a game-written save with a few bytes changed.
@@ -80,7 +80,7 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), [PE images](docs/formats/executable.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all 35 checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all 37 checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -93,7 +93,7 @@ Use Python 3.8 or later and your own copy of the English GOG release (`LOL3.DAT`
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
-- `cdcache.wsx`, a large cache the game writes there when it runs. The three cache texture checks report SKIP if it is missing.
+- `cdcache.wsx`, a large cache the game writes there when it runs. Three cache texture checks report SKIP if it is missing, and the save check skips when there is no saved game (33 pass, 4 skip on a never-run copy).
 
 Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the cache starts from), which `lol3_cache_seed.py` reads. The archive writer and text checks also read the shipped duplicate archives beside `DAT/`.
 
