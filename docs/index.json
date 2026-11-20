@@ -159,8 +159,11 @@
         "tools/lol3_script_browser.py",
         "tools/lol3_script_notes.py",
         "tools/lol3_texture_png.py",
+        "tools/modkit.py",
+        "tools/patch.py",
         "tools/rating.py",
         "tools/repo_guard.py",
+        "tools/save_edit.py",
         "tools/walk_lmf_leaves.py"
       ]
     },
@@ -216,7 +219,8 @@
         "tools/lol3_texture_palettes.py",
         "tools/lol3_texture_png.py",
         "tools/lol3_texture_spans.py",
-        "tools/modkit.py"
+        "tools/modkit.py",
+        "tools/save_edit.py"
       ]
     },
     {
@@ -255,6 +259,8 @@
       "tools": [
         "tools/check_all.py",
         "tools/lol3_script_notes.py",
+        "tools/modkit.py",
+        "tools/patch.py",
         "tools/rating.py"
       ]
     },
@@ -373,7 +379,8 @@
       "question_references": [],
       "tools": [
         "tools/lol3_numbers.py",
-        "tools/lol3_progression.py"
+        "tools/lol3_progression.py",
+        "tools/patch.py"
       ]
     },
     {
@@ -437,6 +444,18 @@
       ]
     },
     {
+      "path": "docs/TOOL_MAKERS.md",
+      "title": "Next steps for tool makers",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/extract_wsx_entries.py",
+        "tools/lol3_level_schematic.py",
+        "tools/lol3_map_writer.py",
+        "tools/lol3_wsx_writer.py"
+      ]
+    },
+    {
       "path": "docs/TOUR.md",
       "title": "Follow LoL3 QWOD0 from map to exit",
       "answers": [],
@@ -486,7 +505,9 @@
         "tools/lol3_save_writer.py",
         "tools/lol3_script_browser.py",
         "tools/lol3_wsx_writer.py",
-        "tools/rating.py"
+        "tools/patch.py",
+        "tools/rating.py",
+        "tools/save_edit.py"
       ]
     },
     {
@@ -560,6 +581,16 @@
       ],
       "tools": [
         "tools/lol3_level_schematic.py"
+      ]
+    },
+    {
+      "path": "docs/formats/patch.md",
+      "title": "Lands of Lore patch format",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/modkit.py",
+        "tools/patch.py"
       ]
     },
     {
@@ -1303,8 +1334,10 @@
         "tools/lol3_wsx_writer.py",
         "tools/modkit.py",
         "tools/modkit_core.py",
+        "tools/patch.py",
         "tools/rating.py",
         "tools/repo_guard.py",
+        "tools/save_edit.py",
         "tools/walk_lmf_leaves.py"
       ]
     }

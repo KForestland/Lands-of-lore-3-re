@@ -10,6 +10,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **What you can do today:** unpack every archive the game ships with, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level plan with waypoints and placements, and follow one level event from entry to effect.
 - **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **Recipes:** [cookbook](docs/COOKBOOK.md), seven short runs with the command and the first lines it prints.
+- **Change the game, safely:** [change a number in your own copy](#change-a-number-in-your-own-copy) with the mod kit, share it as a small [patch](docs/formats/patch.md) that can be undone, or change a field in a copy of a save; your game folder is only read.
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md), counted in the [rating](#rating). Open points include some item effects, how the second spell counter is filled in ordinary play, and final screen composition; two answers were checked on one display setting only. Some questions can only be settled by watching the original game run. Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](docs/NEEDS_A_RUNNING_GAME.md#answered-probes). Some probes were also tried on [edited saves](docs/EDITED_SAVES.md), copies of a game-written save with a few bytes changed.
 - **What changed lately:** [what's new](docs/WHATS_NEW.md), newest first.
 - **What we got wrong:** [corrections](docs/CORRECTIONS.md), each published error with how it was caught and the commit that fixed it.
@@ -21,7 +22,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 442 statements CONFIRMED (proved from the program code or the files) and 70 UNCONFIRMED (a reading not yet proved), on 84 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 443 statements CONFIRMED (proved from the program code or the files) and 71 UNCONFIRMED (a reading not yet proved), on 86 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -51,6 +52,23 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | Music tracks | `python3 tools/lol3_media_check.py --data "$LOL3_DAT" --tracks` |
 | A texture as PNG (after the game has run once) | `python3 tools/lol3_texture_png.py --data "$LOL3_DAT" --offset 1222718 --out ../lol3-out/texture.png` |
 | A saved game you made | `python3 tools/lol3_save_header.py --data "$LOL3_DAT" "$LOL3_SLOT"` |
+
+## Change a number in your own copy
+
+The [mod kit](tools/README.md#modkitpy) turns the game's tables into files you can edit, and the [patch tool](docs/formats/patch.md) turns your change into a small patch file that can be applied and undone. The tools only read your game folder; everything they write goes into new folders you name, outside the game and this repository. Try changes on a **copy** of the game, never on the folder you play from. Patches must not remove or bypass copy protection.
+
+Type these in this repository's folder. Put quotes around paths with spaces. On Windows type `py -3` instead of `python3`, and `\` instead of `/` inside paths if you like; copy folders with Explorer. Each command ends with one summary line, or one sentence saying what is wrong.
+
+1. Unpack: `python3 tools/modkit.py unpack "/path/to/LoL3" "my mod work"`
+2. Change one number: open the file in `my mod work/edits/` whose name ends in `_GLOBAL.WSX_items.json` (the number in front may differ on your copy) in a text editor and, in the first row, change `"special_cast_cost": 5` to `"special_cast_cost": 6` (the base cost on the special cast path, [numbers](docs/NUMBERS.md)). Change nothing else.
+3. Build and check: `python3 tools/modkit.py build "/path/to/LoL3" "my mod work" "my mod output"`, then the same with `verify`. Both end with `22 archives or loose tables, 1 changed (DAT/GLOBAL.WSX)`.
+4. Make the patch: `python3 tools/patch.py make --data "/path/to/LoL3" "my mod output" --title "Dearer cast" --out "dearer cast.json"` prints `make: data patch with 1 change in 1 file (DAT/GLOBAL.WSX) ...`.
+5. Copy your whole game folder to a new folder, for example `LoL3 test copy`.
+6. Apply the patch to the copy: `python3 tools/patch.py apply --data "/path/to/LoL3 test copy" "dearer cast.json" --out "patched files"`. Copy everything in `patched files` except `undo.json` into `LoL3 test copy`, keeping the `DAT` folder, and replace the files there.
+7. Read it back: `python3 tools/modkit.py unpack "/path/to/LoL3 test copy" "check work"`; the file in `check work/edits/` whose name ends in `_GLOBAL.WSX_items.json` (the number in front may differ on your copy) now says 6. Play the copy to try it.
+8. Undo: `python3 tools/patch.py apply --data "/path/to/LoL3 test copy" "patched files/undo.json" --out "restored files"`, then copy the files in `restored files` (except `undo.json`) into the copy in the same way. The copy is then byte for byte the original again.
+
+A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/path/to/LoL3/SAVEGAME/$1234___.000' heading 0x4000 --out "my edited save.000"` prints the old and the new value. Save names begin with `$`, so on Linux and macOS put them in single quotes. More in the [cookbook](docs/COOKBOOK.md#share-a-change-as-a-patch).
 
 ## What you get
 

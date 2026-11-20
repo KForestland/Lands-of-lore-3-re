@@ -148,7 +148,7 @@ The [mod kit](../tools/README.md#modkitpy) writes the game's text tables and num
 python3 tools/modkit.py unpack "/path/to/LoL3" "my mod work"
 ```
 
-Open `my mod work/edits/0000_PROMPT.TRR_text.json` in a text editor and change one line inside `"value"`. Then build and verify:
+Open the file in `my mod work/edits/` whose name ends in `_PROMPT.TRR_text.json` (the number in front may differ on your copy) in a text editor and change one line inside `"value"`. Then build and verify:
 
 ```bash
 python3 tools/modkit.py build "/path/to/LoL3" "my mod work" "my mod output"
@@ -214,3 +214,33 @@ python3 tools/lol3_map_spans.py --data "$out/DAT" --list QWOD0 | sed -n '1,2p'
 Expect `waypoint 1: x 11064 z -2943 surface 0xe7 +6 0x2 +7 0x4`.
 The copied archive is the same size as the original, with one byte
 changed at `QWOD0.WSX+0x733A97`.
+
+## Share a change as a patch
+
+The [README](../README.md#change-a-number-in-your-own-copy) walks through the whole route on your own copy: unpack, change one number, build, make a patch, apply it to a copy, read it back and undo it. The [patch format](formats/patch.md) page gives every rule and limit.
+
+- `make` compares the game folder (`--data`) with a folder of changed files. The output folder of `modkit.py build` works as it is, and so does a copy of the game folder in which only some files changed.
+- File names in the patch start at the game folder holding `LOL3.DAT` and `DAT`, whether you give that folder or its `DAT` folder, so a patch made from one applies to the other. A change made in `DAT` is named `DAT/...`, never a copy of the same archive beside `DAT`.
+- `apply` writes nothing until every check has passed: the old bytes, for a program patch the whole file's SHA-256, and the undo. Applying a patch twice, or to another edition, is refused with one sentence.
+- Program patches: copy the program file (`LOL3.DAT` or `LOL3.EXE`) into a new folder, at the same path it has in the game folder, change a byte with a hex editor, for example one letter of a message, and run `make` with that folder. The patch records the program's SHA-256 and applies only to that exact file. A program change may replace at most 16 bytes at a time and 256 in all, never changes the file length, and never touches copy-protection code.
+
+## Change a saved game (a copy)
+
+```bash
+python3 tools/save_edit.py set '/path/to/LoL3/SAVEGAME/$1234___.000' heading 0x4000 --out "my edited save.000"
+python3 tools/lol3_save_header.py --data "/path/to/LoL3/DAT" "my edited save.000"
+```
+
+Save names begin with `$`; on Linux and macOS put them in single quotes as above (on Windows, double quotes are fine). The first command prints `set: heading OLD -> 0x4000; copy written to ...`, with your save's old value for OLD, then one line saying how far the field is proven. The save itself is only read, and the copy must go outside the game and save folders. Copy it over a slot in the `SAVEGAME` folder of a **copy** of your game to load it.
+
+| Field | Value | Proven |
+| --- | --- | --- |
+| `position-from` | another save of the same level and version; copies the player's 14-byte position group at +0x49C (X, Z, heading, region) | not yet tested: no edited copy loaded yet |
+| `heading` | 0–65535, the low word of the player's heading at +0x4A4 | not yet tested: no edited copy loaded yet |
+| `name` | the display name, printable ASCII | not yet tested: no edited copy loaded yet |
+
+Not yet tested. The only edited-save runs the game has loaded changed item rows and quick-cast references; no position, heading or name edit has been loaded yet. A turn made in the game changes the heading in both saved position groups (the player's at +0x49C and the second one at +0x4AA, whose object the pages do not yet name), so a heading-only edit writes a state the game itself never writes. Keep a backup of your saves. A donor from another level or version, or with no region, is refused.
+[Slot offsets](lol3-native-saves.md#slot-header-and-stream) ·
+[What an edited copy must keep](lol3-native-saves.md#editing-a-copy-of-an-original-slot)
+
+Map viewer and editor notes for tool makers: [tool makers](TOOL_MAKERS.md).
