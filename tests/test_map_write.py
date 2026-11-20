@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from lol3_map_writer import (
-    HEADER_WORDS, emit, field_bytes, read_command, read_fields,
+    HEADER_WORDS, emit, field_bytes, read_command, read_fields, placement_layout,
     rebuild, retained_ranges, retained_spans, waypoints, write_command,
 )
 
@@ -48,8 +48,8 @@ class MapWriteTests(unittest.TestCase):
         self.assertEqual(result, raw)
         self.assertEqual(counts["placements"], 1)
         self.assertEqual(seen, {0x10})
-        # command 4 + 1 operand byte, waypoint row 8, path row 4, placement X/Z 4
-        self.assertEqual(counts["field bytes"], 25 + 4 * len(HEADER_WORDS))
+        # One command, one index, one waypoint, one path and 25 placement bytes.
+        self.assertEqual(counts["field bytes"], 46 + 4 * len(HEADER_WORDS))
 
     def test_vertex_field_and_retained_gap(self):
         raw = synthetic_map()
@@ -64,6 +64,13 @@ class MapWriteTests(unittest.TestCase):
         self.assertTrue(any(lo <= 0x244 and hi == 0x248
                             for lo, hi in retained_ranges(len(raw), fields)))
 
+    def test_placement_consumers_keep_distinct_record_tails(self):
+        original = synthetic_map()
+        row = read_fields(original, {0x10: 6})["placements"]["type 3"][1][0]
+        self.assertEqual(placement_layout("type 3").size, placement_layout("item").size)
+        self.assertNotEqual(placement_layout("type 3").format, placement_layout("item").format)
+        self.assertEqual(row[:4], (-9, 20, 0, 0))
+
     def test_path_count_and_flags_are_unsigned(self):
         raw = synthetic_map()
         struct.pack_into("<HBB", raw, 0x272, 0, 0xFF, 0x80)
@@ -76,7 +83,7 @@ class MapWriteTests(unittest.TestCase):
         fields["commands"]["object"][1][0]["operands"] = (3,)
         fields["waypoints"][1][0] = (-7, 6, 0xFFFF, 2, 5)
         rows = fields["placements"]["type 3"][1]
-        rows[0] = (-9, 21, rows[0][2])
+        rows[0] = (-9, 21, *rows[0][2:])
         changed = emit(raw, fields, {0x10: 6})
         self.assertEqual([at for at in range(len(raw)) if raw[at] != changed[at]], [0x250, 0x2A4, 0x2AC])
         self.assertEqual(waypoints(changed)[1], [(-7, 6, 0xFFFF, 2, 5)])

@@ -37,7 +37,16 @@ COMMAND_FORMATS = {
     0xC9: "BB", 0xCC: "hH", 0xCE: "Bb", 0xCF: "Bb", 0xD0: "BBB",
     0xD1: "hhh", 0xD2: "BB", 0xF0: "B",
 }
-MOVER = 0x29
+# Each loader reads one stored row into a stack buffer (0x4357A0) and its
+# constructor calls 0x4411F0 with that buffer.
+PLACEMENT_BASE = "hhHh2shHHI8sB1sB1s"
+PLACEMENT_TAILS = {
+    "type 3": "HBBB",           # 0x44FBC2–0x44FC28
+    "type 16": "B",             # 0x4698E7
+    "creature": "B23s",         # 0x4B4579: dword load, low byte kept
+    "mover (type 32)": "9B",    # 0x4698E7 and 0x4D591B–0x4D5994
+    "item": "IB",               # 0x4D7390–0x4D73A2
+}
 
 
 # (seek field, count field, row layout). Storage marked "s" is carried
@@ -48,7 +57,7 @@ MOVER = 0x29
 TABLES = {
     "vertices": (0x04, 0x50, "ii"),                          # 0x4F01E0
     "section 1": (0x08, 0x54, "h6B"),                       # 0x4EFDC0, 0x4E6425
-    "surfaces": (0x0C, 0x58, "8s8HhhHHB17sB1sBB2s"),        # 0x4A65F0, 0x50060E
+    "surfaces": (0x0C, 0x58, "4sI8HhhHHB1sB7sH6sB1s4B"),        # 0x4A65F0, 0x50060E
     "section +0x34": (0x34, 0x7C, "HHHBB"),                 # 0x4E73FA, 0x4EFED1, 0x4F0126
     "section +0x30": (0x30, 0x78, "HH"),                    # 0x4EFF14, 0x4EFF21
     "section +0x2C": (0x2C, 0x74, "4sH1sBB3s"),            # 0x4EFAF0–0x4EFB3C
@@ -116,10 +125,8 @@ def write_rows(rows, layout):
     return b"".join(layout.pack(*row) for row in rows)
 
 
-def placement_layout(stride):
-    # Coordinates at +0/+2. The mover also has eight typed state bytes at
-    # +0x21. The other per-class bytes are copied at their offsets.
-    return struct.Struct("<hh29s8B" if stride == MOVER else f"<hh{stride - 4}s")
+def placement_layout(name):
+    return struct.Struct("<" + PLACEMENT_BASE + PLACEMENT_TAILS[name])
 
 
 def retained_spans(raw):
@@ -198,11 +205,11 @@ def parsed_ranges(fields):
         yield start, start + layout.size * len(rows)
     for name, _, _, stride, _ in PLACEMENTS:
         start, rows = fields["placements"][name]
+        spans = tuple(format_ranges(PLACEMENT_BASE + PLACEMENT_TAILS[name]))
         for i in range(len(rows)):
             at = start + i * stride
-            yield at, at + 4
-            if stride == MOVER:
-                yield at + 0x21, at + stride
+            for lo, hi in spans:
+                yield at + lo, at + hi
     for start, rows in fields["commands"].values():
         at = start
         for row in rows:
@@ -251,7 +258,10 @@ def read_fields(raw, lengths):
     fields["waypoints"] = waypoints(raw)
     fields["paths"] = paths(raw)
     for name, location, count, stride, _ in PLACEMENTS:
-        fields["placements"][name] = read_rows(raw, location, count, placement_layout(stride))
+        layout = placement_layout(name)
+        if layout.size != stride:
+            raise ValueError(f"{name} placement layout differs from its native stride")
+        fields["placements"][name] = read_rows(raw, location, count, layout)
     return fields
 
 
@@ -272,7 +282,7 @@ def emit(raw, fields, lengths):
     spans.append(("paths", fields["paths"][0], write_rows(fields["paths"][1], PATH)))
     for name, _, _, stride, _ in PLACEMENTS:
         start, rows = fields["placements"][name]
-        spans.append((name, start, write_rows(rows, placement_layout(stride))))
+        spans.append((name, start, write_rows(rows, placement_layout(name))))
     out = bytearray()
     for _, start, body in sorted((span for span in spans if span[2]), key=lambda span: span[1]):
         if start < len(out) or start + len(body) > len(raw):
@@ -298,7 +308,7 @@ def rebuild(raw, lengths):
 
 
 def edit_check(raw, lengths):
-    """Change a command, waypoint, vertex and placement, then verify the readers see them."""
+    """Change a command, waypoint, vertex, surface and two placements, then verify the readers see them."""
     fields = read_fields(raw, lengths)
     stream_at, commands = fields["commands"]["object"]
     target = next((n for n, row in enumerate(commands)
@@ -316,11 +326,19 @@ def edit_check(raw, lengths):
     vertex_at, _, vertices = fields["tables"]["vertices"]
     x, z = vertices[0]
     vertices[0] = (x + 0x10000, z)
+    surface_at, _, surfaces = fields["tables"]["surfaces"]
+    light = (surfaces[0][18] + 1) & 0xFFFF          # u16 +0x2A
+    surfaces[0] = surfaces[0][:18] + (light,) + surfaces[0][19:]
+    item_at, items = fields["placements"]["item"]
+    identity = items[0][-2] ^ 1 if items else None  # u32 +0x20
+    if items:
+        items[0] = items[0][:-2] + (identity, items[0][-1])
     changed = emit(raw, fields, lengths)
     command_at = stream_at + offset + 4
     differ = [at for at in range(len(raw)) if raw[at] != changed[at]]
     expected = {command_at, wp_at, wp_at + 1, creature_at + 2, creature_at + 3,
-                vertex_at + 2, vertex_at + 3}
+                vertex_at + 2, vertex_at + 3, surface_at + 0x2A, surface_at + 0x2B,
+                item_at + 0x20}
     if len(changed) != len(raw) or not differ or not set(differ) <= expected:
         raise ValueError(f"edit changed bytes outside the edited fields: {[hex(at) for at in differ[:8]]}")
     stream, starts, _, _, _, _ = walk(changed, 0, "object", lengths)
@@ -332,6 +350,10 @@ def edit_check(raw, lengths):
             new_vertices[0][0] != old_vertices[0][0] + (1 << 16) or
             new_points[0][0] != old_points[0][0] + (1 << 16) or
             new_creature[3] != old_creature[3] + (1 << 16)):
+        raise ValueError("an edited field does not read back through the existing readers")
+    again = read_fields(changed, lengths)
+    if (again["tables"]["surfaces"][2][0][18] != light or
+            (items and again["placements"]["item"][1][0][-2] != identity)):
         raise ValueError("an edited field does not read back through the existing readers")
     return True
 
@@ -359,7 +381,7 @@ def check(data):
     print(f"CHECK MAP write: {maps} byte-identical MAPs, {len(seen)}/{len(sizes)} opcodes stored; " +
           ", ".join(f"{value:,} {name}" for name, value in counts.items()) +
           f"; {regenerated:,} of {total:,} bytes from parsed fields, {total - regenerated:,} copied; "
-          "command, waypoint, vertex and placement edits read back")
+          "command, waypoint, vertex, surface and placement edits read back")
 
 
 def main():
