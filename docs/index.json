@@ -183,6 +183,7 @@
         "tools/lol3_map_spans.py",
         "tools/lol3_map_writer.py",
         "tools/lol3_native_checks.py",
+        "tools/lol3_save_selectors.py",
         "tools/lol3_save_writer.py",
         "tools/lol3_script_framing.py",
         "tools/lol3_wsx_writer.py"

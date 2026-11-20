@@ -222,8 +222,8 @@ def check(data, slot_path):
     paths = slot_paths(data, slot_path)
     if not paths:
         return "CHECK save_write: SKIP: no game-written slots in SAVEGAME; the synthetic slot reads back"
-    from lol3_save_selectors import GLOBAL_COUNT, LEVEL_COUNT, image_of, rows
-    flags = [int(row[3]["flags"], 0) for row in rows(image_of(data))]
+    from lol3_save_selectors import GLOBAL_COUNT, LEVEL_COUNT, image_of, selector_flags
+    flags = selector_flags(image_of(data))
     if (GLOBAL_COUNT, LEVEL_COUNT, len(flags)) != (GLOBAL_SECTIONS, LEVEL_SECTIONS, GLOBAL_SECTIONS + LEVEL_SECTIONS):
         raise ValueError("selector counts differ from lol3_save_selectors.py")
     decoded = 0

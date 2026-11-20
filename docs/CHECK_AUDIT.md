@@ -54,3 +54,15 @@ Case 20 remains outside automated coverage. The sentence changes the meaning
 of a description while leaving the bytes, generated tables and links valid.
 A reviewer can compare that sentence with the evidence it cites. The offset
 check covers the named rows only.
+
+## Fresh clone verification on 20 November 2026
+
+A fresh local clone at `558486b` ran the data-free CI commands on
+Python 3.12. With the retail files and liblzo2, the standard-library
+suite passed 31 checks and reported four expected skips for the
+game-written cache and saves. `lol3_save_selectors.py` verified 61
+global, 75 level and 90 nested dispatch rows. The same tool with
+Capstone also verified the decoded instruction bodies against the
+page. The clone reproduced the documentation index and QWOD0
+schematic byte for byte. The reader report and all 36 script listings
+went to folders outside the clone, which stayed clean.

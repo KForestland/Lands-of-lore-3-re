@@ -11,10 +11,11 @@ descriptor, requires the call sites, jump tables, padding and adjuster bounds
 above, counts the 0x43C410 calls in each adjuster arm, and requires the selector
 table on the save page to match those arms. It also reads the 90 table slots
 of level selector 38 (86 distinct arm addresses; slot 89 is the shared tail)
-and requires that table to match. Without Capstone, --check verifies the
-dispatch addresses in the page and the original code and table bounds.
+and requires that table to match. The standard-library check verifies
+the dispatch addresses, the original code and table bounds and the flag stores.
 """
 from cli_errors import run_cli
+from bisect import bisect_right
 from hashlib import sha256
 from pathlib import Path
 
@@ -340,6 +341,42 @@ def rows(image):
             for kind, index, entry, arm in dispatch_rows(image)]
 
 
+def flag_at(image, entry, boundaries):
+    """Read the immediate flag store before ret, following a shared tail if used."""
+    arm = entry
+    for _ in range(2):
+        if not boundaries[0] <= arm < boundaries[-1]:
+            break
+        end = boundaries[bisect_right(boundaries, arm)]
+        body = image[arm - CODE_BIAS:end - CODE_BIAS].rstrip(b"\x90")
+        if body.endswith(b"\x8b\xff"):  # mov edi, edi padding
+            body = body[:-2]
+        # mov dword ptr [r32], imm32; ret, for eax, ecx or edx.
+        if len(body) >= 7 and body[-7] == 0xC7 and body[-6] <= 2 and body[-1] == 0xC3:
+            load = bytes((0x8B, 0x44 + 8 * body[-6], 0x24, 0x14))  # mov r32, [esp + 0x14]
+            if not any(body[-7 - distance:-3 - distance] == load for distance in (6, 10, 16)):
+                break
+            return int.from_bytes(body[-5:-1], "little")
+        for width, opcode in ((5, 0xE9), (2, 0xEB)):
+            if len(body) >= width and body[-width] == opcode:
+                arm += len(body) + int.from_bytes(body[-width + 1:], "little", signed=True)
+                break
+        else:
+            break
+    raise ValueError(f"selector flag store differs at {entry:#x}")
+
+
+def selector_flags(image):
+    """Read both sets of stored flags in selector order."""
+    dispatch = list(dispatch_rows(image))
+    result = []
+    for kind, table_at in (("Global", GLOBAL_TABLE), ("Level", LEVEL_TABLE)):
+        entries = [entry for group, _, entry, _ in dispatch if group == kind]
+        boundaries = sorted(set(entries) | {table_at})
+        result.extend(flag_at(image, entry, boundaries) for entry in entries)
+    return result
+
+
 def effect(arm):
     if arm is None:
         return "index above 0x48, so the adjuster returns before its jump table"
@@ -588,7 +625,10 @@ def nested_table(image):
 
 
 def pins(image):
-    found = {(kind, index): fields for kind, index, _entry, fields, _arm in rows(image)}
+    decoded = rows(image)
+    found = {(kind, index): fields for kind, index, _entry, fields, _arm in decoded}
+    if selector_flags(image) != [int(fields["flags"], 0) for _, _, _, fields, _ in decoded]:
+        raise ValueError("save selector flag reads disagree")
     expect = {
         ("Global", 0): ("0x5d4ee0", "0x464", "0x464", "0x7"),
         ("Global", 5): ("0x0", "0x0", "0x0", "0x1"),
@@ -680,10 +720,11 @@ def check_dispatch_page(image, text):
                 raise ValueError("incomplete save selector page row")
             yield tuple(parts[i].strip() for i in indices)
 
-    expected = [(f"{kind} {index}", f"`{entry:#x}`", f"`{arm:#x}`" if arm is not None else "none")
-                for kind, index, entry, arm in dispatch_rows(image)]
-    if list(columns(marked(text), 1, 2, 7)) != expected:
-        raise ValueError("save page selector addresses differ from LOL3.DAT")
+    expected = [(f"{kind} {index}", f"`{entry:#x}`", f"`{flags:#x}`",
+                 f"`{arm:#x}`" if arm is not None else "none")
+                for (kind, index, entry, arm), flags in zip(dispatch_rows(image), selector_flags(image))]
+    if list(columns(marked(text), 1, 2, 6, 7)) != expected:
+        raise ValueError("save page selector addresses or flags differ from LOL3.DAT")
 
     slots = nested_map(image)
     targets = [u32(image, NESTED_TABLE + 4 * slot) for slot in range(NESTED_SLOTS)]
@@ -705,7 +746,7 @@ def main():
             if not args.check:
                 raise ValueError("install Capstone to list decoded save selector instructions")
             check_dispatch_page(image, PAGE.read_text(encoding="utf-8"))
-            print("CHECK save_selectors: 61 global, 75 level and 90 nested dispatch rows match; "
+            print("CHECK save_selectors: 61 global, 75 level and 90 nested dispatch rows match; flags match; "
                   "instruction decoding uses optional Capstone")
             return 0
         pins(image)
