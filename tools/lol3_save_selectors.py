@@ -11,7 +11,8 @@ descriptor, requires the call sites, jump tables, padding and adjuster bounds
 above, counts the 0x43C410 calls in each adjuster arm, and requires the selector
 table on the save page to match those arms. It also reads the 90 table slots
 of level selector 38 (86 distinct arm addresses; slot 89 is the shared tail)
-and requires that table to match.
+and requires that table to match. Without Capstone, --check verifies the
+dispatch addresses in the page and the original code and table bounds.
 """
 from cli_errors import run_cli
 from hashlib import sha256
@@ -20,8 +21,13 @@ from pathlib import Path
 import lol3_cli
 from lol3_script_framing import CODE_BIAS, RETAIL_PE
 
-from capstone import Cs, CS_ARCH_X86, CS_MODE_32
-from capstone.x86 import X86_OP_IMM, X86_OP_MEM, X86_OP_REG
+try:
+    from capstone import Cs, CS_ARCH_X86, CS_MODE_32
+    from capstone.x86 import X86_OP_IMM, X86_OP_MEM, X86_OP_REG
+except ModuleNotFoundError as error:
+    if error.name != "capstone":
+        raise
+    Cs = None
 
 PAGE = Path(__file__).resolve().parents[1] / "docs" / "lol3-native-saves.md"
 BEGIN = "<!-- selectors:begin -->"
@@ -304,25 +310,34 @@ def describe(md, image, start):
     return outs
 
 
+def dispatch_rows(image):
+    for kind, descriptor, table_at, count, adjuster, arms, index_map, limit in (
+        ("Global", GLOBAL_DESCRIPTOR, GLOBAL_TABLE, GLOBAL_COUNT, GLOBAL_ADJUSTER,
+         GLOBAL_ARMS, GLOBAL_MAP, GLOBAL_ADJUST_MAX),
+        ("Level", LEVEL_DESCRIPTOR, LEVEL_TABLE, LEVEL_COUNT, LEVEL_ADJUSTER,
+         LEVEL_ARMS, LEVEL_MAP, LEVEL_ADJUST_MAX),
+    ):
+        if u32(image, table_at + 4 * count) != 0x90909090:
+            raise ValueError(f"{kind} descriptor padding differs")
+        for index in range(count):
+            entry = u32(image, table_at + 4 * index)
+            if not descriptor < entry < table_at:
+                raise ValueError(f"{kind} selector {index} outside descriptor arms")
+            arm = None
+            if index <= limit:
+                slot = image[index_map - CODE_BIAS + index]
+                if arms + 4 * slot >= index_map:
+                    raise ValueError(f"{kind} selector {index} outside adjuster table")
+                arm = u32(image, arms + 4 * slot)
+                if not adjuster <= arm < arms:
+                    raise ValueError(f"{kind} selector {index} outside adjuster arms")
+            yield kind, index, entry, arm
+
+
 def rows(image):
     md = decoder()
-    global_entries = [u32(image, GLOBAL_TABLE + 4 * i) for i in range(GLOBAL_COUNT)]
-    level_entries = [u32(image, LEVEL_TABLE + 4 * i) for i in range(LEVEL_COUNT)]
-    global_map = list(image[GLOBAL_MAP - CODE_BIAS:GLOBAL_MAP - CODE_BIAS + GLOBAL_COUNT])
-    level_map = list(image[LEVEL_MAP - CODE_BIAS:LEVEL_MAP - CODE_BIAS + LEVEL_ADJUST_MAX + 1])
-    out = []
-    for index, entry in enumerate(global_entries):
-        fields = describe(md, image, entry)
-        arm = u32(image, GLOBAL_ARMS + 4 * global_map[index])
-        out.append(("Global", index, entry, fields, arm))
-    for index, entry in enumerate(level_entries):
-        fields = describe(md, image, entry)
-        if index > LEVEL_ADJUST_MAX:
-            arm = None
-        else:
-            arm = u32(image, LEVEL_ARMS + 4 * level_map[index])
-        out.append(("Level", index, entry, fields, arm))
-    return out
+    return [(kind, index, entry, describe(md, image, entry), arm)
+            for kind, index, entry, arm in dispatch_rows(image)]
 
 
 def effect(arm):
@@ -639,11 +654,60 @@ def marked(text, begin=BEGIN, end_mark=END):
     return body
 
 
+def check_dispatch_page(image, text):
+    """Check the stored tables and their marked page rows without a disassembler."""
+    for va, hex_bytes in (
+        (GLOBAL_DESCRIPTOR, "8b44240483f83c0f87f8060000ff248548884300"),
+        (LEVEL_DESCRIPTOR, "8b44240483f84a0f87120b0000ff248560944300"),
+        (0x4395B3, "83f83c0f87ff04000033c98a88ec9a4300ff248dc49a4300"),
+        (0x439B54, "83f8480f87ab08000033c98a8888a44300ff248d10a44300"),
+        (NESTED_CMP, "3d940000000f87da08000033c98a88d8af4300ff248d70ae4300"),
+    ):
+        expected = bytes.fromhex(hex_bytes)
+        at = va - CODE_BIAS
+        if image[at:at + len(expected)] != expected:
+            raise ValueError(f"save selector dispatch differs at {va:#x}")
+    for site, callee in CALL_SITES:
+        at = site - CODE_BIAS
+        if (image[at] != 0xE8 or
+                site + 5 + int.from_bytes(image[at + 1:at + 5], "little", signed=True) != callee):
+            raise ValueError(f"{site:#x} is not a call to {callee:#x}")
+
+    def columns(block, *indices):
+        for line in block.splitlines()[2:]:
+            parts = line.split("|")
+            if len(parts) <= max(indices) + 1:
+                raise ValueError("incomplete save selector page row")
+            yield tuple(parts[i].strip() for i in indices)
+
+    expected = [(f"{kind} {index}", f"`{entry:#x}`", f"`{arm:#x}`" if arm is not None else "none")
+                for kind, index, entry, arm in dispatch_rows(image)]
+    if list(columns(marked(text), 1, 2, 7)) != expected:
+        raise ValueError("save page selector addresses differ from LOL3.DAT")
+
+    slots = nested_map(image)
+    targets = [u32(image, NESTED_TABLE + 4 * slot) for slot in range(NESTED_SLOTS)]
+    if (len(set(slots)) != NESTED_SLOTS or len(set(targets)) != 86
+            or targets[-1] != NESTED_TAIL or not all(NESTED_CMP < target <= NESTED_TAIL for target in targets)):
+        raise ValueError("level selector 38 slot or arm bounds differ")
+    expected = [(str(slot), f"`{target:#x}`") for slot, target in enumerate(targets)]
+    _, heading, rows_text = marked(text, NESTED_BEGIN, NESTED_END).partition("| Slot |")
+    if not heading or list(columns(heading + rows_text, 1, 2)) != expected:
+        raise ValueError("save page nested arm addresses differ from LOL3.DAT")
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
     args = parser.parse_args()
     try:
         image = image_of(args.data)
+        if Cs is None:
+            if not args.check:
+                raise ValueError("install Capstone to list decoded save selector instructions")
+            check_dispatch_page(image, PAGE.read_text(encoding="utf-8"))
+            print("CHECK save_selectors: 61 global, 75 level and 90 nested dispatch rows match; "
+                  "instruction decoding uses optional Capstone")
+            return 0
         pins(image)
         rendered = table(image)
         nested = nested_table(image)

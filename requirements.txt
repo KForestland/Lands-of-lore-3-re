@@ -1,1 +1,2 @@
 # No required Python packages. Optional system library: liblzo2 (apt install liblzo2-2) for the --decode checks.
+# Optional Python package for save-selector instruction decoding: capstone>=5,<6.
