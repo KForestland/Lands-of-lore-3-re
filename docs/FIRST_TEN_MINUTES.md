@@ -1,7 +1,7 @@
 # First ten minutes
 
 Draw a level from your own installed copy of Lands of Lore III.
-You need Python 3.8 or later, a web browser, and the
+You need Python 3.10 or later, a web browser, and the
 game's `DAT` folder. Find the folder containing `QWOD0.WSX`.
 
 

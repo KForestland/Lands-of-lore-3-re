@@ -1,6 +1,6 @@
 # Lands of Lore III: file formats and game data
 
-[First ten minutes](docs/FIRST_TEN_MINUTES.md)
+**New here?** Start with the [first ten minutes](docs/FIRST_TEN_MINUTES.md): download, one command, a level picture on your screen.
 
 *Lands of Lore III* is a first-person role-playing game by Westwood Studios (1999). This repository documents what is known about its original data files and gives you Python tools that read them from your own copy of the game.
 
@@ -10,7 +10,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 
 - **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
 - **What you can do today:** unpack every archive the game ships with, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level plan with waypoints and placements, and follow one level event from entry to effect.
-- **Start in five minutes:** the [Quick start](#quick-start) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
+- **Using git?** The [quick start with git](#quick-start-with-git-for-people-who-use-git) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **Recipes:** [cookbook](docs/COOKBOOK.md), short recipes with the command and the first lines it prints.
 - **Change the game, safely:** [change a number in your own copy](#change-a-number-in-your-own-copy) with the mod kit, share it as a small [patch](docs/formats/patch.md) that can be undone, or change a field in a copy of a save; your game folder is only read.
 - **Patches:** [original faults, with no patch file in this tree](patches/README.md).
@@ -87,9 +87,9 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
   - [glossary](docs/GLOSSARY.md)
   - [open questions](docs/OPEN_QUESTIONS.md)
 
-## Quick start
+## Quick start with git (for people who use git)
 
-Use Python 3.8 or later and your own copy of the English GOG release (`LOL3.DAT`, SHA-256 starting `9a9eb04c8f404ebf`; the tools that read the program check it by its hash). The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu). The save-selector check reads the dispatch tables and stored flags with the standard library and also decodes the instruction bodies when Capstone is installed (`python3 -m pip install 'capstone>=5,<6'`).
+Use Python 3.10 or later and your own copy of the English GOG release (`LOL3.DAT`, SHA-256 starting `9a9eb04c8f404ebf`; the tools that read the program check it by its hash). The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu). The save-selector check reads the dispatch tables and stored flags with the standard library and also decodes the instruction bodies when Capstone is installed (`python3 -m pip install 'capstone>=5,<6'`).
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);

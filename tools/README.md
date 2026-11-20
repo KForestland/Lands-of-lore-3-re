@@ -11,7 +11,7 @@ details, sharing the drawing and interface in `level_html.py`.
 
 ## Setup
 
-- Python 3.8 or later. The readers and the synthetic tests need only the standard library.
+- Python 3.10 or later. The readers and the synthetic tests need only the standard library.
 - The optional system LZO library (`apt install liblzo2-2` on Debian or Ubuntu) for the light-map decode and the LZO checks; without it those checks print one SKIP line.
 - Your own copy of the English GOG release; point `--data` or `$LOL3_DAT` at its `DAT` folder.
 - Three checks need the texture cache the game writes beside `DAT` on its first run, and the save writer needs the game's own saves; without them they report SKIP ([cookbook](../docs/COOKBOOK.md)).
