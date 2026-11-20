@@ -8,7 +8,7 @@ LOL3.DAT, LOL3.EXE or an archive. Nothing is written.
   lol3_name_hash.py --data DAT --check
   lol3_name_hash.py --data DAT --list     # 40 music stems and their directory keys
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import mmap
 import re
 from hashlib import sha256
@@ -104,7 +104,7 @@ def main():
         if args.check:
             parser.error("--check does not list")
         try:
-            image = (Path(args.data).resolve().parent / "LOL3.DAT").read_bytes()
+            image = game_path(Path(args.data).resolve().parent, "LOL3.DAT").read_bytes()
             if sha256(image).hexdigest() != RETAIL_PE:
                 raise ValueError("LOL3.DAT does not match the documented English retail executable")
             if image[FORMAT_AT:FORMAT_AT + 12] != b"MUSIC\\%s.aud":
@@ -117,8 +117,8 @@ def main():
         parser.error("this tool only checks; pass --check")
     data = Path(args.data)
     try:
-        image = (data.resolve().parent / "LOL3.DAT").read_bytes()
-        exe = (data.resolve().parent / "LOL3.EXE").read_bytes()
+        image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
+        exe = game_path(data.resolve().parent, "LOL3.EXE").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
         if len(exe) != 77824:
@@ -151,7 +151,7 @@ def main():
             for key, row_at, payload_at, length in rows:
                 keys.add(key)
                 if music_file:
-                    music.setdefault(key, []).append((path.name, row_at, payload_at, length))
+                    music.setdefault(key, []).append((path.name.lower(), row_at, payload_at, length))
                 if key == wsx_name_hash("missing.aud") and path.name.upper() == "LOCAL.WSX":
                     missing_row = (row_at, payload_at, length, path)
         if entries != 7549 or len(keys) != 7417:
@@ -182,7 +182,7 @@ def main():
                 f"music join keys {len(music)} extra {extra} absent {absent} "
                 f"joined {len(joined)} covered {covered} target {target_rows}")
         filename, _, start, length = target_rows[0]
-        with (data / filename).open("rb") as stream:
+        with game_path(data, filename).open("rb") as stream:
             chunks = list(form(stream, start, length, b"RIFF", b"WAVE", "<"))
             expected_chunks = [
                 (b"fmt ", start + 0x14, 30), (b"fact", start + 0x3A, 4),
@@ -221,9 +221,9 @@ def main():
                 for needle in (b"uhfroze", b"UHFROZE", UTF16_NEEDLE):
                     if mapping.find(needle) >= 0:
                         froze.append((path.name, needle))
-                hits.extend(matching(path.name, pairs))
+                hits.extend(matching(path.name.upper(), pairs))
                 mapping.close()
-        shipped = data / "cdcache.wsx"
+        shipped = game_path(data, "cdcache.wsx")
         if shipped.is_file():
             blob = shipped.read_bytes()
             for needle in (b"uhfroze", b"UHFROZE", UTF16_NEEDLE):
@@ -240,7 +240,7 @@ def main():
         exe_keys = {hit[2] for hit in path_hits if hit[0] == "LOL3.EXE"}
         all_keys = {hit[2] for hit in path_hits}
         target_hits = [hit for hit in hits if hit[2] == TARGET]
-        missing_at = find_all((data / "locallng.wsx").read_bytes(), b"missing.aud\x00")
+        missing_at = find_all(game_path(data, "locallng.wsx").read_bytes(), b"missing.aud\x00")
         if (len(dat_keys) != 52 or exe_keys - dat_keys or all_keys - dat_keys != {0x2E02FD5E}
                 or bare != [("LOCAL.WSX", 0x147CF1F)] or target_hits
                 or missing_at != [0x58C6636, 0x58C6646]):

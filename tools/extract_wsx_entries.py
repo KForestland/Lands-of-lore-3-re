@@ -198,11 +198,11 @@ def main() -> int:
         if args.list:
             ap.error("--check does not list")
         return check(args.game_dat)
+    import lol3_cli
+    files = lol3_cli.wsx_files(args.game_dat)
     if args.list:
         if args.out is not None or args.manifest is not None:
             ap.error("--list writes nothing")
-        import lol3_cli
-        files = lol3_cli.wsx_files(args.game_dat)
         if args.stems:
             wanted = {stem.upper() for stem in args.stems}
             files = [path for path in files if path.stem.upper() in wanted]
@@ -225,36 +225,17 @@ def main() -> int:
     if refusal:
         ap.error(refusal)
 
-    if args.stems:
-        stems = args.stems
-    else:
-        stems = sorted(
-            {p.stem for p in list(args.game_dat.glob("*.WSX")) + list(args.game_dat.glob("*.wsx"))},
-            key=str.upper,
-        )
-
     results = []
-    for stem in stems:
-        matches = []
-        seen = set()
-        for pat in (f"{stem}.WSX", f"{stem}.wsx", f"{stem.lower()}.wsx", f"{stem.lower()}.WSX", f"{stem.upper()}.WSX"):
-            for m in args.game_dat.glob(pat):
-                rp = m.resolve()
-                if rp not in seen:
-                    seen.add(rp)
-                    matches.append(m)
-        # also case-insensitive stem match
-        if not matches:
-            for m in list(args.game_dat.glob("*.WSX")) + list(args.game_dat.glob("*.wsx")):
-                if m.stem.upper() == stem.upper():
-                    rp = m.resolve()
-                    if rp not in seen:
-                        seen.add(rp)
-                        matches.append(m)
-        if not matches:
+    if args.stems:
+        from cli_errors import game_path
+
+        entries = [(stem, game_path(args.game_dat, stem + ".WSX")) for stem in args.stems]
+    else:
+        entries = [(path.stem, path) for path in files]
+    for stem, path in entries:
+        if not path.is_file():
             results.append({"stem": stem, "error": "WSX not found"})
             continue
-        path = matches[0]
         try:
             parsed = parse_wsx(path)
         except ValueError as exc:

@@ -3,7 +3,7 @@
 from pathlib import Path
 from struct import unpack_from
 
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from lol3_cli import tool_args
 
 
@@ -78,7 +78,7 @@ def main():
         "LOL3.EXE": (0xE0, 0x400000, 0x5E3E, (".text", ".rdata", ".data", ".rsrc"), [], 0),
     }
     for name, witness in expected.items():
-        image = (root / name).read_bytes()
+        image = game_path(root, name).read_bytes()
         pe, base, entry, sections, debug, padding = layout(image)
         if args.check and (pe, base, entry, tuple(row[0] for row in sections), debug, padding) != witness:
             raise ValueError(f"{name} differs from the documented retail layout")

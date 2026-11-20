@@ -46,6 +46,8 @@ The [reader tool check audit](../docs/TOOL_CHECK_AUDIT.md) lists the mistakes te
 
 ## Setup
 
+For game data, give `--data` either your installation folder or its `DAT` folder. The readers accept mixed, uppercase or lowercase filenames and keep the spelling of files they copy.
+
 - Python 3.10 or later. The readers and the synthetic tests need only the standard library.
 - The optional system LZO library (`apt install liblzo2-2` on Debian or Ubuntu) for the light-map decode and the LZO checks; without it those checks print one SKIP line.
 - Your own copy of the English GOG release; point `--data` or `$LOL3_DAT` at its `DAT` folder.

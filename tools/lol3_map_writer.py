@@ -17,7 +17,7 @@ from pathlib import Path
 import re
 import struct
 
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import lol3_cli
 from lol3_level_schematic import PLACEMENTS, map_geometry
 from lol3_script_framing import level_map_entries, native_sizes, u32
@@ -359,7 +359,7 @@ def edit_check(raw, lengths):
 
 
 def check(data):
-    sizes = native_sizes((data.resolve().parent / "LOL3.DAT").read_bytes())
+    sizes = native_sizes(game_path(data.resolve().parent, "LOL3.DAT").read_bytes())
     if len(sizes) != 39:
         raise ValueError("expected 39 native opcode lengths")
     counts, seen, maps, total, edited = Counter(), set(), 0, 0, 0
@@ -399,7 +399,7 @@ def main():
             if stem != target:
                 continue
             if args.coverage:
-                sizes = native_sizes((data.resolve().parent / "LOL3.DAT").read_bytes())
+                sizes = native_sizes(game_path(data.resolve().parent, "LOL3.DAT").read_bytes())
                 fields = read_fields(raw, sizes)
                 copied = 0
                 for lo, hi in retained_ranges(len(raw), fields):

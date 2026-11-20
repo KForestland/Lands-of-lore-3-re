@@ -15,7 +15,7 @@ clear, and the 124 handler pointers at 0x54B918 in LOL3.DAT
 (docs/lol3-item-dispatch.md#regular-handler-examples). The census prints counts.
 The other flags print the named fields.
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter
 from pathlib import Path
 from struct import iter_unpack, unpack_from
@@ -125,7 +125,7 @@ def main():
             parser.error("pass only one of --items, --mitigation, --modes or --check")
     try:
         data_dir = Path(args.data).resolve()
-        image = (data_dir.parent / "LOL3.DAT").read_bytes()
+        image = game_path(data_dir.parent, "LOL3.DAT").read_bytes()
         native_sizes(image)  # checks the retail executable by its hash
         if args.modes:
             print(mode_lines(image), end="")

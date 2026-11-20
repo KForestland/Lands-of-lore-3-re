@@ -21,7 +21,7 @@ from pathlib import Path
 import re
 import struct
 
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import lol3_cli
 from lol3_save_header import BLOCK_HEADER, HEADER_SIZE, LEVEL_SECTIONS, parse_header, report
 from walk_lmf_leaves import lzo_decoder
@@ -206,7 +206,7 @@ def moved_player(slot, blob):
 
 
 def slot_paths(data, slot_path):
-    folder = slot_path if slot_path else Path(data).resolve().parent / "SAVEGAME"
+    folder = slot_path if slot_path else game_path(Path(data).resolve().parent, "SAVEGAME")
     if slot_path and slot_path.is_file():
         return [slot_path]
     if not folder.is_dir():

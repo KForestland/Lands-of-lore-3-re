@@ -12,7 +12,7 @@ level-to-level section and the steps from QWOD0 follow the table.
   lol3_progression.py --data DAT --out FILE   # write the page
   lol3_progression.py --check --data DAT      # docs/PROGRESSION.md equals the page
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import os
 import re
 from collections import Counter, defaultdict, deque, namedtuple
@@ -275,7 +275,7 @@ def taken_when(predicates, own, earlier):
 
 def collect(data_dir, *, full_corpus=True):
     def executable_tables():
-        image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+        image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
         names = level_names(image)
         return names, native_sizes(image), {stem: index for index, stem in names.items() if stem}
 

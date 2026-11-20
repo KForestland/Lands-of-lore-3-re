@@ -6,7 +6,7 @@
   lol3_script_framing.py --data DAT --subcommands
   lol3_script_framing.py --data DAT --dispatch
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -197,7 +197,7 @@ def main():
     try:
         if args.dispatch or args.subcommands:
             data_dir = Path(args.data).resolve()
-            image = (data_dir.parent / "LOL3.DAT").read_bytes()
+            image = game_path(data_dir.parent, "LOL3.DAT").read_bytes()
             if args.dispatch:
                 if sha256(image).hexdigest() != RETAIL_PE:
                     raise ValueError("LOL3.DAT does not match the documented English retail executable")
@@ -207,7 +207,7 @@ def main():
             print(subcommand_lines(level_maps(data_dir), sizes), end="")
             return 0
         data_dir = Path(args.data).resolve()
-        sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
+        sizes = native_sizes(game_path(data_dir.parent, "LOL3.DAT").read_bytes())
         maps = total_bytes = refs = records = embedded = resume = 0
         opcodes, selectors = Counter(), Counter()
         for stem, payload in level_maps(data_dir):

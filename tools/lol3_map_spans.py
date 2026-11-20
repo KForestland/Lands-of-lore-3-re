@@ -5,7 +5,7 @@
   lol3_map_spans.py --data DAT --list QWOD0   # waypoint fields and slot bytes; no label text
   lol3_map_spans.py --data DAT --rows QWOD0   # section-1 bytes the page names
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -57,7 +57,7 @@ def u32(buf, at):
 
 
 def census(data_dir):
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
         raise ValueError("LOL3.DAT does not match the documented English retail executable")
     wp6, wp7 = Counter(), Counter()

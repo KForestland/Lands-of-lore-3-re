@@ -4,7 +4,7 @@
   lol3_odf_companions.py --data DAT --check
   lol3_odf_companions.py --data DAT --list QWOD0   # section-0 names, field-3 words, AI leaves
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from hashlib import sha256
 from pathlib import Path
 from struct import unpack_from
@@ -144,7 +144,7 @@ def main():
         parser.error("this tool only checks; pass --check")
     data = Path(args.data)
     try:
-        image = (data.resolve().parent / "LOL3.DAT").read_bytes()
+        image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
         if image[0x4AB42E - CODE_BIAS:0x4AB42E - CODE_BIAS + 6] != bytes.fromhex("8d347fc1e603"):

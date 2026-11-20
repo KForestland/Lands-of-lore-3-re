@@ -80,4 +80,17 @@ def inspect_jobs(test):
     image = bytearray(offset + 4 * 40)
     struct.pack_into("<40I", image, offset, *([0x401800 + len(image)] * 40))
     (game / "LOL3.DAT").write_bytes(image + b"TEST\0")
+    if test.lowercase:
+        lowercase(game)
     test.assertIn("channels 1 rate 8000 align 1 bits 8 stem TEST", test.job("music", "--data", data))
+
+
+def lowercase(root):
+    """Rename a generated installation as a lower-case filesystem copy."""
+    for path in sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+        lower = path.with_name(path.name.lower())
+        if lower.name != path.name:
+            # The intermediate name also makes a case-only rename portable.
+            temporary = path.with_name(path.name + ".renaming")
+            path.rename(temporary)
+            temporary.rename(lower)

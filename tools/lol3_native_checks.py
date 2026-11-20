@@ -6,7 +6,7 @@
   lol3_native_checks.py --data DAT --list
   lol3_native_checks.py --data DAT --spells
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -273,7 +273,7 @@ def main():
         parser.error("--check does not list")
     try:
         data_dir = Path(args.data).resolve()
-        image = (data_dir.parent / "LOL3.DAT").read_bytes()
+        image = game_path(data_dir.parent, "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
         if args.spells:

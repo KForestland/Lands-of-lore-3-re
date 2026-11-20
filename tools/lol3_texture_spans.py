@@ -12,7 +12,7 @@ game files.
   lol3_texture_spans.py --check --data DAT          # one CHECK line
   lol3_texture_spans.py --data DAT --list 10        # first records: offset, flags, size
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import os
 import re
 import struct
@@ -56,7 +56,7 @@ def cache_path(data_dir, explicit=None):
             raise ValueError(f"cache file does not exist: {explicit}")
         return explicit
     for name in ("cdcache.wsx", "CDCACHE.WSX"):
-        p = os.path.join(os.path.dirname(os.path.abspath(data_dir)), name)
+        p = str(game_path(os.path.dirname(os.path.abspath(data_dir)), name))
         if os.path.isfile(p):
             return p
     return None

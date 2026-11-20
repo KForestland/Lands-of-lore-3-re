@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check original LoL3 movie names, VQA chunk framing and WAVE audio in place."""
-from cli_errors import ReaderArgumentParser, run_cli
+from cli_errors import ReaderArgumentParser, run_cli, game_path
 from collections import Counter
 import hashlib
 import argparse
@@ -302,7 +302,7 @@ def localized_trr(data, names, *, verify_offsets=True):
 
 
 def check(data, summary):
-    names = movie_names((data.parent / "LOL3.DAT").read_bytes())
+    names = movie_names(game_path(data.parent, "LOL3.DAT").read_bytes())
     files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
     level_sounds = {
         stem + "S" for stem, path in files.items() if stem + "S" in files
@@ -369,7 +369,7 @@ def show_text(data, table, record_id):
 
 
 def music_tracks(data):
-    image = (data.parent / "LOL3.DAT").read_bytes()
+    image = game_path(data.parent, "LOL3.DAT").read_bytes()
     from lol3_level_report import c_strings
     stems = c_strings(image, STEMS_AT, 40)
     by_key = {}
@@ -439,7 +439,7 @@ def main():
         if args.trr:
             return show_text(data, args.trr, args.id)
         if args.movie:
-            names = movie_names((data.parent / "LOL3.DAT").read_bytes())
+            names = movie_names(game_path(data.parent, "LOL3.DAT").read_bytes())
             wanted = args.movie.upper()
             found = [(key, name) for key, name in names.items() if wanted in name.upper()]
             if len(found) != 1:

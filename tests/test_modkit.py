@@ -26,7 +26,7 @@ def make_game(folder):
 
 
 def edit(edits):
-    name, document = next((n, d) for n, d in edits.items() if d["file"] == "DAT/locallng.wsx")
+    name, document = next((n, d) for n, d in edits.items() if d["file"].casefold() == "dat/locallng.wsx")
     assert document["value"] == ["Test keep", "Test volcano"]
     document["value"][0] = "Test keep, now longer"
     return name, document
