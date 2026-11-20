@@ -1,8 +1,8 @@
 # LoL3 reverse-engineering status
 
-**As of:** 2026-11-19. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
+**As of:** 2026-11-20. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (37 checks; all 37 pass on a GOG copy that has run once and has a saved game; on a never-run copy 32 pass and 4 report SKIP).
+Run the checks: `python3 tools/check_all.py --data <DAT>` (37 checks; all 37 pass on a GOG copy that has run once and has a saved game; on a never-run copy 33 pass and 4 report SKIP).
 
 **Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
 
@@ -12,6 +12,15 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (37 checks; all 37 pas
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
+
+## Where things stand (20 November 2026)
+
+A dated snapshot; the work continues and the table below is kept current.
+
+- **Known.** 51 of 56 files in `DAT` have their whole layout read by a tool here; the other five are one repeated block (the four PHT files are a seeded `rand()` stream matched to the last byte) ([how we rate](HOW_WE_RATE.md)). 81.8% of the map bytes come from fields the program reads, and every portal command is listed with its conditions in the order the game checks them ([progression](PROGRESSION.md)).
+- **Open.** 10 of 13 numbered questions are not fully answered ([open questions](OPEN_QUESTIONS.md)).
+- **Tests a reader with the game can run.** Each open point that needs the running game has its test and what the runs of 20 November did and did not show, including how to avoid the cache crash marker before a run ([running-game probes](NEEDS_A_RUNNING_GAME.md)); runs from 20 November 08:41 UTC on follow the [launch-record rule](NEEDS_A_RUNNING_GAME.md#launch-record-rule-and-the-runs-of-20-november).
+- **Tools for your own copy.** Change text or numbers with the mod kit, make and undo patches, edit a saved game, open interactive level plans and export a level as a 3D model: start with the [first ten minutes](FIRST_TEN_MINUTES.md) page or `python3 tools/lol.py`. Known original faults: [patches](../patches/README.md). What these pages got wrong: [corrections](CORRECTIONS.md).
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 

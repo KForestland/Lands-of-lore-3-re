@@ -451,6 +451,7 @@
       ],
       "tools": [
         "tools/check_all.py",
+        "tools/lol.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_selectors.py",
         "tools/rating.py"
@@ -502,6 +503,7 @@
         "tools/check_all.py",
         "tools/doc_index.py",
         "tools/doc_links.py",
+        "tools/lol.py",
         "tools/lol3_cache_seed.py",
         "tools/lol3_claimed_edges.py",
         "tools/lol3_combat_census.py",
