@@ -15,6 +15,35 @@ Use `level_viewer.py --check` to write and read back one plan in a temporary fol
 
 `edition.py` reads names, file sizes and SHA-256 to identify a measured game copy. `--check` verifies the full fingerprint in `check_all.py`. [Edition fingerprints](../docs/EDITIONS.md)
 
+## Reader tool examples
+
+Run these from the repository folder. Set the data variable as shown under Setup. Create `../lol3-out` before using the save or patch example, and set `LOL3_SLOT` to your save file.
+
+| Tool | Example | Output |
+|---|---|---|
+| Job menu | `python tools/lol.py --help` | level, text, translate, music, model, save, patch, mod |
+| Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
+| Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
+| Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |
+| Edition fingerprints | `python tools/edition.py --data "$LOL3_DAT" --check` | English GOG release, 1.07a, all 6 fingerprints match |
+| Fields from a save | `python tools/lol.py save page "$LOL3_SLOT" --out ../lol3-out/save.html` | Writes save.html with stored values and commands for making an edited copy |
+| Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
+| Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |
+| Level models | `python tools/level_export.py --data "$LOL3_DAT" --check` | 18 maps, 226,109 OBJ vertices and 118,951 faces |
+| Program sections | `python tools/lol3_pe_layout.py --data "$LOL3_DAT" --check` | 8 sections and 3 debug payloads, with both file ends reached |
+
+The commands also exercise these Python modules through their user-facing tools.
+
+| Modules | Command above | What they produce |
+|---|---|---|
+| `level_html.py` | Interactive map | Searchable entries and drawing in one offline page |
+| `level_edit_data.py` reads placement fields for the editor, and `level_move_ui.py` supplies the move controls | Level copy editor | Controls in the offline map and placement data for the editor |
+| `save_edit.py`, `save_page.py` | Fields from a save | An offline field page with one command per editable field |
+| `modkit_core.py` | Archive workspace | Manifest, editable entries and verified archive copies |
+| `translate_data.py`, `translate_fonts.py` | Translation tables | Counts for the rebuilt text tables and indexed fonts |
+
+The [reader tool check audit](../docs/TOOL_CHECK_AUDIT.md) lists the mistakes tested on generated files.
+
 ## Setup
 
 - Python 3.10 or later. The readers and the synthetic tests need only the standard library.

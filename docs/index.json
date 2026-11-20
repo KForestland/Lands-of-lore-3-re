@@ -144,8 +144,13 @@
       ],
       "tools": [
         "tools/check_all.py",
+        "tools/edition.py",
         "tools/extract_wsx_entries.py",
         "tools/full_report.py",
+        "tools/level_edit.py",
+        "tools/level_export.py",
+        "tools/level_viewer.py",
+        "tools/lol.py",
         "tools/lol3_cache_seed.py",
         "tools/lol3_combat_census.py",
         "tools/lol3_level_report.py",
@@ -154,6 +159,7 @@
         "tools/lol3_media_check.py",
         "tools/lol3_native_checks.py",
         "tools/lol3_odf_companions.py",
+        "tools/lol3_pe_layout.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_writer.py",
         "tools/lol3_script_browser.py",
@@ -164,6 +170,7 @@
         "tools/rating.py",
         "tools/repo_guard.py",
         "tools/save_edit.py",
+        "tools/translate.py",
         "tools/walk_lmf_leaves.py"
       ]
     },
