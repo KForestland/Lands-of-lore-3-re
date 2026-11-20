@@ -274,6 +274,13 @@ def trr_lines(blob, name):
     return "\n".join(lines) + "\n"
 
 
+def display_trr_text(field):
+    """Label formatting bytes whose effect is outside this text view."""
+    lines = field.decode("latin-1").replace("\r\n", "\n").replace("\r", "\n").replace("\t", "    ")
+    return "".join(f"[control {ord(ch):#04x}]" if (ch < " " and ch != "\n") or "\x7f" <= ch <= "\x9f" else ch
+                   for ch in lines).strip()
+
+
 def localized_trr(data, names):
     path = next((path for path in data.iterdir() if path.name.lower() == "locallng.wsx"), None)
     if path is None:
@@ -344,7 +351,10 @@ def main():
     parser.add_argument("--tracks", action="store_true", help="print each music entry's format and stem")
     parser.add_argument("--samples", help="print one level sidecar's sample offsets and format fields")
     parser.add_argument("--trr", help="print one dialogue directory: ids and boundaries, no payload")
+    parser.add_argument("--id", type=int, help="with --trr, show the text of one record")
     args = parser.parse_args()
+    if args.id is not None and not args.trr:
+        parser.error("Use --id with --trr, such as --trr dtext.trr --id 0.")
     chosen = [name for name in ("movie", "tracks", "samples", "trr") if getattr(args, name)]
     if chosen and (args.check or len(chosen) != 1):
         parser.error("pass only one of --movie, --tracks, --samples, --trr or --check")
@@ -357,7 +367,19 @@ def main():
             if name not in TRR_AT:
                 raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
             _, tables = localized_trr(data, (name,))
-            print(trr_lines(tables[name], name), end="")
+            blob = tables[name]
+            if args.id is None:
+                print(trr_lines(blob, name), end="")
+            else:
+                ids, bounds = trr_directory(blob, name)
+                if args.id not in ids:
+                    raise ValueError(f"Record ID {args.id} was not found. Omit --id to see available IDs.")
+                for row, identifier in enumerate(ids):
+                    if identifier == args.id:
+                        field = blob[bounds[row]+4:bounds[row+1]+4]
+                        if not field.endswith(b"\0"):
+                            raise ValueError(f"Record ID {args.id} is missing its terminator.")
+                        print(f"{name} ID {identifier}\n{display_trr_text(field[:-1])}")
             return 0
         image = (data.parent / "LOL3.DAT").read_bytes()
         if args.movie or args.tracks:

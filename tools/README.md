@@ -2,6 +2,13 @@
 
 Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
 
+The `lol.py` job menu opens with `python tools/lol.py`. Add `JOB --help`
+to see the job's options. `level_viewer.py` writes an offline HTML plan with clickable
+details, sharing the drawing and interface in `level_html.py`.
+`level_export.py` writes a Wavefront OBJ surface model and selected texture PNGs.
+[First ten minutes](../docs/FIRST_TEN_MINUTES.md) ·
+[Interactive plans](../docs/COOKBOOK.md#open-an-interactive-level-plan)
+
 ## Setup
 
 - Python 3.8 or later. The readers and the synthetic tests need only the standard library.

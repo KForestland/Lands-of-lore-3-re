@@ -210,6 +210,9 @@
         "tools/check_all.py",
         "tools/extract_wsx_entries.py",
         "tools/full_report.py",
+        "tools/level_export.py",
+        "tools/level_viewer.py",
+        "tools/lol.py",
         "tools/lol3_level_schematic.py",
         "tools/lol3_map_spans.py",
         "tools/lol3_media_check.py",
@@ -248,6 +251,16 @@
         "Q12"
       ],
       "tools": []
+    },
+    {
+      "path": "docs/FIRST_TEN_MINUTES.md",
+      "title": "First ten minutes",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol.py",
+        "tools/lol3_level_schematic.py"
+      ]
     },
     {
       "path": "docs/GLOSSARY.md",
@@ -1303,6 +1316,10 @@
         "tools/doc_links.py",
         "tools/extract_wsx_entries.py",
         "tools/full_report.py",
+        "tools/level_export.py",
+        "tools/level_html.py",
+        "tools/level_viewer.py",
+        "tools/lol.py",
         "tools/lol3_cache_seed.py",
         "tools/lol3_claimed_edges.py",
         "tools/lol3_cli.py",

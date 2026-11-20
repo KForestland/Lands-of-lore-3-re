@@ -99,3 +99,18 @@ These words mean the same thing in the notes for all three Lands of Lore games.
 | Heading | The direction an object faces: a 16-bit turn angle at object +0x26. A save stores the player's heading and the second object's ([saves](lol3-native-saves.md)). |
 | MP3-in-WAV | A RIFF WAVE file with format tag `0x55` whose data is MPEG-1 Layer III (MP3) frames. The 38 music tracks in the four MUSIC archives are stored this way ([audio](formats/audio.md)). |
 | Wine | A program that runs Windows programs on Linux. The running-game probes here ran the original program under Wine with a debugger ([probes](NEEDS_A_RUNNING_GAME.md)). |
+
+## Reader tools
+
+| Term | Meaning |
+| --- | --- |
+| Level plan | An overhead drawing from the level's geometry. The HTML plan opens in a web browser and lets you choose a map feature to read its details. |
+| Gate | A script condition that can control a level change. See [Progression](PROGRESSION.md). |
+| Output folder | A directory you choose for the files a tool writes. The level and media tools use a new folder outside the game and the repository. |
+| Wavefront OBJ | A standard text file for vertices, faces and texture coordinates. Open it with a 3D model viewer. |
+| Texture coordinates (UVs) | The place on an image that corresponds to a face corner. The OBJ exporter uses the four corners of a unit square for each surface. |
+| Texture bank | The group of texture descriptors, mip records and their palettes read from a level's shipped or cached files. |
+| Type 3 / type 16 placement | A row from either of the MAP placement tables with those type numbers. The plan uses the row number to identify each placement. |
+| Upstream: no guard here | This command's event record has no condition of its own or earlier matching record to rule out. The event producer can still gate it. |
+| Kind 12 event 2 | A region event record with kind byte 12 and event byte 2. The native matcher compares the incoming event value. See [script events](lol3-script-events.md). |
+| Stream / group | The object or region command stream and the offset at which the event's commands begin. |

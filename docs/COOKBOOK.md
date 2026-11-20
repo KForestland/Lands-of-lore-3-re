@@ -244,3 +244,63 @@ Not yet tested. The only edited-save runs the game has loaded changed item rows 
 [What an edited copy must keep](lol3-native-saves.md#editing-a-copy-of-an-original-slot)
 
 Map viewer and editor notes for tool makers: [tool makers](TOOL_MAKERS.md).
+
+## Open an interactive level plan
+
+```sh
+python3 tools/level_viewer.py --data "$LOL3_DAT" --level QWOD0 --out "../LoL3 plans"
+```
+
+Open `QWOD0.html` in the new folder. Click a surface, waypoint or
+placement to read its row and source offset. Choose **Exits** under **Show**
+to see portal commands, gates and earlier events that can take priority.
+**Zoom to selection** works for exits attached to a surface. An exit
+in an object event still has a list entry even when its location is open.
+Placement row numbers start at 1. Use `--level all` for the 18 maps.
+[MAP fields](formats/map-odf.md) · [Portal conditions](PROGRESSION.md)
+
+## Export a level to OBJ
+
+```sh
+python3 tools/level_export.py --data "$LOL3_DAT" --level QWOD0 --textures 1 --out "../LoL3 model"
+```
+
+Import `QWOD0.obj` into a model viewer that supports Wavefront OBJ.
+For example, in Blender choose **File → Import → Wavefront (.obj)**,
+select the file, then use **View → Frame Selected**. The example writes
+1,430 faces, 2,854 OBJ vertices and one texture PNG. Without
+`--textures`, the tool writes the OBJ alone. Use `--textures all` for
+each descriptor with a supported pixel route, or give a positive limit.
+Texture export uses an existing matching cache bank or expands the shipped
+level bank with liblzo2. The `textures.tsv` index gives each image's
+descriptor, mip and size.
+
+The mesh uses the MAP's X/Z positions and the stored surface height at
+row +0x18. It splits a shared vertex when two surface heights differ.
+OBJ coordinates are (X, height, −Z). Face order is reversed to preserve
+the normals after changing the sign of Z. With the model's height axis
+pointing up, the top view matches the level plan. In QWOD0, waypoint 1 at
+MAP +0x580C selects surface 231 through its word at +0x5810. Its four
+corners match the OBJ face in the plan orientation.
+
+The UVs map each face to a unit square. Native wall rendering, sloped
+surfaces and per-face texture assignment are outside this export.
+Texture PNGs are separate for inspection or manual assignment. Run
+`python3 tools/level_export.py --data "$LOL3_DAT" --check` to verify
+the vertices and compare each face count with the MAP reader and the
+published level sheet. The check writes no files.
+
+[MAP coordinates and heights](lol3-map-odf-readers.md#map-section-0) ·
+[Texture palettes and supported flags](formats/textures.md#colour)
+
+## Find a tool by job
+
+Run `python3 tools/lol.py` to see the job names. This example reads one
+row of a text table.
+
+```sh
+python3 tools/lol.py text --data "$LOL3_DAT" --trr dtext.trr --id 0
+```
+
+Use `python3 tools/lol.py level --help` to see the level viewer's options.
+The original tool filenames also work.
