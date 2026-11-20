@@ -193,7 +193,9 @@
       "title": "Re-deriving a sample of confirmed statements",
       "answers": [],
       "question_references": [],
-      "tools": []
+      "tools": [
+        "tools/lol3_progression.py"
+      ]
     },
     {
       "path": "docs/COOKBOOK.md",

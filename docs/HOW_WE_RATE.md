@@ -33,7 +33,7 @@ that would settle it). Pages marked as history are left out. The glossary define
 labels, not importance: one CONFIRMED may cover a whole table and one
 UNCONFIRMED a single byte. It does **not** claim that unlabelled text is
 wrong or that labelled text is complete.
-A sample of 30 CONFIRMED statements was re-derived from the bytes ([sample](CONFIRMED_SAMPLE.md)): 17 held, 10 held in part, 3 corrected (2 wrong, 1 overstated). A first sample, taken by a different rule, is not recorded yet.
+Two samples of 30 CONFIRMED statements, taken by different rules, were re-derived from the bytes ([samples](CONFIRMED_SAMPLE.md)). First sample: 24 held, 6 held in part, none wrong. Second sample: 17 held, 10 held in part, 3 corrected (2 wrong, 1 overstated). Four statements are on both lists, so 56 different statements were checked.
 
 **Seen in the running game.** Of the probes on
 [NEEDS_A_RUNNING_GAME.md](NEEDS_A_RUNNING_GAME.md) (tests that the files
