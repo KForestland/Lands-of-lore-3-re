@@ -42,7 +42,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 
 | To see | Command |
 |---|---|
-| A level drawn from above, with waypoints and placements | `python3 tools/lol3_level_schematic.py --data "$LOL3_DAT" QWOD0 --out ../lol3-out/qwod0.svg` |
+| A level drawn from above, with waypoints and placements | `python3 tools/lol3_level_schematic.py --data "$LOL3_DAT" --level QWOD0 --out ../lol3-out/qwod0.svg` |
 | Level sheets | `python3 tools/lol3_level_report.py --data "$LOL3_DAT" --out ../lol3-out/levels` |
 | A level's script commands by opcode, with their meaning | `python3 tools/lol3_script_browser.py --data "$LOL3_DAT" QWOD0` |
 | A level's waypoints and paths | `python3 tools/lol3_map_spans.py --data "$LOL3_DAT" --list QWOD0` |
@@ -80,7 +80,7 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), [PE images](docs/formats/executable.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all 37 checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all 38 checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -93,7 +93,7 @@ Use Python 3.10 or later and your own copy of the English GOG release (`LOL3.DAT
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
-- `cdcache.wsx`, a large cache the game writes there when it runs. Three cache texture checks report SKIP if it is missing, and the save check skips when there is no saved game (33 pass, 4 skip on a never-run copy).
+- `cdcache.wsx`, a large cache the game writes there when it runs. Three cache texture checks report SKIP if it is missing, and the save check skips when there is no saved game (34 pass, 4 skip on a never-run copy).
 
 Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the cache starts from), which `lol3_cache_seed.py` reads. The archive writer and text checks also read the shipped duplicate archives beside `DAT/`.
 
@@ -102,7 +102,7 @@ git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
 python3 tools/check_all.py --quick              # lists the checks it skips
-python3 tools/check_all.py                      # full suite of 37 checks with a matching cache and saves
+python3 tools/check_all.py                      # full suite of 38 checks with a matching cache and saves
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository

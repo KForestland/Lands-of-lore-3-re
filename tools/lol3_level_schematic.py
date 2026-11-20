@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Read an original LoL3 MAP and draw an overhead SVG.
 
-  lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg
+  lol3_level_schematic.py --data DAT --level QWOD0 --out ../qwod0.svg
+
+Give --data the game folder or its DAT folder.
 
 The drawing uses MAP coordinates: surface edges, hollow waypoint squares,
 path runs and numbered dots for the rows of all five placement tables
@@ -14,6 +16,7 @@ write those outside the repository.
 No texture, sprite, light map or game image is opened for drawing.
 """
 from cli_errors import run_cli
+from level_html import find_data, new_picture
 import struct
 from collections import Counter
 from html import escape
@@ -181,26 +184,26 @@ def schematic_svg(stem, vertices, surfaces, waypoints, routes, placed, labels=Tr
 
 def main():
     parser = lol3_cli.tool_args(__doc__, out_help="write the SVG to this path")
-    parser.add_argument("level", nargs="?", help="level archive stem, for example QWOD0")
+    parser.add_argument("--level", help="level page name such as QWOD0")
     parser.add_argument("--no-labels", action="store_true", help="draw placement dots without row numbers")
     args = parser.parse_args()
-    if args.check:
-        args.level = "QWOD0"
-    elif not args.out or not args.level:
-        parser.error("give a level stem and --out to write the schematic, or --check")
+    if args.check and args.out:
+        parser.error("--check prints to stdout")
+    if not args.check and (not args.out or not args.level):
+        parser.error("Use --level and --out to write the schematic, or --check.")
     try:
-        stem = args.level.upper()
-        archive = next((file for file in lol3_cli.wsx_files(args.data) if file.stem.upper() == stem), None)
+        data = find_data(args.data, "DAT", "QWOD0.WSX")
+        stem = "QWOD0" if args.check else args.level.upper()
+        archive = next((file for file in lol3_cli.wsx_files(data) if file.stem.upper() == stem), None)
         if archive is None:
-            raise ValueError(f"no archive for level {stem}")
+            raise ValueError(f"Level {stem} was not found in {data}. Give --level the name of a level page.")
         key = wsx_name_hash(f"LEVELS\\{stem}\\{stem}.MAP")
         matches = [entry for entry in parse_wsx(archive)["entries"] if entry["hash"] == key]
         if len(matches) != 1:
             raise ValueError(f"expected one MAP with key {key:#010x} in {archive.name}")
         vertices, surfaces, waypoints, routes, placed = map_geometry(matches[0]["blob"])
-        notes = []
         svg = schematic_svg(stem, vertices, surfaces, waypoints, routes, placed,
-                            labels=args.check or not args.no_labels, notes=notes)
+                            labels=args.check or not args.no_labels)
         counts = ", ".join(f"{name} {sum(item[0] == name for item in placed)}" for name, *_ in PLACEMENTS)
         summary = (f"{len(vertices)} vertices, {len(surfaces)} surfaces, "
                    f"waypoints {len(waypoints)}, paths {len(routes)}, {counts}")
@@ -211,15 +214,17 @@ def main():
                   f"docs/images/qwod0-schematic.svg {'regenerates byte-identical' if same else 'DIFFERS'}")
             return 0 if same else 1
         output = Path(args.out).resolve()
-        game = Path(args.data).resolve().parent
+        game = data.parent
         repo = Path(__file__).resolve().parents[1]
         if output == game or game in output.parents:
             parser.error("--out must be outside the game tree")
         if (output == repo or repo in output.parents) and not any(
                 folder in output.parents for folder in (repo / "docs" / "images", repo / "examples")):
             parser.error("inside the repository, --out may only point into docs/images/ or examples/")
-        output.write_text(svg, encoding="utf-8")
-        print(f"{archive.name}+{matches[0]['offset']:#x}: {summary}; {'; '.join(notes)}")
+        new_picture(Path(args.out), ".svg")
+        with output.open("x", encoding="utf-8", newline="\n") as file:
+            file.write(svg)
+        print(f"Wrote schematic for {stem} to {args.out}.")
         return 0
     except (OSError, ValueError, struct.error) as error:
         parser.exit(1, f"level schematic: {error}\n")

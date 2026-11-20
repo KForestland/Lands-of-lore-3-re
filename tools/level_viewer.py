@@ -49,7 +49,8 @@ def view(data, stem, gates):
     base, payload = maps(data)[stem]
     vertices, surfaces, waypoints, routes, placed = map_geometry(payload)
     plan = Plan(f"{stem} level plan", vertices,
-                f"Geometry from {stem}.WSX +{base:#x}. Exit conditions use the static Progression reader.")
+                f"The map comes from {stem}.WSX. Source offsets show where records start in the archive. "
+                "Exit conditions come from the stored scripts.")
     plan.legend.update({"Surface": "#587888", "Exit surface": "var(--exit)", "Waypoint path": "#83a6ff"})
     exit_surfaces = {source_event(row) for row in gates}
     start, = struct.unpack_from("<I", payload, 0x0C)

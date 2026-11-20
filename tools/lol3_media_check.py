@@ -3,6 +3,7 @@
 from cli_errors import ReaderArgumentParser, run_cli
 from collections import Counter
 import hashlib
+import argparse
 import os
 from pathlib import Path
 import struct
@@ -342,6 +343,75 @@ def check(data, summary):
     return 0
 
 
+def show_text(data, table, record_id):
+    name = table.lower()
+    if name not in TRR_AT:
+        raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
+    _, tables = localized_trr(data, (name,))
+    blob = tables[name]
+    if record_id is None:
+        print(trr_lines(blob, name), end="")
+    else:
+        ids, bounds = trr_directory(blob, name)
+        if record_id not in ids:
+            raise ValueError(f"Record ID {record_id} was not found. Omit --id to see available IDs.")
+        for row, identifier in enumerate(ids):
+            if identifier == record_id:
+                field = blob[bounds[row]+4:bounds[row+1]+4]
+                if not field.endswith(b"\0"):
+                    raise ValueError(f"Record ID {record_id} is missing its terminator.")
+                print(f"{name} ID {identifier}\n{display_trr_text(field[:-1])}")
+    return 0
+
+
+def music_tracks(data):
+    image = (data.parent / "LOL3.DAT").read_bytes()
+    from lol3_level_report import c_strings
+    stems = c_strings(image, STEMS_AT, 40)
+    by_key = {}
+    for stem in stems:
+        by_key.setdefault(wsx_name_hash("MUSIC\\%s.aud" % stem), []).append(stem)
+    files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
+    for stem in sorted(path for path in files if path.startswith("MUSIC")):
+        with files[stem].open("rb") as stream:
+            for key, start, size in wsx_rows(stream):
+                tag, channels, rate, _byterate, align, bits = wave_fields(stream, start, size)
+                stored = ",".join(by_key.get(key, ())) or "absent"
+                print(f"{files[stem].name}+0x{start:X} size {size} key {key:08X} "
+                      f"tag {tag:#x} channels {channels} rate {rate} align {align} bits {bits} "
+                      f"stem {stored}")
+    return 0
+
+
+def job_parser(description):
+    parser = ReaderArgumentParser(description=description)
+    dat = os.environ.get("LOL3_DAT")
+    parser.add_argument("--data", required=dat is None, default=dat, help="your game folder or its DAT folder")
+    return parser
+
+
+def text_job():
+    from level_html import find_data
+
+    parser = job_parser("Read original game text from a LoL3 dialogue table.")
+    parser.add_argument("table", nargs="?", metavar="TABLE", help=", ".join(TRR_AT))
+    parser.add_argument("--trr", help=argparse.SUPPRESS)
+    parser.add_argument("--id", type=int, help="show the text for one record ID")
+    args = parser.parse_args()
+    if bool(args.table) == bool(args.trr):
+        parser.error(f"Choose one table: {', '.join(TRR_AT)}.")
+    return show_text(find_data(args.data, "DAT", "LOCALLNG.WSX"), args.table or args.trr, args.id)
+
+
+def music_job():
+    from level_html import find_data
+
+    parser = job_parser("List the MP3 and WAVE tracks in LoL3 music archives.")
+    parser.add_argument("--tracks", action="store_true", help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    return music_tracks(find_data(args.data, "DAT", "MUSIC1.WSX"))
+
+
 def main():
     parser = ReaderArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=os.environ.get("LOL3_DAT"),
@@ -363,29 +433,9 @@ def main():
             return check(args.data, summary=not args.check)
         data = Path(args.data)
         if args.trr:
-            name = args.trr.lower()
-            if name not in TRR_AT:
-                raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
-            _, tables = localized_trr(data, (name,))
-            blob = tables[name]
-            if args.id is None:
-                print(trr_lines(blob, name), end="")
-            else:
-                ids, bounds = trr_directory(blob, name)
-                if args.id not in ids:
-                    raise ValueError(f"Record ID {args.id} was not found. Omit --id to see available IDs.")
-                for row, identifier in enumerate(ids):
-                    if identifier == args.id:
-                        field = blob[bounds[row]+4:bounds[row+1]+4]
-                        if not field.endswith(b"\0"):
-                            raise ValueError(f"Record ID {args.id} is missing its terminator.")
-                        print(f"{name} ID {identifier}\n{display_trr_text(field[:-1])}")
-            return 0
-        image = (data.parent / "LOL3.DAT").read_bytes()
-        if args.movie or args.tracks:
-            from lol3_level_report import c_strings
-            names = movie_names(image) if args.movie else {}
+            return show_text(data, args.trr, args.id)
         if args.movie:
+            names = movie_names((data.parent / "LOL3.DAT").read_bytes())
             wanted = args.movie.upper()
             found = [(key, name) for key, name in names.items() if wanted in name.upper()]
             if len(found) != 1:
@@ -408,21 +458,7 @@ def main():
             print("\n".join(chunks))
             return 0
         if args.tracks:
-            from lol3_level_report import c_strings
-            stems = c_strings(image, STEMS_AT, 40)
-            by_key = {}
-            for stem in stems:
-                by_key.setdefault(wsx_name_hash("MUSIC\\%s.aud" % stem), []).append(stem)
-            files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
-            for stem in sorted(path for path in files if path.startswith("MUSIC")):
-                with files[stem].open("rb") as stream:
-                    for key, start, size in wsx_rows(stream):
-                        tag, channels, rate, _byterate, align, bits = wave_fields(stream, start, size)
-                        stored = ",".join(by_key.get(key, ())) or "absent"
-                        print(f"{files[stem].name}+0x{start:X} size {size} key {key:08X} "
-                              f"tag {tag:#x} channels {channels} rate {rate} align {align} bits {bits} "
-                              f"stem {stored}")
-            return 0
+            return music_tracks(data)
         stem = args.samples.upper()
         files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
         path = files.get(stem + "S")

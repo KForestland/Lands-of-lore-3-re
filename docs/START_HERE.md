@@ -6,7 +6,7 @@ You need Python 3.10 or later (optional: the system LZO library, `apt install li
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
-python3 tools/check_all.py         # 37 checks; the last line should read ALL 37 CHECKS PASSED (or 33 passed, 4 skipped if the game has never run)
+python3 tools/check_all.py         # 38 checks; the last line should read ALL 38 CHECKS PASSED (or 34 passed, 4 skipped if the game has never run)
 ```
 
 Words you do not know are in the [glossary](GLOSSARY.md). Short worked commands, with the first lines they print, are in the [cookbook](COOKBOOK.md). What is known and what is open: [STATUS](STATUS.md) and [open questions](OPEN_QUESTIONS.md). Write tool output outside the repository.

@@ -22,11 +22,11 @@ Choose an output folder outside the game and clone. Use a fresh folder for each 
 
 ```bash
 mkdir -p ../lol3-out
-python3 tools/lol3_level_schematic.py QWOD0 --out ../lol3-out/qwod0.svg
+python3 tools/lol3_level_schematic.py --level QWOD0 --out ../lol3-out/qwod0.svg
 ```
 
 ```text
-QWOD0.WSX+0x72e28b: 1308 vertices, 1430 surfaces, waypoints 1, paths 0, type 3 472, type 16 53, creature 1, mover (type 32) 0, item 6; numbers are 1-based table rows; 327 overlapping numbers left out
+Wrote schematic for QWOD0 to ../lol3-out/qwod0.svg.
 ```
 
 The SVG is an overhead line drawing: surface edges, one hollow waypoint square, and numbered placement dots (type 3, type 16, creature, mover, item); 327 overlapping numbers are left out. No game pixels.
@@ -299,7 +299,7 @@ Run `python3 tools/lol.py` to see the job names. This example reads one
 row of a text table.
 
 ```sh
-python3 tools/lol.py text --data "$LOL3_DAT" --trr dtext.trr --id 0
+python3 tools/lol.py text --data "$LOL3_DAT" dtext.trr --id 0
 ```
 
 Use `python3 tools/lol.py level --help` to see the level viewer's options.

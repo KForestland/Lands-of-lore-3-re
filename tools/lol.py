@@ -2,25 +2,30 @@
 """Find and run an original Lands of Lore file tool."""
 from argparse import RawDescriptionHelpFormatter
 from pathlib import Path
-import subprocess
+from importlib import import_module
+from runpy import run_path
 import sys
 
+import cli_errors
 from cli_errors import ReaderArgumentParser, run_cli
 
 JOBS = {
     "level": ("level_viewer.py", (), "Look at an interactive level plan"),
-    "text": ("lol3_media_check.py", (), "Read a dialogue table with --trr"),
-    "music": ("lol3_media_check.py", ("--tracks",), "List original music tracks"),
+    "text": ("lol3_media_check.py", (), "Read original game text"),
+    "music": ("lol3_media_check.py", (), "Inspect original game music (list MP3 and WAVE tracks)"),
     "model": ("level_export.py", (), "Export a level model and textures"),
     "save": ("save_edit.py", (), "Edit a copy of a saved game"),
     "patch": ("patch.py", (), "Make or apply a patch and its undo"),
     "mod": ("modkit.py", (), "Unpack or build an editable workspace"),
 }
 
+JOB_HANDLERS = {"text": "text_job", "music": "music_job"}
+
 
 def main():
     menu = "\n".join(f"  {name:7} {spec[2]}" for name, spec in JOBS.items())
     parser = ReaderArgumentParser(
+        prog="lol.py",
         description="Choose a job for your copy of the original game.",
         usage="python tools/lol.py JOB [OPTIONS]",
         epilog="Jobs\n" + menu + "\n\nUse python tools/lol.py JOB --help for the job's options.",
@@ -35,9 +40,18 @@ def main():
     job, options = args[0], args[1:]
     script, prefix, label = JOBS[job]
     if not options or options[-1] in ("-h", "--help"):
-        print(f"{label}. Use python tools/lol.py {job} [OPTIONS].", flush=True)
+        print(f"{label}.", flush=True)
     program = Path(__file__).resolve().with_name(script)
-    return subprocess.run([sys.executable, str(program), *prefix, *(options or ["--help"])]).returncode
+    old_argv, old_name = sys.argv, cli_errors.JOB_NAME
+    try:
+        sys.argv = [str(program), *prefix, *(options or ["--help"])]
+        cli_errors.JOB_NAME = f"lol.py {job}"
+        handler = JOB_HANDLERS.get(job)
+        if handler:
+            return run_cli(getattr(import_module(program.stem), handler))
+        run_path(str(program), run_name="__main__")
+    finally:
+        sys.argv, cli_errors.JOB_NAME = old_argv, old_name
 
 
 if __name__ == "__main__":

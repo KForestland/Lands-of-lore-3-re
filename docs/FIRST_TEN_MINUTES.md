@@ -17,7 +17,7 @@ if it differs.
 ## Windows
 
 Open **Windows PowerShell** from the Start menu. Run `py -3 --version`.
-If the command is missing or the version is below 3.8, install a
+If the command is missing or the version is below 3.10, install a
 current Python 3 release with the Python launcher, then reopen PowerShell.
 [Python for Windows](https://www.python.org/downloads/windows/)
 
@@ -34,13 +34,13 @@ New-Item -ItemType Directory -Force "$out" | Out-Null
 Draw the level and open the picture.
 
 ```powershell
-py -3 tools/lol3_level_schematic.py --data "$data" QWOD0 --out "$out\first-level.svg"
+py -3 tools/lol3_level_schematic.py --data "$data" --level QWOD0 --out "$out\first-level.svg"
 Start-Process "$out\first-level.svg"
 ```
 
 ## Linux
 
-Open a terminal. If `python3 --version` reports a version below 3.8,
+Open a terminal. If `python3 --version` reports a version below 3.10,
 install a newer Python with your distribution's package manager.
 Paste these lines, replacing the path after `data=` with the folder you
 found above.
@@ -50,7 +50,7 @@ cd "$HOME/Downloads/Lands-of-lore-3-re-main"
 data="$HOME/Games/Lands of Lore III/DAT"
 out="$HOME/Downloads/LoL3 output"
 mkdir -p "$out"
-python3 tools/lol3_level_schematic.py --data "$data" QWOD0 --out "$out/first-level.svg"
+python3 tools/lol3_level_schematic.py --data "$data" --level QWOD0 --out "$out/first-level.svg"
 xdg-open "$out/first-level.svg"
 ```
 
@@ -58,6 +58,8 @@ You should see an overhead plan of QWOD0 with surface edges and numbered placeme
 If the tool cannot find a game file, check that the path points to the
 folder containing `QWOD0.WSX`. If the open command fails, open
 `first-level.svg` from the output folder in your browser.
+
+To draw the picture again, choose a new picture file name in both lines.
 
 [More recipes](COOKBOOK.md) · [Terms used in the guides](GLOSSARY.md)
 

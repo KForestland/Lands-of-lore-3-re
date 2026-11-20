@@ -64,7 +64,7 @@ The first vertices of section 0, read as 16.16 dwords, are X 1370, Z −5530 (by
 
 ## Overhead schematic
 
-**CONFIRMED.** The [QWOD0 drawing](../images/qwod0-schematic.svg) (made by `python3 tools/lol3_level_schematic.py QWOD0 --data DAT --out docs/images/qwod0-schematic.svg`; `--check` confirms it regenerates byte-identical)
+**CONFIRMED.** The [QWOD0 drawing](../images/qwod0-schematic.svg) (made by `python3 tools/lol3_level_schematic.py --level QWOD0 --data DAT --out ../qwod0.svg`; `--check` confirms the tracked SVG regenerates byte-identical)
 uses the 1,308 vertices and 1,430 surface rows from
 `QWOD0.WSX+0x72E28B`. The vertices begin at +0x7311B7.
 The surface rows begin at +0x7384B9. The native loader selects
@@ -108,7 +108,7 @@ those two values. See [the native surface fields](../lol3-map-odf-readers.md#map
 and [the waypoint and path rows](../lol3-map-odf-readers.md#tail-after-the-vertices).
 
 ```bash
-python3 tools/lol3_level_schematic.py --data DAT QWOD0 --out ../qwod0.svg
+python3 tools/lol3_level_schematic.py --data DAT --level QWOD0 --out ../qwod0.svg
 ```
 
 ## Open ([Q4](../OPEN_QUESTIONS.md), [Q5](../OPEN_QUESTIONS.md))

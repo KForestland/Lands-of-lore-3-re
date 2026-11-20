@@ -9,7 +9,7 @@ QWOD0 has an overhead plan, two commands that can request the next level, and on
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
 mkdir -p ../lol3-tour
-python3 tools/lol3_level_schematic.py QWOD0 --out ../lol3-tour/qwod0.svg
+python3 tools/lol3_level_schematic.py --level QWOD0 --out ../lol3-tour/qwod0.svg
 python3 tools/lol3_level_report.py --out ../lol3-tour/levels
 ```
 
