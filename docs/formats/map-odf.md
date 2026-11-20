@@ -15,6 +15,11 @@ Measured on the 51 readable WSX files. CONFIRMED:
 
 ## MAP sections
 
+The [typed native table reads](../lol3-map-odf-readers.md#writing-the-stored-fields)
+give the row layouts for surfaces, region descriptors, the +0x34 and
++0x30 tables and both event pools. The MAP writer reports each remaining
+byte range with its file offset.
+
 | Field | Meaning | Evidence |
 |---|---|---|
 | 0 | start of section 0 | CONFIRMED value (12,076 in all 18) |

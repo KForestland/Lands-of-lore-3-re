@@ -435,36 +435,65 @@ other rows are 2,384 waypoints (`0x43EBD9–0x43EC45`), 36 paths
 (`0x43EC4D–0x43EC92`) and 23,850 placements (`0x43EEB6–0x43EF6F`, X/Z
 taken by `0x4411F0`).
 
-Only 2.3% of the MAP bytes are regenerated from parsed fields. The other
-97.7% are copied as stored bytes, so the check proves the framing of these
-rows and commands, not the meaning of the copied bytes. Totals over the
-18 MAPs (21,232,680 bytes):
+**CONFIRMED.** The writer now regenerates 15,822,119 of 21,232,680
+bytes (74.5%) from typed fields. Here, a typed field is one whose
+stored value is read by native code at the listed address with that
+width. Some of those fields have uses whose game meaning is still open.
+The check also matches the 5,410,561 bytes carried at their original
+offsets. Three fields with a known width but no read of the stored
+value stay retained: header +0xCC (the shared-block start, which the
+loader never seeks; 72 bytes), region descriptor u8 +0x16 (only
+cleared, at `0x4F5A8C`; 13,163 bytes) and u8 +9 of the +0x48 rows
+(cleared on load at `0x46C5E8` before any read; 95 bytes).
 
-| Part | Written from fields | Copied as stored bytes |
+| Source | Newly typed fields | Native evidence | CKEEP example |
+|---|---|---|---|
+| Header | 46 dwords: the tag (`0x43E800`) and the seeks, counts and lengths the loader reads | Header load `0x43E7E7`, seek and read pairs above | `CKEEP.WSX+0xCBB182`, header +0x00 is 38 |
+| MAP +0x04 and +0x08 seeks | Signed X/Z dwords per vertex. Section 1 has a signed index word and six individually held bytes | `0x4F0126–0x4F0161`, `0x4E6425–0x4E65E7`, `0x4FFD91–0x4FFE05` | `CKEEP.WSX+0xCBE0AE` and `+0xCC5B2C` |
+| MAP +0x0C seek | Surface neighbors and vertices (+0x08/+0x10), signed low/high heights (+0x18/+0x1A), region index (+0x1C), section-1 index/count (+0x1E/+0x32), bytes +0x20/+0x34/+0x35 | `0x4A67D0–0x4A685A`, `0x4A74C0–0x4A7566`, `0x50060E–0x50063F`, `0x4E75B2–0x4E75D2`, `0x4EFF8C–0x4EFF9D` | `CKEEP.WSX+0xCCF97C` |
+| MAP +0x34/+0x7C | Eight-byte rows: two u16 vertex indices, u16 byte offset into the +0x30 table, u8 pair count, u8 traversal count | `0x43EB3F–0x43EB74 → 0x4EFE40`, `0x4EFED1–0x4EFF14`, `0x4F0126–0x4F0161`, `0x4F0170–0x4F0190` | `CKEEP.WSX+0xD0FFDB`: 2858, 2857, 0, 1, 1 |
+| MAP +0x30/+0x78 | Pairs of u16 surface indices, four bytes per pair | `0x4EFE72–0x4EFEA7`, `0x4EFF14–0x4EFF36` | `CKEEP.WSX+0xD0E94B`: 5, 22 |
+| MAP +0xA4/+0xAC | 28-byte region descriptor. Typed dword +0 indexes the +0x34 rows, u16 +6 selects a +0x2C row (or 0xFFFF), u16 +8 is the state word, u16 +0x0E is the event-list offset, u8 +0x1B supplies the +0x34 run count | `0x43EB0C–0x43EB2A → 0x4E7330`, `0x4AC21A`, `0x4E73C5–0x4E73ED`, `0x4E767B–0x4E7685`, `0x4F5A91–0x4F5AAA` | `CKEEP.WSX+0xD2CEB3` |
+| MAP +0x28 | Settings block read of 0x218 bytes. The typed subset is four dwords at +0x0C through +0x18 and the signed word at +0x1A8 | `0x43E87B–0x43E8E6` | `CKEEP.WSX+0xD0E569` |
+| MAP +0x2C/+0x74 | 12-byte rows. u16 +4 is decremented by a clock value in one switch arm. u8 +7 selects that arm and u8 +8 is tested for bit 0 | `0x43EBA9–0x43EBC4 → 0x4EFA90`, `0x4EFAF0–0x4EFB3C` | The count is zero in CKEEP. EWOD1 has four rows at its header +0x2C seek. |
+| MAP +0x48/+0x90 | 12-byte rows. u8 +8 is the lookup key. u8 +9 is retained: the load clears it (`0x46C5E8`) before the iterator tests it (`0x46C655`) | `0x43EF93–0x43EFAB → 0x46C5B0`, `0x46C61A` | `CKEEP.WSX+0xD0E781` |
+| MAP +0x4C/+0x98 | u32 object command offsets. +0x98 is the byte length of the array. | `0x43EA36–0x43EA60`, `0x4A8290–0x4A82A6` | `CKEEP.WSX+0xD07270` |
+| MAP +0xBC/+0xB8 and +0xB4/+0xB0 | Five bytes per predicate and separate level byte array | `0x43E91D–0x43E964`, `0x440A20–0x440A5E`, `0x4F02B0–0x4F0414` | `CKEEP.WSX+0xD2F277` and `+0xD2EF83` |
+| MAP +0x38/+0x80 and +0x40/+0x88 | Length/kind, known reference and operand fields from the event matchers, and the kind-22 name through its first NUL | `0x4A8255–0x4A82B2`, `0x4A8DE9–0x4A8E13` and the per-kind [event evidence](lol3-script-events.md#two-event-pools) | A region terminator `CKEEP.WSX+0xD0E889` and an object kind 1 at `+0xD0962C` |
+
+The coverage counts come from non-overlapping physical MAP ranges.
+Where a record contains retained fields, the writer copies each field
+or tail at the original row-relative offsets. The check changes an
+object-command operand, a waypoint, a vertex and a placement in
+memory. Only the selected fields change, and the script and schematic
+readers see the edits.
+
+| Part | Bytes from fields | Retained bytes |
 |---|---:|---:|
-| Region commands: opcode, selector, index, typed operands | 23,466 | 4,021 (operand bytes without a field) |
-| Object commands: the same | 336,202 | 95,293 (operand bytes without a field) |
-| Waypoint rows (8 bytes: X, Z, u16, two u8) | 19,072 | — |
-| Path rows (4 bytes: u16, two u8) | 144 | — |
-| Placements: X/Z words; mover state bytes +0x21–+0x28 (`0x4D591B–0x4D5994`) | 95,400 + 6,688 | 797,463 (the other row bytes) |
-| Waypoint labels | — | 61,984 |
-| Path labels | — | 1,116 |
-| Shared block, MAP +0x244 through +0x2F2B in each MAP | — | 206,928 (11,496 × 18) |
-| Surface-to-script gap | — | 1,784 |
-| All other MAP bytes: header 10,440, vertices 915,864, section 1 rows 1,343,536, surfaces 6,661,256, object index 219,864, event pools 267,228, and 10,164,931 in the other MAP sections | — | 19,583,119 |
-| **Total** | **480,972** | **20,751,708** |
+| Header | 3,312 | 7,128 |
+| Vertices and section 1 | 2,259,400 | 0 |
+| Surfaces and region descriptors | 3,475,421 | 3,554,399 |
+| +0x34 and +0x30 tables | 9,125,520 | 0 |
+| +0x28, +0x2C and +0x48 tables | 1,071 | 11,673 |
+| Object command index, predicates and level bytes | 243,025 | 0 |
+| Event pools | 233,398 | 33,830 |
+| Region and object commands | 359,668 | 99,314 |
+| Waypoint and path rows, placements | 121,304 | 797,463 |
+| Shared block, both label arrays and surface-to-script gap | 0 | 271,812 |
+| Other sections and gaps | 0 | 634,942 |
+| **Total** | **15,822,119** | **5,410,561** |
 
-The CHECK line prints both totals. It then changes one object-command
-operand, one waypoint X and one creature Z in memory. Only those bytes
-change, and `lol3_script_notes.py` and `lol3_level_schematic.py` read the
-new values.
+`--coverage STEM` lists every retained range with end-exclusive MAP and
+WSX offsets. In CKEEP it reports 171,198 retained bytes, starting with
+MAP +0x10..+0x14 at `CKEEP.WSX+0xCBB192..+0xCBB196`. `--list STEM`
+continues to give the hashes and offsets of the four named ranges.
 
-**CONFIRMED.** `--list STEM` prints the MAP offset, WSX offset, size and
-SHA-256 of the four copied spans named in the table: the shared block,
-both label ranges and the gap. It does not print their bytes. In CKEEP,
-for example, the waypoint labels start at `CKEEP.WSX+0xCC59A6`. What the
-shared block holds remains **UNCONFIRMED**, as described in
-[Q8](#q8).
+**UNCONFIRMED.** The full meanings of the stored region and surface
+fields and the retained subfields. The exact-row reads at `0x4E737A`
+and `0x4A663C` established their record extents. The coverage walk
+separates the remaining bytes by range. Tracing each retained offset
+to the first typed read or write would extend the table. The shared
+block still requires a reader witness, as described in [Q8](#q8).
 
 ## Close-out
 

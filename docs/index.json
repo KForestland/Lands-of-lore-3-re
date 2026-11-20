@@ -1020,11 +1020,9 @@
       "question_references": [],
       "tools": [
         "tools/lol3_claimed_edges.py",
-        "tools/lol3_level_schematic.py",
         "tools/lol3_map_spans.py",
         "tools/lol3_map_writer.py",
-        "tools/lol3_odf_companions.py",
-        "tools/lol3_script_notes.py"
+        "tools/lol3_odf_companions.py"
       ]
     },
     {

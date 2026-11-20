@@ -4,17 +4,12 @@
   lol3_map_writer.py --data DAT --check         # all 18 MAPs
   lol3_map_writer.py --data DAT --list CKEEP    # copied spans: offsets, sizes, SHA-256
 
-The check regenerates from parsed fields: the opcode, selector, index and
-typed operands of every region and object command, the 8-byte waypoint rows,
-the 4-byte path rows, the X/Z words of every placement and the mover's eight
-state bytes. Everything else is copied as stored bytes: command operand
-bytes without a field name, the other placement bytes, the shared block,
-the waypoint and path labels, the surface-to-script gap and every MAP table
-this tool does not parse. The CHECK line gives both byte totals. The check
-then changes one command operand, one waypoint and one placement in memory
-and requires the existing readers to read the new values back.
---list prints offsets, sizes and hashes only, never the bytes. Nothing is
-written.
+The check regenerates the typed header, geometry, event and placement
+fields described in docs/lol3-map-odf-readers.md. It also verifies every
+retained range and changes a few fields in memory to test read-back.
+--list reports four named copied spans. --coverage reports every copied
+byte by range, using offsets in both the MAP and the containing WSX.
+Neither option prints stored bytes or writes files.
 """
 from collections import Counter
 from hashlib import sha256
@@ -45,10 +40,44 @@ COMMAND_FORMATS = {
 MOVER = 0x29
 
 
+# (seek field, count field, row layout). Storage marked "s" is carried
+# without assigning its component fields a width or meaning. Only fields
+# with a native read of the stored value are typed: region byte +0x16
+# (only cleared at 0x4F5A8C), byte +9 of the +0x48 rows (cleared on load
+# at 0x46C5E8) and header +0xCC (no loader read) stay retained.
+TABLES = {
+    "vertices": (0x04, 0x50, "ii"),                          # 0x4F01E0
+    "section 1": (0x08, 0x54, "h6B"),                       # 0x4EFDC0, 0x4E6425
+    "surfaces": (0x0C, 0x58, "8s8HhhHHB17sB1sBB2s"),        # 0x4A65F0, 0x50060E
+    "section +0x34": (0x34, 0x7C, "HHHBB"),                 # 0x4E73FA, 0x4EFED1, 0x4F0126
+    "section +0x30": (0x30, 0x78, "HH"),                    # 0x4EFF14, 0x4EFF21
+    "section +0x2C": (0x2C, 0x74, "4sH1sBB3s"),            # 0x4EFAF0–0x4EFB3C
+    "region descriptors": (0xA4, 0xAC, "I2sHH4sH11sB"),   # 0x4E737A, 0x4AC21A
+    "predicates": (0xBC, 0xB8, "5B"),                       # 0x4F0240, 0x4F02B0
+    "level bytes": (0xB4, 0xB0, "B"),                       # 0x440A20
+    "section +0x48": (0x48, 0x90, "8sB3s"),                 # 0x46C5E3, 0x46C61A
+}
+HEADER_WORDS = tuple(sorted({
+    0, 0x28, 0x2C, 0x30, 0x34, 0x74, 0x78, 0x7C, 0x4C, 0x98,
+    0xC4, 0xC8, 0xD8, 0xDC,
+    *(at for seek, count, _ in TABLES.values() for at in (seek, count)),
+    *(at for stream in STREAMS.values() for at in stream),
+    *(at for _, seek, count, _, _ in PLACEMENTS for at in (seek, count)),
+}))
+
+# Values consumed by the native event matchers after length and kind.
+# The matching reference at +2 is a stream offset for regions and index
+# for objects. Kind 19 uses this word as a guard index.
+EVENT_FORMATS = {
+    0: "", 1: "H2sHHB1sb1sbB", 2: "HBB2sH", 3: "HB", 4: "HB",
+    5: "HBB", 6: "HBB", 7: "HBB", 8: "HH", 9: "HHHBB", 10: "HBBH",
+    11: "HHB", 12: "HHBB", 15: "HHBBH", 19: "H", 21: "HB", 22: "H",
+}
+
+
 def field_bytes(fmt):
     """Bytes of a struct format that are named fields (not "s" storage)."""
-    stored = sum(int(count or 1) for count in re.findall(r"(\d*)s", fmt))
-    return struct.calcsize("<" + fmt) - stored
+    return sum(end - start for start, end in format_ranges(fmt))
 
 
 def read_command(raw):
@@ -112,10 +141,110 @@ def retained_spans(raw):
     ]
 
 
+def event_fields(raw, start, end):
+    at = start
+    while at < end:
+        length, kind = struct.unpack_from("<BB", raw, at)
+        if kind not in EVENT_FORMATS or at + length > end:
+            raise ValueError(f"invalid event at MAP+{at:#x}")
+        fmt = "BB" + EVENT_FORMATS[kind]
+        if kind == 22:
+            stop = raw.find(b"\0", at + 4, at + length)
+            if stop < 0:
+                raise ValueError(f"unterminated audio name at MAP+{at:#x}")
+            fmt += f"{stop - at - 3}c"
+        tail = length - struct.calcsize("<" + fmt)
+        if tail < 0:
+            raise ValueError(f"truncated event at MAP+{at:#x}")
+        if tail:
+            fmt += f"{tail}s"
+        yield at, fmt, struct.unpack_from("<" + fmt, raw, at)
+        at += length
+
+
+def format_ranges(fmt):
+    """Get the row-relative ranges that are regenerated from typed fields."""
+    pos = start = 0
+    for count, code in re.findall(r"(\d*)(.)", fmt):
+        size = struct.calcsize("<" + count + code)
+        if code == "s":
+            if pos > start:
+                yield start, pos
+            start = pos + size
+        pos += size
+    if pos > start:
+        yield start, pos
+
+
+def parsed_ranges(fields):
+    for at in fields["header"]:
+        yield at, at + 4
+    for entries in fields["events"].values():
+        for at, fmt, _ in entries:
+            for lo, hi in format_ranges(fmt):
+                yield at + lo, at + hi
+    for start, fmt, rows in fields["tables"].values():
+        size = struct.calcsize("<" + fmt)
+        ranges = tuple(format_ranges(fmt))
+        if ranges == ((0, size),):
+            yield start, start + size * len(rows)
+            continue
+        for i in range(len(rows)):
+            at = start + i * size
+            for lo, hi in ranges:
+                yield at + lo, at + hi
+    for layout, key in ((WAYPOINT, "waypoints"), (PATH, "paths")):
+        start, rows = fields[key]
+        yield start, start + layout.size * len(rows)
+    for name, _, _, stride, _ in PLACEMENTS:
+        start, rows = fields["placements"][name]
+        for i in range(len(rows)):
+            at = start + i * stride
+            yield at, at + 4
+            if stride == MOVER:
+                yield at + 0x21, at + stride
+    for start, rows in fields["commands"].values():
+        at = start
+        for row in rows:
+            fmt = "BBH" + COMMAND_FORMATS.get(row["opcode"], "")
+            for lo, hi in format_ranges(fmt):
+                yield at + lo, at + hi
+            at += struct.calcsize("<" + fmt) + len(row["tail"])
+
+
+def retained_ranges(total, fields):
+    """Yield end-exclusive gaps in the parsed ranges, rejecting overlaps."""
+    at = 0
+    for start, end in sorted(parsed_ranges(fields)):
+        if start == end:
+            continue
+        if start < at or end > total:
+            raise ValueError(f"typed field overlaps or crosses the MAP at +{start:#x}")
+        if start > at:
+            yield at, start
+        at = end
+    if at < total:
+        yield at, total
+
+
 def read_fields(raw, lengths):
-    """Parse the writable fields: commands per stream, waypoints, paths, placements."""
-    fields = {"commands": {}, "placements": {}}
-    for space, (location, _, _, _) in STREAMS.items():
+    """Parse typed fields and retain the remaining storage at its source offset."""
+    fields = {"commands": {}, "placements": {}, "events": {}, "tables": {},
+              "header": {at: u32(raw, at) for at in HEADER_WORDS}}
+    for name, (location, count, fmt) in TABLES.items():
+        start, rows = read_rows(raw, location, count, struct.Struct("<" + fmt))
+        fields["tables"][name] = start, fmt, rows
+    start = u32(raw, 0x28)
+    if start:
+        fmt = "12sIIII396sh110s"
+        row = struct.unpack_from("<" + fmt, raw, start)
+        fields["tables"]["section +0x28"] = start, fmt, [row]
+    start, size = u32(raw, 0x4C), u32(raw, 0x98)
+    fields["tables"]["object command index"] = start, "I", list(
+        struct.iter_unpack("<I", raw[start:start + size]))
+    for space, (location, _, events, event_size) in STREAMS.items():
+        at, size = u32(raw, events), u32(raw, event_size)
+        fields["events"][space] = list(event_fields(raw, at, at + size))
         stream, starts, _, _, _, _ = walk(raw, 0, space, lengths)
         fields["commands"][space] = (u32(raw, location), [
             read_command(stream[start:start + lengths[stream[start]]]) for start in starts])
@@ -129,6 +258,14 @@ def read_fields(raw, lengths):
 def emit(raw, fields, lengths):
     """Write the fields over the original; every other byte is copied."""
     spans = list(retained_spans(raw))
+    for at, value in fields["header"].items():
+        spans.append(("header", at, struct.pack("<I", value)))
+    for name, (start, fmt, rows) in fields["tables"].items():
+        spans.append((name, start, write_rows(rows, struct.Struct("<" + fmt))))
+    for name, entries in fields["events"].items():
+        if entries:
+            spans.append((name + " events", entries[0][0], b"".join(
+                struct.pack("<" + fmt, *row) for _, fmt, row in entries)))
     for space, (start, rows) in fields["commands"].items():
         spans.append((space + " commands", start, b"".join(write_command(row, lengths) for row in rows)))
     spans.append(("waypoints", fields["waypoints"][0], write_rows(fields["waypoints"][1], WAYPOINT)))
@@ -152,18 +289,16 @@ def rebuild(raw, lengths):
     for space, (_, rows) in fields["commands"].items():
         counts[space + " commands"] += len(rows)
         observed.update(row["opcode"] for row in rows)
-        counts["field bytes"] += sum(4 + field_bytes(COMMAND_FORMATS.get(row["opcode"], "")) for row in rows)
     counts["waypoints"], counts["paths"] = len(fields["waypoints"][1]), len(fields["paths"][1])
-    counts["field bytes"] += WAYPOINT.size * counts["waypoints"] + PATH.size * counts["paths"]
-    for name, _, _, stride, _ in PLACEMENTS:
-        rows = fields["placements"][name][1]
-        counts["placements"] += len(rows)
-        counts["field bytes"] += (12 if stride == MOVER else 4) * len(rows)
+    counts["placements"] = sum(len(rows) for _, rows in fields["placements"].values())
+    counts.update({name: len(rows) for name, (_, _, rows) in fields["tables"].items()})
+    counts["events"] = sum(len(rows) for rows in fields["events"].values())
+    counts["field bytes"] = len(raw) - sum(hi - lo for lo, hi in retained_ranges(len(raw), fields))
     return emit(raw, fields, lengths), counts, observed
 
 
 def edit_check(raw, lengths):
-    """Change one command operand, one waypoint and one placement; the readers must see them."""
+    """Change a command, waypoint, vertex and placement, then verify the readers see them."""
     fields = read_fields(raw, lengths)
     stream_at, commands = fields["commands"]["object"]
     target = next((n for n, row in enumerate(commands)
@@ -178,18 +313,23 @@ def edit_check(raw, lengths):
     points[0] = (points[0][0] + 1,) + points[0][1:]
     creature_at, creatures = fields["placements"]["creature"]
     creatures[0] = (creatures[0][0], creatures[0][1] + 1) + creatures[0][2:]
+    vertex_at, _, vertices = fields["tables"]["vertices"]
+    x, z = vertices[0]
+    vertices[0] = (x + 0x10000, z)
     changed = emit(raw, fields, lengths)
     command_at = stream_at + offset + 4
     differ = [at for at in range(len(raw)) if raw[at] != changed[at]]
-    expected = {command_at, wp_at, wp_at + 1, creature_at + 2, creature_at + 3}
+    expected = {command_at, wp_at, wp_at + 1, creature_at + 2, creature_at + 3,
+                vertex_at + 2, vertex_at + 3}
     if len(changed) != len(raw) or not differ or not set(differ) <= expected:
         raise ValueError(f"edit changed bytes outside the edited fields: {[hex(at) for at in differ[:8]]}")
     stream, starts, _, _, _, _ = walk(changed, 0, "object", lengths)
-    _, _, old_points, _, old_placed = map_geometry(raw)
-    _, _, new_points, _, new_placed = map_geometry(changed)
+    old_vertices, _, old_points, _, old_placed = map_geometry(raw)
+    new_vertices, _, new_points, _, new_placed = map_geometry(changed)
     old_creature = next(row for row in old_placed if row[0] == "creature")
     new_creature = next(row for row in new_placed if row[0] == "creature")
     if (read_command(stream[starts[target]:])["operands"][0] != operands[0] or
+            new_vertices[0][0] != old_vertices[0][0] + (1 << 16) or
             new_points[0][0] != old_points[0][0] + (1 << 16) or
             new_creature[3] != old_creature[3] + (1 << 16)):
         raise ValueError("an edited field does not read back through the existing readers")
@@ -219,26 +359,40 @@ def check(data):
     print(f"CHECK MAP write: {maps} byte-identical MAPs, {len(seen)}/{len(sizes)} opcodes stored; " +
           ", ".join(f"{value:,} {name}" for name, value in counts.items()) +
           f"; {regenerated:,} of {total:,} bytes from parsed fields, {total - regenerated:,} copied; "
-          "a command, waypoint and placement edit reads back")
+          "command, waypoint, vertex and placement edits read back")
 
 
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
-    parser.add_argument("--list", metavar="STEM", help="list the copied spans of one MAP: offsets, sizes and SHA-256")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--list", metavar="STEM", help="list the four named copied spans")
+    mode.add_argument("--coverage", metavar="STEM", help="list every copied range and its size")
     args = parser.parse_args()
     data = Path(args.data)
     if args.check:
         check(data)
-    elif args.list:
+    elif args.list or args.coverage:
+        target = (args.list or args.coverage).upper()
         for stem, base, raw in level_map_entries(data):
-            if stem == args.list.upper():
+            if stem != target:
+                continue
+            if args.coverage:
+                sizes = native_sizes((data.resolve().parent / "LOL3.DAT").read_bytes())
+                fields = read_fields(raw, sizes)
+                copied = 0
+                for lo, hi in retained_ranges(len(raw), fields):
+                    print(f"{stem}.WSX+{base + lo:#x}..+{base + hi:#x} "
+                          f"MAP+{lo:#x}..+{hi:#x} size={hi - lo} (end exclusive)")
+                    copied += hi - lo
+                print(f"{stem}: {copied:,} retained bytes, {len(raw) - copied:,} typed bytes")
+            else:
                 for name, start, body in retained_spans(raw):
                     print(f"{stem}.WSX+{base + start:#x} MAP+{start:#x} {name} "
                           f"size={len(body)} sha256={sha256(body).hexdigest()}")
-                return 0
-        raise ValueError(f"unknown level {args.list}")
+            return 0
+        raise ValueError(f"unknown level {target}")
     else:
-        parser.error("give --check or --list STEM")
+        parser.error("give --check, --list STEM or --coverage STEM")
     return 0
 
 

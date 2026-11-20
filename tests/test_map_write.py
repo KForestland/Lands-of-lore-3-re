@@ -4,7 +4,10 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from lol3_map_writer import emit, field_bytes, read_command, read_fields, rebuild, retained_spans, waypoints, write_command
+from lol3_map_writer import (
+    HEADER_WORDS, emit, field_bytes, read_command, read_fields,
+    rebuild, retained_ranges, retained_spans, waypoints, write_command,
+)
 
 
 def synthetic_map():
@@ -46,7 +49,20 @@ class MapWriteTests(unittest.TestCase):
         self.assertEqual(counts["placements"], 1)
         self.assertEqual(seen, {0x10})
         # command 4 + 1 operand byte, waypoint row 8, path row 4, placement X/Z 4
-        self.assertEqual(counts["field bytes"], 21)
+        self.assertEqual(counts["field bytes"], 25 + 4 * len(HEADER_WORDS))
+
+    def test_vertex_field_and_retained_gap(self):
+        raw = synthetic_map()
+        struct.pack_into("<I", raw, 0x50, 1)
+        struct.pack_into("<ii", raw, 0x248, 0x4000, -0x20000)
+        fields = read_fields(raw, {0x10: 6})
+        start, _, vertices = fields["tables"]["vertices"]
+        self.assertEqual((start, vertices[0]), (0x248, (0x4000, -0x20000)))
+        vertices[0] = (0x4100, -0x20000)
+        result = emit(raw, fields, {0x10: 6})
+        self.assertEqual([at for at in range(len(raw)) if raw[at] != result[at]], [0x249])
+        self.assertTrue(any(lo <= 0x244 and hi == 0x248
+                            for lo, hi in retained_ranges(len(raw), fields)))
 
     def test_path_count_and_flags_are_unsigned(self):
         raw = synthetic_map()
