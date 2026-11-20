@@ -512,6 +512,15 @@
       ]
     },
     {
+      "path": "docs/formats/executable.md",
+      "title": "LoL3 PE images",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/lol3_pe_layout.py"
+      ]
+    },
+    {
       "path": "docs/formats/lmf.md",
       "title": "LMF light maps",
       "answers": [],
@@ -1257,6 +1266,7 @@
         "tools/lol3_native_checks.py",
         "tools/lol3_numbers.py",
         "tools/lol3_odf_companions.py",
+        "tools/lol3_pe_layout.py",
         "tools/lol3_pht.py",
         "tools/lol3_progression.py",
         "tools/lol3_save_header.py",

@@ -45,7 +45,8 @@ Escaped cases: 08, 09, 12, 13, 14, 15, 16, 17, 20.
   affected page and field and is part of `check_all.py`.
 - A synthetic path row keeps unsigned count and flag bytes above 127. The full
   suite now passes `--decode-copy` to the native check when liblzo2 is installed.
-  That comparison reads the 20 copy mips from the shipped banks.
+  That comparison reads the five flagged copy mips of each of the 18 shipped
+  banks (90 mips).
 
 The focused checks rejected all 8 automatable escapes in a second
 scratch pass (cases 08, 09, 12, 13, 14, 15, 16, 17).

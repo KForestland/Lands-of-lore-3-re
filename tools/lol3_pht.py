@@ -9,9 +9,9 @@ first cycle has the pinned SHA-256 and every later byte equals the byte at
 that distance into the first cycle. The check also requires that LOL3.DAT
 and LOL3.EXE do not contain the names (ASCII, either case, or UTF-16), that
 the cycle length is not a code immediate, and that the stored `$*.*` search
-is the save-game folder. The same check re-reads the COFF TimeDateStamp at
-`LOL3.DAT` file +0xD0. This shows the photo bytes are one block repeated; what
-they mean and what reads them is unknown.
+is the save-game folder. The stored bytes are also compared with the full
+low-byte cycle of the program's random-number recurrence with LF expanded
+to CR LF. The files' purpose and the program path that uses them remain open.
 """
 from cli_errors import run_cli
 from hashlib import sha256
@@ -42,6 +42,21 @@ WILD_AT = 0x1488A0
 WILD = b"$*.*\x00\x00\x00\x00.\\SAVEGAME\x00"
 WILD_PUSHES = (0x5A3A9, 0x5A441, 0x5A554)
 WILD_PUSH = bytes.fromhex("68a0a05400")
+RANDOM_AT = 0x11AA55  # LOL3.DAT VA 0x51B655
+RANDOM_CODE = bytes.fromhex(
+    "8b48148d14498d1491c1e20403d1c1e2082bd18d8c91c39e2600894814"
+    "8bc1c1e81025ff7f0000c3"
+)
+
+
+def random_cycle():
+    """Generate the seed-1 cycle of low output bytes, expanded as DOS text."""
+    state = 1
+    block = bytearray(1 << 24)
+    for i in range(len(block)):
+        state = (214013 * state + 2531011) & 0xFFFFFF
+        block[i] = state >> 16
+    return block.replace(b"\x0a", b"\x0d\x0a")
 
 
 def cycle_covers(path, period=PERIOD, cycle_sha=None):
@@ -148,6 +163,11 @@ def main():
                 raise ValueError(f"{label} contains {hit}")
             programs[label] = blob
         image = programs["LOL3.DAT"]
+        if image[RANDOM_AT:RANDOM_AT + len(RANDOM_CODE)] != RANDOM_CODE:
+            raise ValueError("LOL3.DAT random-number recurrence differs")
+        with ordered[0].open("rb") as handle:
+            if handle.read(PERIOD) != random_cycle():
+                raise ValueError("PHT common cycle differs from the seed-1 byte model")
         if int.from_bytes(image[0xD0:0xD4], "little") != 0x37332C6E:
             raise ValueError("LOL3.DAT COFF timestamp field differs")
         if image[0xE0:0xE2] != b"\x0b\x01":
@@ -178,7 +198,7 @@ def main():
         print(f"CHECK pht FAILED: {exc}")
         return 1
     shown = ", ".join(f"{path.name} {path.stat().st_size}" for path in ordered)
-    print(f"CHECK pht: 4 files are prefixes of one pinned 0x1010000-byte cycle; {shown}; "
+    print(f"CHECK pht: 4 files match the seed-1 cycle with LF expansion; {shown}; "
           "names absent from LOL3.DAT and LOL3.EXE (any case, ASCII/UTF-16); "
           "0x1010000 not an immediate; `$*.*` pushes at 3 sites")
     return 0

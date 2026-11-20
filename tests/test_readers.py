@@ -375,3 +375,35 @@ class ReaderTests(unittest.TestCase):
                                  "plus4": Counter({0: 4, 2: 5, 6: 6, 0x0B: 0})})
         self.assertIn("QWOD0 C5 A5: texture 1, MAP 2, light map 3, ODF 0", counted)
         self.assertIn("0xb on 0", counted)
+
+
+class PeLayoutTests(unittest.TestCase):
+    """A synthetic one-section PE32 image in the layout lol3_pe_layout reads."""
+
+    @staticmethod
+    def image(tail=b""):
+        pe = 0x40
+        head = bytearray(0x200)
+        head[:2] = b"MZ"
+        struct.pack_into("<I", head, 0x3C, pe)
+        head[pe:pe + 4] = b"PE\0\0"
+        struct.pack_into("<HH", head, pe + 4, 0x14C, 1)
+        struct.pack_into("<H", head, pe + 20, 224)
+        optional = pe + 24
+        struct.pack_into("<H", head, optional, 0x10B)
+        struct.pack_into("<I", head, optional + 16, 0x1010)
+        struct.pack_into("<III", head, optional + 28, 0x400000, 0x1000, 0x200)
+        struct.pack_into("<II", head, optional + 56, 0x2000, 0x200)
+        struct.pack_into("<8s4I", head, optional + 224, b".text", 0x100, 0x1000, 0x200, 0x200)
+        return bytes(head) + bytes(0x200) + tail
+
+    def test_layout_to_eof(self):
+        from lol3_pe_layout import layout
+        pe, base, entry, sections, debug, padding = layout(self.image())
+        self.assertEqual((pe, base, entry, debug, padding), (0x40, 0x400000, 0x210, [], 0))
+        self.assertEqual(sections, [(".text", 0x1000, 0x100, 0x200, 0x200)])
+
+    def test_unaccounted_tail_fails(self):
+        from lol3_pe_layout import layout
+        with self.assertRaises(ValueError):
+            layout(self.image(b"\x01"))

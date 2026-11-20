@@ -18,7 +18,8 @@ while it runs (the full texture cache next to `DAT`, the saves in
 `SAVEGAME`) are outside that folder, so playing the game does not change
 the count. The shipped compact
 `cdcache.wsx` does not parse as an ordinary archive, and the four `.PHT`
-files have no known layout. These five files are **not** counted as read.
+files have no header, directory or entries: their bytes are a generated
+stream ([PHT](formats/pht.md)). These five files are **not** counted as read.
 They are listed separately as repeated blocks: `tools/lol3_cache_seed.py`
 shows the pinned 114-byte header plus 51 copies of one pinned
 64,000-byte block fill `cdcache.wsx`, and `tools/lol3_pht.py` shows every

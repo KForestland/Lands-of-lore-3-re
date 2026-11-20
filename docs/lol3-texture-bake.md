@@ -410,16 +410,18 @@ different positions per bank, in mip order.
 | `RVOL0.WSX+0x36` | +0xABD99 | +0xB11A7, +0xB53B3, +0xB64BF, +0xB694B, +0xB6A97 |
 
 `check_all.py` runs `tools/lol3_native_checks.py --check`, which checks the
-pickup and copy-dispatch anchors only; the SMD scale, slice and crop
-addresses are cited, not machine-checked. The separate command
+pickup and copy-dispatch anchors, and adds `--decode-copy` when liblzo2 is
+installed; the SMD scale, slice and crop addresses are cited, not
+machine-checked. The command
 `tools/lol3_native_checks.py --data DAT --check --decode-copy`
 replays the fixed-width and span index reads on the shipped
 archives using liblzo2. It checks the dispatch instructions,
 all row headers, both first indexes, their palette witness
 and the two-matrix difference counts. It needs no game-written
-cache and writes no images. All pixels of these mips are index 3, so
-the difference counts measure where the row-header bytes fall; the same
-flagged five-mip set exists in all 18 banks (90 mips, identical counts).
+cache and writes no images. **CONFIRMED.** All 18 banks pass the same
+structural read for their five flagged mips, 90 in total. The span
+interpretation reads index 3 throughout those mips. The difference counts
+measure where the row-header bytes fall under the fixed-width helper.
 
 **CONFIRMED.** In the remap dispatcher, both words masked with 0x211
 give 0x200, selecting `0x42136E` (`0x421326–0x421345`). This path

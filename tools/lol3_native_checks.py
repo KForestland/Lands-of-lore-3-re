@@ -19,7 +19,6 @@ from lol3_texture_archive import chunks, texture_entries
 from lol3_texture_png import UNCONFIRMED_FLAGS, cache_textures, texture_payload
 from walk_lmf_leaves import lzo_decoder
 
-COPY_BANKS = {"BUPP1", "EWOD1", "QWOD0", "RVOL0"}
 COPY_MISMATCHES = (500, 244, 116, 52, 24)
 FIRST_COUNTER_IDS = {0x54, 0x59, 0x5E, 0x63, 0x68, 0x6D, 0x72, 0x77, 0x7C,
                      0x81, 0x86, 0x8B, 0x9C, 0x9D, 0x9E, 0x9F, 0x15A}
@@ -186,9 +185,9 @@ def regular_item_handlers(image, original):
 def verify_copy_banks(data_dir):
     decode = lzo_decoder()
     seen = Counter()
+    banks = set()
     for name, packed in texture_entries(data_dir):
-        if name not in COPY_BANKS:
-            continue
+        banks.add(name)
         bank = b"".join(decode(data, size) for data, size in chunks(packed))
         for offset, size, _, _, mip, _, palette in cache_textures(bank, [(0, len(bank))]):
             flags, width, height, payload = texture_payload(bank[offset:offset + size])
@@ -204,10 +203,12 @@ def verify_copy_banks(data_dir):
                 span.extend(payload[start + 4:start + 4 + width])
             if (fixed[0], span[0], unpack_from("<H", bank, palette + 6)[0]) != (0, 3, 0x03C0):
                 raise ValueError(f"{name}: wrong first-pixel witness at {offset:#x}")
+            if span.count(3) != len(span):
+                raise ValueError(f"{name}: nonuniform literal span at {offset:#x}")
             if sum(left != right for left, right in zip(fixed, span)) != COPY_MISMATCHES[mip]:
                 raise ValueError(f"{name}: wrong fixed-width comparison at {offset:#x}")
             seen[name, mip] += 1
-    if seen != {(name, mip): 1 for name in COPY_BANKS for mip in range(5)}:
+    if len(banks) != 18 or seen != {(name, mip): 1 for name in banks for mip in range(5)}:
         raise ValueError("missing or duplicate shipped copy mips")
     return seen
 
@@ -262,7 +263,7 @@ def spell_lines(archive):
 
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
-    parser.add_argument("--decode-copy", action="store_true", help="compare all 20 shipped copy mips")
+    parser.add_argument("--decode-copy", action="store_true", help="compare the five copy mips in every shipped bank")
     parser.add_argument("--list", action="store_true", help="print the anchor values the check reads")
     parser.add_argument("--spells", action="store_true", help="print spell rows and special-definition costs")
     args = parser.parse_args()

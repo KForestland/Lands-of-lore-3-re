@@ -13,9 +13,34 @@ the same stream. In the first 65,536 bytes, every lag from 1 through
 about 1 in 256). `lol3_pht.py --check` reads each file through its last
 byte, pins the SHA-256 of the first cycle and repeats that lag test.
 
-Nothing is known about what the bytes mean: the 0x1010000-byte block has
-no header or internal structure and its entropy is 7.998 bits per byte.
-No reader is known.
+## Byte generation
+
+**CONFIRMED.** Starting with state 1, step
+`state = (214013 * state + 2531011) mod 2^32`. Take the low byte of
+`(state >> 16) & 0x7FFF`. For each `0x0A`, emit `0x0D 0x0A`.
+The first expansion occurs at file `+0x3B`, followed by `0x0A` at
+`+0x3C`. This reproduces all four files as prefixes of one repeated
+sequence, starting at file byte 0. Only the low 24 state bits affect
+the extracted byte. Those bits return to 1 after `0x1000000` steps,
+including 65,536 newline bytes. With expansion, the cycle has
+`0x1010000` bytes. `lol3_pht.py --check` generates the cycle in memory,
+compares it with the first block and checks the four files through EOF.
+
+**CONFIRMED.** `LOL3.DAT` has the same recurrence at
+`0x51B655–0x51B67C` (file `+0x11AA55`). The LEA and shift chain
+multiplies by `4 * ((13 * 16 + 1) * 256 - 1) + 1 = 214013`, then adds
+`0x269EC3`. The code stores the new state at thread data `+0x14` and
+returns `(state >> 16) & 0x7FFF`. The caller at `0x4FF4D7–0x4FF4DC`
+does store the low byte of this return into a buffer. The link between
+that caller and the shipped files is **UNCONFIRMED**. The byte match
+establishes the stored sequence and text-mode expansion. Its producer
+and its use by the game remain open.
+
+**CONFIRMED.** `LOL3.DAT` has four direct calls to the generator
+(`0x4FF4D7`, `0x507890`, `0x50B5E4`, `0x50B5F1`) and one direct call to
+the seed setter `0x51B640`, at `0x50787B`. That setter stores the value
+returned by `0x51B830(0)` (`0x507870–0x50787B`). A stream that starts
+at state 1 is the one produced before any seed is set.
 
 ## Worked example
 
@@ -44,5 +69,8 @@ in no WSX directory and not in either program.
 
 **UNCONFIRMED** (what the game does with them). No stored name and no stored
 search pattern in those two programs names the four files, and nothing there
-shows how a byte of the cycle would be indexed. Settling test: a file-open
-trace that shows whether the game opens any of the four names.
+identifies a consumer of this cycle. Settling test: a file-open trace of
+`LOL3.EXE` and `LOL3.DAT` from start-up through a level load, filtered on
+`.PHT`. An open of one of the four names identifies the consumer; no open
+leaves the files unread by the game. The original distribution step that
+produced the files would also settle why the sequence is present.
