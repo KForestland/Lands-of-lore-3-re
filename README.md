@@ -12,6 +12,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **Recipes:** [cookbook](docs/COOKBOOK.md), seven short runs with the command and the first lines it prints.
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md), counted in the [rating](#rating). Open points include some item effects, how the second spell counter is filled in ordinary play, and final screen composition; two answers were checked on one display setting only. Some questions can only be settled by watching the original game run. Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](docs/NEEDS_A_RUNNING_GAME.md#answered-probes). Some probes were also tried on [edited saves](docs/EDITED_SAVES.md), copies of a game-written save with a few bytes changed.
 - **What changed lately:** [what's new](docs/WHATS_NEW.md), newest first.
+- **What we got wrong:** [corrections](docs/CORRECTIONS.md), each published error with how it was caught and the commit that fixed it.
 - **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md), [how they gate progress and scale numbers](docs/series-progress-and-numbers.md)).
 
 ## Rating
@@ -20,7 +21,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 442 statements CONFIRMED (proved from the program code or the files) and 70 UNCONFIRMED (a reading not yet proved), on 83 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 442 statements CONFIRMED (proved from the program code or the files) and 70 UNCONFIRMED (a reading not yet proved), on 84 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->

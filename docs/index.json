@@ -220,6 +220,23 @@
       ]
     },
     {
+      "path": "docs/CORRECTIONS.md",
+      "title": "Corrections",
+      "answers": [],
+      "question_references": [
+        "Q1",
+        "Q5",
+        "Q8",
+        "Q9",
+        "Q12"
+      ],
+      "tools": [
+        "tools/check_all.py",
+        "tools/lol3_claimed_edges.py",
+        "tools/lol3_save_selectors.py"
+      ]
+    },
+    {
       "path": "docs/EDITED_SAVES.md",
       "title": "Runs on edited saves",
       "answers": [],
