@@ -140,6 +140,23 @@ MUSIC1.WSX+0x36 size 4157978 key BD4CB6E0 tag 0x55 channels 2 rate 44100 align 1
 
 One line per music entry follows.
 
+## Change text or numbers with the mod kit
+
+The [mod kit](../tools/README.md#modkitpy) writes the game's text tables and numbers as files you can edit, and builds changed archives into a new folder. The game folder is only read.
+
+```bash
+python3 tools/modkit.py unpack "/path/to/LoL3" "my mod work"
+```
+
+Open `my mod work/edits/0000_PROMPT.TRR_text.json` in a text editor and change one line inside `"value"`. Then build and verify:
+
+```bash
+python3 tools/modkit.py build "/path/to/LoL3" "my mod work" "my mod output"
+python3 tools/modkit.py verify "/path/to/LoL3" "my mod work" "my mod output"
+```
+
+Each command ends with one summary line; build and verify print `22 archives or loose tables, 1 changed (PROMPT.TRR)`. Copy `PROMPT.TRR` from the output folder over a backup copy of your game to try it.
+
 ## Change one thing safely
 
 This example adds one to the X coordinate of the first waypoint in

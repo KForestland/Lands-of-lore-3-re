@@ -215,7 +215,8 @@
         "tools/lol3_script_browser.py",
         "tools/lol3_texture_palettes.py",
         "tools/lol3_texture_png.py",
-        "tools/lol3_texture_spans.py"
+        "tools/lol3_texture_spans.py",
+        "tools/modkit.py"
       ]
     },
     {
@@ -1283,6 +1284,8 @@
         "tools/lol3_texture_png.py",
         "tools/lol3_texture_spans.py",
         "tools/lol3_wsx_writer.py",
+        "tools/modkit.py",
+        "tools/modkit_core.py",
         "tools/rating.py",
         "tools/repo_guard.py",
         "tools/walk_lmf_leaves.py"

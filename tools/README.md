@@ -25,8 +25,9 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 35 CHECKS PASSED`, or `31 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
+| `check_all.py` | all checks below | prints each line, then `ALL 36 CHECKS PASSED`, or `32 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
+| `modkit.py` | the game folder (see [`modkit.py`](#modkitpy)) | unpacks, rebuilds and verifies every supported table in a temporary folder; unchanged files must match byte for byte |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
 | `extract_wsx_entries.py` | `DAT/*.WSX`. `--list` prints key, offset and size and writes nothing | parses every WSX and writes nothing (51/52; `cdcache.wsx` is open question Q1) |
 | `lol3_wsx_writer.py` | the WSX archives in `DAT` (not the `cdcache.wsx` seed) and the loose `LOCAL.WSX` and `locallng.wsx` beside `DAT` | rebuilds each archive in memory from its parsed rows (directory, then the data pool) and compares it byte for byte with the file: 51 DAT and 2 loose archives, 7,614 rows. One member is changed in memory first: the output must differ and re-read with the change. Writes nothing; `cdcache.wsx` is left out ([Q1](../docs/OPEN_QUESTIONS.md)) |
@@ -102,6 +103,29 @@ Check means the tool's `--check` is in the `check_all.py` list above. Inspect is
 | [Name to directory key](../docs/lol3-wsx-reader.md#resource-name-key) | `lol3_name_hash.py`; level sheets print four level keys; `extract_wsx_entries.py --list` prints any archive's keys | yes | text. `--list` prints `stems 40`, `stem 9: uhfrozen key 0x1d4f90da` and `stem 11: uhfroze2 key 0x1d4f74da`. An archive's keys are the WSX listing above. |
 | Program witnesses in `LOL3.DAT` ([pickup](../docs/lol3-item-dispatch.md), [copy mips](../docs/lol3-texture-bake.md), [spell counter](../docs/lol3-spell-dispatch.md)) | `lol3_native_checks.py` | yes. `check_all` adds `--decode-copy` when liblzo2 is available | text. `--list` prints `world item +0x68 0x4d83a0`, `call 0x4d83ac targets 0x42ef50` and `handler 112 0x4a6120`. |
 | [QWOD0 and SWOD4 byte-pattern counts](../docs/lol3-semantic-phase.md) | `lol3_claimed_edges.py` | yes | text. `--counts` prints `QWOD0 C5 A5: texture 195, MAP 2, light map 1, ODF 0` and `SWOD4 surface +4: 0x0 on 2393, 0x2 on 14, 0x6 on 29, 0xb on 0`. No picture: drawings of those labels were removed because they match no field the readers use. |
+
+## `modkit.py`
+
+The mod kit changes game text and numbers in copies; your game folder is only read. Run it from any folder and put quotes around paths with spaces:
+
+```bash
+python3 tools/modkit.py unpack "/path/to/LoL3" "my mod work"
+# change the files in "my mod work/edits", then:
+python3 tools/modkit.py build "/path/to/LoL3" "my mod work" "my mod output"
+python3 tools/modkit.py verify "/path/to/LoL3" "my mod work" "my mod output"
+```
+
+- `modkit.py` names the LoL3 tables; `modkit_core.py`, the same file in the three repositories, does the unpack, build, verify and folder checks.
+- The game folder is the LoL3 game folder holding `LOL3.DAT` and `DAT`, or its `DAT` folder (then the folder above it is read too).
+- `unpack` creates the work folder with `manifest.json`, a `README.txt` and one JSON file per table in `edits/`: the TRR text tables (`PROMPT.TRR` and the 26 tables of `locallng.wsx`, both the copy beside `DAT` and the one in it; change both), the item fields `special_cast_cost` (meaningful for items with flag 2) and `step_input` and the spell field `frame_count` of `GLOBAL.WSX`, and the creature fields `health_cap` and `attack_input` of the 18 level archives ([numbers](../docs/NUMBERS.md)). Change only `"value"`; keep the number of rows, the field names and codes such as `\r` or `\u0002`.
+- `build` creates the output folder and writes every unpacked file into it, changed or not (about 520 MB), and names the changed files. `verify` reads the output back with the archive and table readers and checks it against the work folder. Copy the changed files over a backup copy of your game to try them.
+- Refused, with one line saying why: a work or output folder that already exists, lies inside the game folder, inside a folder holding WSX archives or `LOL3.DAT`, or inside this repository, and an output inside the work folder.
+- An unchanged work folder rebuilds byte for byte: 22 files (`PROMPT.TRR` and 21 WSX archives) from 73 entries. `--check` does unpack, build and verify in a temporary folder (`--data` or `$LOL3_DAT`) and is part of `check_all.py`:
+
+```
+$ python3 tools/modkit.py --check
+CHECK modkit: 22 archives or loose tables rebuilt byte-identically from 73 unpacked entries; outputs in the game, work, archive and repository folders refused
+```
 
 ## Command-line conventions
 
