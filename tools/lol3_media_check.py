@@ -282,18 +282,22 @@ def display_trr_text(field):
                    for ch in lines).strip()
 
 
-def localized_trr(data, names):
+def localized_trr(data, names, *, verify_offsets=True):
     path = next((path for path in data.iterdir() if path.name.lower() == "locallng.wsx"), None)
     if path is None:
         raise FileNotFoundError("LOCALLNG.WSX is missing from the DAT folder")
     tables = {}
     with path.open("rb") as stream:
-        directory = {start: size for _, start, size in wsx_rows(stream)}
+        directory = list(wsx_rows(stream))
         for name in names:
-            start = TRR_AT[name]
-            if start not in directory:
+            key = wsx_name_hash(name)
+            matches = [(start, size) for stored, start, size in directory if stored == key]
+            if len(matches) != 1:
+                raise ValueError(f"LOCALLNG.WSX must contain one {name} entry, found {len(matches)}.")
+            start, size = matches[0]
+            if verify_offsets and start != TRR_AT[name]:
                 raise ValueError(f"{name} is not at the documented offset")
-            tables[name] = read_at(stream, start, directory[start])
+            tables[name] = read_at(stream, start, size)
     return path, tables
 
 
@@ -347,7 +351,7 @@ def show_text(data, table, record_id):
     name = table.lower()
     if name not in TRR_AT:
         raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
-    _, tables = localized_trr(data, (name,))
+    _, tables = localized_trr(data, (name,), verify_offsets=False)
     blob = tables[name]
     if record_id is None:
         print(trr_lines(blob, name), end="")
