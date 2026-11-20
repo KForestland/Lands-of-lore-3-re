@@ -32,16 +32,17 @@ def write_trr(rows):
     return struct.pack(f"<{len(header)}I", *header) + payload
 
 
-def trr_sources(data):
+def trr_sources(data, indexed=False):
     for folder in (data, data.parent):
         for path in sorted(folder.iterdir()):
             if path.suffix.lower() == ".trr":
-                yield path, None, 0, path.read_bytes()
+                blob = path.read_bytes()
+                yield (path, 0, None, 0, blob) if indexed else (path, None, 0, blob)
         for path in lol3_cli.wsx_files(folder):
             if path.name.upper() == "CDCACHE.WSX":
                 continue
             with path.open("rb") as source:
-                for key, start, size in wsx_rows(source):
+                for index, (key, start, size) in enumerate(wsx_rows(source)):
                     if size < 16:
                         continue
                     count = int.from_bytes(read_at(source, start, 4), "little")
@@ -58,7 +59,7 @@ def trr_sources(data):
                         read_trr(blob, path.name)
                     except ValueError:
                         continue
-                    yield path, key, start, blob
+                    yield (path, index, key, start, blob) if indexed else (path, key, start, blob)
 
 
 def check(data, listing=False):

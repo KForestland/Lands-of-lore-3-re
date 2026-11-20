@@ -2,6 +2,10 @@
 
 Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
 
+[Translation guide](../docs/TRANSLATION.md) covers `translate.py` , the FNT reader `translate_fonts.py`, and its game-specific `translate_data.py`.
+
+[Move placements](../docs/LEVEL_EDITOR.md) with `level_edit.py`, `level_edit_data.py` and `level_move_ui.py`.
+
 The `lol.py` job menu opens with `python tools/lol.py`. Add `JOB --help`
 to see the job's options. `level_viewer.py` writes an offline HTML plan with clickable details using `level_html.py`.
 Use `level_viewer.py --check` to write and read back one plan in a temporary folder.
@@ -159,6 +163,8 @@ Data patches are for the original Windows game.
 ```
 
 ## `save_edit.py`
+
+`save_page.py` renders the offline page produced by `lol.py save page`. See [the save guide](../docs/EDITED_SAVES.md#see-the-fields-in-an-offline-page).
 
 Writes a copy of an original save with one field changed; the save itself is only read. Each run prints the old and the new value and one line saying whether the game has been shown to load such an edit (CONFIRMED) or not yet (UNCONFIRMED). Fields and their status: [cookbook](../docs/COOKBOOK.md#change-a-saved-game-a-copy).
 

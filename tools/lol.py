@@ -12,6 +12,7 @@ from cli_errors import ReaderArgumentParser, run_cli
 JOBS = {
     "level": ("level_viewer.py", (), "Look at an interactive level plan"),
     "text": ("lol3_media_check.py", (), "Read original game text"),
+    "translate": ("translate.py", (), "Export, build and verify translations"),
     "music": ("lol3_media_check.py", (), "Inspect original game music (list MP3 and WAVE tracks)"),
     "model": ("level_export.py", (), "Export a level model and textures"),
     "save": ("save_edit.py", (), "Edit a copy of a saved game"),

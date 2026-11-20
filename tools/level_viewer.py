@@ -6,6 +6,7 @@ import struct
 
 from cli_errors import run_cli
 from level_html import Plan, main
+from level_move_ui import sections
 from lol3_level_schematic import PLACEMENTS, map_geometry
 from lol3_progression import collect
 from lol3_script_framing import level_map_entries
@@ -85,6 +86,7 @@ def view(data, stem, gates):
         plan.note(f"exit-{i}", f"Exit {i} to {dest}", "Exits",
                   {"Gate": guard, "Event": event, "Predicate": predicate, "Tried first": earlier,
                    "Script": f"{stream} group {group}, command {command}, subcommand {arm}, arg {arg}"}, target)
+    plan.edit_controls, plan.edit_script = sections(plan, stem, payload)
     return plan
 
 
