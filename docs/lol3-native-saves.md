@@ -111,13 +111,13 @@ expanded length; the decoded bytes are not compared with anything.
 
 ## Selector payloads
 
-**CONFIRMED.** The global descriptor `0x438140` and the level descriptor `0x438940` name each selector. The global loader calls the first at `0x436D43` and the global writer calls it at `0x43789D`. The level reader `0x437340` calls the second at `0x43745B` and the level writer calls it at `0x437F3A`. Each descriptor compares the selector index with its bound (`0x3C` at `0x438144`, `0x4A` at `0x438944`) and jumps through a table of 4-byte arm addresses (`0x438848`, `0x439460`). That gives 61 global and 75 level selectors, and each table is followed by `90 90 90 90` padding. Each arm writes four results: the live address, the byte count, the unit and a flag byte. The table is those four results for all 61 global selectors and all 75 level selectors. `lol3_save_selectors.py --check` requires the table to match the program.
+**CONFIRMED.** The global descriptor `0x438140` and the level descriptor `0x438940` name each selector. The global loader calls the first at `0x436D43` and the global writer calls it at `0x43789D`. The level reader `0x437340` calls the second at `0x43745B` and the level writer calls it at `0x437F3A`. Each descriptor compares the selector index with its bound (`0x3C` at `0x438144`, `0x4A` at `0x438944`) and jumps through a table of 4-byte arm addresses (`0x438848`, `0x439460`). That gives 61 global and 75 level selectors, and each table is followed by `90 90 90 90` padding. Each arm writes four results: the live address, the byte count, the unit and a flag byte. The table is those four results for all 61 global selectors and all 75 level selectors. `lol3_save_selectors.py --check` requires the table, and the 90 nested slots below, to match the program.
 
 A zero live pointer skips the section (loader `0x436D4F`, global writer `0x4378B8`, level writer `0x437F53`). Flag bit 0 (value 1) is what the global loader (`0x436D57`) and the level reader (`0x43746F`) test before they read the section. The two writers do not test that bit. Flag bit 1 (value 2) selects the baseline XOR through `0x43C480` (loader `0x436D75`, global writer `0x4378C4`, level writer `0x437F7D`). On that path the save writer calls the global adjuster `0x439590` at `0x437928`, or the level adjuster `0x439B30` at `0x437FDC`, with direction 0 (`0x43791B`, `0x437FD2`). The loader calls the global adjuster on the XOR path at `0x436E14` and on the direct path at `0x436E83`. The level reader `0x437340`, called from the loader at `0x436F2E`, calls the level adjuster at `0x437513` and `0x43757A`. Flag bit 2 (value 4) selects compression: save `0x43C830` (`0x43792D`, `0x437980`, `0x437FE1`, `0x438036`), load `0x43C790` (global loader `0x436DB6`, `0x436E26`; level reader `0x4374A9`, `0x437525`). Flag bit 3 (value 8) is tested only by the level writer, together with the writer's second stack argument, at `0x437F61`. If that argument is zero and bit 3 is clear, the stored length is 0 (`0x43805C`).
 
 Both adjusters return before their jump tables when the live pointer is zero, the byte count is zero, or the index is past the bound (`0x439598` and `0x4395A7`, bound `0x3C` at `0x4395B3`; `0x439B39` and `0x439B48`, bound `0x48` at `0x439B54`). Selectors 73 and 74 are past that bound. `0x43C410` copies one dword when its direction argument is 0, so the file stores the absolute value. When the direction is not 0, a source dword of zero is stored as zero (`0x43C46F`). A nonzero value is matched against 30 ranges. Base i is dword i of the direction object, and the end is that base plus dword i of the length row at direction +0x78 (signed compares). The stored result is the source dword plus the difference between this object's base and the direction object's base. If none of the 30 ranges contains the value, the index stays 30 and the addition still runs (`0x43C44C`).
 
-The last column is which dwords that helper receives, as offsets from the live address. `--check` also counts the helper calls written in each arm. An arm that returns without calling it copies the bytes and does not relocate pointers. Level selector 38's arm calls `0x43A4E0` instead. That function switches on byte +0x64 through the table at `0x43AE70`, bound `0x94`, and those arms are not read here.
+The last column is which dwords that helper receives, as offsets from the live address. `--check` also counts the helper calls written in each arm. An arm that returns without calling it copies the bytes and does not relocate pointers. Level selector 38's arm calls `0x43A4E0` instead. It compares byte +0x64 with `0x94` and takes the shared tail when the byte is above `0x94`, so the accepted indexes are 0 through `0x94`. The byte at `0x43AFD8` plus the index selects one of 90 slots in the table at `0x43AE70` (86 distinct arm addresses). Slot 89 is the shared tail `0x43AE12`, which an index above `0x94` also reaches; each of the other 89 slots stores a vtable at +0 and may relocate further dwords. The shared tail then relocates +0x10, +0x14, +0x34, +0x48 and +0x4c. What each arm holds in play stays open.
 
 <!-- selectors:begin -->
 | Selector | Descriptor | Live bytes | Byte count | Unit | Flags | Adjuster | Dwords passed to the pointer helper |
@@ -221,7 +221,7 @@ The last column is which dwords that helper receives, as offsets from the live a
 | Level 35 | `0x438e58` | `0x7d7690` | `0x80` | `0x8` | `0x5` | `0x43a0b5` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
 | Level 36 | `0x438e81` | `0x7d7600` | `0x90` | `0x30` | `0x5` | `0x43a0f0` | the dword at +0 of each record, stride = the unit, while the record start is below the byte count |
 | Level 37 | `0x438eaa` | `0x7d7710` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
-| Level 38 | `0x438ec3` | `dword([0x660ca4]+0x0)` | `dword([0x660ca4]+0x4)` | `0x0` | `0x5` | `0x43a12b` | calls 0x43A4E0, which switches on byte +0x64 through the table at 0x43AE70 (bound 0x94). Those arms are not read here |
+| Level 38 | `0x438ec3` | `dword([0x660ca4]+0x0)` | `dword([0x660ca4]+0x4)` | `0x0` | `0x5` | `0x43a12b` | calls 0x43A4E0, which accepts indexes 0 through 0x94 in byte +0x64 and selects one of 90 table slots through the map at 0x43AFD8 and the table at 0x43AE70; the slots are listed after this table |
 | Level 39 | `0x438eee` | `0x7d779c` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
 | Level 40 | `0x438f17` | `0x7d7794` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
 | Level 41 | `0x438f30` | `0x7d7798` | `0x4` | `0x4` | `0x1` | `0x43a408` | returns without calling the pointer helper |
@@ -260,7 +260,111 @@ The last column is which dwords that helper receives, as offsets from the live a
 | Level 74 | `0x439298` | `0x58cb8d` | `0x51` | `0x51` | `0x3` | none | index above 0x48, so the adjuster returns before its jump table |
 <!-- selectors:end -->
 
-**UNCONFIRMED.** What each selector holds in play. The table gives where its bytes live and how they are copied, not what they mean; only the fields isolated by the controlled saves below have a meaning. Also open: the `0x94` arms of `0x43A4E0` and the unnamed header bytes. Test: save the same load before and after one controlled action and compare that selector's bytes ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action)).
+**UNCONFIRMED.** What each selector holds in play. The table gives where its bytes live and how they are copied, not what they mean; only the fields isolated by the controlled saves below have a meaning. Of the 90 slots of `0x43A4E0`, 89 store a vtable and slot 89 is the shared tail; what each arm holds in play stays open, as do the unnamed header bytes. Test: save the same load before and after one controlled action and compare that selector's bytes ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action)).
+
+
+### Arms of level selector 38
+
+<!-- nested-arms:begin -->
+Indexes 0 through 0x94 (149 values) select these 90 table slots. Slot 89 is selected by 48 indexes, slot 88 by 6, slot 75 by 5, slot 87 by 3, slot 54 by 2, and every other slot by one index.
+
+The 90 slots hold 86 distinct arm addresses: slots 18 and 20, 43 and 45, 46 and 48, and 87 and 88 share one. Slot 89 is the shared tail `0x43AE12` itself, the same target the `ja` at `0x43A532` takes for an index above 0x94; it stores no vtable. The other 89 slots each store a vtable at +0 before they reach the tail.
+
+Every slot, and an index above 0x94, then relocates the dwords at +0x10, +0x14, +0x34, +0x48 and +0x4c through `0x43C410`. The tail then loads the dword at `[esi-0x14]`. It returns when that dword is zero; otherwise it adds `0x14` and jumps back to the switch at `0x43A528`.
+
+| Slot | Arm | Setup call | Vtable left at +0 | Further dwords relocated |
+|---:|---|---|---|---|
+| 0 | `0x43a547` | `0x43c250` | `0x53e908` | +0x68, +0x80 |
+| 1 | `0x43a55a` | `0x43c250` | `0x53e7e8` | +0x68, +0x80 |
+| 2 | `0x43a5a9` | `0x43b0f0` | `0x53e488` | none |
+| 3 | `0x43a580` | `0x43c250` | `0x53e5a8` | +0x68, +0x80 |
+| 4 | `0x43a56d` | `0x43c250` | `0x53e6c8` | +0x68, +0x80 |
+| 5 | `0x43a5c3` | `0x43c040` | `0x53e360` | none |
+| 6 | `0x43a5dd` | `0x43c040` | `0x53e238` | none |
+| 7 | `0x43a5f7` | `0x43b0f0` | `0x53e118` | +0x78, 0x14 dwords from +0x7c step 4 |
+| 8 | `0x43a63a` | `0x43b0f0` | `0x53dff8` | +0x68 |
+| 9 | `0x43a654` | `0x43b0f0` | `0x53ded8` | none |
+| 10 | `0x43a66e` | `0x43b0f0` | `0x53ddb8` | none |
+| 11 | `0x43a688` | `0x43b0f0` | `0x53dc98` | none |
+| 12 | `0x43a6a2` | `0x43b0f0` | `0x53db78` | +0x68 |
+| 13 | `0x43a6bc` | `0x43bb90` | `0x53da50` | none |
+| 14 | `0x43a6d6` | `0x43bb90` | `0x53d928` | none |
+| 15 | `0x43a6f0` | `0x43bb90` | `0x53d800` | none |
+| 16 | `0x43a70a` | `0x43bb90` | `0x53d6d8` | none |
+| 17 | `0x43a724` | `0x43b0f0` | `0x53d5b8` | none |
+| 18 | `0x43ac90` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x539880` | +0x80 |
+| 19 | `0x43acb4` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x539758` | none |
+| 20 | `0x43ac90` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x539880` | +0x80 |
+| 21 | `0x43acd6` | `0x43b0f0` | `0x539630` | none |
+| 22 | `0x43acf0` | `0x43b0f0` | `0x539508` | none |
+| 23 | `0x43a73e` | `0x43c040` | `0x53d490` | none |
+| 24 | `0x43a758` | `0x43b0f0` | `0x53d370` | none |
+| 25 | `0x43a772` | `0x43b0f0` | `0x53d250` | none |
+| 26 | `0x43a78c` | `0x43b0f0` | `0x53d130` | none |
+| 27 | `0x43a7a6` | `0x43b450` | `0x53d008` | none |
+| 28 | `0x43a7c0` | `0x43ba90` | `0x53cee8` | none |
+| 29 | `0x43a7da` | `0x43b450` | `0x53cdc0` | none |
+| 30 | `0x43a7f4` | `0x43bec0` | `0x53cc98` | none |
+| 31 | `0x43a80e` | `0x43bec0` | `0x53cb70` | none |
+| 32 | `0x43a828` | `0x43bec0` | `0x53ca48` | none |
+| 33 | `0x43a842` | `0x43bec0` | `0x53c920` | none |
+| 34 | `0x43a85c` | `0x43bec0` | `0x53c7f8` | none |
+| 35 | `0x43a876` | `0x43bec0` | `0x53c6d0` | none |
+| 36 | `0x43a890` | `0x43b450` | `0x53c5a8` | none |
+| 37 | `0x43a8aa` | `0x43b450` | `0x53c480` | none |
+| 38 | `0x43a8c4` | `0x43b0f0` | `0x53c360` | none |
+| 39 | `0x43a8f8` | `0x43b0f0` | `0x53c120` | none |
+| 40 | `0x43a912` | `0x43b0f0` | `0x53c000` | none |
+| 41 | `0x43a92c` | `0x43b0f0` | `0x53bee0` | none |
+| 42 | `0x43a946` | `0x43b0f0` | `0x53bdc0` | none |
+| 43 | `0x43a960` | `0x43b0f0` | `0x53bca0` | none |
+| 44 | `0x43a97a` | `0x43b0f0` | `0x53bb80` | none |
+| 45 | `0x43a960` | `0x43b0f0` | `0x53bca0` | none |
+| 46 | `0x43a9ae` | `0x43b0f0` | `0x53b940` | none |
+| 47 | `0x43a994` | `0x43b0f0` | `0x53ba60` | none |
+| 48 | `0x43a9ae` | `0x43b0f0` | `0x53b940` | none |
+| 49 | `0x43a9c8` | `0x43b0f0` | `0x53b820` | none |
+| 50 | `0x43a9e2` | `0x43b0f0` | `0x53b700` | none |
+| 51 | `0x43a9fc` | `0x43b0f0` | `0x53b5e0` | none |
+| 52 | `0x43aa16` | `0x43b0f0` | `0x53b4c0` | none |
+| 53 | `0x43aa30` | `0x43b0f0` | `0x53b3a0` | none |
+| 54 | `0x43aa4a` | `0x43b0f0` | `0x53b280` | none |
+| 55 | `0x43aa64` | `0x43b0f0` | `0x53b160` | none |
+| 56 | `0x43aa7e` | `0x43b0f0` | `0x53b040` | none |
+| 57 | `0x43aa98` | `0x43b0f0` | `0x53af20` | none |
+| 58 | `0x43aab2` | `0x43b0f0` | `0x53ae00` | none |
+| 59 | `0x43a8de` | `0x43b0f0` | `0x53c240` | none |
+| 60 | `0x43aacc` | `0x43b0f0` | `0x53ace0` | none |
+| 61 | `0x43aae6` | `0x43b0f0` | `0x53abc0` | none |
+| 62 | `0x43ad4e` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x5391a8` | none |
+| 63 | `0x43ab00` | `0x43b0f0` | `0x53aaa0` | +0x68 |
+| 64 | `0x43ab1a` | `0x43b0f0` | `0x53a980` | none |
+| 65 | `0x43ab34` | `0x43b0f0` | `0x53a860` | none |
+| 66 | `0x43ab4e` | `0x43b0f0` | `0x53a740` | none |
+| 67 | `0x43ab68` | `0x43b0f0` | `0x53a618` | none |
+| 68 | `0x43ac54` | `0x43b0f0` | `0x539be0` | none |
+| 69 | `0x43ab9f` | `0x43b0f0` | `0x53a3c8` | none |
+| 70 | `0x43abb9` | `0x43b0f0` | `0x53a2a8` | none |
+| 71 | `0x43abd3` | `0x43b0f0` | `0x53a180` | none |
+| 72 | `0x43ab82` | `0x43b0f0` | `0x53a4f0` | +0x70 |
+| 73 | `0x43abed` | `0x43b0f0` | `0x53a060` | none |
+| 74 | `0x43ac07` | `0x43b0f0` | `0x539f40` | +0x74 |
+| 75 | `0x43ac20` | `0x43b0f0` | `0x539e20` | none |
+| 76 | `0x43ac3a` | `0x43b0f0` | `0x539d00` | none |
+| 77 | `0x43ad2c` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x5392c8` | none |
+| 78 | `0x43ac6e` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x5399a0` | none |
+| 79 | `0x43ad70` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x539088` | +0x68 |
+| 80 | `0x43ad8f` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x538f68` | +0x68 |
+| 81 | `0x43adaa` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x538e48` | +0x70 |
+| 82 | `0x43ad0a` | `0x43b090` passing +0x38 while +0 is `0x539ac0` | `0x5393e8` | none |
+| 83 | `0x43add4` | none | `0x538c08` | none |
+| 84 | `0x43adc8` | none | `0x538d28` | none |
+| 85 | `0x43ade0` | none | `0x538ae8` | +0x7c |
+| 86 | `0x43adef` | none | `0x5389c8` | +0x68 |
+| 87 | `0x43adfb` | none | `0x5388a8` | +0x68 |
+| 88 | `0x43adfb` | none | `0x5388a8` | +0x68 |
+| 89 | `0x43ae12` | none | none | none |
+<!-- nested-arms:end -->
 
 ## Controlled save setup
 
@@ -488,4 +592,4 @@ bases.
 
 **What was tried.** This compares the 61 directory offsets in each slot header and reads the descriptor and adjuster arms in the program. The page already records controlled saves for movement, the quick-slot transfer and the floor pickup.
 
-**What would settle it.** The running-game test is not yet run ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). It compares the original save bytes before and after one controlled action for each remaining selector payload. What each selector holds in play and the `0x94` arms of `0x43A4E0` are also still open.
+**What would settle it.** The running-game test is not yet run ([test Q13](NEEDS_A_RUNNING_GAME.md#q13-which-original-save-bytes-follow-one-controlled-action), [probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)). It compares the original save bytes before and after one controlled action for each remaining selector payload. What each selector holds in play is still open. Of the 90 slots, 89 store a vtable and slot 89 is the shared tail; what each arm means in play is still open.

@@ -9,7 +9,9 @@ The level reader (0x43745B) and the level writer (0x437F3A) call 0x438940.
 --check reads the two selector counts from the bound compare at the head of each
 descriptor, requires the call sites, jump tables, padding and adjuster bounds
 above, counts the 0x43C410 calls in each adjuster arm, and requires the selector
-table on the save page to match those arms.
+table on the save page to match those arms. It also reads the 90 table slots
+of level selector 38 (86 distinct arm addresses; slot 89 is the shared tail)
+and requires that table to match.
 """
 from cli_errors import run_cli
 from hashlib import sha256
@@ -24,6 +26,21 @@ from capstone.x86 import X86_OP_IMM, X86_OP_MEM, X86_OP_REG
 PAGE = Path(__file__).resolve().parents[1] / "docs" / "lol3-native-saves.md"
 BEGIN = "<!-- selectors:begin -->"
 END = "<!-- selectors:end -->"
+NESTED_BEGIN = "<!-- nested-arms:begin -->"
+NESTED_END = "<!-- nested-arms:end -->"
+# Level selector 38 calls 0x43A4E0. Byte +0x64 is compared with 0x94 (ja),
+# so indexes 0 through 0x94 are accepted. The byte at 0x43AFD8 translates
+# the index into one of 90 slots, and the dword table at 0x43AE70 holds their
+# arm addresses (86 distinct; slot 89 is the shared tail 0x43AE12).
+NESTED_CMP = 0x43A52D
+NESTED_MAP = 0x43AFD8
+NESTED_TABLE = 0x43AE70
+NESTED_TAIL = 0x43AE12
+NESTED_JOIN = 0x43AE08
+NESTED_BACK = 0x43A528
+NESTED_INDEXES = 0x95
+NESTED_SLOTS = 90
+SHARED_OFFSETS = (0x10, 0x14, 0x34, 0x48, 0x4C)
 GLOBAL_DESCRIPTOR, GLOBAL_TABLE, GLOBAL_COUNT = 0x438140, 0x438848, 61
 LEVEL_DESCRIPTOR, LEVEL_TABLE, LEVEL_COUNT = 0x438940, 0x439460, 75
 GLOBAL_ADJUSTER, GLOBAL_MAP, GLOBAL_ARMS = 0x439590, 0x439AEC, 0x439AC4
@@ -68,7 +85,7 @@ ARM_EFFECT = {
     0x43A144: "the dword at +0",
     0x43A0B5: "the dword at +0 of each record, stride = the unit, while the record start is below the byte count",
     0x43A0F0: "the dword at +0 of each record, stride = the unit, while the record start is below the byte count",
-    0x43A12B: "calls 0x43A4E0, which switches on byte +0x64 through the table at 0x43AE70 (bound 0x94). Those arms are not read here",
+    0x43A12B: "calls 0x43A4E0, which accepts indexes 0 through 0x94 in byte +0x64 and selects one of 90 table slots through the map at 0x43AFD8 and the table at 0x43AE70; the slots are listed after this table",
     0x43A366: "the dword at +0 of each record, stride = the unit, while the record start is below the byte count",
     0x43A3A1: "the dword at +0 of each record, stride = the unit, while the record start is below the byte count",
     0x43A3D8: "the dword at +0 of each record, stride = the unit, while the record start is below the byte count",
@@ -328,6 +345,233 @@ def table(image):
     return "\n".join(lines)
 
 
+def _reg(ins, op):
+    if op.type != X86_OP_REG:
+        return None
+    return ins.reg_name(op.reg)
+
+
+def _mem(ins, op):
+    if op.type != X86_OP_MEM or op.mem.index:
+        return None
+    return ins.reg_name(op.mem.base), op.mem.disp
+
+
+def nested_map(image):
+    raw = image[NESTED_MAP - CODE_BIAS:NESTED_MAP - CODE_BIAS + NESTED_INDEXES]
+    if len(raw) != NESTED_INDEXES or any(slot >= NESTED_SLOTS for slot in raw):
+        raise ValueError("selector 38 map is not 149 slots in 0..89")
+    return list(raw)
+
+
+def shared_tail(md, image):
+    """The five dwords every arm relocates, then the link back to the switch."""
+    offs = []
+    va = NESTED_TAIL
+    for _ in range(5):
+        lea, mov, push_a, push_b, push_c, call = (
+            ins_at(md, image, va + delta) for delta in (0, 3, 5, 6, 7, 8)
+        )
+        base, disp = _mem(lea, lea.operands[1])
+        if not (lea.mnemonic == "lea" and _reg(lea, lea.operands[0]) == "eax"
+                and base == "esi" and mov.mnemonic == "mov" and mov.op_str == "ecx, edi"
+                and [item.op_str for item in (push_a, push_b, push_c)] == ["eax", "eax", "ebp"]
+                and call.mnemonic == "call" and call.operands[0].imm & 0xFFFFFFFF == POINTER_HELPER):
+            raise ValueError(f"shared tail at {va:#x} is not a pointer-helper call")
+        offs.append(disp)
+        va = call.address + call.size
+    link = ins_at(md, image, va)
+    base, disp = _mem(link, link.operands[1])
+    add = ins_at(md, image, 0x43AE5A)
+    back = ins_at(md, image, 0x43AE5F)
+    ret = ins_at(md, image, 0x43AE6A)
+    if not (link.mnemonic == "mov" and _reg(link, link.operands[0]) == "esi" and base == "esi" and disp == -0x14
+            and add.mnemonic == "add" and add.op_str == "esi, 0x14"
+            and back.mnemonic == "jne" and back.operands[0].imm & 0xFFFFFFFF == NESTED_BACK
+            and ret.mnemonic == "ret" and ret.op_str == "0xc"):
+        raise ValueError("shared tail does not walk [esi-0x14] back to the switch")
+    if tuple(offs) != SHARED_OFFSETS:
+        raise ValueError(f"shared tail offsets {offs} are not {SHARED_OFFSETS}")
+    return offs
+
+
+def _helper_lea(md, image, ins):
+    """A lea of [esi+disp] that 0x43C410 receives, either here or at the join.
+
+    The result is ((displacement, count, stride), next address, joined). A stride
+    of 0 is one dword. Slot 7's second lea is 0x14 dwords from +0x7C, step 4.
+    """
+    if ins.mnemonic != "lea":
+        return None
+    base, disp = _mem(ins, ins.operands[1])
+    dest = _reg(ins, ins.operands[0])
+    if base != "esi" or dest == "ecx":
+        return None
+    nxt = ins_at(md, image, ins.address + ins.size)
+    if dest == "eax" and nxt.mnemonic == "jmp" and nxt.operands[0].type == X86_OP_IMM and nxt.operands[0].imm & 0xFFFFFFFF == NESTED_JOIN:
+        return (disp, 1, 0), nxt.address + nxt.size, True
+    va = ins.address + ins.size
+    item = nxt
+    count = 1
+    if dest == "edi" and item.mnemonic == "mov" and _reg(item, item.operands[0]) == "ebx" and item.operands[1].type == X86_OP_IMM:
+        count = item.operands[1].imm
+        va = item.address + item.size
+        item = ins_at(md, image, va)
+        if item.mnemonic != "mov":
+            raise ValueError(f"counted lea at {ins.address:#x} does not reload ecx")
+        va = item.address + item.size
+        item = ins_at(md, image, va)
+    seq = []
+    for _ in range(5):
+        seq.append(item)
+        va = item.address + item.size
+        item = ins_at(md, image, va)
+    call = next((entry for entry in seq if entry.mnemonic == "call"), None)
+    pushes = [entry.op_str for entry in seq if entry.mnemonic == "push"]
+    if not (call is not None and call.operands[0].imm & 0xFFFFFFFF == POINTER_HELPER and pushes[:3] == [dest, dest, "ebp"]):
+        raise ValueError(f"lea at {ins.address:#x} is not passed to the pointer helper")
+    va = call.address + call.size
+    if count == 1:
+        return (disp, 1, 0), va, False
+    add = ins_at(md, image, va)
+    dec = ins_at(md, image, add.address + add.size)
+    branch = ins_at(md, image, dec.address + dec.size)
+    if not (add.mnemonic == "add" and add.op_str == f"{dest}, 4" and dec.mnemonic == "dec"
+            and branch.mnemonic == "jne"):
+        raise ValueError(f"counted lea at {ins.address:#x} is not a step-4 loop")
+    return (disp, count, 4), branch.address + branch.size, False
+
+
+def arm_facts(md, image, start):
+    """Setup call, the vtable left at +0, the vtable the setup call sees, and extra dwords."""
+    if start == NESTED_TAIL:
+        return None, None, (None, None), ()
+    va = start
+    seen = set()
+    setup = None
+    setup_at = None
+    stores = []
+    extra = []
+    while va not in seen and len(seen) < 40:
+        if va >= NESTED_TAIL:
+            break
+        seen.add(va)
+        ins = ins_at(md, image, va)
+        if ins is None:
+            raise ValueError(f"no instruction at {va:#x}")
+        found = _helper_lea(md, image, ins)
+        if found is not None:
+            item, va, joined = found
+            extra.append(item)
+            if joined:
+                break
+            continue
+        if ins.mnemonic == "lea":
+            base, disp = _mem(ins, ins.operands[1])
+            if _reg(ins, ins.operands[0]) == "ecx" and base == "esi":
+                setup_at = disp
+        if ins.mnemonic == "mov" and len(ins.operands) == 2:
+            base, disp = _mem(ins, ins.operands[0]) or (None, None)
+            if base == "esi" and disp == 0 and ins.operands[1].type == X86_OP_IMM:
+                stores.append(ins.operands[1].imm & 0xFFFFFFFF)
+        if ins.mnemonic == "call" and ins.operands[0].type == X86_OP_IMM:
+            target = ins.operands[0].imm & 0xFFFFFFFF
+            if target != POINTER_HELPER:
+                if setup is not None:
+                    raise ValueError(f"arm {start:#x} has two setup calls")
+                setup = target
+        if ins.mnemonic == "jmp" and ins.operands[0].type == X86_OP_IMM:
+            dest = ins.operands[0].imm & 0xFFFFFFFF
+            if dest in (NESTED_JOIN, NESTED_TAIL) or dest >= NESTED_TAIL:
+                break
+            va = dest
+            continue
+        if ins.mnemonic.startswith("ret"):
+            raise ValueError(f"arm {start:#x} returned before the shared tail")
+        va += ins.size
+    else:
+        raise ValueError(f"arm {start:#x} did not reach the shared tail")
+    during = stores[0] if len(stores) > 1 else None
+    vtable = stores[-1] if stores else None
+    if len(stores) > 2:
+        raise ValueError(f"arm {start:#x} stores {len(stores)} vtables")
+    return setup, setup_at if during is not None else None, (during, vtable), tuple(extra)
+
+
+def nested_rows(image):
+    md = decoder()
+    slots = nested_map(image)
+    shared_tail(md, image)
+    raw = image[NESTED_CMP - CODE_BIAS:NESTED_CMP - CODE_BIAS + 26]
+    if raw != bytes.fromhex("3d940000000f87da08000033c98a88d8af4300ff248d70ae4300"):
+        raise ValueError("selector 38 switch is not cmp 0x94, the map, and the 90-arm table")
+    if NESTED_MAP != NESTED_TABLE + NESTED_SLOTS * 4:
+        raise ValueError("the byte map does not start immediately after the arm table")
+    targets = [u32(image, NESTED_TABLE + 4 * slot) for slot in range(NESTED_SLOTS)]
+    rows = []
+    for slot, target in enumerate(targets):
+        if not NESTED_CMP < target <= NESTED_TAIL:
+            raise ValueError(f"slot {slot} target {target:#x} is outside the switch")
+        setup, passed, pair, extra = arm_facts(md, image, target)
+        during, vtable = pair
+        rows.append((slot, target, setup, passed, during, vtable, extra))
+    expect = {
+        0: (0x43A547, 0x43C250, None, None, 0x53E908, ((0x68, 1, 0), (0x80, 1, 0))),
+        7: (0x43A5F7, 0x43B0F0, None, None, 0x53E118, ((0x78, 1, 0), (0x7C, 0x14, 4))),
+        8: (0x43A63A, 0x43B0F0, None, None, 0x53DFF8, ((0x68, 1, 0),)),
+        18: (0x43AC90, 0x43B090, 0x38, 0x539AC0, 0x539880, ((0x80, 1, 0),)),
+        81: (0x43ADAA, 0x43B090, 0x38, 0x539AC0, 0x538E48, ((0x70, 1, 0),)),
+        89: (NESTED_TAIL, None, None, None, None, ()),
+    }
+    for slot, want in expect.items():
+        if rows[slot][1:] != want:
+            raise ValueError(f"slot {slot} decoded {rows[slot][1:]}, expected {want}")
+    return slots, rows
+
+
+def nested_table(image):
+    slots, rows = nested_rows(image)
+    counts = {}
+    for slot in slots:
+        counts[slot] = counts.get(slot, 0) + 1
+    if [counts[slot] for slot in (89, 88, 75, 87, 54)] != [48, 6, 5, 3, 2]:
+        raise ValueError("selector 38 slot counts changed")
+    if sum(1 for count in counts.values() if count == 1) != 85 or len(counts) != 90:
+        raise ValueError("selector 38 does not use all 90 arms")
+    distinct = len({target for _slot, target, *_rest in rows})
+    if distinct != 86:
+        raise ValueError(f"selector 38 has {distinct} distinct arm addresses, not 86")
+    if [row[0] for row in rows if row[5] is None] != [89]:
+        raise ValueError("a slot other than 89 stores no vtable")
+    lines = [
+        "Indexes 0 through 0x94 (149 values) select these 90 table slots. Slot 89 is selected by 48 indexes, slot 88 by 6, slot 75 by 5, slot 87 by 3, slot 54 by 2, and every other slot by one index.",
+        "",
+        f"The 90 slots hold {distinct} distinct arm addresses: slots 18 and 20, 43 and 45, 46 and 48, and 87 and 88 share one. Slot 89 is the shared tail `0x43AE12` itself, the same target the `ja` at `0x43A532` takes for an index above 0x94; it stores no vtable. The other 89 slots each store a vtable at +0 before they reach the tail.",
+        "",
+        "Every slot, and an index above 0x94, then relocates the dwords at +0x10, +0x14, +0x34, +0x48 and +0x4c through `0x43C410`. The tail then loads the dword at `[esi-0x14]`. It returns when that dword is zero; otherwise it adds `0x14` and jumps back to the switch at `0x43A528`.",
+        "",
+        "| Slot | Arm | Setup call | Vtable left at +0 | Further dwords relocated |",
+        "|---:|---|---|---|---|",
+    ]
+    for slot, target, setup, passed, during, vtable, extra in rows:
+        if setup is None:
+            setup_text = "none"
+        elif during is None:
+            setup_text = f"`{setup:#x}`"
+        else:
+            setup_text = f"`{setup:#x}` passing +{passed:#x} while +0 is `{during:#x}`"
+        vtable_text = "none" if vtable is None else f"`{vtable:#x}`"
+        parts = []
+        for disp, count, stride in extra:
+            if count == 1:
+                parts.append(f"+{disp:#x}")
+            else:
+                parts.append(f"{count:#x} dwords from +{disp:#x} step {stride}")
+        extra_text = "none" if not parts else ", ".join(parts)
+        lines.append(f"| {slot} | `{target:#x}` | {setup_text} | {vtable_text} | {extra_text} |")
+    return "\n".join(lines)
+
+
 def pins(image):
     found = {(kind, index): fields for kind, index, _entry, fields, _arm in rows(image)}
     expect = {
@@ -378,12 +622,13 @@ def pins(image):
     used = {arm for kind, _index, _entry, _fields, arm in rows(image) if arm is not None}
     if used - set(ARM_CALLS) or used - set(ARM_EFFECT):
         raise ValueError("an adjuster arm has no effect line or call count")
+    nested_rows(image)
 
 
-def marked(text):
+def marked(text, begin=BEGIN, end_mark=END):
     try:
-        start = text.index(BEGIN) + len(BEGIN)
-        end = text.index(END, start)
+        start = text.index(begin) + len(begin)
+        end = text.index(end_mark, start)
     except ValueError as error:
         raise ValueError("save page is missing the selector markers") from error
     body = text[start:end]
@@ -401,10 +646,13 @@ def main():
         image = image_of(args.data)
         pins(image)
         rendered = table(image)
+        nested = nested_table(image)
         if args.check:
-            page = marked(PAGE.read_text(encoding="utf-8"))
-            if page != rendered:
+            text = PAGE.read_text(encoding="utf-8")
+            if marked(text) != rendered:
                 raise ValueError("docs/lol3-native-saves.md selector table differs from LOL3.DAT")
+            if marked(text, NESTED_BEGIN, NESTED_END) != nested:
+                raise ValueError("docs/lol3-native-saves.md nested arm table differs from LOL3.DAT")
             print("CHECK save_selectors: 61 global and 75 level selectors match docs/lol3-native-saves.md")
             return 0
         print(rendered, end="")

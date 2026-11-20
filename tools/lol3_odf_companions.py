@@ -165,6 +165,18 @@ def main():
             raise ValueError("failure jump is not 0x4FD7B1 to 0x4FD8E4")
         if image[0x4FD8E4 - CODE_BIAS:0x4FD8E8 - CODE_BIAS] != bytes.fromhex("5f5e5dc3"):
             raise ValueError("failure landing is not the epilogue")
+        if image[0x450434 - CODE_BIAS:0x450437 - CODE_BIAS] != bytes.fromhex("c20400"):
+            raise ValueError("creature allocator is not ret 4")
+        placement = (
+            "8d4424106a385055e84412f8ff8b0d18777d0083c40c681c010000e871bef9ff"
+            "8bf03bf30f84910200008b4424308b15d801570025ff000000"
+        )
+        if image[0x4B454F - CODE_BIAS:0x4B4588 - CODE_BIAS] != bytes.fromhex(placement):
+            raise ValueError("creature placement index is not the low byte at row +0x20")
+        if image[0x4B458C - CODE_BIAS:0x4B459A - CODE_BIAS] != bytes.fromhex("8d0c40c1e1032bc88d0c498d044a"):
+            raise ValueError("creature index stride is not 139")
+        if image[0x4B45AA - CODE_BIAS:0x4B45B0 - CODE_BIAS] != bytes.fromhex("c70628fe5300"):
+            raise ValueError("creature vtable store changed")
         if image[0x546318 - DATA_BIAS:0x546318 - DATA_BIAS + 2] != b"\\\x00":
             raise ValueError("path separator is not a backslash")
         for leaf, va in LEAF_VA.items():

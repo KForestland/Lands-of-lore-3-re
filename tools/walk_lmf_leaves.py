@@ -16,8 +16,21 @@ from collections import Counter
 from pathlib import Path
 from struct import iter_unpack, unpack_from
 
+from hashlib import sha256
+
 from extract_wsx_entries import parse_wsx
 from lol3_cli import wsx_files
+from lol3_script_framing import CODE_BIAS, RETAIL_PE
+
+# The 15 calls of the member loader, and the 11-dword copy of its 44-byte header.
+MEMBER_CALLS = (
+    0x47451E, 0x474D85, 0x47596D, 0x47F833, 0x47FD11, 0x480438, 0x4982BA,
+    0x498D51, 0x499C42, 0x4C00D1, 0x4C0154, 0x4C02D4, 0x4C02EB, 0x4C0321, 0x4C0345,
+)
+MEMBER_LOADER = 0x44EB40
+HEADER_COPY = bytes.fromhex(
+    "b90b0000008bf325ffff0000f3a58b0d149c540089542410d1e066894104a1149c54008d732c"
+)
 
 
 def lmf_groups(data):
@@ -176,7 +189,28 @@ def directory_text(data, name):
     return "\n".join(lines) + "\n"
 
 
+def check_header_copy(data_dir):
+    """The 44-byte header copy and the 15 calls of the member loader."""
+    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    if sha256(image).hexdigest() != RETAIL_PE:
+        raise ValueError("LOL3.DAT does not match the documented English retail executable")
+    if image[0x44ED0A - CODE_BIAS:0x44ED30 - CODE_BIAS] != HEADER_COPY:
+        raise ValueError("light-map header copy is not 11 dwords ending at the grid")
+    found = []
+    blob = image[0x401000 - CODE_BIAS:0x5372E5 - CODE_BIAS]  # all of .text (virtual size 0x1362E5)
+    for index in range(len(blob) - 5):
+        if blob[index] != 0xE8:
+            continue
+        rel = int.from_bytes(blob[index + 1:index + 5], "little", signed=True)
+        src = 0x401000 + index
+        if (src + 5 + rel) & 0xFFFFFFFF == MEMBER_LOADER:
+            found.append(src)
+    if tuple(found) != MEMBER_CALLS:
+        raise ValueError(f"member loader calls are {found}, not the 15 documented sites")
+
+
 def check(data_dir, decode):
+    check_header_copy(data_dir)
     files = groups = members = 0
     stats = Counter()
     for path in wsx_files(data_dir):

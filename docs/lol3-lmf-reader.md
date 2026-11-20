@@ -151,7 +151,25 @@ returns the scratch copy through `0x44EEAB–0x44EEC3`.
 
 Checked without a hit: `0x44EB40` itself, `0x44EC90`, the first 45
 instructions after each of the 15 calls to `0x44EB40`, the size path
-`0x479D90` and the surface renderer around `0x4980D8`. A read watch on the two dwords +0x0C/+0x10 of a nonzero member
+`0x479D90` and the surface renderer around `0x4980D8`. The copy at
+`0x44ED0A` is `mov ecx, 0xB` followed by `rep movsd` at `0x44ED16`:
+11 dwords, the 44-byte header. Through `lea esi, [ebx+0x2C]` at
+`0x44ED2D` the only header fields addressed are the dimension words
++4 and +6. Following the returned pointer along the straight-line path after
+each of the 15 calls reaches a bit test of dword +0, dword +8
+(`0x4C00DD`, `0x4C0160`) or its bytes +8 to +0xA (`0x47403A`), words
++0x14 to +0x18 (`0x4751E7`, `0x480164`, `0x499C79`), or a nonzero
+test. The member is also passed to `0x479D90`, `0x479E60`, `0x4857C0`,
+`0x485840`, `0x44EED0`, `0x49B100`, `0x49B9E0` and `0x49C850`; each
+load of that argument found in them is followed by a bit test of
+dword +0 or a read of the dimension words +4 and +6. `0x44EED0` does
+read dwords +0x0C and +0x10, of its first argument, which is the
+first argument of `0x44EB40` (pushed at `0x498D60` and `0x499C50`);
+the member is its second (pushed at `0x498D5F` and `0x499C4F`).
+Limits: a static scan of register and stack-slot copies of the
+pointer; a copy kept elsewhere, an indirect call, or a branch the
+scan does not follow could still reach the words. `walk_lmf_leaves.py --check` re-reads the copy and the
+15 call sites. A read watch on the two dwords +0x0C/+0x10 of a nonzero member
 returned by `0x44EB40` (`EAX` at `0x44EC7D` or `0x44EC83`) can isolate
 the consumer. If `0x44ED16` or
 `0x44EEA2` copies the member, move the watch to the same offsets in the
@@ -165,6 +183,6 @@ would settle their purpose.
 
 **What was measured.** The group at `CKEEP.WSX+0xC48D7D` is 5,311 stored bytes and decodes to 52,800 bytes, 256 members. Thirty-seven of those members hold a nonzero word at +0x0C through +0x13 (122 words); the four words of member index 125 are 30,560, 32,672, 28,480 and 26,336.
 
-**What was tried.** This decode is one group, not the full set of members. The page already matched every nonzero header word to a sample in its own grid and showed that quadrant summaries do not reproduce them.
+**What was tried.** This decode is one group, not the full set of members. The page already matched every nonzero header word to a sample in its own grid and showed that quadrant summaries do not reproduce them. The 11-dword header copy moves the four words without reading them by offset, and no read of them was found after the 15 returns of the member loader or in the eight callees that receive the member (static scan; limits above).
 
 **What would settle it.** A read watch on the dwords +0x0C/+0x10 of a nonzero member returned by `0x44EB40`, as described above, isolates the consumer; a typed read of those words, or a shipped writer that supplies their sample indices, settles their purpose.

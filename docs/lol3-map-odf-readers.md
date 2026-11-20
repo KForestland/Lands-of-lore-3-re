@@ -488,7 +488,7 @@ fields while preserving the remaining byte spans.
 |---|---|---:|
 | Type 3 | u16 definition index and three u8 inputs, `0x44FBC2–0x44FC28` | 25 |
 | Type 16 | u8 definition index, `0x4698E7–0x46990D` | 21 |
-| Creature | u8 definition selector: `0x4B4579` loads the dword at +0x20 of the row buffer and keeps only the low byte (`and eax, 0xFF`), so +0x21–+0x37 stay retained, `0x4B4579–0x4B4597` | 21 |
+| Creature | u8 definition selector: `0x4B4579` loads the dword at +0x20 of the row buffer and keeps only the low byte (`and eax, 0xFF`). `0x4503E0` is `ret 4`, so `[esp+0x30]` is that dword in the 0x38-byte row read at `0x4B454F`. The byte indexes a 139-byte row at `[0x5701D8]` (`0x4B4583` through `0x4B4597`) and `0x4B45AA` stores vtable `0x53FE28`. The row count is `[0x5701F8]` (the save descriptor `0x435FE0` stores it times 139 at `0x43601B–0x43602F`); the setup does not compare the byte with it. +0x21 through +0x37 stay retained | 21 |
 | Mover | type-16 index and the eight state bytes at +0x21–+0x28, `0x4D58FB–0x4D5994` | 29 |
 | Item | u32 identity and u8 alternate input to the item definition lookup, `0x4D7390–0x4D73A2` | 25 |
 
@@ -559,7 +559,7 @@ block still requires a reader witness, as described in [Q8](#q8).
 
 **What was measured.** The 630 name slots hold 8,771 bytes after the terminating NUL: 6,684 are `0xCD` and 2,087 are `0x00`. In 176 slots that pad is not entirely `0xCD`.
 
-**What was tried.** This is a pad-byte count on the section-0 names. The page already records that the loader reads 24 bytes times the count and seeks away without reading the names, and that a zero AI lookup leaves a zeroed buffer.
+**What was tried.** This is a pad-byte count on the section-0 names. The page already records that the loader reads 24 bytes times the count and seeks away without reading the names, and that a zero AI lookup leaves a zeroed buffer. The creature setup index is the low byte of the dword at +0x20 of the 56-byte placement row. `lol3_odf_companions.py --check` re-reads that load, the `ret 4`, the 139-byte stride and the vtable store.
 
 **What would settle it.** A read of a 22-byte section-0 slot past the 24 × count rows (`0x4AB42E`), or a memory search for `Floor39` followed by a read watch, settles it. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
 
