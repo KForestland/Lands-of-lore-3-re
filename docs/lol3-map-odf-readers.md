@@ -551,9 +551,9 @@ block still requires a reader witness, as described in [Q8](#q8).
 
 **What was measured.** The twelve nonempty gaps are 1,784 bytes, and 11 of those bytes are `0x00`. As 892 little-endian u16 values, none is 0, and 820 of the values are distinct.
 
-**What was tried.** This count is the gap before field 16. The page already records that the loader's seeks skip both label spans and this gap.
+**What was tried.** This count is the gap before field 16. The page already records that the loader's seeks skip both label spans and this gap. Running-game observation, 2026-11-20, in a run with two live edits in the cache initializer ([run](NEEDS_A_RUNNING_GAME.md#run-of-2026-11-20-dlow1-autosave-with-two-live-edits)): in the DLOW1 MAP the loader seeked to +0xC944 (`0x43EBE8`) and then to +0xD868 (`0x43EC5C`), past the 26-byte names at +0xCCD4–+0xD868, as listed above. The read before its next seek, which holds the 31-byte label at +0xD86C, was not logged.
 
-**What would settle it.** Log every read the level load makes; a read that covers the 26-byte names or the 31-byte labels, or a read watch on a loaded copy, gives the reader, and a reader that steps by 26 or 31 bytes settles it. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
+**What would settle it.** Log every read the level load makes; a read that covers the 26-byte names or the 31-byte labels, or a read watch on a loaded copy, gives the reader, and a reader that steps by 26 or 31 bytes settles it. The running-game test is partly run, without a settling result ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
 
 ### Q5
 
@@ -567,6 +567,6 @@ block still requires a reader witness, as described in [Q8](#q8).
 
 **What was measured.** The 2,873 four-byte rows at `QWOD0.WSX+0x72E4D3` are 11,492 bytes. All 2,873 little-endian dwords are different, and none is 0.
 
-**What was tried.** This is a row-value count in the shared block. The page already records the leading count of 2,873, the identical bytes in all 18 MAPs, and the seeks that skip the block in the standard, conversion and editor cases.
+**What was tried.** This is a row-value count in the shared block. The page already records the leading count of 2,873, the identical bytes in all 18 MAPs, and the seeks that skip the block in the standard, conversion and editor cases. Running-game observation, 2026-11-20, in a run with two live edits in the cache initializer ([run](NEEDS_A_RUNNING_GAME.md#run-of-2026-11-20-dlow1-autosave-with-two-live-edits)): in the DLOW1 load the loader read the 0x244 header bytes and all 23 of its seeks on that handle went to member +0x2F2C or later, so that load did not read the block through that handle. Other handles and later play were not covered, and no memory search for the block was made.
 
-**What would settle it.** Log the reads of the MAP loader `0x43E6B0`; a reader of the span at header +0xCC, followed to the first typed use of one row, settles it. The running-game test is not yet run ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
+**What would settle it.** Log the reads of the MAP loader `0x43E6B0`; a reader of the span at header +0xCC, followed to the first typed use of one row, settles it. The running-game test is partly run, without a settling result ([probes not yet run](NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).

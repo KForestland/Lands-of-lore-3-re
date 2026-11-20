@@ -129,6 +129,6 @@ to check movie identity, frame indexes and both audio corpora in place.
 
 **What was measured.** The bytes `DA 73 4F 1D` occur once in `music4.wsx`, at file +0x8A. The same four bytes occur zero times in `MUSIC1.WSX`, `MUSIC2.WSX`, `music3.wsx` and `LOL3.DAT`.
 
-**What was tried.** This is a four-byte scan for key `0x1D4F73DA`. The page already records that no default stem from the builder and no stored string hashes to that key.
+**What was tried.** This is a four-byte scan for key `0x1D4F73DA`. The page already records that no default stem from the builder and no stored string hashes to that key. Running-game observation, 2026-11-20, one level (DLOW1), no travel and no `-SCORE`, in a run with two live edits in the cache initializer ([run](../NEEDS_A_RUNNING_GAME.md#run-of-2026-11-20-dlow1-autosave-with-two-live-edits)): the first 30 calls at `0x44A7F5` all passed `MUSIC\ubtown1.aud` (key `0x206A0547`).
 
-**What would settle it.** Break at the lookup entry `0x435880` and the call at `0x44A7F5`, logging the name and the returned archive row while the music changes (also with `-SCORE`); a stop that returns the `music4.wsx+0x8A` row names the track. The running-game test is not yet run ([probes not yet run](../NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).
+**What would settle it.** Break at the lookup entry `0x435880` and the call at `0x44A7F5`, logging the name and the returned archive row while the music changes (also with `-SCORE`); a stop that returns the `music4.wsx+0x8A` row names the track. The running-game test is partly run, without a settling result ([probes not yet run](../NEEDS_A_RUNNING_GAME.md#probes-not-yet-run)).

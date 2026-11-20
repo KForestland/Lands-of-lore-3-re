@@ -90,15 +90,63 @@ Not yet run; see [Probes not yet run](#probes-not-yet-run).
 
 ## Probes not yet run
 
-These running-game tests have no result yet. A reader with the original
+These running-game tests have no settling result yet. A reader with the original
 game and a debugger can run them; the question each belongs to keeps its
-state until then. Addresses are `LOL3.DAT` virtual addresses, used as
+state until then. A partial run is recorded under the probe it belongs
+to, with its date and labels; it does not move the question. Addresses are `LOL3.DAT` virtual addresses, used as
 they are (see the top of this page).
 
 Common setup: load a game-written slot, for example the level-5
 autosave of the [controlled save setup](lol3-native-saves.md#controlled-save-setup).
 The loader waits on the progress sound at `0x46F68F–0x46F69B`; use a
 null sound sink, or set `[0x65BD64]` to 0 there (a patched run).
+
+Before launch, delete `cdcache2.smf` from the game folder of the
+disposable copy if it is there. The cache initializer writes that file
+(9 bytes, `The game `) at `0x4E4CC0–0x4E4CD7` and deletes it only at a
+clean shutdown (`0x4E5316`, `DeleteFileA` through `0x531E10`), so a
+session that was killed leaves it behind. When the next start finds it
+(`0x4E4C2B–0x4E4C3A`), the initializer calls the two-string notice
+`0x47AD50` (string ids `0x12` and `0x24`, five arguments, `ret 0x14`)
+and then takes its rebuild branch: `CopyFileA` restores `cdcache.lst`
+from `cdcache.ls_` (`0x4E4C97`) and replaces the game-folder
+`cdcache.wsx` with the 114-byte `cdcache.hdr` (`0x4E4CA9`); the fill
+loop then grows it from screen memory. Without the file, and with a
+game-folder cache no more than 0xFA00 bytes short of `[0x545520]`
+(clamped to `0x6400000`–`0x1F400000`), the initializer shows no
+notice and skips the fill (`0x4E4DD9` jumps to `0x4E4EAF`).
+
+### Run of 2026-11-20: DLOW1 autosave with two live edits
+
+One instance of the English retail game under Wine, on a private
+16-bit Xvfb display with no audio driver, loaded a copy of the
+game-written DLOW1 autosave `f88f201e77d4` (written during the
+[DLOW1 approach](lol3-spell-dispatch.md#dlow1-approach-with-the-native-placement-live);
+its SHA-256 was unchanged after the run, and no save was written). The
+save bytes were not edited. A `cdcache2.smf` was present at start, so
+two **live edits** were made in the cache initializer:
+
+- At `0x4E4C62` the call to the notice `0x47AD50` was skipped
+  (`esp + 0x14`, resume at `0x4E4C67`). Its result is not used; the
+  rebuild branch above ran (the lookups of `cdcache.ls_` and
+  `cdcache.hdr` from `0x420DFB` were logged).
+- At `0x4E4E34` execution jumped to `0x4E4EAF`, skipping the surface
+  lock `0x5046E0` and the fill loop `0x4E4E61–0x4E4E95`. The local at
+  `[esp+0x1C]` is then 0 instead of the 1 set at `0x4E4EA3`.
+
+Both edits change only how the game-folder cache file is built. That
+file ended at 35,327,926 bytes, starting with the 114 header bytes,
+instead of being filled to about 100 MiB; this says nothing about a
+native run. The level-file reads, seeks and name lookups below do not
+pass through that code. Reads (`0x4357A0`) and seeks (`0x435A90`) were
+logged from the entry of the MAP loader `0x43E6B0`, the first 400 reads
+and 250 seeks only; the file-name lookup `0x435880` was logged for its
+first 250 calls (from start-up into the first seconds in the level).
+No file-open trace ran in this launch. An earlier launch in the same
+folder, which stopped at the notice, traced `CreateFileA` from start-up
+to the cache check of the same load. The play after loading was about
+two seconds of walking, a short turn and one click; no picture of it
+was kept. Results are listed under each probe.
 
 The first three tests look for a reader of bytes the level loaders skip.
 The loaders seek over these bytes, so first find out whether they
@@ -109,34 +157,66 @@ a copy of the bytes is in memory, set read watchpoints on it and play;
 a hit gives the reader. No read and no hit over a stated stretch of
 play bounds that stretch only.
 
-- **The 2,873 rows at MAP +0x244 (not run).** Settles
+- **The 2,873 rows at MAP +0x244 (partly run 2026-11-20; open).** Settles
   [Q8](OPEN_QUESTIONS.md). Bytes: MAP +0x244 to +0x2F2C, the leading
   u32 `0xB39` and 2,873 four-byte rows (in `QWOD0.WSX` from
   +0x72E4CF). The loader `0x43E6B0` reads 0x244 header bytes and its
   next read follows a seek to header +0x28. A reader of the span at
   header +0xCC is the answer; follow one row to its first typed use.
   [Shared block](lol3-map-odf-readers.md#shared-block-before-the-vertices).
-- **The 630 section-0 names in the ODF (not run).** Settles the names
+  *2026-11-20, running-game observation with the two live edits above:*
+  in the DLOW1 load the loader read the 0x244 header bytes at member
+  +0, and all 23 of its seeks on that handle (callers `0x43E889`–`0x43EF9F`,
+  all logged) went to member +0x2F2C or later; the ninth (`0x43EABE`)
+  went to +0x2F2C, the end of the span. Reads only move forward from a
+  seek, so this load did not read the span through that handle. Not
+  covered: other handles, reads after the 400th, and any later play. No
+  memory search for the block was made, so no read watch could be set.
+  Next: after a load, search memory for the 2,873 rows; if a copy
+  exists, set read watches on it and play.
+- **The 630 section-0 names in the ODF (not run; a 2026-11-20 launch did not test it).** Settles the names
   in [Q5](OPEN_QUESTIONS.md). Bytes: the 22-byte slots after the
   counted 24-byte rows of section 0 (CKEEP's first, `Floor39`, at entry
   +0x5DC). `0x4AB420` reads exactly 24 × count (`0x4AB42E`). A read of
   a 22-byte slot, or a search for `Floor39` in memory followed by a
   read watch, is the test.
   [ODF header](lol3-map-odf-readers.md#odf-header-and-primary-tables).
-- **The two MAP label spans (not run).** Settles the labels in
+  In the 2026-11-20 launch `0x4AB420` ran once (from `0x43FCE7`, count
+  0x19 for DLOW1), before read logging was armed at the MAP loader, so
+  none of the ODF reads were logged. Next: arm read logging at the start
+  of the level load (before `0x43FCD6`).
+- **The two MAP label spans (partly run 2026-11-20; open).** Settles the labels in
   [Q4](OPEN_QUESTIONS.md). Bytes: the 26-byte names at
   `u32(+0xC8) + 8 * u32(+0xC4)` and the 31-byte labels at
   `u32(+0xDC) + 4 * u32(+0xD8)` (the first label at
   `BUPP1.WSX+0x181E90C`). A reader that reaches either start and
   steps by 26 or 31 bytes is the answer.
   [Tail after the vertices](lol3-map-odf-readers.md#tail-after-the-vertices).
-- **The PHT stream (not run).** Not a numbered question; it settles
+  *2026-11-20, running-game observation with the two live edits above:*
+  in the DLOW1 MAP (114 waypoints, one path label) the loader seeked
+  to +0xC944 (`0x43EBE8`, the waypoint rows) and then to +0xD868
+  (`0x43EC5C`), past the 26-byte names at +0xCCD4–+0xD868; its next
+  seek went to +0x7A516. The 31-byte label at +0xD86C–+0xD88B lies
+  between those two seeks; the read there (static: 4 × u32(+0xD8) bytes)
+  came after the 400th read and was not logged. The seeks match the
+  page's static seek list. Next: log every read of the MAP load without
+  a cap.
+- **The PHT stream (partly run 2026-11-20; open).** Not a numbered question; it settles
   what reads the four [PHT files](formats/pht.md). Log every file the
   game opens from start to a level load. An open of `CYGNUS.PHT`,
   `QUANN.PHT`, `RAIDER.PHT` or `YUPA.PHT` gives the caller; then read
   watches on the loaded bytes show how a byte of the 0x1010000-byte
   cycle is picked. No open means these files are not read in that play.
-- **Music key `0x1D4F73DA` (not run).** Settles
+  *2026-11-20:* a `CreateFileA` trace from start-up to the cache check
+  of a DLOW1 load (the save, `dlow1.wsx`, `dlow1S.wsx`, `SLICECD3.wsx`
+  and `MUSIC3.wsx` were opened) showed none of the four names; that
+  launch stopped at the notice above. In the launch that reached the
+  level no open trace ran; the four names were not among the first 250
+  name lookups and not in one listing of the open files. That bounds
+  start-up to the cache check only. Next: trace `CreateFileA` and
+  `CreateFileW` without a cap from start-up through a full level load
+  and some play.
+- **Music key `0x1D4F73DA` (partly run 2026-11-20; open).** Settles
   [Q10](OPEN_QUESTIONS.md). Watch: the lookup entry `0x435880`
   (log the name and the returned archive row) and the call at
   `0x44A7F5` (its argument is the string at `EBX`). Play: start the
@@ -145,7 +225,10 @@ play bounds that stretch only.
   with this key (directory at `music4.wsx+0x8A`) names the track.
   No such stop leaves the key unnamed for that play.
   [Music streams](formats/audio.md#music-streams).
-- **The shipped `cdcache.wsx` (not run).** Settles
+  *2026-11-20, one level, no travel, no `-SCORE`:* the first 30 calls at
+  `0x44A7F5` all passed `MUSIC\ubtown1.aud` (stem 3, key `0x206A0547`),
+  and the following lookups repeated that name. The key stays unnamed.
+- **The shipped `cdcache.wsx` (partly run 2026-11-20; open).** Settles
   [Q1](OPEN_QUESTIONS.md). Use an install where `DAT/cdcache.wsx` and
   the game-folder `CDCACHE.wsx` are both present. Watch: every file
   open, with its path, and the game-folder probe at `0x4E4C00`. Result:
@@ -155,7 +238,17 @@ play bounds that stretch only.
   loop `0x4E4E61–0x4E4E95`) and compare its first 64,000 bytes with
   the shipped block.
   [Cache reader](lol3-wsx-reader.md#cache-index-lifecycle).
-- **The second player-side actor at `0x5860F0` (not run).** Settles
+  *2026-11-20:* the `CreateFileA` trace up to the cache check showed
+  `CDCACHE.wsx` opened by its bare name, found in the game folder; no
+  `DAT` path was tried for it (for `GLOBAL.wsx`, by contrast, the game
+  folder and then `DAT` were tried). The shipped `DAT/cdcache.wsx` kept
+  its SHA-256 and date, which shows it was not written, not that it was
+  not opened. The game-folder cache was rebuilt by the branch the live
+  edits passed through (see the run above), so its size says nothing
+  about a native run. Next: in a copy without `cdcache2.smf`, trace
+  opens (a) as installed and (b) with the game-folder `cdcache.wsx`
+  removed, to see whether the lookup then falls back to the `DAT` copy.
+- **The second player-side actor at `0x5860F0` (not run; a 2026-11-20 launch did not test it).** Settles
   that part of [Q11](OPEN_QUESTIONS.md). Setup: a slot in BUPP1, near
   the opcode-0x1A record at `BUPP1.WSX+0x18C7FD3`. Watch: the call at
   `0x448316` (`ecx = 0x5860F0`) and `0x48EBE0`. Play: let that script
@@ -163,6 +256,10 @@ play bounds that stretch only.
   screen, and note which character does action +4. That character is
   the answer.
   [Opcode 0x1A](lol3-script-opcodes.md).
+  The 2026-11-20 launch watched `0x448316` in DLOW1, not in BUPP1, and
+  ran no script toward an opcode-0x1A record; the call was not fetched
+  in about two seconds of play. A game-written BUPP1 slot
+  (`5ae559b2cabe`) was among the copies.
 - **Final colour of one textured wall pixel (not run).** Settles the
   final composition in [Q6](OPEN_QUESTIONS.md). Watch: record the
   texture handle stored at `0x4965CE` for one upload, as in the
