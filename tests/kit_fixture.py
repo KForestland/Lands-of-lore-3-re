@@ -53,6 +53,12 @@ def make_fixture(game):
     return source_slot()
 
 
+def foreign_level_edit():
+    from level_edit import document
+
+    return document(LEVEL, b"a different map", [])
+
+
 def inspect_jobs(test):
     out = test.root / "obj"
     test.assertIn("1 face", test.job("model", "--data", test.data, "--level", LEVEL, "--out", out))
