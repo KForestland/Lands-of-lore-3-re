@@ -62,6 +62,7 @@ Newest first. Each statement below was on GitHub before it was corrected.
 
 ## Process
 
+- **Writer, reviewer and lead, 2026-11-20.** Two running-game runs of Lands of Lore III attached a debugger to the game through a debugger port. A helper meant to make that port listen on the local machine only failed to load in the game's 32-bit processes, and the run logs did not show which address the port listened on, so the runs did not show that the port was closed to the network; when checked afterwards, no debugger port was listening. The runs went ahead without that check. Since 20 November 08:41 UTC a launch must show the port is local only before it starts, or it does not start ([running-game probes](NEEDS_A_RUNNING_GAME.md#launch-record-rule-and-the-runs-of-20-november)).
 - **Lead, 2026-11-19.** Pushed writers' commits before the reviewer's fixes were in (`c565b87`, `de36af6`, `cbaf52b`, `284605c`) and the reviewer's sweep `f132bbd` before its re-read; each needed a public follow-up commit (listed above).
 - **Lead, 2026-11-20.** Reported the static work as being at what the files can give after round 11. The next round still moved the MAP bytes from fields with a known read from 2.3% to 81.8%, read the arms of save selector 38 and showed the PHT files to be a seeded `rand()` stream (`3a4882a`, `35d4115`, `1d20dbc`, `6a3fe1c`).
 - **Lead, 2026-11-18.** The leak scan before pushing skipped the guard file, so the plain word list in it went public (entry above).

@@ -11,6 +11,13 @@ are; if the module base differs, you are in the wrong process.
 
 Some probes were also tried on edited saves: copies of a game-written save with a few bytes changed. [Edited saves](EDITED_SAVES.md) lists those runs and what a game-written save would still add.
 
+## Launch-record rule and the runs of 20 November
+
+Since 20 November 08:41 UTC every game launch must show four things in its record: (a) any debugger port listens on the local machine only, shown in the run log while it is up; (b) one new folder and one set of logs per launch, nothing overwritten; (c) a process listing after each launch; (d) every launch reported, failed ones included, with every live memory edit listed by address and bytes. The runs of 20 November below were made before that rule and did not meet it; their results stay as recorded observations, and no question state rests on them alone. A later run under the rule can confirm or replace them.
+
+- The DLOW1 run of [20 November](#run-of-2026-11-20-dlow1-autosave-with-two-live-edits) (map rows, names, labels, PHT, music key, cache, second actor): (a) not met, the helper meant to keep the debugger port local failed to load, so the port was not shown to be local only; (b) not met, seven launches shared one folder and logs were overwritten; (c) not met, one listing for seven launches; (d) not met, six early-stopped launches and a third live edit (an audio-start flag set from 0 to 1) were not reported.
+- The run for the final colour and the remaining casts: (a) not met, as above; (b) not met, it reused the previous run's game copy and overwrote its logs; (c) not met, one listing for four launches; (d) not met, four launches were reported as two.
+
 ## Remaining probes
 
 ### Q6. Which bytes does the texture renderer consume?
