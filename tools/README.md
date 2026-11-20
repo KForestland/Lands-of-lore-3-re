@@ -32,7 +32,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 36 CHECKS PASSED`, or `32 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
+| `check_all.py` | all checks below | prints each line, then `ALL 37 CHECKS PASSED`, or `33 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `modkit.py` | the game folder (see [`modkit.py`](#modkitpy)) | unpacks, rebuilds and verifies every supported table in a temporary folder; unchanged files must match byte for byte |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |

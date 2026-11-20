@@ -13,7 +13,7 @@ import sys
 from time import monotonic
 
 CACHE_CHECKS = {"lol3_texture_spans", "lol3_texture_palettes", "lol3_texture_png"}
-TOOLS = ["repo_guard", "extract_wsx_entries", "lol3_wsx_writer", "walk_lmf_leaves", "lol3_lzo_writer", "lol3_texture_spans", "lol3_texture_palettes", "lol3_texture_png",
+TOOLS = ["repo_guard", "level_export", "extract_wsx_entries", "lol3_wsx_writer", "walk_lmf_leaves", "lol3_lzo_writer", "lol3_texture_spans", "lol3_texture_palettes", "lol3_texture_png",
          "lol3_script_framing", "lol3_texture_archive", "lol3_script_notes", "lol3_level_report", "lol3_progression", "lol3_media_check", "lol3_text_writer", "lol3_level_schematic", "lol3_map_spans", "lol3_map_writer", "lol3_combat_census", "lol3_claimed_edges", "lol3_name_hash", "rating", "lol3_cache_seed", "lol3_odf_companions", "lol3_native_checks", "lol3_pe_layout", "lol3_pht", "lol3_save_header", "lol3_save_writer", "lol3_save_selectors", "lol3_script_browser", "lol3_numbers", "doc_index", "doc_links", "doc_format_offsets", "modkit"]
 
 QUICK_SKIP = {"walk_lmf_leaves", "lol3_lzo_writer",
