@@ -114,5 +114,6 @@ These words mean the same thing in the notes for all three Lands of Lore games.
 | Upstream: no guard here | This command's event record has no condition of its own or earlier matching record to rule out. The event producer can still gate it. |
 | Kind 12 event 2 | A region event record with kind byte 12 and event byte 2. The native matcher compares the incoming event value. See [script events](lol3-script-events.md). |
 | Stream / group | The object or region command stream and the offset at which the event's commands begin. |
+| Edition fingerprint | A group of file names, byte counts and full SHA-256 checksums used to identify a measured release. See [Editions](EDITIONS.md). |
 
 In the schematic, **edge used once** means one surface has that edge. A **shared edge** belongs to several surfaces. **1-based table rows** means the first stored placement has label 1. See [the map schematic](formats/map-odf.md#overhead-schematic).

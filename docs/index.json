@@ -253,6 +253,15 @@
       "tools": []
     },
     {
+      "path": "docs/EDITIONS.md",
+      "title": "Identify your edition",
+      "answers": [],
+      "question_references": [],
+      "tools": [
+        "tools/edition.py"
+      ]
+    },
+    {
       "path": "docs/FIRST_TEN_MINUTES.md",
       "title": "First ten minutes",
       "answers": [],
@@ -481,6 +490,13 @@
         "tools/lol3_progression.py",
         "tools/lol3_script_browser.py"
       ]
+    },
+    {
+      "path": "docs/UNUSED.md",
+      "title": "Unused content and development leftovers",
+      "answers": [],
+      "question_references": [],
+      "tools": []
     },
     {
       "path": "docs/WHATS_NEW.md",
@@ -1316,6 +1332,7 @@
         "tools/doc_format_offsets.py",
         "tools/doc_index.py",
         "tools/doc_links.py",
+        "tools/edition.py",
         "tools/extract_wsx_entries.py",
         "tools/full_report.py",
         "tools/level_export.py",

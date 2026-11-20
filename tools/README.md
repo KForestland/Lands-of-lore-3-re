@@ -9,6 +9,8 @@ Use `level_viewer.py --check` to write and read back one plan in a temporary fol
 [First ten minutes](../docs/FIRST_TEN_MINUTES.md) ·
 [Interactive plans](../docs/COOKBOOK.md#open-an-interactive-level-plan)
 
+`edition.py` reads names, file sizes and SHA-256 to identify a measured game copy. `--check` verifies the full fingerprint in `check_all.py`. [Edition fingerprints](../docs/EDITIONS.md)
+
 ## Setup
 
 - Python 3.10 or later. The readers and the synthetic tests need only the standard library.
@@ -32,7 +34,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 38 CHECKS PASSED`, or `34 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
+| `check_all.py` | all checks below | prints each line, then `ALL 39 CHECKS PASSED`, or `35 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `modkit.py` | the game folder (see [`modkit.py`](#modkitpy)) | unpacks, rebuilds and verifies every supported table in a temporary folder; unchanged files must match byte for byte |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
