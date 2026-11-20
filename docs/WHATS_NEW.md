@@ -4,6 +4,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 
 ## 20 November 2026
 
+- **Image base.** `LOL3.DAT` at file +0xFC is `00 00 40 00`. `lol3_pht.py --check` re-reads those four bytes ([light maps](lol3-lmf-reader.md)).
 - **Confirmed statements re-derived.** A sample of 30 statements labelled confirmed was checked again from the original bytes: 17 held, 10 held in part, 2 wrong and 1 overstated. The wrong and overstated statements are corrected: 57 is the count of distinct 20-byte mitigation prefixes, not of distinct rows; the index-123 item handler is five instructions; and the name search is bounded to the strings it scans. The cache row at +0x12 is now named as the cache's own directory row ([sample](CONFIRMED_SAMPLE.md)).
 
 ## 19 November 2026

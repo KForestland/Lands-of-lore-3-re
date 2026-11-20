@@ -156,6 +156,8 @@ def main():
             raise ValueError("LOL3.DAT COFF machine word differs")
         if image[0xCE:0xD0] != b"\x04\x00":
             raise ValueError("LOL3.DAT COFF section count differs")
+        if image[0xFC:0x100] != b"\x00\x00\x40\x00":
+            raise ValueError("LOL3.DAT image base differs")
         if period_is_immediate(image[TEXT_RAW:TEXT_RAW + TEXT_SIZE]):
             raise ValueError("LOL3.DAT code uses 0x1010000 as an immediate")
         with ordered[0].open("rb") as handle:
