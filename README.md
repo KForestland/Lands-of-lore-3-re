@@ -72,6 +72,10 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | Movie and sound conversion | [Copy the commands in First ten minutes](docs/FIRST_TEN_MINUTES.md#convert-a-movie-or-sound) | `MOVIES2-1.mkv` and `QWOD0S-0.wav` in folders you choose |
 | Program sections | `python tools/lol3_pe_layout.py --data "$LOL3_DAT" --check` | 8 sections and 3 debug payloads, with both file ends reached |
 
+![Eight untextured surfaces at different heights in Blender](docs/images/model-synthetic-blender.png)
+
+*Blender view of a synthetic MAP exported with `lol.py model`. The colours show surface heights. Run the command above to open a level from your own copy.*
+
 ## Change a number in your own copy
 
 The [mod kit](tools/README.md#modkitpy) turns the game's tables into files you can edit, and the [patch tool](docs/formats/patch.md) turns your change into a small patch file that can be applied and undone. The tools only read your game folder; everything they write goes into new folders you name, outside the game and this repository. Try changes on a **copy** of the game, never on the folder you play from. Patches must not remove or bypass copy protection.

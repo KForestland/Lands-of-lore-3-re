@@ -4,7 +4,7 @@ The scope is the [English Windows 1.07a release](EDITIONS.md). The record counts
 
 ## Bytes the level loader skips
 
-**CONFIRMED.** Each of the 18 MAPs has a tail beginning at its header's `+0xC0` offset. The tails total 606,420 bytes. The largest begins at `JUNDR.WSX+0xF90748` and holds 104,044 bytes. The retail loader's 22 direct seeks and nested seek at `0x4EFE96` never select that offset. Every typed range ends at or before the tail. **UNCONFIRMED.** The record grammar in these tails and the original tool that consumed them. [MAP tail evidence](lol3-map-odf-readers.md)
+**CONFIRMED.** Each of the 18 MAPs has a tail beginning at its header's `+0xC0` offset. The tails total 606,420 bytes. The largest begins at `JUNDR.WSX+0xF90748` and holds 104,044 bytes. The retail loader's 22 direct seeks and nested seek at `0x4EFE96` never select that offset. The stored framing fits 1,542 populated labels and 3,429 annotation rows across the 18 tails. **UNCONFIRMED.** What uses the other fields and which original tool wrote or consumed these rows. [MAP tail evidence](lol3-map-odf-readers.md)
 
 ## Opcodes absent from both shipped streams
 
@@ -19,9 +19,12 @@ The scope is the [English Windows 1.07a release](EDITIONS.md). The record counts
 | `0xCD` | `+0xE4C5C` | Common map return `0x4E5A77`. |
 | `0xD1` | `+0xE4C60` | `0x4E5A5F` routes to the region-group resolver. |
 
-## Development options and files
+## Development leftovers
+
+- The build strings in `LOL3.DAT` are `Win95/NT 1.07a` at `+0x14DEAC`, `May  7 1999` at `+0x14DE74` and `11:09:31` at `+0x14DE68`. The COFF timestamp at `+0xD0` decodes to 7 May 1999 at 18:09:50 UTC. The build string has no time zone. [Edition fingerprints](EDITIONS.md#build-strings-and-comparison)
 
 - **CONFIRMED.** `-CONVERT_TEST` is stored at `LOL3.DAT+0x147FAC`. The MAP loader tests it at `0x43E7F4` and can accept a header that fails the usual leading-word and surface-count tests. Five other operands refer to the same switch, at `0x43F742, 0x43FC96, 0x44051B, 0x440608, 0x440BCE`. The texture and definition readers still impose their following bounds checks. [MAP and ODF startup](lol3-map-odf-readers.md) · [Shared and editor texture paths](lol3-texture-palette-sources.md#shared-retail-banks-and-the-editor-path)
+- `-LEVED` is stored at `LOL3.DAT+0x144608`. Its argument check is at `0x40E84C–0x40E85B`. The MAP loader's editor flag selects the editor's file paths and smaller table allocations. [Editor mode and MAP reads](lol3-map-odf-readers.md)
 - **CONFIRMED.** Four graphics options can set the flag that skips an RGB555 candidate at `0x495072`. The strings are `-D3DUSEARGB4444`, `-D3DPERMEDIA2`, `-D3DNOVERTEXCOLOR` and `-D3DMONOLIGHTMAPS`, respectively at file `+0x149360, +0x149380, +0x1493B0, +0x1493C4`. The immediate and indirect setters are at `0x472AC1–0x472AD8` and `0x472A6A–0x472A79`. [Texture selection](lol3-texture-bake.md)
 - **CONFIRMED.** The literal `-NO_ASSERTS` occurs at file `+0x1520FC`. Its operand at `0x5077AF` reaches the argument lookup at `0x434890`. A match jumps from `0x5077BE` to the return at `0x507860`, skipping the report and termination path at `0x5077CD–0x50785D`.
 - **CONFIRMED.** The PE debug directory at file `+0x170` locates three debug payloads beyond the final file-backed program section. They begin at `+0x17F400, +0x17F510, +0x1911E0`. The last carries an NB10 marker and a PDB filename at `+0x1911F0`. [PE extents](formats/executable.md)
