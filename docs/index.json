@@ -323,6 +323,7 @@
         "tools/extract_wsx_entries.py",
         "tools/lol3_cache_seed.py",
         "tools/lol3_pht.py",
+        "tools/page_facts.py",
         "tools/rating.py"
       ]
     },

@@ -1,0 +1,129 @@
+"""Recognize common raw citations and arithmetic stated on measured pages."""
+from dataclasses import dataclass
+import re
+
+FILE = r"(?:DAT[/\\])?[A-Za-z0-9_][A-Za-z0-9_.-]*\.(?:DAT|EXE|MIX|PAK|WSX|TLK|LCF|HDR)"
+OFFSET = r"0x[0-9A-Fa-f]+"
+BYTE = r"[\da-fA-F]{2}"
+BYTES = BYTE + r"(?:[ \t]+" + BYTE + r"){1,31}"
+DECIMAL = r"(?:\d{1,3}(?:,\d{3})+|\d+)"
+DIRECT = re.compile(
+    rf"`(?P<file>{FILE})\+(?P<offset>{OFFSET})`\s+"
+    rf"(?:has|holds|starts with|contains|is)\s+(?:bytes\s+)?`(?P<value>{BYTES})`"
+)
+STRING = re.compile(
+    rf"\b(?:suffix|literal|string)\s+`(?P<value>[^\s`]+)`\s+(?:at|from)\s+"
+    rf"`(?P<file>{FILE})\+(?P<offset>{OFFSET})`"
+)
+PAIRED = re.compile(
+    rf"\b(?:LE|PE) `\+{OFFSET}` and `\+{OFFSET}`"
+    rf"\s*\(file `\+(?P<a>{OFFSET})` and `\+(?P<b>{OFFSET})`,"
+    rf"\s+bytes `(?P<x>{BYTES})` and `(?P<y>{BYTES})`\)"
+)
+RECORD = re.compile(
+    rf"\btable of (?P<total>{DECIMAL})-byte [^.\n]+\s+definitions\.\s*"
+    rf"Its (?P<body>{DECIMAL})-byte [^.\n]+ is followed by a (?P<tag>{DECIMAL})-byte"
+)
+COMMAND = re.compile(r"`(?:python3?\s+)?(?:tools/)?([\w-]+\.py)\s+--check(?:[^`\n]+)?`")
+ARCHIVE_ENTRY = re.compile(
+    rf"`(?P<file>{FILE})`\s+entry\s+(?P<entry>\d+)\b[^.\n]{{0,90}}?"
+    rf"(?<![\d,])(?P<value>{DECIMAL}) bytes\b"
+)
+PE_ROW = re.compile(
+    rf"^\|\s*(?:`(?P<file>{FILE})`)?\s*\|\s*`(?P<section>[.\w]+)`\s*\|"
+    + "".join(rf"\s*`(?P<{field}>{OFFSET})`\s*\|" for field in ("rva", "virtual", "offset", "stored"))
+    + r"\s*$"
+)
+
+
+@dataclass(frozen=True)
+class Claim:
+    line: int
+    shown: str
+    expected: object
+    reader: tuple
+
+
+def parse_number(text):
+    return int(text.replace(",", ""))
+
+
+def probes(text, measured, config):
+    """Find supported citation forms. Each probe records its own source line."""
+    def line(offset):
+        return text.count("\n", 0, offset) + 1
+
+    def eligible(match):
+        return line(match.start()) in measured
+
+    found = []
+    for regex, kind in ((DIRECT, "bytes_at"), (STRING, "string_at")):
+        for match in regex.finditer(text):
+            if eligible(match):
+                value = match["value"]
+                expected = bytes.fromhex(value) if kind == "bytes_at" else value
+                found.append(Claim(line(match.start("value")), value, expected,
+                                   (kind, match["file"], int(match["offset"], 16))))
+    if config.get("executable"):
+        for match in PAIRED.finditer(text):
+            if eligible(match):
+                for offset, value in (("a", "x"), ("b", "y")):
+                    found.append(Claim(line(match.start(offset)), match[offset], bytes.fromhex(match[value]),
+                                       ("bytes_at", config["executable"], int(match[offset], 16))))
+    for match in RECORD.finditer(text):
+        if eligible(match):
+            found.append(Claim(line(match.start("body")), match["body"], parse_number(match["body"]),
+                               ("arithmetic", parse_number(match["total"]), parse_number(match["tag"]))))
+    if config.get("archive_entries"):
+        for match in ARCHIVE_ENTRY.finditer(text):
+            if eligible(match) and match["file"].upper().endswith(tuple(config["archive_entries"])):
+                found.append(Claim(line(match.start("value")), match["value"], parse_number(match["value"]),
+                                   ("archive_size", match["file"], int(match["entry"]))))
+    if config.get("pe_sections"):
+        current_file = None
+        for row, content in enumerate(text.splitlines(), 1):
+            match = PE_ROW.match(content)
+            if not match:
+                current_file = None
+                continue
+            if match["file"]:
+                current_file = match["file"]
+            if current_file and current_file in config["pe_sections"]:
+                for field in ("rva", "virtual", "offset", "stored"):
+                    value = match[field]
+                    found.append(Claim(row, value, int(value, 16),
+                                       ("pe_section", current_file, match["section"], field)))
+    counts = config.get("counts", {})
+    for command in COMMAND.finditer(text):
+        if not eligible(command):
+            continue
+        tail = text[command.end():command.end() + 200].split("\n\n", 1)[0]
+        for unit, reader in counts.get(command[1], {}).items():
+            match = re.search(rf"(?<![\d,])({DECIMAL})\s+{re.escape(unit)}\b", tail)
+            if match:
+                found.append(Claim(line(command.end() + match.start()), match[1], parse_number(match[1]),
+                                   tuple(reader)))
+    return found
+
+
+def observed(claim, data, read_witness, original_file):
+    kind, *parts = claim.reader
+    if kind == "arithmetic":
+        total, tag = parts
+        return total - tag, f"stated record size {total} minus tag size {tag}"
+    if data is None:
+        return None
+    if kind not in {"bytes_at", "string_at"}:
+        return read_witness(data, claim.reader)
+    name, offset = parts
+    path = original_file(data, name)
+    with path.open("rb") as source:
+        source.seek(offset)
+        if kind == "bytes_at":
+            value = source.read(len(claim.expected))
+        else:
+            raw = source.read(256)
+            value = raw.split(b"\0", 1)[0].decode("ascii", errors="backslashreplace")
+            if b"\0" not in raw:
+                raise ValueError(f"no NUL-terminated string at {name}+{offset:#x}")
+    return value, f"{name}+{offset:#x}"
