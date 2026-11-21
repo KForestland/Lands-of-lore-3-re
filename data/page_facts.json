@@ -1,0 +1,110 @@
+{
+  "edition": "LoL3 PC 1.07a",
+  "facts": {
+    "lmf.ckeep.first_row": {
+      "reader": [
+        "lmf_first_row",
+        "DAT/CKEEP.WSX"
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/lmf.md",
+          "before": "The first row at `CKEEP.WSX+",
+          "after": "`",
+          "kind": "hex"
+        },
+        {
+          "page": "docs/CONFIRMED_SAMPLE.md",
+          "before": "its first row at +",
+          "after": " selects",
+          "kind": "hex"
+        }
+      ]
+    },
+    "pe.remap.virtual_size": {
+      "reader": [
+        "pe_virtual_size",
+        "LOL3.DAT",
+        "RemapTab"
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/executable.md",
+          "before": "| `RemapTab` | `0x3F7000` | `",
+          "after": "` | `0x15B200`",
+          "kind": "hex"
+        }
+      ]
+    },
+    "wsx.originals.rows": {
+      "reader": [
+        "wsx_count"
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/wsx.md",
+          "before": "locallng.wsx` beside `DAT` (",
+          "after": " rows) come out",
+          "kind": "number"
+        },
+        {
+          "page": "docs/ROUND_TRIP.md",
+          "before": "and `locallng.wsx`, ",
+          "after": " rows;",
+          "kind": "number"
+        },
+        {
+          "page": "docs/WHATS_NEW.md",
+          "before": "and the 2 loose WSX beside `DAT` (",
+          "after": " rows) from",
+          "kind": "number"
+        }
+      ]
+    },
+    "cache.texture.suffix": {
+      "reader": [
+        "cache_extension",
+        "LOL3.DAT"
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/textures.md",
+          "before": "path changes `.TEX` to\n`",
+          "after": "` at `0x4E462C",
+          "kind": "name"
+        }
+      ]
+    },
+    "map.field20.section": {
+      "reader": [
+        "map_section",
+        8
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/map-odf.md",
+          "before": "| 20 | number of 8-byte records in section ",
+          "after": " |",
+          "kind": "number"
+        }
+      ]
+    }
+  },
+  "automatic": {
+    "executable": "LOL3.DAT",
+    "counts": {
+      "lol3_wsx_writer.py": {
+        "rows": [
+          "wsx_count"
+        ]
+      }
+    },
+    "archive_entries": [
+      ".WSX"
+    ],
+    "pe_sections": [
+      "LOL3.DAT",
+      "LOL3.EXE"
+    ]
+  }
+}
