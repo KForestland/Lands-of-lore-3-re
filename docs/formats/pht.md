@@ -13,6 +13,24 @@ the same stream. In the first 65,536 bytes, every lag from 1 through
 about 1 in 256). `lol3_pht.py --check` reads each file through its last
 byte, pins the SHA-256 of the first cycle and repeats that lag test.
 
+| File | Whole cycles at +0 | Last partial cycle starts at | Bytes in last partial cycle | End offset (exclusive) |
+|---|---:|---:|---:|---:|
+| `CYGNUS.PHT` | 6 | `0x6060000` | 11,463,220 | `0x6B4EA34` |
+| `RAIDER.PHT` | 3 | `0x3030000` | 11,088,634 | `0x3AC32FA` |
+| `quann.pht` | 3 | `0x3030000` | 7,204,334 | `0x370EDEE` |
+| `yupa.pht` | 2 | `0x2020000` | 12,497,266 | `0x2C0B172` |
+
+There is no extra file header between these spans. To read and check a
+single file, give its name in any case with `--file`:
+
+```sh
+python3 tools/lol3_pht.py --data DAT --file CYGNUS.PHT --check
+```
+
+Each selected-file check generates the same cycle, reads that file to EOF
+and checks the native program anchors. It needs only that PHT and the
+two game programs.
+
 ## Byte generation
 
 **CONFIRMED.** Starting with state 1, step

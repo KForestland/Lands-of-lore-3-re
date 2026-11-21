@@ -83,6 +83,18 @@ dword is the shipped file's `0xD0BCD8BE` at +0x72, so those bytes
 are not an allocator index (the marker compare at `0x4E5118` re-initializes a cache that lacks `0xF1E2D3C4` through `0x4FE480`). Five directory entries of size 0xD
 land inside the first copy. The file is missing the larger
 declared ranges.
+
+| File offset in the shipped copy | Field or span | Stored length or value |
+|---|---|---|
+| `0x00` | u16 directory row count | 9 |
+| `0x02` | u32 declared body length | 52,663,679 bytes |
+| `0x06` to `0x72` | Nine 12-byte rows, u32 key, relative offset and length | Five 13-byte ranges in the fill, four ranges extending beyond EOF |
+| `0x72` to `0x31CE72` | Fill body, end exclusive | 51 × 64,000 bytes |
+
+`python3 tools/lol3_cache_seed.py --data DAT --shipped --check` prints
+each row and checks the pinned header and fill through EOF. This mode
+can run without a game-written cache or a separate `cdcache.hdr`.
+
 The game-folder copy is 104,896,114 bytes and has a second directory
 and separately allocated storage. The original initializer copies
 the header and writes in 64,000-byte blocks. Its default target is

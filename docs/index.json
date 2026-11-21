@@ -701,6 +701,7 @@
       "question_references": [],
       "tools": [
         "tools/extract_wsx_entries.py",
+        "tools/lol3_cache_seed.py",
         "tools/lol3_wsx_writer.py"
       ]
     },

@@ -3,6 +3,7 @@
 
   lol3_pht.py --data DAT            # size and the first 16 bytes of each file
   lol3_pht.py --data DAT --check
+  lol3_pht.py --data DAT --file CYGNUS.PHT --check
 
 A file passes when its name and size are one of the four retail files, its
 first cycle has the pinned SHA-256 and every later byte equals the byte at
@@ -128,25 +129,36 @@ def head_line(path, count=16):
     return f"{Path(path).name} {Path(path).stat().st_size} bytes +0: " + " ".join(f"{byte:02x}" for byte in head)
 
 
+def extent_line(path):
+    size = path.stat().st_size
+    copies, tail = divmod(size, PERIOD)
+    return f"{path.name}: {copies} full cycles, tail {tail} bytes at +{copies * PERIOD:#x}, EOF {size:#x}"
+
+
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
+    parser.add_argument("--file", type=str.lower, choices=SIZES, help="select one retail PHT by name")
     args = parser.parse_args()
-    if not args.check:
-        data = Path(args.data)
-        paths = sorted((p for p in data.iterdir() if p.is_file() and p.suffix.lower() == ".pht"),
-                       key=lambda path: path.name.lower())
-        if not paths:
-            parser.error("no .PHT files in the DAT folder")
-        for path in paths:
-            print(head_line(path))
-        return 0
     data = Path(args.data)
     try:
         paths = [p for p in data.iterdir() if p.is_file() and p.suffix.lower() == ".pht"]
+        if args.file:
+            paths = [p for p in paths if p.name.lower() == args.file]
+            if len(paths) != 1:
+                raise ValueError(f"expected one {args.file}, found {len(paths)}")
+        if not args.check:
+            if not paths:
+                raise ValueError("no .PHT files in the DAT folder")
+            for path in sorted(paths, key=lambda path: path.name.lower()):
+                print(head_line(path))
+                if args.file:
+                    print(extent_line(path))
+            return 0
         found = {p.name.lower(): p for p in paths}
-        if len(paths) != len(SIZES) or set(found) != set(SIZES):
+        expected = (args.file,) if args.file else tuple(SIZES)
+        if len(paths) != len(expected) or set(found) != set(expected):
             raise ValueError(f"PHT names {sorted(p.name for p in paths)}")
-        ordered = [found[name] for name in SIZES]
+        ordered = [found[name] for name in expected]
         for path in ordered:
             if path.stat().st_size != SIZES[path.name.lower()]:
                 raise ValueError(f"{path.name} is {path.stat().st_size} bytes")
@@ -198,9 +210,12 @@ def main():
         print(f"CHECK pht FAILED: {exc}")
         return 1
     shown = ", ".join(f"{path.name} {path.stat().st_size}" for path in ordered)
-    print(f"CHECK pht: 4 files match the seed-1 cycle with LF expansion; {shown}; "
+    count = "1 file matches" if args.file else "4 files match"
+    print(f"CHECK pht: {count} the seed-1 cycle with LF expansion; {shown}; "
           "names absent from LOL3.DAT and LOL3.EXE (any case, ASCII/UTF-16); "
           "0x1010000 not an immediate; `$*.*` pushes at 3 sites")
+    if args.file:
+        print(extent_line(ordered[0]))
     return 0
 
 

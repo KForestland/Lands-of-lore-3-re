@@ -6,6 +6,7 @@ beside the game, and that allocator byte +0x17 has no address.
 
   lol3_cache_seed.py --data DAT            # header bytes and, when present, the second directory
   lol3_cache_seed.py --data DAT --check
+  lol3_cache_seed.py --data DAT --shipped --check   # the DAT file only
 """
 from cli_errors import run_cli, game_path
 from hashlib import sha256
@@ -135,6 +136,24 @@ def shipped_listing(data):
     return "\n".join(lines) + "\n"
 
 
+def shipped_directory(data):
+    """Read the carried WSX index without interpreting fill bytes as entries."""
+    if len(data) < HEADER:
+        raise ValueError("shipped cache is shorter than its directory")
+    count, declared = unpack_from("<HI", data)
+    if 6 + 12 * count != HEADER:
+        raise ValueError(f"shipped cache directory has {count} rows instead of 9")
+    lines = [f"count {count}, declared body {declared} bytes, actual body {len(data) - HEADER} bytes"]
+    for index in range(count):
+        at = 6 + 12 * index
+        key, relative, size = unpack_from("<3I", data, at)
+        start = HEADER + relative
+        end = start + size
+        storage = "inside fill" if end <= len(data) else "beyond fill"
+        lines.append(f"row {index} +{at:#x}: key {key:#010x}, span +{start:#x}..+{end:#x} {storage}")
+    return "\n".join(lines) + "\n"
+
+
 def written_listing(prefix):
     """Forty rows of 0x18 at +0x76. Names are the page's; byte +0x17 stays a byte offset."""
     need = 0x76 + 40 * 0x18
@@ -155,7 +174,20 @@ def written_listing(prefix):
 
 def main():
     parser = lol3_cli.tool_args(__doc__, writes=False)
+    parser.add_argument("--shipped", action="store_true", help="read only DAT/cdcache.wsx")
     args = parser.parse_args()
+    if args.shipped:
+        try:
+            shipped = game_path(Path(args.data), "cdcache.wsx").read_bytes()
+            text = shipped_directory(shipped)
+            if args.check and not body_covers(shipped):
+                raise ValueError("shipped cache differs from the pinned header and fill through EOF")
+            if args.check:
+                print(f"CHECK cache_seed shipped: {HEADER}-byte header and {COPIES} blocks of {BLOCK} verified")
+            print(text + shipped_listing(shipped), end="")
+        except (OSError, ValueError) as exc:
+            parser.exit(1, f"cache seed: {exc}\n")
+        return 0
     if not args.check:
         data = Path(args.data)
         try:
