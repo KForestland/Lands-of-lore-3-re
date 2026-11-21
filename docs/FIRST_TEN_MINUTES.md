@@ -1,9 +1,17 @@
 # First ten minutes
 
 Draw a level from your own installed copy of Lands of Lore III.
-You need Python 3.10 or later, a web browser, and the
-game's `DAT` folder. Find the folder containing `QWOD0.WSX`.
+You need Python 3.10 or later and a web browser.
 
+## Find your game files
+
+Open the folder for the copy you play. Find `LOL3.DAT` in that folder and
+open the `DAT` folder next to it. Look for `CKEEP.WSX` and `QWOD0.WSX`
+directly inside `DAT`. Lowercase names such as `ckeep.wsx` also work.
+
+If a search finds several copies of `QWOD0.WSX`, use the one in the `DAT`
+folder beside `LOL3.DAT` in your chosen installation. Copy the full path
+of that `DAT` folder.
 
 ## Download the tools
 
@@ -21,12 +29,16 @@ If the command is missing or the version is below 3.10, install a
 current Python 3 release with the Python launcher, then reopen PowerShell.
 [Python for Windows](https://www.python.org/downloads/windows/)
 
-Paste these lines, replacing the path after `$data =` with
-the folder you found above. Keep the quotation marks around paths.
+Run this line, then paste the folder path when PowerShell asks for it.
+
+```powershell
+$data = (Read-Host 'Paste the path to your game folder').Trim('"')
+```
+
+Then paste these lines.
 
 ```powershell
 Set-Location "$HOME\Downloads\Lands-of-lore-3-re-main"
-$data = 'C:\Games\Lands of Lore III\DAT'
 $out = "$HOME\Downloads\LoL3 output"
 New-Item -ItemType Directory -Force "$out" | Out-Null
 ```
@@ -42,12 +54,16 @@ Start-Process "$out\first-level.svg"
 
 Open a terminal. If `python3 --version` reports a version below 3.10,
 install a newer Python with your distribution's package manager.
-Paste these lines, replacing the path after `data=` with the folder you
-found above.
+Run this line, paste the folder path and press Enter again.
+
+```sh
+IFS= read -r data
+```
+
+Then paste these lines.
 
 ```sh
 cd "$HOME/Downloads/Lands-of-lore-3-re-main"
-data="$HOME/Games/Lands of Lore III/DAT"
 out="$HOME/Downloads/LoL3 output"
 mkdir -p "$out"
 python3 tools/lol3_level_schematic.py --data "$data" --level QWOD0 --out "$out/first-level.svg"
@@ -55,8 +71,8 @@ xdg-open "$out/first-level.svg"
 ```
 
 You should see an overhead plan of QWOD0 with surface edges and numbered placements.
-If the tool cannot find a game file, check that the path points to the
-folder containing `QWOD0.WSX`. If the open command fails, open
+If the tool cannot find a game file, check the markers in
+[Find your game files](#find-your-game-files). If the open command fails, open
 `first-level.svg` from the output folder in your browser.
 
 To draw the picture again, choose a new picture file name in both lines.
