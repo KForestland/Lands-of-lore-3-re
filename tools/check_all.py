@@ -46,10 +46,14 @@ def main():
         options = ["--cache", a.cache] if (t in CACHE_CHECKS or t == "lol3_lzo_writer") and a.cache else extra.get(t, [])
         p = subprocess.run([sys.executable, os.path.join(here, t + ".py"), "--check", "--data", a.data, *options],
                            capture_output=True, text=True)
-        line = (p.stdout.strip().splitlines() or [p.stderr.strip()[-300:]])[-1]
+        out = p.stdout.strip().splitlines()
+        fallback = f"{t}: exit {p.returncode}" if p.returncode else p.stderr.strip()[-300:]
+        line = out[-1] if out else fallback
         print(f"{line} [{monotonic() - before:.2f}s]")
         last_line[t] = line
         if p.returncode != 0:
+            for detail in p.stderr.splitlines()[-20:]:
+                print(f"  {detail}")
             failed.append(t)
         elif t in CACHE_CHECKS and line.startswith(f"CHECK {t[5:]}: SKIP:"):
             skipped.append(t)
