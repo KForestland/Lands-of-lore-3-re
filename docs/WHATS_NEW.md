@@ -10,6 +10,7 @@ Newest first. One line per question worked on, new tool or visible change; each 
 - **Map bytes.** The map writer now rebuilds the 18 level MAPs from their command, waypoint, path and placement fields and the fields the program reads. 84.9% of the map bytes now come from fields with a known read. Five stored surface bytes are traced to the code that reads them. The rarely used surface bytes are measured against the stored flags ([MAP and ODF](lol3-map-odf-readers.md)).
 - **PHT files.** Each of the four PHT files is checked on its own, and so is the shipped cache. The page lists each file's whole cycles and its last partial cycle. The byte-store candidate in the program fills a buffer on the stack for an in-memory comparison ([PHT](formats/pht.md)).
 - **Light-map edges (Q3 stays mostly answered).** On each sample grid, the outer two rows and columns hold a matching texel for 599,684 of 610,325 words (98.3%) ([light maps](lol3-lmf-reader.md)).
+- **Software wall drawing.** The software renderer's wall span is traced from the driver's dispatch table to the byte it reads, the level's remap table and the screen byte it writes ([texture bake](lol3-texture-bake.md)). Which colour a given screen pixel gets still needs the running game.
 - **Glossary and checks.** New glossary rows explain tool words in plain language. A damaged save is refused with one line. A failed check now prints the last twenty lines of its error output, and the workspace check accepts paths through symbolic links.
 
 ## 20 November 2026
