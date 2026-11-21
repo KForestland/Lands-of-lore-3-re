@@ -54,7 +54,7 @@ The audio keys are in the same options block:
 
 The program names `cdcache.lst` at `+0x14DF48`, `cdcache.ls_` at `+0x14DFF0`, `cdcache.wsx` at `+0x14DFE4`, `cdcache.hdr` at `+0x14DFD8`, and `cdcache2.smf` at `+0x14DFFC`. The switch `-NOCDCACHE` is at `+0x147F88`.
 
-**Read from files.** In this tree `cdcache2.smf` is 9 bytes and the bytes are `The game `. The [native cache path](../docs/lol3-wsx-reader.md#cache-index-lifecycle) explains how its presence selects the rebuild branch.
+**Tried here.** The disposable copy in folder 0054 gained a nine-byte `cdcache2.smf` containing `The game ` when the run was stopped. The [native cache path](../docs/lol3-wsx-reader.md#cache-index-lifecycle) explains how the marker selects the rebuild branch.
 
 **Tried here.** Folder 0066 started from a disposable copy after removing its marker. The cache question did not appear and the world loaded. Restoration after a genuine crash and the `-NOCDCACHE` switch remain untried in this setup.
 

@@ -138,9 +138,12 @@ clamped to 0x3F on that arm. At `0x49D0AA` the code reads
 destination addresses at `0x49D0C1` and `0x49D0C4`.
 
 **CONFIRMED.** The executable's `RemapTab` section starts at
-VA `0x7F7000` (file +0x15B200) and its stored 0x24200 bytes are zero.
-The texture bank reader seeks to the offset in bank header +0x18
-and loads 0x4200 bytes at that VA (`0x43F7AD`, `0x43F88C–0x43F8A9`).
+VA `0x7F7000` (file +0x15B200) and measures 0x24200 bytes.
+Its first 0x4200 stored bytes are zero. The texture bank reader
+seeks to the offset in bank header +0x18 and loads 0x4200 bytes
+at that VA (`0x43F7AD`, `0x43F88C–0x43F8A9`). The stored
+section has 425 nonzero bytes within +0x20000 through +0x201C7.
+This read does not identify their role.
 For a file witness, the QWOD0 bank begins at game-folder
 `cdcache.wsx+0x436`. Its +0x18 field is 0x9A2. At index 0xDF, rows
 0, 1, 32 and 63 of that table return 0x00, 0x39, 0xDF and 0x09.
