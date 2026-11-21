@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import re
+import struct
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -78,14 +79,30 @@ class ReaderTools(unittest.TestCase):
             self.assertFalse(out.exists())
 
     def test_obj_round_trip(self):
-        from level_export import obj_lines, verify_obj
+        from level_export import obj_lines, texture_references, verify_obj
 
         points = [(0.5, 0, 2), (2, 0, 2), (2, 1, 4), (0, 1, 4)]
         faces = [(1, 2, 3, 4)]
-        lines = list(obj_lines("Example", points, faces))
-        verify_obj(lines, points, faces)
+        map_data = bytearray(0x244 + 56)
+        struct.pack_into("<I", map_data, 0x0C, 0x244)
+        map_data[0x244 + 0x22] = 0xFF
+        struct.pack_into("<H", map_data, 0x244 + 0x2A, 12)
+        odf = bytearray(0x40 + 24)
+        struct.pack_into("<I", odf, 4, 0x40)
+        struct.pack_into("<I", odf, 0x3C, 1)
+        struct.pack_into("<h", odf, 0x44, -3)
+        references = texture_references(map_data, odf, 1)
+        self.assertEqual(references, ["0:-3 none 12"])
+
+        lines = list(obj_lines("Example", points, faces, references))
+        verify_obj(lines, points, faces, references)
         with self.assertRaisesRegex(ValueError, "face counts"):
-            verify_obj(lines[:-1], points, faces)
+            verify_obj(lines[:-1], points, faces, references)
+        with self.assertRaisesRegex(ValueError, "texture reference"):
+            verify_obj(lines[:-2] + lines[-1:], points, faces, references)
+        map_data[0x244 + 0x20] = 1
+        with self.assertRaisesRegex(ValueError, "missing ODF material"):
+            texture_references(map_data, odf, 1)
 
     def test_dialogue_control_bytes(self):
         from lol3_media_check import display_trr_text

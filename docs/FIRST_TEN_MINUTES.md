@@ -85,6 +85,26 @@ Click a region or placement to see its details. Turn on **Map numbers**
 to show the placement numbers. To repeat the command, choose a new
 subfolder such as `plans-2` in both lines.
 
+## Export a 3D model
+
+Use the same paths as above. Choose a new output folder each time.
+
+Windows PowerShell
+
+```powershell
+py -3 tools/lol.py model --data "$data" --level QWOD0 --out "$out\model"
+```
+
+Linux
+
+```sh
+python3 tools/lol.py model --data "$data" --level QWOD0 --out "$out/model"
+```
+
+Import `model/QWOD0.obj` in a 3D viewer that can open Wavefront OBJ.
+QWOD0 has 1,430 faces. The file includes texture references from your
+copy and opens as an untextured model. [Model export and checks](COOKBOOK.md#export-a-level-to-obj)
+
 ## Find another job
 
 Use the same Python command with `tools/lol.py` to list the jobs.

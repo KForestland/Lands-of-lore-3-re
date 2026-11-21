@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
-"""Export LoL3 MAP surfaces to OBJ, with optional original level textures."""
+"""Export LoL3 MAP surfaces and texture references to Wavefront OBJ."""
 from collections import defaultdict
+from math import isclose
 from pathlib import Path
 import re
 import struct
 
 from cli_errors import ReaderArgumentParser, run_cli
 from extract_wsx_entries import wsx_name_hash
+from level_edit_data import entry
 from level_html import counted, find_data, installation_root
 from level_viewer import levels, maps
+from lol3_cli import DEFAULT_DATA
 from lol3_level_schematic import map_geometry
 from lol3_texture_archive import cache_rows, chunks, texture_entries
 from lol3_texture_png import RAW_FLAGS, SPAN_FLAGS, cache_textures, decode_texture, png_bytes, rgba_palette
 from modkit_core import output_folder
 from walk_lmf_leaves import lzo_decoder
+
+UVS = ("vt 0 0", "vt 1 0", "vt 1 1", "vt 0 1")
 
 
 def mesh(payload):
@@ -41,34 +46,81 @@ def mesh(payload):
     return len(vertices), points, faces
 
 
-def obj_lines(stem, points, faces):
-    yield f"# {stem}: MAP surface heights and unit-square UVs per face (no materials)"
+def texture_references(payload, odf, face_count):
+    """Read each MAP surface's two ODF material references and light-map base."""
+    if odf is None or len(odf) < 0x40:
+        raise ValueError("The level ODF is missing or truncated. Use an intact level archive.")
+    start, = struct.unpack_from("<I", odf, 4)
+    count, = struct.unpack_from("<I", odf, 0x3C)
+    if (count and start < 0x40) or start + 24 * count > len(odf):
+        raise ValueError("The ODF material table is out of range. Use an intact level archive.")
+    materials = [struct.unpack_from("<h", odf, start + 24 * index + 4)[0]
+                 for index in range(count)]
+
+    surface_start, = struct.unpack_from("<I", payload, 0x0C)
+    references = []
+    for index in range(face_count):
+        at = surface_start + 56 * index
+        first, second = payload[at + 0x20], payload[at + 0x22]
+        light, = struct.unpack_from("<H", payload, at + 0x2A)
+        if any(value != 0xFF and value >= count for value in (first, second)):
+            raise ValueError(f"Surface {index + 1} refers to a missing ODF material. Use an intact level archive.")
+        references.append(" ".join(
+            "none" if value == 0xFF else f"{value}:{materials[value]}"
+            for value in (first, second)) + f" {light}")
+    return references
+
+
+def level_references(data, stem, payload, face_count):
+    key = wsx_name_hash(f"LEVELS\\{stem}\\{stem}.ODF")
+    return texture_references(payload, entry(data, f"{stem}.WSX", key=key), face_count)
+
+
+def obj_lines(stem, points, faces, references):
+    yield f"# {stem}: MAP surface heights and unit-square UVs per face"
+    yield "# Each face follows a texture-ref comment: first material:selector, second material:selector, light-map base"
+    yield "# ODF material indices and initial selectors; texture pixels and native UVs are separate."
     yield f"o {stem}"
     for x, y, z in points:
         yield f"v {x:.8f} {y} {z:.8f}"
-    yield from ("vt 0 0", "vt 1 0", "vt 1 1", "vt 0 1")
-    for face in faces:
+    yield from UVS
+    for face, reference in zip(faces, references, strict=True):
+        yield f"# texture-ref {reference}"
         yield "f " + " ".join(f"{vertex}/{i}" for i, vertex in enumerate(face, 1))
 
 
-def verify_obj(lines, points, faces):
+def verify_obj(lines, points, faces, references):
     seen_v = seen_uv = seen_f = 0
+    reference = None
     for line in lines:
+        line = line.strip()
+        if line.startswith("# texture-ref "):
+            if reference is not None:
+                raise ValueError("OBJ has two texture references for one face")
+            reference = line.removeprefix("# texture-ref ")
+            continue
         parts = line.split()
+        if not parts:
+            continue
         if parts[0] == "v":
-            expected = points[seen_v]
-            if len(parts) != 4 or any(abs(float(actual) - want) > 0.00000001
-                                      for actual, want in zip(parts[1:], expected)):
+            if seen_v >= len(points) or len(parts) != 4 or any(
+                    not isclose(float(actual), want, abs_tol=1e-8, rel_tol=0)
+                    for actual, want in zip(parts[1:], points[seen_v])):
                 raise ValueError("OBJ vertex differs from the MAP reader")
             seen_v += 1
         elif parts[0] == "vt":
+            if seen_uv >= len(UVS) or line != UVS[seen_uv]:
+                raise ValueError("OBJ texture coordinates differ from the unit square")
             seen_uv += 1
         elif parts[0] == "f":
+            if seen_f >= len(faces) or reference != references[seen_f]:
+                raise ValueError("OBJ texture reference differs from the MAP and ODF reader")
             want = [f"{index}/{i}" for i, index in enumerate(faces[seen_f], 1)]
             if parts[1:] != want or any(not 1 <= index <= seen_v for index in faces[seen_f]):
                 raise ValueError("OBJ face references differ from the MAP reader")
             seen_f += 1
-    if (seen_v, seen_uv, seen_f) != (len(points), 4, len(faces)):
+            reference = None
+    if (seen_v, seen_uv, seen_f) != (len(points), len(UVS), len(faces)) or reference is not None:
         raise ValueError("OBJ vertex, UV or face counts differ from the MAP reader")
 
 
@@ -142,9 +194,10 @@ def verify_surface_count(stem, payload, face_count):
 
 def main():
     parser = ReaderArgumentParser(description=__doc__)
-    parser.add_argument("--data", required=True, help="your game folder or its DAT folder")
+    parser.add_argument("--data", default=DEFAULT_DATA, required=DEFAULT_DATA is None,
+                        help="your game folder or its DAT folder (default: $LOL3_DAT)")
     parser.add_argument("--level", default="QWOD0", help="level name (default: QWOD0)")
-    parser.add_argument("--out", help="new folder for the OBJ and selected PNGs")
+    parser.add_argument("--out", help="new folder for the OBJ")
     parser.add_argument("--textures", nargs="?", const="all", help="also export textures (all or a positive number)")
     parser.add_argument("--check", action="store_true", help="verify every MAP mesh without writing")
     args = parser.parse_args()
@@ -160,27 +213,31 @@ def main():
         total_v = total_f = 0
         for stem, (_, payload) in maps(data).items():
             _original, points, faces = mesh(payload)
-            verify_obj(obj_lines(stem, points, faces), points, faces)
+            references = level_references(data, stem, payload, len(faces))
+            verify_obj(obj_lines(stem, points, faces, references), points, faces, references)
             verify_surface_count(stem, payload, len(faces))
             total_v += len(points)
             total_f += len(faces)
         print(f"CHECK level_export: {len(maps(data))} maps, {total_v:,} OBJ vertices read back. "
-              f"{total_f:,} faces match the MAP reader and the level sheets.")
+              f"{total_f:,} faces and texture-reference rows match the MAP and ODF readers "
+              "and the face counts in the level sheets.")
         return 0
     selected = levels(data, args.level.upper())
     if len(selected) != 1:
         parser.error("Choose one level name to export, such as QWOD0.")
     stem = selected[0]
-    source_count, points, faces = mesh(maps(data)[stem][1])
+    payload = maps(data)[stem][1]
+    source_count, points, faces = mesh(payload)
+    references = level_references(data, stem, payload, len(faces))
     with output_folder(args.out, installation_root(data), args.data) as folder:
         output = folder / f"{stem}.obj"
-        output.write_text("\n".join(obj_lines(stem, points, faces)) + "\n", encoding="ascii")
+        output.write_text("\n".join(obj_lines(stem, points, faces, references)) + "\n", encoding="ascii")
         with output.open(encoding="ascii") as file:
-            verify_obj(file, points, faces)
+            verify_obj(file, points, faces, references)
         textures, skipped = write_textures(data, stem, folder, args.textures) if args.textures else (0, 0)
     print(f"Wrote {stem}.obj to {args.out}: {counted(source_count, 'MAP vertex', 'MAP vertices')}, "
           f"{counted(len(points), 'OBJ vertex', 'OBJ vertices')}, "
-          f"{counted(len(faces), 'face')}, {counted(textures, 'texture PNG')}.")
+          f"{counted(len(faces), 'face')} with texture references, {counted(textures, 'texture PNG')}.")
     if skipped:
         print(f"Skipped {skipped:,} texture descriptors whose available pixel routes are still open.")
     return 0

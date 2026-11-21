@@ -9,7 +9,8 @@ Read the original LoL3 data files and replay the checks cited in the reference p
 The `lol.py` job menu opens with `python tools/lol.py`. Add `JOB --help`
 to see the job's options. `level_viewer.py` writes an offline HTML plan with clickable details using `level_html.py`.
 Use `level_viewer.py --check` to write and read back one plan in a temporary folder.
-`level_export.py` writes a Wavefront OBJ surface model and selected texture PNGs.
+`level_export.py` writes a Wavefront OBJ surface model with the source texture references.
+Add `--textures` to export separate PNGs from your own copy.
 [First ten minutes](../docs/FIRST_TEN_MINUTES.md) ·
 [Interactive plans](../docs/COOKBOOK.md#open-an-interactive-level-plan)
 

@@ -14,7 +14,7 @@ JOBS = {
     "text": ("lol3_media_check.py", (), "Read original game text"),
     "translate": ("translate.py", (), "Export, build and verify translations"),
     "music": ("lol3_media_check.py", (), "Inspect original game music (list MP3 and WAVE tracks)"),
-    "model": ("level_export.py", (), "Export a level model and textures"),
+    "model": ("level_export.py", (), "Export a level model with texture references"),
     "save": ("save_edit.py", (), "Edit a copy of a saved game"),
     "patch": ("patch.py", (), "Make or apply a patch and its undo"),
     "mod": ("modkit.py", (), "Unpack or build an editable workspace"),

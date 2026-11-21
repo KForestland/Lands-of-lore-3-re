@@ -262,14 +262,24 @@ Placement row numbers start at 1. Use `--level all` for the 18 maps.
 ## Export a level to OBJ
 
 ```sh
-python3 tools/level_export.py --data "$LOL3_DAT" --level QWOD0 --textures 1 --out "../LoL3 model"
+python3 tools/lol.py model --data "$LOL3_DAT" --level QWOD0 --out "../LoL3 model"
 ```
 
 Import `QWOD0.obj` into a model viewer that supports Wavefront OBJ.
 For example, in Blender choose **File → Import → Wavefront (.obj)**,
 select the file, then use **View → Frame Selected**. The example writes
-1,430 faces, 2,854 OBJ vertices and one texture PNG. Without
-`--textures`, the tool writes the OBJ alone. Use `--textures all` for
+one OBJ with 1,430 faces and 2,854 vertices.
+
+The OBJ includes a `# texture-ref` comment before each face. It lists
+the first and second material as `index:selector`, then the stored
+light-map base number. `none` marks an absent material. The index is
+the zero-based row in the level's ODF material table. The signed
+selector is its starting texture reference. A negative selector
+uses the game's animated lookup. A standard OBJ viewer displays the
+untextured model.
+
+The optional `--textures` operation exports pixels separately to
+your output folder. Use `--textures all` for
 each descriptor with a supported pixel route, or give a positive limit.
 Texture export uses an existing matching cache bank or expands the shipped
 level bank with liblzo2. The `textures.tsv` index gives each image's
@@ -283,14 +293,16 @@ pointing up, the top view matches the level plan. In QWOD0, waypoint 1 at
 MAP +0x580C selects surface 231 through its word at +0x5810. Its four
 corners match the OBJ face in the plan orientation.
 
-The UVs map each face to a unit square. Native wall rendering, sloped
-surfaces and per-face texture assignment are outside this export.
-Texture PNGs are separate for inspection or manual assignment. Run
-`python3 tools/level_export.py --data "$LOL3_DAT" --check` to verify
-the vertices and compare each face count with the MAP reader and the
-published level sheet. The check writes no files.
+The UVs map each face to a unit square. The mesh shows the stored lower
+surface heights. Rendering the native walls, slopes and animated
+textures needs additional game data. Run
+`python3 tools/lol.py model --data "$LOL3_DAT" --check` to verify the vertices,
+face indices, UVs and texture references for all 18 levels and compare
+their face counts with the published level sheets. The check writes no files.
+The same options work with `tools/level_export.py` directly.
 
 [MAP coordinates and heights](lol3-map-odf-readers.md#map-section-0) ·
+[Surface texture references](lol3-map-odf-readers.md#surface-texture-references) ·
 [Texture palettes and supported flags](formats/textures.md#colour)
 
 ## Find a tool by job

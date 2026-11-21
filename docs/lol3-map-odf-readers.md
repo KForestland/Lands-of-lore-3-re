@@ -500,6 +500,26 @@ and the stored roles of +0x28–+0x29 and +0x2E–+0x30. A read of the
 loaded row before those bytes are replaced would settle their coverage.
 The remaining 14 retained bytes per surface total 1,665,314.
 
+#### Surface texture references
+
+**CONFIRMED.** Surface bytes +0x20 and +0x22 select the first and
+second material. The renderer skips a face when its byte is 0xFF.
+Otherwise it scales the byte by 24 and adds it to the loaded ODF
+section-0 base at `[0x5701CC]` (`0x4F6CD3–0x4F6CF4`,
+`0x4F6DBC–0x4F6DE0`). It reads the material's signed texture
+selector at +4. A nonnegative selector indexes the texture table
+at `[0x570200]`. A negative selector first selects an eight-byte
+row in the animated lookup at `[0x5701DC]`. Its u16 +0 and u8 +7
+are added before the texture table lookup (`0x4F6CFA–0x4F6D30`,
+`0x4F6DE4–0x4F6E1C`). The surface word at +0x2A is the
+light-map base. When both faces have materials, the second uses base
+plus one (`0x4C0134–0x4C0154`).
+
+All 182,851 non-sentinel face references in the 18 levels join to
+existing ODF rows. There are 1,200 references with negative selectors.
+The OBJ exporter carries each surface's two original references and
+the light-map base as metadata in its face order.
+
 **CONFIRMED.** The common placement reads in addition to X/Z
 are u16 heading +4 and s16 height +6 (`0x4411FF–0x44124C`),
 s16 surface +0x0A with sentinel −1 (`0x441284–0x4412A3`),
