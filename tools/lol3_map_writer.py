@@ -62,7 +62,7 @@ TABLES = {
     "section +0x34": (0x34, 0x7C, "HHHBB"),                 # 0x4E73FA, 0x4EFED1, 0x4F0126
     "section +0x30": (0x30, 0x78, "HH"),                    # 0x4EFF14, 0x4EFF21
     "section +0x2C": (0x2C, 0x74, "4sH1sBB3s"),            # 0x4EFAF0–0x4EFB3C
-    "region descriptors": (0xA4, 0xAC, "I2sHH4sH11sB"),   # 0x4E737A, 0x4AC21A
+    "region descriptors": (0xA4, 0xAC, "I3H4sHH8s2B"),     # 0x4E737A, 0x4E7934, 0x4E7787
     "predicates": (0xBC, 0xB8, "5B"),                       # 0x4F0240, 0x4F02B0
     "level bytes": (0xB4, 0xB0, "B"),                       # 0x440A20
     "section +0x48": (0x48, 0x90, "8sB3s"),                 # 0x46C5E3, 0x46C61A
@@ -173,6 +173,28 @@ def check_tail_layout(raw):
         if not note or not terminator or not all(32 <= value < 127 for value in note):
             raise ValueError("MAP +0xC0 annotation is not a terminated printable string")
     return label_count, (notes_end - notes_start) // annotation_row.size
+
+
+def check_region_surfaces(raw):
+    """Check the region runs against each surface's reverse region index."""
+    at = u32(raw, 0xA4)
+    region_count = u32(raw, 0xAC)
+    surface_at = u32(raw, 0x0C)
+    surface_count = u32(raw, 0x58)
+    seen_surfaces = 0
+    for index in range(region_count):
+        row = at + 28 * index
+        first, = struct.unpack_from("<H", raw, row + 4)
+        count = raw[row + 0x1A]
+        if not count or first + count > surface_count:
+            raise ValueError(f"Region {index} has an invalid surface run")
+        for surface in range(first, first + count):
+            owner, = struct.unpack_from("<H", raw, surface_at + 56 * surface + 0x1C)
+            if owner != index:
+                raise ValueError(f"Surface {surface} does not point back to region {index}")
+        seen_surfaces += count
+    if seen_surfaces != surface_count:
+        raise ValueError("Region runs do not cover all MAP surfaces")
 
 
 def event_fields(raw, start, end):
@@ -398,6 +420,8 @@ def check(data):
         (0x4FB34A, "8a 41 2c 8b d0 0f bf 41 18 2b c2"),
         (0x4A70FB, "8a 4e 31 84 c8"), (0x4F7059, "8a 51 33 81 ea 80 00 00 00"),
         (0x4A66CF, "66 89 59 04 66 89 59 06"),
+        (0x4E7934, "66 8b 41 04"), (0x4E794C, "8a 41 1a"),
+        (0x4E7787, "66 8b 4c 95 10 8b 54 24 2c 3b ca"),
     ):
         opcode(image, address, encoding)
     counts, seen, maps, total, edited = Counter(), set(), 0, 0, False
@@ -407,6 +431,7 @@ def check(data):
         labels += label_count
         annotations += note_count
         rebuilt, totals, opcodes = rebuild(raw, sizes)
+        check_region_surfaces(raw)
         if rebuilt != raw:
             raise ValueError(f"{stem}: rebuilt MAP differs")
         counts.update(totals)
@@ -426,7 +451,7 @@ def check(data):
           ", ".join(f"{value:,} {name}" for name, value in counts.items()) +
           f"; {regenerated:,} of {total:,} bytes from parsed fields, {total - regenerated:,} copied; "
           "command, waypoint, vertex, surface and placement edits read back; "
-          f"retained tails frame {labels:,} names and {annotations:,} annotations")
+          f"region surface runs agree; retained tails frame {labels:,} names and {annotations:,} annotations")
 
 
 def main():
