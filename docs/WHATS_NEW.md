@@ -2,6 +2,16 @@
 
 Newest first. One line per question worked on, new tool or visible change; each question bullet gives its state. Details are on the linked pages; the counts are in the [rating](../README.md#rating).
 
+## 21 November 2026
+
+- **Finding your game folder, 3D models, movies and sounds.** The [first ten minutes](FIRST_TEN_MINUTES.md) page now says which folder to give, and walks through exporting a level as an OBJ model for Blender and converting a movie or sound. The OBJ export carries each face's original texture reference as a comment. The front page shows a picture of a test model opened in Blender, made from synthetic data.
+- **Where each reported fault sits.** Every remaining report after 1.07a is classified as script, state or program. None has a few-byte patch. Quest reports now name their English 1.07a script records and what would settle them ([patches](../patches/README.md)).
+- **Development leftovers.** The unused-material page now lists the build strings, the `-CONVERT_TEST`, `-LEVED` and `-NO_ASSERTS` switches, four graphics switches and the debug payloads after the last program section ([unused](UNUSED.md)).
+- **Map bytes.** The map writer now rebuilds the 18 level MAPs from their command, waypoint, path and placement fields and the fields the program reads. 84.9% of the map bytes now come from fields with a known read. Five stored surface bytes are traced to the code that reads them. The rarely used surface bytes are measured against the stored flags ([MAP and ODF](lol3-map-odf-readers.md)).
+- **PHT files.** Each of the four PHT files is checked on its own, and so is the shipped cache. The page lists each file's whole cycles and its last partial cycle. The byte-store candidate in the program fills a buffer on the stack for an in-memory comparison ([PHT](formats/pht.md)).
+- **Light-map edges (Q3 stays mostly answered).** On each sample grid, the outer two rows and columns hold a matching texel for 599,684 of 610,325 words (98.3%) ([light maps](lol3-lmf-reader.md)).
+- **Glossary and checks.** New glossary rows explain tool words in plain language. A damaged save is refused with one line. A failed check now prints the last twenty lines of its error output, and the workspace check accepts paths through symbolic links.
+
 ## 20 November 2026
 
 - **Moving items and props.** The level plans export moves of existing items and props inside their own surfaces, for a copy ([level editor](LEVEL_EDITOR.md)).

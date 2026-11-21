@@ -1,6 +1,6 @@
 # LoL3 reverse-engineering status
 
-**As of:** 2026-11-20. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
+**As of:** 2026-11-21. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
 
 Run the checks: `python3 tools/check_all.py --data <DAT>` (41 checks; all 41 pass on a GOG copy that has run once and has a saved game; on a never-run copy 37 pass and 4 report SKIP).
 
@@ -13,7 +13,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>` (41 checks; all 41 pas
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
 
-## Where things stand (20 November 2026)
+## Where things stand (21 November 2026)
 
 A dated snapshot; the work continues and the table below is kept current.
 
