@@ -70,7 +70,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
 | Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |
 | Level models | `python3 tools/lol.py model --data "$LOL3_DAT" --level QWOD0 --out "../LoL3 model"` | `QWOD0.obj` with 1,430 faces and texture references. [Open it in Blender](docs/FIRST_TEN_MINUTES.md#export-a-3d-model). |
-| Movie and sound conversion | [Copy the commands in First ten minutes](docs/FIRST_TEN_MINUTES.md#convert-a-movie-or-sound) | `MOVIES2-1.mkv` and `QWOD0S-0.wav` in folders you choose |
+| Movie and sound conversion | [Copy the commands in First ten minutes](docs/FIRST_TEN_MINUTES.md#convert-a-movie-or-sound) | `MOVIES2-1.mkv` and `QWOD0S-0.wav` in folders you choose, with letter case from the original archives |
 | Program sections | `python tools/lol3_pe_layout.py --data "$LOL3_DAT" --check` | 8 sections and 3 debug payloads, with both file ends reached |
 
 ![Eight untextured surfaces at different heights in Blender](docs/images/model-synthetic-blender.png)
