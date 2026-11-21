@@ -39,6 +39,7 @@ VALUE = {
     "name": r"[a-zA-Z0-9_./\\-]+",
     "step": r"[+−-]\d+",
     "word": r"[a-zA-Z]+",
+    "text": r"[^,\n]+",
 }
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
 
