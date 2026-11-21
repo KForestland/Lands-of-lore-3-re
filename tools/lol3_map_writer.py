@@ -20,6 +20,7 @@ import struct
 from cli_errors import run_cli, game_path
 import lol3_cli
 from lol3_level_schematic import PLACEMENTS, map_geometry
+from lol3_native_checks import opcode
 from lol3_script_framing import level_map_entries, native_sizes, u32
 from lol3_script_notes import STREAMS, walk
 
@@ -57,7 +58,7 @@ PLACEMENT_TAILS = {
 TABLES = {
     "vertices": (0x04, 0x50, "ii"),                          # 0x4F01E0
     "section 1": (0x08, 0x54, "h6B"),                       # 0x4EFDC0, 0x4E6425
-    "surfaces": (0x0C, 0x58, "4sI8HhhHHB1sB7sH6sB1s4B"),        # 0x4A65F0, 0x50060E
+    "surfaces": (0x0C, 0x58, "4sI8HhhHH4B6sHB4s7B"),      # 0x4A65F0, 0x4F6010
     "section +0x34": (0x34, 0x7C, "HHHBB"),                 # 0x4E73FA, 0x4EFED1, 0x4F0126
     "section +0x30": (0x30, 0x78, "HH"),                    # 0x4EFF14, 0x4EFF21
     "section +0x2C": (0x2C, 0x74, "4sH1sBB3s"),            # 0x4EFAF0–0x4EFB3C
@@ -66,6 +67,9 @@ TABLES = {
     "level bytes": (0xB4, 0xB0, "B"),                       # 0x440A20
     "section +0x48": (0x48, 0x90, "8sB3s"),                 # 0x46C5E3, 0x46C61A
 }
+# Tuple index, stored offset and byte width for the fields changed by --check.
+SURFACE_EDITS = ((15, 0x21, 1), (17, 0x23, 1), (19, 0x2A, 2),
+                 (20, 0x2C, 1), (22, 0x31, 1), (24, 0x33, 1))
 HEADER_WORDS = tuple(sorted({
     0, 0x28, 0x2C, 0x30, 0x34, 0x74, 0x78, 0x7C, 0x4C, 0x98,
     0xC4, 0xC8, 0xD8, 0xDC,
@@ -327,8 +331,10 @@ def edit_check(raw, lengths):
     x, z = vertices[0]
     vertices[0] = (x + 0x10000, z)
     surface_at, _, surfaces = fields["tables"]["surfaces"]
-    light = (surfaces[0][18] + 1) & 0xFFFF          # u16 +0x2A
-    surfaces[0] = surfaces[0][:18] + (light,) + surfaces[0][19:]
+    surface = list(surfaces[0])
+    for index, _, width in SURFACE_EDITS:
+        surface[index] ^= 0x0101 if width == 2 else 1
+    surfaces[0] = tuple(surface)
     item_at, items = fields["placements"]["item"]
     identity = items[0][-2] ^ 1 if items else None  # u32 +0x20
     if items:
@@ -337,9 +343,10 @@ def edit_check(raw, lengths):
     command_at = stream_at + offset + 4
     differ = [at for at in range(len(raw)) if raw[at] != changed[at]]
     expected = {command_at, wp_at, wp_at + 1, creature_at + 2, creature_at + 3,
-                vertex_at + 2, vertex_at + 3, surface_at + 0x2A, surface_at + 0x2B,
-                item_at + 0x20}
-    if len(changed) != len(raw) or not differ or not set(differ) <= expected:
+                vertex_at + 2, vertex_at + 3, item_at + 0x20}
+    surface_offsets = {surface_at + at + byte for _, at, width in SURFACE_EDITS
+                       for byte in range(width)}
+    if len(changed) != len(raw) or not surface_offsets <= set(differ) <= expected | surface_offsets:
         raise ValueError(f"edit changed bytes outside the edited fields: {[hex(at) for at in differ[:8]]}")
     stream, starts, _, _, _, _ = walk(changed, 0, "object", lengths)
     old_vertices, _, old_points, _, old_placed = map_geometry(raw)
@@ -352,16 +359,24 @@ def edit_check(raw, lengths):
             new_creature[3] != old_creature[3] + (1 << 16)):
         raise ValueError("an edited field does not read back through the existing readers")
     again = read_fields(changed, lengths)
-    if (again["tables"]["surfaces"][2][0][18] != light or
+    if (again["tables"]["surfaces"][2][0] != surfaces[0] or
             (items and again["placements"]["item"][1][0][-2] != identity)):
         raise ValueError("an edited field does not read back through the existing readers")
     return True
 
 
 def check(data):
-    sizes = native_sizes(game_path(data.resolve().parent, "LOL3.DAT").read_bytes())
+    image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
+    sizes = native_sizes(image)
     if len(sizes) != 39:
         raise ValueError("expected 39 native opcode lengths")
+    for address, encoding in (
+        (0x4F6178, "8a 41 21 88 46 40"), (0x4F627D, "8a 51 23 88 96 82 00 00 00"),
+        (0x4FB34A, "8a 41 2c 8b d0 0f bf 41 18 2b c2"),
+        (0x4A70FB, "8a 4e 31 84 c8"), (0x4F7059, "8a 51 33 81 ea 80 00 00 00"),
+        (0x4A66CF, "66 89 59 04 66 89 59 06"),
+    ):
+        opcode(image, address, encoding)
     counts, seen, maps, total, edited = Counter(), set(), 0, 0, 0
     for stem, _, raw in level_map_entries(data):
         rebuilt, totals, opcodes = rebuild(raw, sizes)

@@ -218,10 +218,11 @@ eight-byte rows, copied to world +0x20 by
 points to field-21 56-byte surface rows. The loader reads the
 rows to world +0x24 (`0x43EADF–0x43EB04 → 0x4A65F0`).
 It stores field 21 at world +0x44 (`0x5701B4`), the count
-tested against waypoints above. The surface reader then
-initializes live bytes +0x24–+0x27 and +0x2D and applies a
-type-specific rule to +0x2C
-(`0x4A6653–0x4A66DF`, dispatch `0x4A671C`).
+tested against waypoints above. The surface reader clears
+bytes +0x24–+0x27 and +0x2D and can set live +0x2C to 0 or 23
+depending on the first material and the row's stack position
+(`0x4A6653–0x4A66DF`, dispatch `0x4A671C`). Other branches
+leave the stored +0x2C in place.
 
 | Surface offset | Confirmed field or consumer |
 |---|---|
@@ -435,11 +436,11 @@ other rows are 2,384 waypoints (`0x43EBD9–0x43EC45`), 36 paths
 (`0x43EC4D–0x43EC92`) and 23,850 placements (`0x43EEB6–0x43EF6F`; the
 common fields, X/Z included, are taken by `0x4411F0`).
 
-**CONFIRMED.** The writer now regenerates 17,366,520 of 21,232,680
-bytes (81.8%) from typed fields. Here, a typed field is one whose
+**CONFIRMED.** The writer regenerates 17,961,275 of 21,232,680
+bytes (84.6%) from typed fields. Here, a typed field is one whose
 stored value is read by native code at the listed address with that
 width. Some of those fields have uses whose game meaning is still open.
-The check also matches the 3,866,160 bytes carried at their original
+The check also matches the 3,271,405 bytes carried at their original
 offsets. Three fields with a known width but no read of the stored
 value stay retained: header +0xCC (the shared-block start, which the
 loader never seeks; 72 bytes), region descriptor u8 +0x16 (only
@@ -450,7 +451,7 @@ cleared, at `0x4F5A8C`; 13,163 bytes) and u8 +9 of the +0x48 rows
 |---|---|---|---|
 | Header | 46 dwords: the tag (`0x43E800`) and the seeks, counts and lengths the loader reads | Header load `0x43E7E7`, seek and read pairs above | `CKEEP.WSX+0xCBB182`, header +0x00 is 38 |
 | MAP +0x04 and +0x08 seeks | Signed X/Z dwords per vertex. Section 1 has a signed index word and six individually held bytes | `0x4F0126–0x4F0161`, `0x4E6425–0x4E65E7`, `0x4FFD91–0x4FFE05` | `CKEEP.WSX+0xCBE0AE` and `+0xCC5B2C` |
-| MAP +0x0C seek | Surface neighbors and vertices (+0x08/+0x10), signed low/high heights (+0x18/+0x1A), region index (+0x1C), section-1 index/count (+0x1E/+0x32), bytes +0x20/+0x34/+0x35; dword +4, u8 +0x22, u16 +0x2A and u8s +0x36/+0x37 [below](#surface-and-placement-reads-and-the-largest-retained-ranges) | `0x4A67D0–0x4A685A`, `0x4A74C0–0x4A7566`, `0x50060E–0x50063F`, `0x4E75B2–0x4E75D2`, `0x4EFF8C–0x4EFF9D` | `CKEEP.WSX+0xCCF97C` |
+| MAP +0x0C seek | Surface neighbors and vertices (+0x08/+0x10), signed low/high heights (+0x18/+0x1A), region index (+0x1C), section-1 index/count (+0x1E/+0x32), dword +4, u16 +0x2A and single bytes +0x20–+0x23, +0x2C, +0x31 and +0x33–+0x37 | `0x4A67D0–0x4A685A`, `0x4A74C0–0x4A7566`; see [surface reads below](#surface-and-placement-reads-and-the-largest-retained-ranges) | `CKEEP.WSX+0xCCF97C` |
 | MAP +0x34/+0x7C | Eight-byte rows: two u16 vertex indices, u16 byte offset into the +0x30 table, u8 pair count, u8 traversal count | `0x43EB3F–0x43EB74 → 0x4EFE40`, `0x4EFED1–0x4EFF14`, `0x4F0126–0x4F0161`, `0x4F0170–0x4F0190` | `CKEEP.WSX+0xD0FFDB`: 2858, 2857, 0, 1, 1 |
 | MAP +0x30/+0x78 | Pairs of u16 surface indices, four bytes per pair | `0x4EFE72–0x4EFEA7`, `0x4EFF14–0x4EFF36` | `CKEEP.WSX+0xD0E94B`: 5, 22 |
 | MAP +0xA4/+0xAC | 28-byte region descriptor. Typed dword +0 indexes the +0x34 rows, u16 +6 selects a +0x2C row (or 0xFFFF), u16 +8 is the state word, u16 +0x0E is the event-list offset, u8 +0x1B supplies the +0x34 run count | `0x43EB0C–0x43EB2A → 0x4E7330`, `0x4AC21A`, `0x4E73C5–0x4E73ED`, `0x4E767B–0x4E7685`, `0x4F5A91–0x4F5AAA` | `CKEEP.WSX+0xD2CEB3` |
@@ -475,6 +476,29 @@ readers below move 1,544,401 of those bytes into typed fields.
 | Surface u8 +0x22 and u16 +0x2A | 356,853 | `0x4C0121–0x4C0154` checks the second material byte and uses the base light-map ID in the second-face lookup. The first-face lookup also uses +0x2A at `0x4C00A9–0x4C00D1`. |
 | Surface u8s +0x36 and +0x37 | 237,902 | `0x4A6D00–0x4A6D3F` uses them as row offsets when finding the lower and upper surfaces. `0x4C01A2` follows a nonzero +0x37 to the next 56-byte row. |
 | Placement common fields and class tails | 473,842 | Each of the five loaders (`0x44FCD0`, `0x469980`, `0x4B44F0`, `0x4D59F0`, `0x4D7480`, called at `0x43EEC7–0x43EF6F`) reads one stored row into a stack buffer through the MAP read `0x4357A0` and passes that buffer to its constructor, which calls `0x4411F0`. The type-specific reads follow below. |
+
+**CONFIRMED.** Surface rows alone accounted for 2,260,069 retained
+bytes at 19 bytes per row. Five more stored bytes per row have
+native readers. This moves 594,755 bytes into typed fields.
+`CKEEP.WSX+0xCCF97C` is row zero. All values below are unsigned bytes.
+
+| Offset | What code does with the value | CKEEP row zero |
+|---|---|---:|
+| +0x21 | `0x4F6178` and `0x4F61AF` copy it to the first face's geometry record at +0x40, for both sloped and flat faces when +0x20 is present. | 128 |
+| +0x23 | `0x4F627D` and `0x4F62B8` copy it to the second face's geometry record at +0x82. | 128 |
+| +0x2C | `0x4FB34A–0x4FB355` optionally subtracts it from the signed +0x18 height. `0x4A7883–0x4A7889` subtracts the same byte from a height in 16.16 units. The loader changes it only on specific branches. | 0 |
+| +0x31 | `0x4A7057–0x4A70FE` walks the surface table at a 56-byte stride and, when a mask was supplied, tests it against this byte before checking the geometry. | 0 |
+| +0x33 | `0x4F7059–0x4F7066` converts it to a signed adjustment as `(value - 128) * 65536`. The lighting calculation reads that adjustment at `0x4C0853` and can add it to all three channels at `0x4C0873–0x4C0877`. | 128 |
+
+**CONFIRMED.** Surface +0x24–+0x27 are two words cleared at
+`0x4A66CF–0x4A66D3`. The load clears +0x2D on every row before
+subsequent rows consult it as live stack state. These five bytes stay
+retained. Dword +0 is zero in all shipped rows. Live code reads and
+replaces it as the surface's object-list head (`0x4E5590–0x4E5595`).
+**UNCONFIRMED.** The first reader of the stored dword before live setup,
+and the stored roles of +0x28–+0x29 and +0x2E–+0x30. A read of the
+loaded row before those bytes are replaced would settle their coverage.
+The remaining 14 retained bytes per surface total 1,665,314.
 
 **CONFIRMED.** The common placement reads in addition to X/Z
 are u16 heading +4 and s16 height +6 (`0x4411FF–0x44124C`),
@@ -512,8 +536,9 @@ remain visible in `--coverage STEM`.
 The coverage counts come from non-overlapping physical MAP ranges.
 Where a record contains retained fields, the writer copies each field
 or tail at the original row-relative offsets. The check changes an
-object-command operand, a waypoint, a vertex, a creature's Z, the
-u16 surface +0x2A and an item placement's u32 +0x20 in memory. Only
+object-command operand, a waypoint, a vertex, a creature's Z,
+surface +0x21, +0x23, +0x2A, +0x2C, +0x31 and +0x33, and
+an item placement's u32 +0x20 in memory. Only
 the selected fields change. The script and schematic readers see the
 first four edits, and reading the edited MAP again gives the new
 surface and item values.
@@ -522,7 +547,7 @@ surface and item values.
 |---|---:|---:|
 | Header | 3,312 | 7,128 |
 | Vertices and section 1 | 2,259,400 | 0 |
-| Surfaces and region descriptors | 4,545,980 | 2,483,840 |
+| Surfaces and region descriptors | 5,140,735 | 1,889,085 |
 | +0x34 and +0x30 tables | 9,125,520 | 0 |
 | +0x28, +0x2C and +0x48 tables | 1,071 | 11,673 |
 | Object command index, predicates and level bytes | 243,025 | 0 |
@@ -531,10 +556,10 @@ surface and item values.
 | Waypoint and path rows, placements | 595,146 | 323,621 |
 | Shared block, both label arrays and surface-to-script gap | 0 | 271,812 |
 | Other sections and gaps | 0 | 634,942 |
-| **Total** | **17,366,520** | **3,866,160** |
+| **Total** | **17,961,275** | **3,271,405** |
 
 `--coverage STEM` lists every retained range with end-exclusive MAP and
-WSX offsets. In CKEEP it reports 128,970 retained bytes, starting with
+WSX offsets. In CKEEP it reports 110,020 retained bytes, starting with
 MAP +0x10..+0x14 at `CKEEP.WSX+0xCBB192..+0xCBB196`. `--list STEM`
 continues to give the hashes and offsets of the four named ranges.
 
