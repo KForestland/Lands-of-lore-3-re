@@ -118,6 +118,45 @@ expand the SMD frames and validate every run. The tool reports the
 palette arm, bank count, open flags and malformed records. Both
 checks write no files.
 
+## Software wall span
+
+**CONFIRMED.** Driver 1 installs the software dispatch table at
+`0x5385E0` (`0x4098F6–0x4098FB`). The face code indexes 14-byte
+texture descriptors from `[0x570200]` and passes the chosen descriptor
+to the table at `0x4F6D60` (slot +0x34) or `0x4F6D87` (slot +0x30).
+The two-input branches of those slots reach the same span routine
+`0x49C850` from `0x49A5F3` and `0x498D13`.
+
+**CONFIRMED.** In one four-pixel arm of that routine, the first
+descriptor selects a mip through `0x44B130` at `0x49CEDB`.
+The routine saves the returned record's payload pointer (record +0xC)
+at `0x49CEE9` and reads an indexed texel at `0x49D0A1`. The
+second input supplies four samples at `0x49CFEE`, `0x49D00A`,
+`0x49D028` and `0x49D039`. Four lookups and a bias produce a row
+clamped to 0x3F on that arm. At `0x49D0AA` the code reads
+`RemapTab[row * 256 + texel]` and writes that byte to consecutive
+destination addresses at `0x49D0C1` and `0x49D0C4`.
+
+**CONFIRMED.** The executable's `RemapTab` section starts at
+VA `0x7F7000` (file +0x15B200) and measures 0x24200 bytes.
+Its first 0x4200 stored bytes are zero. The texture bank reader
+seeks to the offset in bank header +0x18 and loads 0x4200 bytes
+at that VA (`0x43F7AD`, `0x43F88C–0x43F8A9`). The stored
+section has 425 nonzero bytes within +0x20000 through +0x201C7.
+This read does not identify their role.
+For a file witness, the QWOD0 bank begins at game-folder
+`cdcache.wsx+0x436`. Its +0x18 field is 0x9A2. At index 0xDF, rows
+0, 1, 32 and 63 of that table return 0x00, 0x39, 0xDF and 0x09.
+Those are indexed span values.
+
+The [running-game probe](NEEDS_A_RUNNING_GAME.md#q6-which-bytes-does-the-texture-renderer-consume)
+needs the material, texel read, remap byte and destination for the same
+face and pixel. In this arm, record `EBX+EDX` and its byte before
+`0x49D0A1`, `0x7F7000+EAX+EDX` and its byte before `0x49D0AA`,
+and `EBX+EDX` before the store at `0x49D0C1`. Then follow that
+destination to presentation in the same frame. The link from the
+indexed destination to a measured display pixel remains **UNCONFIRMED**.
+
 ## Live Direct3D texture format
 
 **CONFIRMED.** On Wine 9.0 with the built-in DirectDraw library and a

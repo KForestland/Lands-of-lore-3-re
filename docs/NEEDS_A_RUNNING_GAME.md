@@ -30,7 +30,15 @@ coefficients, the predicted indexed output rows. The
 first-pixel predictions for the two unresolved row flags. Use those tests to
 identify the source buffer and output words before testing display conversion.
 
-Not yet run; see [Probes not yet run](#probes-not-yet-run).
+**21 November, partial runs (0066 and 0067).** The logged renderer was
+`SoFtWaRe`. At (120, 80), the presented RGB565 sample was `0xCDB2` in both
+runs. The software table inspected in 0067 supplied no filled bake tied to
+that pixel. The [software span](lol3-texture-bake.md#software-wall-span)
+gives the exact byte capture before remapping and the indexed destination
+to follow through presentation. The final-colour pair remains open. The Direct3D upload has
+an exact source-word collection point at `0x495635` just as the caller
+returns from filling staging. Use a matched draw and presentation on that
+renderer if following that route. [Final-colour probe](#probes-not-yet-run)
 
 ### Q12. Which live cast consumes an alternate resource?
 
@@ -93,7 +101,26 @@ charged cast. A native acquisition control and exact HUD indicator
 remain open.
 [Exact bytes and native debit trace](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
 
-Not yet run; see [Probes not yet run](#probes-not-yet-run).
+**21 November, folder 0068.** Key 1 left mana at 165 and showed no cast
+effect. The item click drew a hand and left the quick slots unchanged.
+This run did not exercise the successful cast and item-use paths above.
+
+## On-screen spell and item coverage
+
+Spell `0x57` has a viewport effect in the charged-cast run on the edited
+quick-slot setup. The charged HUD indication is still unseen. The key-3
+`0x54` request showed the no-enemy message, so its cast effect is unseen.
+The `0x59` trace records the native debit. The viewport effect for `0x59`
+and all the other rows in the [spell tables](lol3-spell-dispatch.md#definition-tables)
+remains unseen in a matched launch record.
+
+The edited-slot trials followed Ancient's Stone (handler 6) and Mana
+Cluster (handler 112) through their native counter writes and checked
+consumption against a new save. No separate on-screen effect was isolated
+for those uses. The [item-handler tables](lol3-item-dispatch.md#use-effects)
+describe the file and code evidence. Each handler row remains unseen
+on-screen as an isolated use effect. The floor pickup in Q13 is an
+inventory transfer witness.
 
 ## Probes not yet run
 
