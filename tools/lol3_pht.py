@@ -48,6 +48,13 @@ RANDOM_CODE = bytes.fromhex(
     "8b48148d14498d1491c1e20403d1c1e2082bd18d8c91c39e2600894814"
     "8bc1c1e81025ff7f0000c3"
 )
+RANDOM_CALL_SITES = {
+    0xFE8D7: "e874c10100888434180f0000",  # generator call and store AL to the stack buffer
+    0xFE8FF: "8d8c24180f0000",            # same buffer passed to the first transform
+    0xFE91B: "e860000000",
+    0xFE944: "e877010000",                # second transform
+    0xFE96B: "f3a6",                      # compare bytes with the original buffer
+}
 
 
 def random_cycle():
@@ -177,6 +184,10 @@ def main():
         image = programs["LOL3.DAT"]
         if image[RANDOM_AT:RANDOM_AT + len(RANDOM_CODE)] != RANDOM_CODE:
             raise ValueError("LOL3.DAT random-number recurrence differs")
+        for at, encoding in RANDOM_CALL_SITES.items():
+            expected = bytes.fromhex(encoding)
+            if image[at:at + len(expected)] != expected:
+                raise ValueError(f"LOL3.DAT in-memory RNG caller differs at +{at:#x}")
         with ordered[0].open("rb") as handle:
             if handle.read(PERIOD) != random_cycle():
                 raise ValueError("PHT common cycle differs from the seed-1 byte model")
