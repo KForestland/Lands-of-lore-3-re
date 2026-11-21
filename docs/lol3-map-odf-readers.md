@@ -503,6 +503,17 @@ displacements without establishing a stored reader. A read of the
 loaded row before those bytes are replaced would settle their coverage.
 The remaining 14 retained bytes per surface total 1,665,314.
 
+**CONFIRMED (stored correlation).** Among 118,951 surfaces, the
+u16 at +0x28 and bytes +0x2E/+0x2F are zero throughout. Byte +0x30
+uses values 2–16 in 1,182 rows across six Gladstone maps (BUPP1,
+CKEEP, DLOW1, LUPP2, MLOW2 and OLOW3). Every one has bit `0x200`
+set in the dword at +4. A further 103,783 surfaces have that flag
+and byte +0x30 equal to zero. The other 13,986 surfaces have
+neither. `lol3_map_writer.py --check` verifies the +0x30 count and
+flag relation. The correlation leaves +0x30 retained. The next
+reader witness must follow a loaded surface with a nonzero +0x30
+through a typed read of that byte.
+
 #### Surface texture references
 
 **CONFIRMED.** Surface bytes +0x20 and +0x22 select the first and

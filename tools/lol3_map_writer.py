@@ -197,6 +197,13 @@ def check_region_surfaces(raw):
         raise ValueError("Region runs do not cover all MAP surfaces")
 
 
+def surface_storage_counts(raw):
+    """Count retained +0x30 bytes against the stored surface flag at +4."""
+    start, count = u32(raw, 0x0C), u32(raw, 0x58)
+    return Counter((bool(u32(raw, at + 4) & 0x200), raw[at + 0x30])
+                   for at in range(start, start + 56 * count, 56))
+
+
 def event_fields(raw, start, end):
     at = start
     while at < end:
@@ -426,12 +433,14 @@ def check(data):
         opcode(image, address, encoding)
     counts, seen, maps, total, edited = Counter(), set(), 0, 0, False
     labels, annotations = 0, 0
+    surface_bytes = Counter()
     for stem, _, raw in level_map_entries(data):
         label_count, note_count = check_tail_layout(raw)
         labels += label_count
         annotations += note_count
         rebuilt, totals, opcodes = rebuild(raw, sizes)
         check_region_surfaces(raw)
+        surface_bytes.update(surface_storage_counts(raw))
         if rebuilt != raw:
             raise ValueError(f"{stem}: rebuilt MAP differs")
         counts.update(totals)
@@ -446,12 +455,18 @@ def check(data):
         raise ValueError("no MAP held an opcode 0x0E command for the edit check")
     if (labels, annotations) != (1542, 3429):
         raise ValueError(f"expected 1,542 tail labels and 3,429 annotations, read {labels:,} and {annotations:,}")
+    nonzero = {value: count for (flag, value), count in surface_bytes.items() if flag and value}
+    if (set(nonzero) != set(range(2, 17)) or sum(nonzero.values()) != 1182
+            or sum(count for (flag, value), count in surface_bytes.items() if not flag and value)
+            or surface_bytes[True, 0] != 103783 or surface_bytes[False, 0] != 13986):
+        raise ValueError("stored surface +0x30 census or its relation to flag 0x200 differs")
     regenerated = counts.pop("field bytes")
     print(f"CHECK MAP write: {maps} byte-identical MAPs, {len(seen)}/{len(sizes)} opcodes stored; " +
           ", ".join(f"{value:,} {name}" for name, value in counts.items()) +
           f"; {regenerated:,} of {total:,} bytes from parsed fields, {total - regenerated:,} copied; "
           "command, waypoint, vertex, surface and placement edits read back; "
-          f"region surface runs agree; retained tails frame {labels:,} names and {annotations:,} annotations")
+          f"region surface runs agree; retained tails frame {labels:,} names and {annotations:,} annotations; "
+          "1,182 nonzero retained surface +0x30 values, all with flag 0x200")
 
 
 def main():
