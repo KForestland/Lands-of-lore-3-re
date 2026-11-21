@@ -9,9 +9,9 @@ Open the folder for the copy you play. Find `LOL3.DAT` in that folder and
 open the `DAT` folder next to it. Look for `CKEEP.WSX` and `QWOD0.WSX`
 directly inside `DAT`. Lowercase names such as `ckeep.wsx` also work.
 
-If a search finds several copies of `QWOD0.WSX`, use the one in the `DAT`
-folder beside `LOL3.DAT` in your chosen installation. Copy the full path
-of that `DAT` folder.
+If you have several installations or test copies, start with the installation
+you normally launch. Copy the full path to its `DAT` folder, with both
+marker files inside and `LOL3.DAT` one folder up.
 
 ## Download the tools
 
@@ -72,8 +72,8 @@ xdg-open "$out/first-level.svg"
 
 You should see an overhead plan of QWOD0 with surface edges and numbered placements.
 If the tool cannot find a game file, check the markers in
-[Find your game files](#find-your-game-files). If the open command fails, open
-`first-level.svg` from the output folder in your browser.
+[Find your game files](#find-your-game-files). If no window opens, open
+`first-level.svg` from the output folder in a browser on your desktop.
 
 To draw the picture again, choose a new picture file name in both lines.
 
@@ -117,7 +117,11 @@ Linux
 python3 tools/lol.py model --data "$data" --level QWOD0 --out "$out/model"
 ```
 
-The last line should report 1,430 faces. In Blender, choose
+The last line should report 1,430 faces. To view the export, get Blender for
+Windows, macOS or Linux, or run `sudo apt install blender` on Debian or Ubuntu.
+[Blender downloads](https://www.blender.org/download/)
+
+In Blender, choose
 **File → Import → Wavefront (.obj)**. Open `QWOD0.obj` inside the new
 `model` folder you named. If the view is empty, select QWOD0 in the
 Outliner and choose **View → Frame Selected** in the 3D Viewport.
@@ -144,9 +148,10 @@ python3 tools/lol.py movie --data "$data" --file MOVIES2.WSX --entry 1 --out "$o
 python3 tools/lol.py sound --data "$data" --file QWOD0S.WSX --entry 0 --out "$out/sound"
 ```
 
-Open `MOVIES2-1.mkv` in the movie folder or `QWOD0S-0.wav` in the sound
-folder with a media player. The movie has 166 frames. The sound has
-49,655 sample frames. [How to choose a different entry](COOKBOOK.md#convert-a-movie-or-sound)
+Open the files named in the tool output from the `movie` or `sound` folder.
+The filenames keep the archive names' letter case. A lowercase installation
+produces `movies2-1.mkv` and `qwod0s-0.wav`. The movie has 166 frames. The sound
+has 49,655 sample frames. [How to choose a different entry](COOKBOOK.md#convert-a-movie-or-sound)
 
 ## Find another job
 
