@@ -101,9 +101,12 @@ Linux
 python3 tools/lol.py model --data "$data" --level QWOD0 --out "$out/model"
 ```
 
-Import `model/QWOD0.obj` in a 3D viewer that can open Wavefront OBJ.
-QWOD0 has 1,430 faces. The file includes texture references from your
-copy and opens as an untextured model. [Model export and checks](COOKBOOK.md#export-a-level-to-obj)
+The last line should report 1,430 faces. In Blender, choose
+**File → Import → Wavefront (.obj)**. Open `QWOD0.obj` inside the new
+`model` folder you named. If the view is empty, select QWOD0 in the
+Outliner and choose **View → Frame Selected** in the 3D Viewport.
+The model appears untextured. Its texture references are in the OBJ
+as comments. [Model export and checks](COOKBOOK.md#export-a-level-to-obj)
 
 ## Find another job
 

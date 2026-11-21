@@ -68,7 +68,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | Fields from a save | `python tools/lol.py save page "$LOL3_SLOT" --out ../lol3-out/save.html` | Writes save.html with stored values and commands for making an edited copy |
 | Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
 | Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |
-| Level models | `python tools/level_export.py --data "$LOL3_DAT" --check` | 18 maps, 226,109 OBJ vertices and 118,951 faces |
+| Level models | `python3 tools/lol.py model --data "$LOL3_DAT" --level QWOD0 --out "../LoL3 model"` | `QWOD0.obj` with 1,430 faces and texture references. [Open it in Blender](docs/FIRST_TEN_MINUTES.md#export-a-3d-model). |
 | Program sections | `python tools/lol3_pe_layout.py --data "$LOL3_DAT" --check` | 8 sections and 3 debug payloads, with both file ends reached |
 
 ## Change a number in your own copy

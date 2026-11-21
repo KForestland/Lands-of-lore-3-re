@@ -148,7 +148,6 @@
         "tools/extract_wsx_entries.py",
         "tools/full_report.py",
         "tools/level_edit.py",
-        "tools/level_export.py",
         "tools/level_viewer.py",
         "tools/lol.py",
         "tools/lol3_cache_seed.py",
