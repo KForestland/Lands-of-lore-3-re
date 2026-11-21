@@ -116,7 +116,7 @@ class ReaderArgumentParser(argparse.ArgumentParser):
             if isinstance(folder, (str, os.PathLike)):
                 path = input_path(folder)
                 if not path.is_dir():
-                    self.error(f"game data folder does not exist: {folder}")
+                    self.error(f"The game data folder {folder} does not exist, so give --data the game folder or its DAT folder.")
                 setattr(options, name, str(path) if isinstance(folder, str) else path)
         data = [getattr(options, name, None) for name in DATA_OPTIONS]
         for name in self.output_options:
