@@ -5,36 +5,74 @@
   lol3_texture_archive.py --data DAT --check --decode   # liblzo2
   lol3_texture_archive.py --data DAT --list QWOD0 --decode   # one bank's descriptors
 """
-from cli_errors import run_cli
+from cli_errors import game_path, run_cli
 from pathlib import Path
+import re
 from struct import error as struct_error, iter_unpack, unpack_from
 
 import lol3_cli
 from extract_wsx_entries import parse_wsx, wsx_name_hash
+from lol3_pe_layout import layout
+from lol3_script_framing import CODE_BIAS
 from lol3_texture_spans import cache_path
 from walk_lmf_leaves import lzo_decoder
 
 CHUNK = 0x100000
 
 
-def texture_entries(data_dir):
+def texture_entries(data_dir, extension=".TE_"):
     for path in lol3_cli.wsx_files(data_dir):
         with path.open("rb") as source:
             count, size = unpack_from("<HI", source.read(6))
             if count != 4:
                 continue
             name = path.stem.upper()
-            key = wsx_name_hash(f"LEVELS\\{name}\\{name}.TE_")
+            key = wsx_name_hash(f"LEVELS\\{name}\\{name}{extension}")
             for stored, offset, length in iter_unpack("<III", source.read(48)):
                 if stored == key:
                     if offset + length > size:
-                        raise ValueError(f"{path.name}: .TE_ range exceeds WSX data")
+                        raise ValueError(f"{path.name}: {extension} range exceeds WSX data")
                     source.seek(54 + offset)
                     packed = source.read(length)
                     if len(packed) != length:
-                        raise ValueError(f"{path.name}: truncated .TE_ entry")
+                        raise ValueError(f"{path.name}: truncated {extension} entry")
                     yield name, packed
                     break
+
+
+def check_wrapper_extension(data_dir):
+    """Read the cache code's extension literal and its last-character rewrite."""
+    page = "docs/formats/textures.md"
+    text = (Path(__file__).resolve().parents[1] / page).read_text(encoding="utf-8")
+    claims = re.findall(r"cache preparation path changes `(\.\w{3})` to\s+`(\.\w{3})` "
+                        r"at `(0x[0-9a-fA-F]+)[–-](0x[0-9a-fA-F]+)`", text)
+    if len(claims) != 1:
+        raise ValueError(f"{page}: expected one cache extension rewrite")
+    old, new, first_store, second_store = claims[0]
+
+    image = game_path(data_dir.resolve().parent, "LOL3.DAT").read_bytes()
+    _, base, _, sections, _, _ = layout(image)
+    push = 0x4E45D1 - CODE_BIAS
+    load = 0x4E460A - CODE_BIAS
+    if image[push] != 0x68 or image[load] != 0xB2:
+        raise ValueError("LOL3.DAT: cache extension comparison or replacement moved")
+    literal = unpack_from("<I", image, push + 1)[0] - base
+    _, rva, _, stored, size = next(row for row in sections if row[0] == ".data")
+    if not rva <= literal <= rva + size - 5:
+        raise ValueError("LOL3.DAT: cache extension literal is outside .data")
+    start = stored + literal - rva
+    source = image[start:start + 5]
+    if source[:1] != b"." or source[4:] != b"\0":
+        raise ValueError("LOL3.DAT: malformed cache extension literal")
+    for address, encoding in ((first_store, b"\x88\x54\x0c\x33"), (second_store, b"\x88\x54\x29\xff")):
+        at = int(address, 16) - CODE_BIAS
+        if at < 0 or image[at:at + len(encoding)] != encoding:
+            raise ValueError(f"{page}: no cache extension store at {address} in LOL3.DAT")
+    native = source[:4].decode("ascii").upper()
+    rewritten = native[:-1] + chr(image[load + 1])
+    if (old.upper(), new.upper()) != (native, rewritten):
+        raise ValueError(f"{page}: claims {old} to {new}, LOL3.DAT changes {native} to {rewritten}")
+    return new.upper()
 
 
 def chunks(data):
@@ -144,12 +182,13 @@ def main():
         return 0
     try:
         data_dir = Path(args.data)
+        extension = check_wrapper_extension(data_dir) if args.check else ".TE_"
         decode = lzo_decoder() if args.decode else None
         path, cache = None, None
         if decode and cache_path(data_dir) is not None:
             path, cache = cache_rows(data_dir)
         files = blocks = matches = descriptors = 0
-        for name, packed in texture_entries(data_dir):
+        for name, packed in texture_entries(data_dir, extension):
             sections = list(chunks(packed))
             files += 1
             blocks += len(sections)
@@ -176,7 +215,7 @@ def main():
             detail = (f", all decoded and {matches} byte-identical cache banks" if cache is not None
                       else ", all decoded; cache comparison SKIPPED (no game-folder cdcache.wsx, which the game writes when it runs)")
             detail += f"; palette joins {counts[1]:,}/{counts[2]:,}/{descriptors:,} for arms 1/2/3"
-        print(f"CHECK texture_archive: {files} .TE_ entries, {blocks} packed chunks{detail}")
+        print(f"CHECK texture_archive: {files} {extension} entries, {blocks} packed chunks{detail}")
         return 0
     except (OSError, ValueError, struct_error, StopIteration) as error:
         parser.exit(1, f"texture archive: {error}\n")
