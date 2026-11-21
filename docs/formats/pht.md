@@ -97,6 +97,15 @@ free-space query. None names a `DAT` file. The name keys of `CYGNUS.PHT`,
 `DAT\CYGNUS.PHT` and the other three names (with and without the folder) are
 in no WSX directory and not in either program.
 
+**CONFIRMED.** The GOG install's `goggame-galaxyFileList.ini` lists all
+four as loose data paths. Keys F66, F68, F69 and F76 identify
+`DAT\yupa.pht`, `DAT\quann.pht`, `DAT\RAIDER.PHT` and
+`DAT\CYGNUS.PHT` respectively. A case-insensitive search for the four
+stems and the suffix, as ASCII and UTF-16LE, found none in the 16
+MZ files next to the game's data folder. That set includes the
+launcher, engine, patch helper, audio modules, display DLLs and
+uninstaller. The manifest records their packaging.
+
 **UNCONFIRMED** (what the game does with them). No stored name and no stored
 search pattern in those two programs names the four files, and nothing there
 identifies a consumer of this cycle. Settling test: a file-open trace of
