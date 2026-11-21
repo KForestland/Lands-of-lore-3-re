@@ -31,6 +31,8 @@ def geometry():
         struct.pack_into("<ii", raw, vertex + 8 * index, x << 16, z << 16)
     struct.pack_into("<8H", raw, surface + 8, *([0xFFFF] * 4), 0, 1, 2, 3)
     struct.pack_into("<H", raw, surface + 0x1E, 0xFFFF)
+    raw[surface + 0x22] = 0xFF
+    struct.pack_into("<H", raw, surface + 0x2A, 12)
     for index, at in enumerate((prop, control, item), 2):
         struct.pack_into("<hh", raw, at, index, index + 1)
     return bytes(raw)
@@ -40,8 +42,16 @@ def make_fixture(game):
     game.mkdir()
     make_game(game)
     payload = geometry()
-    key = wsx_name_hash("LEVELS\\QWOD0\\QWOD0.MAP")
-    rows = [(key, 0, payload)] + [(i, len(payload) + i - 1, bytes([i])) for i in range(1, 4)]
+    material_start = 0x98
+    odf = bytearray(material_start + 24)
+    struct.pack_into("<II", odf, 0, 38, material_start)
+    struct.pack_into("<I", odf, 0x3C, 1)
+    struct.pack_into("<h", odf, material_start + 4, 7)
+    map_key = wsx_name_hash("LEVELS\\QWOD0\\QWOD0.MAP")
+    odf_key = wsx_name_hash("LEVELS\\QWOD0\\QWOD0.ODF")
+    end = len(payload) + len(odf)
+    rows = [(map_key, 0, payload), (odf_key, len(payload), odf),
+            (2, end, b"x"), (3, end + 1, b"y")]
     (game / DATA / "QWOD0.WSX").write_bytes(write_wsx(rows))
     archive = game / DATA / "locallng.wsx"
     text = write_trr([(42, b"A made-up forest")])
@@ -63,6 +73,7 @@ def inspect_jobs(test):
     out = test.root / "obj"
     test.assertIn("1 face", test.job("model", "--data", test.data, "--level", LEVEL, "--out", out))
     model = (out / "QWOD0.obj").read_text(encoding="ascii")
+    test.assertIn("# texture-ref 0:7 none 12", model)
     test.assertIn("f 1/1 4/2 3/3 2/4", model)
     test.assertIn("A made-up forest", test.job("text", "--data", test.game, "qtext.trr", "--id", "42"))
 
