@@ -152,6 +152,29 @@ def retained_spans(raw):
     ]
 
 
+def check_tail_layout(raw):
+    """Verify the stored tail's label and annotation slots without typing them."""
+    start = u32(raw, 0xC0)
+    label_row = struct.Struct("<5x40s")
+    annotation_row = struct.Struct("<16x100s")
+    labels_end = start + 256 * label_row.size
+    notes_start = labels_end + 55
+    notes_end = len(raw) - 17
+    if start < 0x244 or notes_start > notes_end or (notes_end - notes_start) % annotation_row.size:
+        raise ValueError("MAP +0xC0 tail does not fit the label and annotation rows")
+    label_count = 0
+    for (slot,) in label_row.iter_unpack(raw[start:labels_end]):
+        label, terminator, _ = slot.partition(b"\0")
+        if not terminator or not all(32 <= value < 127 for value in label):
+            raise ValueError("MAP +0xC0 label is not a terminated printable string")
+        label_count += bool(label)
+    for (slot,) in annotation_row.iter_unpack(raw[notes_start:notes_end]):
+        note, terminator, _ = slot.partition(b"\0")
+        if not note or not terminator or not all(32 <= value < 127 for value in note):
+            raise ValueError("MAP +0xC0 annotation is not a terminated printable string")
+    return label_count, (notes_end - notes_start) // annotation_row.size
+
+
 def event_fields(raw, start, end):
     at = start
     while at < end:
@@ -377,8 +400,12 @@ def check(data):
         (0x4A66CF, "66 89 59 04 66 89 59 06"),
     ):
         opcode(image, address, encoding)
-    counts, seen, maps, total, edited = Counter(), set(), 0, 0, 0
+    counts, seen, maps, total, edited = Counter(), set(), 0, 0, False
+    labels, annotations = 0, 0
     for stem, _, raw in level_map_entries(data):
+        label_count, note_count = check_tail_layout(raw)
+        labels += label_count
+        annotations += note_count
         rebuilt, totals, opcodes = rebuild(raw, sizes)
         if rebuilt != raw:
             raise ValueError(f"{stem}: rebuilt MAP differs")
@@ -392,11 +419,14 @@ def check(data):
         raise ValueError(f"expected 18 shipped MAPs, read {maps}")
     if not edited:
         raise ValueError("no MAP held an opcode 0x0E command for the edit check")
+    if (labels, annotations) != (1542, 3429):
+        raise ValueError(f"expected 1,542 tail labels and 3,429 annotations, read {labels:,} and {annotations:,}")
     regenerated = counts.pop("field bytes")
     print(f"CHECK MAP write: {maps} byte-identical MAPs, {len(seen)}/{len(sizes)} opcodes stored; " +
           ", ".join(f"{value:,} {name}" for name, value in counts.items()) +
           f"; {regenerated:,} of {total:,} bytes from parsed fields, {total - regenerated:,} copied; "
-          "command, waypoint, vertex, surface and placement edits read back")
+          "command, waypoint, vertex, surface and placement edits read back; "
+          f"retained tails frame {labels:,} names and {annotations:,} annotations")
 
 
 def main():

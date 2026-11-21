@@ -547,11 +547,34 @@ the retail MAP loader's 22 direct seeks, nor the nested seek at
 range ends at or before the tail start. This seek evidence shows
 only that the retail loader skips the tails: it does not parse
 them, so they are carried as retained bytes, not typed fields.
-No `Expression` NUL string occurs in the inspected `LOL3.DAT`. **UNCONFIRMED.** The
-grammar of the tail and which original tool reads it. A program
-that seeks to header +0xC0 and exposes the record widths would
-settle that range. The unexplained surface fields and tails
-remain visible in `--coverage STEM`.
+No `Expression` NUL string occurs in the inspected `LOL3.DAT`.
+
+#### Layout of the retained +0xC0 tails
+
+**CONFIRMED (stored framing).** The lengths of all 18 tails fit
+`11,592 + 116 × n`. The string positions give the following
+partition. Offsets are relative to the tail start, with exclusive ends.
+
+| Range | Stored layout |
+|---|---|
+| +0 to +11,520 | 256 rows of 45 bytes. Each starts with five opaque bytes followed by a 40-byte slot containing a NUL-terminated printable label or an empty string. |
+| +11,520 to +11,575 | 55 intervening bytes with no established layout. |
+| +11,575 to +11,575 + 116 × n | `n` rows of 116 bytes. Each starts with 16 opaque bytes followed by a 100-byte slot containing a NUL-terminated printable annotation. |
+| Final 17 bytes | Retained as stored. |
+
+Across the 18 maps, 1,542 of 4,608 label slots are occupied. The known
+`Expression` label accounts for 598 of them. Eleven label slots and
+323 annotation slots have nonzero bytes after the terminator. The
+writer preserves them. QWOD0 has no annotation rows. SWOD4's tail
+starts at `SWOD4.WSX+0x61E319` and has two rows. Their text slots begin
+at `+0x621060` and `+0x6210D4`. The corpus check verifies the partitions
+and terminators for all 3,429 annotations without printing their text.
+
+**UNCONFIRMED.** The purposes of the opaque fields and which original
+tool consumes this layout. A reader that seeks to header +0xC0 and
+steps the two row widths would settle the link to the original tool.
+The retail loader skips these spans, so their 606,420 bytes remain
+retained in `--coverage STEM`. The native-read coverage stays at 84.6%.
 
 The coverage counts come from non-overlapping physical MAP ranges.
 Where a record contains retained fields, the writer copies each field
