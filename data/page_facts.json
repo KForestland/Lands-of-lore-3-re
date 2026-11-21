@@ -88,15 +88,42 @@
           "kind": "number"
         }
       ]
+    },
+    "audio.music.wave_count": {
+      "reader": [
+        "wave_count"
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/audio.md",
+          "before": "The four MUSIC archives hold ",
+          "after": " RIFF WAVE entries",
+          "kind": "number"
+        }
+      ]
+    },
+    "audio.music.wave_channels": {
+      "reader": [
+        "wave_channels"
+      ],
+      "anchors": [
+        {
+          "page": "docs/formats/audio.md",
+          "before": "Their `fmt ` chunks describe ",
+          "after": ",",
+          "kind": "text"
+        }
+      ]
     }
   },
   "automatic": {
     "executable": "LOL3.DAT",
     "counts": {
       "lol3_wsx_writer.py": {
-        "rows": [
-          "wsx_count"
-        ]
+        "rows": "rows"
+      },
+      "walk_lmf_leaves.py": {
+        "LMF entries": "LMF entries"
       }
     },
     "archive_entries": [
@@ -105,6 +132,12 @@
     "pe_sections": [
       "LOL3.DAT",
       "LOL3.EXE"
+    ],
+    "absolute_operands": true,
+    "loose_files": [
+      "*.EXE",
+      "LOL3.DAT",
+      "DAT/*"
     ]
   }
 }

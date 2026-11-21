@@ -4,6 +4,7 @@ from hashlib import sha256
 from struct import iter_unpack, unpack_from
 
 from cli_errors import game_path
+from page_facts_auto import x86_operand
 
 DATA_ENV = "LOL3_DAT"
 IMAGE_HASH = "9a9eb04c8f404ebf68f439df4ec7dc6ad5cc230235d0f853059f636ff720ccea"
@@ -136,12 +137,38 @@ def wsx_count(data):
     return sum(len(wsx_directory(path)) for path in paths)
 
 
+def music_wave_headers(data):
+    for disc in range(1, 5):
+        path = game_file(data, f"DAT/MUSIC{disc}.WSX")
+        for offset, size in wsx_directory(path):
+            header = read_at(path, offset, min(size, 128))
+            if header[:4] != b"RIFF" or header[8:12] != b"WAVE":
+                continue
+            at = 12
+            while at + 8 <= len(header):
+                length, = unpack_from("<I", header, at + 4)
+                if header[at:at + 4] == b"fmt " and length >= 16 and at + 12 <= len(header):
+                    yield unpack_from("<H", header, at + 10)[0]
+                    break
+                at += 8 + length + (length & 1)
+            else:
+                raise ValueError(f"{path.name}+{offset:#x}: WAVE format header unavailable")
+
+
 def read_witness(data, spec):
     kind, *args = spec
     if kind == "wsx_count":
         return wsx_count(data), "WSX directory headers in DAT and the two loose originals"
     if kind == "map_section":
         return map_section(data, args[0]), "18 raw MAP headers, section starts and field 20"
+    if kind in {"wave_count", "wave_channels"}:
+        channels = list(music_wave_headers(data))
+        source = "MUSIC1–4.WSX directory members and RIFF WAVE format headers"
+        if kind == "wave_count":
+            return len(channels), source
+        if not channels or len(set(channels)) != 1:
+            raise ValueError("music WAVE format headers do not agree on channel count")
+        return {1: "one channel", 2: "two channels"}.get(channels[0], f"{channels[0]} channels"), source
     path = game_file(data, args[0])
     if kind == "archive_size":
         entry = args[1]
@@ -150,6 +177,10 @@ def read_witness(data, spec):
     if kind == "lmf_first_row":
         return lmf_first_row(path), f"{path.name}, LMF member offset plus stored directory offset"
     image = read_file(path)
+    if kind == "absolute_operand":
+        va = args[1]
+        code = va_bytes(image, pe_rows(image), va, 8)
+        return x86_operand(code, 4), f"{path.name} instruction at VA {va:#x}"
     if kind == "pe_virtual_size":
         at, virtual, _, _, _ = pe_rows(image)[args[1]]
         return virtual, f"{path.name}+{at + 8:#x}, RemapTab virtual size"

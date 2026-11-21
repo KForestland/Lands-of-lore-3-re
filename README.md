@@ -30,7 +30,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 - **Rules traced:** the pages mark 475 statements CONFIRMED (proved from the program code or the files) and 79 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 42/8,278 candidate literals registered with byte witnesses. The other literals are inventoried as prose-only.
+- **Page facts:** 54/8,279 candidate literals registered with byte witnesses. The other literals are inventoried as prose-only.
 <!-- rating:end -->
 
 ![Overhead QWOD0 schematic from MAP edges, waypoints and placements](docs/images/qwod0-schematic.svg)
