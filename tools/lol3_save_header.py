@@ -14,7 +14,7 @@ file +0x3BE0B (VA 0x43CA0B, cmp immediate 310) and +0x3BE17 (VA 0x43CA17,
 cmp immediate 38). A level block header is 0x34C bytes: size at +0, 75
 relative starts at +0xF4, 75 expanded lengths at +0x220.
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import struct
 from pathlib import Path
 
@@ -213,7 +213,7 @@ def check_line(data_dir):
             or "second object +0x4aa:" not in text or "PAYLOAD" in text
             or "50 41 59 4c" in text):
         raise ValueError("synthetic slot report is wrong")
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if image[VERSION_310_CMP_AT:VERSION_310_CMP_AT + len(VERSION_310_CMP)] != VERSION_310_CMP:
         raise ValueError("LOL3.DAT version 310 compare at file +0x3BE0B differs")
     if image[VERSION_38_CMP_AT:VERSION_38_CMP_AT + len(VERSION_38_CMP)] != VERSION_38_CMP:

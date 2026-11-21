@@ -37,7 +37,7 @@ def levels(data, selection):
 
 def progression(data, _selected):
     result = defaultdict(list)
-    for row in collect(data)[0]:
+    for row in collect(data, full_corpus=False)[0]:
         result[row[0]].append(row)
     return result
 

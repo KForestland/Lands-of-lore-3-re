@@ -5,7 +5,7 @@
   lol3_claimed_edges.py --data DAT --check --decode   # also the light-map samples
   lol3_claimed_edges.py --data DAT --span QWOD0       # hex of the unidentified span; no field names
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
@@ -141,10 +141,10 @@ def check_shared_map_block(image, maps):
 
 
 def file_facts(data_dir):
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
         raise ValueError("LOL3.DAT does not match the documented English retail executable")
-    qw = archive(Path(data_dir) / "QWOD0.WSX")
+    qw = archive(game_path(Path(data_dir), "QWOD0.WSX"))
     counts = {}
     te_pos = []
     at = []
@@ -201,7 +201,7 @@ def decode_facts(data_dir):
     decode = lzo_decoder()
     out = {}
     for filename in ("QWOD0.WSX", "swod4.wsx"):
-        archive_entries = parse_wsx(Path(data_dir) / filename)
+        archive_entries = parse_wsx(game_path(data_dir, filename))
         blob = next(entry["blob"] for entry in archive_entries["entries"] if entry["is_lmf"])
         members = highs = marked = 0
         for group in lmf_groups(blob):

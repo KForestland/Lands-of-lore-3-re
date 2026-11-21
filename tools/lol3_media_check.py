@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check original LoL3 movie names, VQA chunk framing and WAVE audio in place."""
-from cli_errors import ReaderArgumentParser, run_cli
+from cli_errors import ReaderArgumentParser, run_cli, game_path
 from collections import Counter
 import hashlib
 import argparse
@@ -282,23 +282,27 @@ def display_trr_text(field):
                    for ch in lines).strip()
 
 
-def localized_trr(data, names):
+def localized_trr(data, names, *, verify_offsets=True):
     path = next((path for path in data.iterdir() if path.name.lower() == "locallng.wsx"), None)
     if path is None:
         raise FileNotFoundError("LOCALLNG.WSX is missing from the DAT folder")
     tables = {}
     with path.open("rb") as stream:
-        directory = {start: size for _, start, size in wsx_rows(stream)}
+        directory = list(wsx_rows(stream))
         for name in names:
-            start = TRR_AT[name]
-            if start not in directory:
+            key = wsx_name_hash(name)
+            matches = [(start, size) for stored, start, size in directory if stored == key]
+            if len(matches) != 1:
+                raise ValueError(f"LOCALLNG.WSX must contain one {name} entry, found {len(matches)}.")
+            start, size = matches[0]
+            if verify_offsets and start != TRR_AT[name]:
                 raise ValueError(f"{name} is not at the documented offset")
-            tables[name] = read_at(stream, start, directory[start])
+            tables[name] = read_at(stream, start, size)
     return path, tables
 
 
 def check(data, summary):
-    names = movie_names((data.parent / "LOL3.DAT").read_bytes())
+    names = movie_names(game_path(data.parent, "LOL3.DAT").read_bytes())
     files = {path.stem.upper(): path for path in data.iterdir() if path.suffix.upper() == ".WSX"}
     level_sounds = {
         stem + "S" for stem, path in files.items() if stem + "S" in files
@@ -347,7 +351,7 @@ def show_text(data, table, record_id):
     name = table.lower()
     if name not in TRR_AT:
         raise ValueError(f"trr name must be one of {', '.join(TRR_AT)}")
-    _, tables = localized_trr(data, (name,))
+    _, tables = localized_trr(data, (name,), verify_offsets=False)
     blob = tables[name]
     if record_id is None:
         print(trr_lines(blob, name), end="")
@@ -365,7 +369,7 @@ def show_text(data, table, record_id):
 
 
 def music_tracks(data):
-    image = (data.parent / "LOL3.DAT").read_bytes()
+    image = game_path(data.parent, "LOL3.DAT").read_bytes()
     from lol3_level_report import c_strings
     stems = c_strings(image, STEMS_AT, 40)
     by_key = {}
@@ -435,7 +439,7 @@ def main():
         if args.trr:
             return show_text(data, args.trr, args.id)
         if args.movie:
-            names = movie_names((data.parent / "LOL3.DAT").read_bytes())
+            names = movie_names(game_path(data.parent, "LOL3.DAT").read_bytes())
             wanted = args.movie.upper()
             found = [(key, name) for key, name in names.items() if wanted in name.upper()]
             if len(found) != 1:

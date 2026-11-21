@@ -7,7 +7,7 @@ beside the game, and that allocator byte +0x17 has no address.
   lol3_cache_seed.py --data DAT            # header bytes and, when present, the second directory
   lol3_cache_seed.py --data DAT --check
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from hashlib import sha256
 from pathlib import Path
 from struct import unpack_from
@@ -89,7 +89,7 @@ def fill_absent_from_programs(install_dir, head):
         if head in blob:
             raise ValueError(f"{path.name} contains the shipped fill head")
         if PUSH_64000 in blob:
-            found.append(path.name)
+            found.append(path.name.upper())
     if found != ["LOL3.DAT"]:
         raise ValueError(f"push 64000 occurs in {found}")
     image = next(path for path in files if path.name.lower() == "lol3.dat").read_bytes()
@@ -159,17 +159,17 @@ def main():
     if not args.check:
         data = Path(args.data)
         try:
-            shipped_path = data / "cdcache.wsx"
-            header_path = data.resolve().parent / "cdcache.hdr"
+            shipped_path = game_path(data, "cdcache.wsx")
+            header_path = game_path(data.resolve().parent, "cdcache.hdr")
             shipped = shipped_path.read_bytes()
             header = header_path.read_bytes() if header_path.is_file() else b""
             text = shipped_listing(shipped)
             if header == shipped[:HEADER]:
                 text = "cdcache.hdr matches the first 114 bytes\n" + text
             print(text, end="")
-            game_path = data.resolve().parent / "cdcache.wsx"
-            if game_path.is_file():
-                with game_path.open("rb") as handle:
+            live_path = game_path(data.resolve().parent, "cdcache.wsx")
+            if live_path.is_file():
+                with live_path.open("rb") as handle:
                     prefix = handle.read(0x76 + 40 * 0x18)
                 print(written_listing(prefix), end="")
             else:
@@ -179,7 +179,7 @@ def main():
         return 0
     data = Path(args.data)
     try:
-        image = (data.resolve().parent / "LOL3.DAT").read_bytes()
+        image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("LOL3.DAT does not match the documented English retail executable")
         text = code_section(image)
@@ -188,8 +188,8 @@ def main():
             counts[address] = text.count(address.to_bytes(4, "little"))
             if counts[address] != expected:
                 raise ValueError(f"address {address:#x} occurs {counts[address]} times")
-        shipped_path = data / "cdcache.wsx"
-        header_path = data.resolve().parent / "cdcache.hdr"
+        shipped_path = game_path(data, "cdcache.wsx")
+        header_path = game_path(data.resolve().parent, "cdcache.hdr")
         shipped = shipped_path.read_bytes()
         header = header_path.read_bytes()
         if len(header) != HEADER or shipped[:HEADER] != header or len(shipped) != HEADER + COPIES * BLOCK:
@@ -218,10 +218,10 @@ def main():
                 shipped[HEADER + index * BLOCK:HEADER + (index + 1) * BLOCK] != block
                 for index in range(COPIES)):
             raise ValueError("shipped body is not 51 copies of the pinned block")
-        game_path = data.resolve().parent / "cdcache.wsx"
+        live_path = game_path(data.resolve().parent, "cdcache.wsx")
         witness = ""
-        if game_path.is_file():
-            game = game_path.read_bytes()
+        if live_path.is_file():
+            game = live_path.read_bytes()
             if game[:HEADER] != header or len(game) != 104896114:
                 raise ValueError(f"game-written cache is {len(game)} bytes")
             if unpack_from("<I", game, 0x72)[0] != 0xF1E2D3C4:
@@ -246,7 +246,7 @@ def main():
         else:
             witness = "; game-written cache absent"
         fill_absent_from_programs(data.resolve().parent, block[:16])
-        fill_loop_pinned((data.resolve().parent / "LOL3.DAT").read_bytes())
+        fill_loop_pinned(game_path(data.resolve().parent, "LOL3.DAT").read_bytes())
     except (OSError, ValueError) as exc:
         print(f"CHECK cache_seed FAILED: {exc}")
         return 1

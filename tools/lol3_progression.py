@@ -12,7 +12,7 @@ level-to-level section and the steps from QWOD0 follow the table.
   lol3_progression.py --data DAT --out FILE   # write the page
   lol3_progression.py --check --data DAT      # docs/PROGRESSION.md equals the page
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import os
 import re
 from collections import Counter, defaultdict, deque, namedtuple
@@ -273,11 +273,14 @@ def taken_when(predicates, own, earlier):
     return text + " and not " + " and not ".join(decode(predicates, guard, set()) for _, guard in earlier)
 
 
-def collect(data_dir):
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
-    names = level_names(image)
-    sizes = native_sizes(image)
-    by_stem = {stem: index for index, stem in names.items() if stem}
+def collect(data_dir, *, full_corpus=True):
+    def executable_tables():
+        image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
+        names = level_names(image)
+        return names, native_sizes(image), {stem: index for index, stem in names.items() if stem}
+
+    # Empty command streams can be checked without an executable.
+    names, sizes, by_stem = executable_tables() if full_corpus else ({}, {}, {})
     rows = []
     archives = []
     for stem, _map_base, payload in level_map_entries(data_dir):
@@ -288,6 +291,8 @@ def collect(data_dir):
             raise ValueError(f"{stem} predicate table runs outside the MAP")
         predicates = [payload[start + index * 5:start + index * 5 + 5] for index in range(count)]
         for space in STREAMS:
+            if not sizes and u32(payload, STREAMS[space][1]):
+                names, sizes, by_stem = executable_tables()
             stream, starts, _base, _counts, walked, _aliases = walk(payload, 0, space, sizes)
             events, ordered = structured_events(payload, space, starts)
             if {key: len(value) for key, value in events.items()} != {key: len(value) for key, value in walked.items()}:
@@ -343,7 +348,7 @@ def collect(data_dir):
                               for source, g in earlier) or "—",
                     taken_when(predicates, guard, earlier),
                 ))
-    if len(archives) != 18:
+    if full_corpus and len(archives) != 18:
         raise ValueError(f"expected 18 MAP archives, found {len(archives)}")
     rows.sort(key=lambda row: (row[0], by_stem[row[2].lower()], row[3], row[4], row[5], row[6], row[7]))
     return [row[1:] for row in rows], archives, names

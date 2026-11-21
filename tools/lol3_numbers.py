@@ -4,7 +4,7 @@ from hashlib import sha256
 from pathlib import Path
 from struct import unpack_from
 
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from extract_wsx_entries import wsx_name_hash
 import lol3_cli
 from lol3_combat_census import ITEM_ROWS, ITEM_STRIDE, ITEM_TABLE, global_wsx
@@ -76,7 +76,7 @@ def creature_rows(data):
 
 
 def render(data):
-    program = (data.parent / "LOL3.DAT").read_bytes()
+    program = game_path(data.parent, "LOL3.DAT").read_bytes()
     if sha256(program).hexdigest() != RETAIL_PE:
         raise ValueError("the report requires the documented English retail LOL3.DAT")
     archive = global_wsx(data)

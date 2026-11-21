@@ -6,7 +6,7 @@
   lol3_script_notes.py --data DAT --check     # verify the checked-in summaries
   lol3_script_notes.py --data DAT --timers QWOD0
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter, defaultdict
 from pathlib import Path
 from struct import error as struct_error, iter_unpack, unpack_from
@@ -237,7 +237,7 @@ def main():
             parser.error("--timers only prints")
         try:
             data_dir = Path(args.data).resolve()
-            sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
+            sizes = native_sizes(game_path(data_dir.parent, "LOL3.DAT").read_bytes())
             stem = args.timers.upper()
             found = [item for item in level_map_entries(data_dir) if item[0] == stem]
             if len(found) != 1:
@@ -258,7 +258,7 @@ def main():
             raise ValueError("full listings require a directory outside this checkout and the game folder")
         if output:
             output.mkdir(parents=True, exist_ok=True)
-        sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
+        sizes = native_sizes(game_path(data_dir.parent, "LOL3.DAT").read_bytes())
         totals = Counter()
         for stem, map_base, payload in level_map_entries(data_dir):
             walks = {space: walk(payload, map_base, space, sizes) for space in STREAMS}

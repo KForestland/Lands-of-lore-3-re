@@ -18,8 +18,9 @@ File roles, ids and counts only; no game text, pictures or sound.
   lol3_level_report.py --data DAT --out DIR      # all levels + README.md
   lol3_level_report.py --check --data DAT        # one line
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 import os
+import re
 import struct
 import sys
 from collections import Counter
@@ -80,7 +81,7 @@ def level_path_stems(image):
 
 
 def load_script_context(data_dir):
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     music = c_strings(image, 0x148180, 40)
     return {
         "sizes": native_sizes(image),
@@ -356,6 +357,14 @@ def readme(levels):
     return "\n".join(lines)
 
 
+def same_sheet(path, rendered):
+    """Compare all sheet content after folding the filesystem's archive spelling."""
+    def archive_names(text):
+        return re.sub(r"\b[\w-]+\.wsx\b", lambda match: match.group().upper(), text, flags=re.IGNORECASE)
+
+    return path.is_file() and archive_names(path.read_text(encoding="utf-8")) == archive_names(rendered)
+
+
 def main():
     ap = lol3_cli.tool_args(__doc__ or "")
     a = ap.parse_args()
@@ -384,10 +393,10 @@ def main():
         differ = []
         for L in levels:
             path = root / f"{L['stem']}.md"
-            if not path.is_file() or path.read_text(encoding="utf-8") != sheet(L):
+            if not same_sheet(path, sheet(L)):
                 differ.append(L["stem"])
         readme_path = root / "README.md"
-        if not readme_path.is_file() or readme_path.read_text(encoding="utf-8") != readme(levels):
+        if not same_sheet(readme_path, readme(levels)):
             differ.append("README")
         sheet_note = "sheets match docs/levels" if not differ else "sheets differ: " + ", ".join(differ)
         print(f"CHECK level_report: {len(levels)} level archives; all four level names (.LMF .MAP .ODF .TE_) found by hash in "

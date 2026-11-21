@@ -13,7 +13,7 @@ is the save-game folder. The stored bytes are also compared with the full
 low-byte cycle of the program's random-number recurrence with LF expanded
 to CR LF. The files' purpose and the program path that uses them remain open.
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from hashlib import sha256
 from pathlib import Path
 
@@ -155,7 +155,7 @@ def main():
         root = data.resolve().parent
         programs = {}
         for label, size in (("LOL3.DAT", DAT_SIZE), ("LOL3.EXE", EXE_SIZE)):
-            blob = (root / label).read_bytes()
+            blob = game_path(root, label).read_bytes()
             if len(blob) != size:
                 raise ValueError(f"{label} is {len(blob)} bytes")
             hit = names_absent(blob)

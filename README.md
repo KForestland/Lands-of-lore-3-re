@@ -27,7 +27,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 464 statements CONFIRMED (proved from the program code or the files) and 76 UNCONFIRMED (a reading not yet proved), on 91 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 464 statements CONFIRMED (proved from the program code or the files) and 76 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
 <!-- rating:end -->
@@ -57,6 +57,19 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | Music tracks | `python3 tools/lol3_media_check.py --data "$LOL3_DAT" --tracks` |
 | A texture as PNG (after the game has run once) | `python3 tools/lol3_texture_png.py --data "$LOL3_DAT" --offset 1222718 --out ../lol3-out/texture.png` |
 | A saved game you made | `python3 tools/lol3_save_header.py --data "$LOL3_DAT" "$LOL3_SLOT"` |
+
+| Tool | Command | Example result |
+|---|---|---|
+| Job menu | `python tools/lol.py --help` | level, text, translate, music, model, save, patch, mod |
+| Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
+| Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
+| Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |
+| Edition fingerprints | `python tools/edition.py --data "$LOL3_DAT" --check` | English GOG release, 1.07a, all 6 fingerprints match |
+| Fields from a save | `python tools/lol.py save page "$LOL3_SLOT" --out ../lol3-out/save.html` | Writes save.html with stored values and commands for making an edited copy |
+| Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
+| Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |
+| Level models | `python tools/level_export.py --data "$LOL3_DAT" --check` | 18 maps, 226,109 OBJ vertices and 118,951 faces |
+| Program sections | `python tools/lol3_pe_layout.py --data "$LOL3_DAT" --check` | 8 sections and 3 debug payloads, with both file ends reached |
 
 ## Change a number in your own copy
 

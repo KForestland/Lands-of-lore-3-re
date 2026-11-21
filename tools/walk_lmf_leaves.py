@@ -8,7 +8,7 @@
 """
 from __future__ import annotations
 
-from cli_errors import ReaderArgumentParser, run_cli
+from cli_errors import ReaderArgumentParser, run_cli, game_path
 import argparse
 import json
 import os
@@ -191,7 +191,7 @@ def directory_text(data, name):
 
 def check_header_copy(data_dir):
     """The 44-byte header copy and the 15 calls of the member loader."""
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
         raise ValueError("LOL3.DAT does not match the documented English retail executable")
     if image[0x44ED0A - CODE_BIAS:0x44ED30 - CODE_BIAS] != HEADER_COPY:

@@ -13,7 +13,7 @@ and this repository.
 
 Meanings are the native-effect sentences on the opcode page, one line each.
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from collections import Counter
 from pathlib import Path
 
@@ -110,7 +110,7 @@ def _payload(data_dir, stem):
 
 
 def check_line(data_dir):
-    sizes = native_sizes((Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes())
+    sizes = native_sizes(game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes())
     if set(sizes) != set(MEANINGS):
         missing = sorted(set(sizes) - set(MEANINGS))
         extra = sorted(set(MEANINGS) - set(sizes))
@@ -147,7 +147,7 @@ def main():
         parser.error("give a level stem, or --check")
     try:
         data_dir = Path(args.data).resolve()
-        sizes = native_sizes((data_dir.parent / "LOL3.DAT").read_bytes())
+        sizes = native_sizes(game_path(data_dir.parent, "LOL3.DAT").read_bytes())
         text = level_summary(args.level.upper(), _payload(data_dir, args.level.upper()), sizes)
     except (OSError, ValueError) as error:
         parser.exit(1, f"script browser: {error}\n")

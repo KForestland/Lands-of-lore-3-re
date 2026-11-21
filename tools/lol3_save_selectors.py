@@ -14,7 +14,7 @@ of level selector 38 (86 distinct arm addresses; slot 89 is the shared tail)
 and requires that table to match. The standard-library check verifies
 the dispatch addresses, the original code and table bounds and the flag stores.
 """
-from cli_errors import run_cli
+from cli_errors import run_cli, game_path
 from bisect import bisect_right
 from hashlib import sha256
 from pathlib import Path
@@ -167,7 +167,7 @@ class Lin:
 
 
 def image_of(data_dir):
-    image = (Path(data_dir).resolve().parent / "LOL3.DAT").read_bytes()
+    image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
         raise ValueError("LOL3.DAT does not match the documented English retail executable")
     return image
