@@ -106,10 +106,32 @@ MZ files next to the game's data folder. That set includes the
 launcher, engine, patch helper, audio modules, display DLLs and
 uninstaller. The manifest records their packaging.
 
+The executable import tables give concrete file-open trace points.
+Both programs import `CreateFileA` and `FindFirstFileA` from
+`KERNEL32.dll`. The direct call sites below pass the path or search
+pattern at the top of the stack immediately before the call. At the
+imported API's entry it is at `[ESP+4]`.
+
+| Program | Import | Import cell VA | Direct call sites (VA) |
+|---|---|---|---|
+| `LOL3.EXE` | `CreateFileA` | `0x40E124` | `0x4028E6`, `0x40B944` |
+| `LOL3.EXE` | `FindFirstFileA` | `0x40E07C` | `0x402822` |
+| `LOL3.DAT` | `CreateFileA` | `0x538090` | `0x493875`, `0x508DCE`, `0x50B0D0`, `0x527E97` |
+| `LOL3.DAT` | `FindFirstFileA` | `0x538124` | `0x519BD0`, `0x51A421` |
+
+The engine also has import jump stubs at `0x5369BC` and `0x536A9A`.
+The engine call at `0x508DCE` supplies its fixed device string
+`\\.\MONO` (file +0x152250). The other open sites take a caller or
+object path. Trace at API entry to cover both the direct calls and
+import stubs. Record the path, return handle and first read if either
+program opens a PHT. Retain directory enumeration results as well
+when a wildcard could enumerate the files.
+
 **UNCONFIRMED** (what the game does with them). No stored name and no stored
 search pattern in those two programs names the four files, and nothing there
 identifies a consumer of this cycle. Settling test: a file-open trace of
 `LOL3.EXE` and `LOL3.DAT` from start-up through a level load, filtered on
-`.PHT`. An open of one of the four names identifies the consumer; no open
-leaves the files unread by the game. The original distribution step that
-produced the files would also settle why the sequence is present.
+`.PHT`. A successful open and read identify the consumer for that run.
+A trace with no matching opens covers the captured actions. The original
+distribution step that produced the files would settle why the sequence
+is present.
