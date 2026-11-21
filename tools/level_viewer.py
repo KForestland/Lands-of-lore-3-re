@@ -31,7 +31,7 @@ def levels(data, selection):
     if selection == "ALL":
         return stems
     if selection not in stems:
-        raise ValueError(f"Level {selection} was not found. Choose {', '.join(stems)} or all.")
+        raise ValueError(f"Choose {', '.join(stems)} or all because level {selection} was not found.")
     return [selection]
 
 

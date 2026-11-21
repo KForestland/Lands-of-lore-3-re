@@ -49,7 +49,7 @@ class ReaderTools(unittest.TestCase):
         self.assertEqual(plan.records[0]["details"]["Location"], "No location on the plan.")
         with TemporaryDirectory() as tmp:
             folder = Path(tmp)
-            with self.assertRaisesRegex(ValueError, "Create it or choose another folder"):
+            with self.assertRaisesRegex(ValueError, "or choose another folder"):
                 with output_folder(folder / "missing" / "output", folder / "game"):
                     self.fail("a missing parent unexpectedly allowed an output")
             with self.assertRaisesRegex(ValueError, "Choose a new folder name"):

@@ -78,7 +78,7 @@ def output_path(path, game, *inputs):
         if target == root or root in target.parents:
             raise ValueError(f"output must be outside {root}")
     if target.exists() or Path(path).is_symlink():
-        raise ValueError(f"The output already exists: {path}. Choose a new folder name.")
+        raise ValueError(f"Choose a new folder name because the output already exists at {path}.")
     return target
 
 
@@ -86,7 +86,7 @@ def output_path(path, game, *inputs):
 def output_folder(path, game, *inputs):
     target = output_path(path, game, *inputs)
     if not target.parent.is_dir():
-        raise ValueError(f"The folder above --out does not exist: {target.parent}. Create it or choose another folder.")
+        raise ValueError(f"Create {target.parent} or choose another folder because the parent of --out is missing.")
     with TemporaryDirectory(prefix=".lol-output-", dir=target.parent) as temp:
         staged = Path(temp) / "result"
         staged.mkdir()
