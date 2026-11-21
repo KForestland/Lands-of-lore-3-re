@@ -27,3 +27,27 @@ One line per report. Script means a quest or scene order. State means a flag, a 
 - Solved quests stay in the journal (same notes). State. The 1.07a note already claims a fix for quests that are not crossed out, and this report says they still stay. No further byte is isolated.
 - No new quest after the five herbs (same notes). Script. No few-byte patch.
 - Rix's staff leaves the pack when it is not worn (same notes). State. No few-byte patch.
+
+### Retail script checks
+
+These anchors are for English 1.07a. Quest and dialogue IDs come from the
+original TRR directory and the [native lookup](../docs/lol3-dialogue-dispatch.md).
+The settling steps distinguish a failure to select an event from a failure
+after the event runs.
+
+| Report | Static witness | Settling step |
+|---|---|---|
+| Sioned | `GRULO.WSX+0xCC1086` submits quest row 36, then starts the sequence at `+0xCC1096`. `BUPP1.WSX+0x1B45DAC` has a rescue annotation for creature 26 in its editor tail. | Compare the rescue sequence and creature 26 on the first return to the guild. |
+| Orcish Retribution | `MLOW2.WSX+0x14D2563` uses the dialogue tag for quest 42. `NWOD2.WSX+0x1CD5847` has the editor annotation for the defeated orcs. | Record the final encounter, then the return and item grant with the same inventory room in a working and failing save. |
+| Perfumed Scarf | `DLOW1.WSX+0x154EB06` takes request mode 9 with operand 27 and writes level byte 6 to 1. The corresponding event at `+0x154EAF8` takes the same request when the byte is 1 and sets it to 2. The request at `+0x154EB8C` then requires value 2 for dialogue 2475. The stored initial byte is 0 at `+0x159416C`. | Record the two mode-9 dispatches and the following dialogue request from a save at byte 6 equal to 0. |
+| Sewer grate | Object request modes and threshold guard families are decoded. Several sewer MAPs have doors and gates. The report gives no event ID or reproducible square that selects one. | Give the area, grate position, thief guild status and skill and the request on the failed click. |
+| Draracle wall | `FLAIR` surface and region descriptors give the stored geometry and surface adjacency. The report describes a location without coordinates. | Mark the square, heading and direction of the unintended move on the level plan. |
+| Rhynn | `BUPP1.WSX+0x18D5568` resolves Rhynn dialogue ID 674. `LUPP2.WSX+0x1442B07` resolves dialogue ID 4240 from a separate request. | Compare the later request and the recorded library meeting state in two otherwise matched slots. |
+| Blue Deer | `DLOW1.WSX+0x153F2FD` resolves the rent quest row 12. The paid line at `+0x153F2B1` resolves quest row 51. The separate payment confirmation at `+0x154513C` submits row 12 with argument 5 and then sets property 21 on object 286. | Record the room request, whether the rent quest was already present, the cursor item and the payment or refusal event. |
+| Blue gem | Four HWHIT kind-4 events at `+0x111AACB`, `+0x111AAE9`, `+0x111AB07` and `+0x111AB25` have distinct mode-3 identities and all use guard 206. The White Tower chicken dialogue has its own event at `+0x111B73F`. | Identify the blue socket and compare its request, guard result and bound object state before and after the other gems or the last chicken. |
+| Victoria | CKEEP contains the Victoria room labels. The two commands at `BUPP1.WSX+0x18D1EBE` and `+0x18D1EFA` map to payment dialogue 5303. The first has an object-state guard. That line alone cannot identify a shop transaction. | Record the actual pickup/payment request in Victoria's shop, the visit number and the currency balance. |
+| Scavenger eyes | The native item dispatch has separate paths for selecting an item in the pack and submitting a throw request. The report does not identify the inventory instance or the target. | Record the definition key and request kind for the attempted throw and a working throw from the same slot. |
+| Volcano elevator | `KVOLC.WSX+0x15D137B` sends its guarded raising event to script index 1012. The lowering event is `+0x15D0C25`. A separate mover event at `+0x15D4F19` links to the annotated delay. | Take out the statue with the player below and record which raising event dispatched and what event brings the platform back. |
+| Journal entries | Retail quests such as 12, 35, 36 and 37 have opcode `0x19` commands with argument 5. The 1.07a notes describe a fix. | Identify an exact quest row, capture its completion event and inspect the journal state afterward. |
+| Five herbs | `BUPP1.WSX+0x18E3EDA` tests the bound object state against 5 with ≥ at `+0x1B321DB`. Its group submits quest 35 with argument 5 and sets level byte 22 to 1. | Verify all five distinct herb keys, the bound counter and the next guild dialogue after that group. |
+| Rix's staff | `EWOD1.WSX+0x1978777` names the post-Rix familiar event in the editor tail. It does not establish an inventory removal. | Save before the staff disappears and record its definition key, equipped state and the first change to the pack or cursor. |
