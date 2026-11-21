@@ -108,6 +108,30 @@ Outliner and choose **View → Frame Selected** in the 3D Viewport.
 The model appears untextured. Its texture references are in the OBJ
 as comments. [Model export and checks](COOKBOOK.md#export-a-level-to-obj)
 
+## Convert a movie or sound
+
+Install FFmpeg and check that `ffmpeg -version` and `ffprobe -version`
+both work in the same terminal. Use the paths you set above and choose
+new output folders for each run.
+
+Windows PowerShell
+
+```powershell
+py -3 tools/lol.py movie --data "$data" --file MOVIES2.WSX --entry 1 --out "$out\movie"
+py -3 tools/lol.py sound --data "$data" --file QWOD0S.WSX --entry 0 --out "$out\sound"
+```
+
+Linux
+
+```sh
+python3 tools/lol.py movie --data "$data" --file MOVIES2.WSX --entry 1 --out "$out/movie"
+python3 tools/lol.py sound --data "$data" --file QWOD0S.WSX --entry 0 --out "$out/sound"
+```
+
+Open `MOVIES2-1.mkv` in the movie folder or `QWOD0S-0.wav` in the sound
+folder with a media player. The movie has 166 frames. The sound has
+49,655 sample frames. [How to choose a different entry](COOKBOOK.md#convert-a-movie-or-sound)
+
 ## Find another job
 
 Use the same Python command with `tools/lol.py` to list the jobs.

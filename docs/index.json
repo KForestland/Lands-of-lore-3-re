@@ -228,6 +228,7 @@
         "tools/lol3_texture_palettes.py",
         "tools/lol3_texture_png.py",
         "tools/lol3_texture_spans.py",
+        "tools/media_convert.py",
         "tools/modkit.py",
         "tools/save_edit.py"
       ]

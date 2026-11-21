@@ -108,3 +108,13 @@ class ReaderTools(unittest.TestCase):
         from lol3_media_check import display_trr_text
 
         self.assertEqual(display_trr_text(b"\x02Example\r\nLine"), "[control 0x02]Example\nLine")
+
+    def test_ima_sample_count_uses_fact_instead_of_block_padding(self):
+        from io import BytesIO
+        from media_convert import wave_sample_count
+
+        fmt = struct.pack("<HHIIHHHH", 0x11, 1, 22050, 11100, 16, 4, 2, 25)
+        chunks = [(b"fmt ", fmt), (b"fact", struct.pack("<I", 17)), (b"data", bytes(16))]
+        body = b"WAVE" + b"".join(tag + struct.pack("<I", len(data)) + data for tag, data in chunks)
+        wav = b"RIFF" + struct.pack("<I", len(body)) + body
+        self.assertEqual(wave_sample_count(BytesIO(wav), len(wav)), (1, 22050, 17))

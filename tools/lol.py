@@ -15,12 +15,15 @@ JOBS = {
     "translate": ("translate.py", (), "Export, build and verify translations"),
     "music": ("lol3_media_check.py", (), "Inspect original game music (list MP3 and WAVE tracks)"),
     "model": ("level_export.py", (), "Export a level model with texture references"),
+    "movie": ("media_convert.py", (), "Convert a movie to MKV"),
+    "sound": ("media_convert.py", (), "Convert a sound to WAV"),
     "save": ("save_edit.py", (), "Edit a copy of a saved game"),
     "patch": ("patch.py", (), "Make or apply a patch and its undo"),
     "mod": ("modkit.py", (), "Unpack or build an editable workspace"),
 }
 
-JOB_HANDLERS = {"text": "text_job", "music": "music_job"}
+JOB_HANDLERS = {"text": ("text_job", ()), "music": ("music_job", ()),
+                "movie": ("main", ("movie",)), "sound": ("main", ("sound",))}
 
 
 def main():
@@ -49,7 +52,8 @@ def main():
         cli_errors.JOB_NAME = f"lol.py {job}"
         handler = JOB_HANDLERS.get(job)
         if handler:
-            return run_cli(getattr(import_module(program.stem), handler))
+            entry, arguments = handler
+            return run_cli(getattr(import_module(program.stem), entry), *arguments)
         run_path(str(program), run_name="__main__")
     finally:
         sys.argv, cli_errors.JOB_NAME = old_argv, old_name

@@ -22,7 +22,7 @@ Run these from the repository folder. Set the data variable as shown under Setup
 
 | Tool | Example | Output |
 |---|---|---|
-| Job menu | `python tools/lol.py --help` | level, text, translate, music, model, save, patch, mod |
+| Job menu | `python tools/lol.py --help` | level, text, translate, music, model, movie, sound, save, patch, mod |
 | Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
 | Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
 | Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |
@@ -30,7 +30,8 @@ Run these from the repository folder. Set the data variable as shown under Setup
 | Fields from a save | `python tools/lol.py save page "$LOL3_SLOT" --out ../lol3-out/save.html` | Writes save.html with stored values and commands for making an edited copy |
 | Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
 | Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |
-| Level models | `python tools/level_export.py --data "$LOL3_DAT" --check` | 18 maps, 226,109 OBJ vertices and 118,951 faces |
+| Level models | `python3 tools/lol.py model --data "$LOL3_DAT" --level QWOD0 --out "../LoL3 model"` | `QWOD0.obj` with 1,430 faces and 1,430 texture reference rows |
+| Movie and sound | [Conversion commands](../docs/FIRST_TEN_MINUTES.md#convert-a-movie-or-sound) | `MOVIES2-1.mkv` with 166 frames and `QWOD0S-0.wav` with 49,655 sample frames |
 | Program sections | `python tools/lol3_pe_layout.py --data "$LOL3_DAT" --check` | 8 sections and 3 debug payloads, with both file ends reached |
 
 The commands also exercise these Python modules through their user-facing tools.

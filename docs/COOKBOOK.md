@@ -305,6 +305,33 @@ The same options work with `tools/level_export.py` directly.
 [Surface texture references](lol3-map-odf-readers.md#surface-texture-references) ·
 [Texture palettes and supported flags](formats/textures.md#colour)
 
+## Convert a movie or sound
+
+The [first ten minutes guide](FIRST_TEN_MINUTES.md#convert-a-movie-or-sound)
+has steps for Windows and Linux. The movie job reads WSX entries
+containing the original VQA format. It writes lossless FFV1 video and
+PCM audio in an MKV container. The sound job writes 16-bit PCM WAV
+from WAVE entries in the level sound or music archives. Both jobs
+use FFmpeg and write only to the new output folder you name.
+
+```sh
+python3 tools/lol.py movie --data "$LOL3_DAT" --list
+python3 tools/lol.py movie --data "$LOL3_DAT" --list --file MOVIES2.WSX
+python3 tools/lol.py sound --data "$LOL3_DAT" --list --file QWOD0S.WSX
+```
+
+Replace `--list` with `--entry` and the zero-based number you
+want, then add `--out` and a new folder name. To convert a loose VQA or
+WAVE file from your own copy, pass its path as `--file` and omit
+`--entry`. The same options work with `tools/media_convert.py`
+when you put `movie` or `sound` before the options.
+
+The movie check compares the output's frame count with VQHD and the
+stereo sample count with the source SND2 packets. The sound converter
+uses the source WAVE sample count to trim final block padding and
+reads the result back. These checks verify counts and format. The
+movie plays with the FFmpeg decoder's rendering and audio.
+
 ## Find a tool by job
 
 Run `python3 tools/lol.py` to see the job names. This example reads one

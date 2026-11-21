@@ -12,7 +12,7 @@ from lol3_wsx_writer import write_wsx
 DATA = "DAT"
 LEVEL = "QWOD0"
 ARCHIVE = "DAT/locallng.wsx"
-JOBS = ("level", "text", "translate", "music", "model", "save", "patch", "mod")
+JOBS = ("level", "text", "translate", "music", "model", "movie", "sound", "save", "patch", "mod")
 TRANSLATE_FROM = "Insert the disc"
 SAVE_FIELD = "heading"
 SAVE_AT = GROUP + 8
@@ -94,6 +94,7 @@ def inspect_jobs(test):
     if test.lowercase:
         lowercase(game)
     test.assertIn("channels 1 rate 8000 align 1 bits 8 stem TEST", test.job("music", "--data", data))
+    test.assertIn("Entry    0", test.job("sound", "--data", data, "--list", "--file", "MUSIC1.WSX"))
 
 
 def lowercase(root):
