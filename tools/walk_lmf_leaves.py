@@ -104,6 +104,8 @@ def walk_bytes(data, name, decode=None):
                 if any(words):
                     grid = unpack_from(f"<{width * height}H", members, at + 0x2C)
                     colors = set(grid)
+                    perimeter = set(grid[:height])
+                    perimeter.update(grid[-height:], grid[::height], grid[height - 1::height])
                     lattice = {}
                     for i in range(5):
                         base = round(i * (width - 1) / 4) * height
@@ -116,6 +118,7 @@ def walk_bytes(data, name, decode=None):
                         stats["nonzero_header_samples"] += 1
                         if word & 0x8000 or word not in colors:
                             raise ValueError(f"{name}: header word outside sample colors at {source:#x}+{at:#x}")
+                        stats["perimeter_header_samples"] += word in perimeter
                         near = [
                             (width - 1 - col if x else col) * height + (height - 1 - row if y else row)
                             for col in range(min(2, width)) for row in range(min(2, height))
@@ -230,7 +233,8 @@ def check(data_dir, decode):
         extra += (f"; bit 0 set on {stats[1]:,} members whose {stats['vertex_unit']:,} vertex normals are unit length "
                   f"({stats['vertex_zero']} zero), one repeated vector on {stats['face_repeated']:,} of {stats[0]:,} others")
         extra += (f"; {stats['nonzero_header_samples']:,} nonzero +0x0C..+0x13 words occur in their own grids "
-                  f"({stats['matching_corner']:,} near their corresponding corners, "
+                  f"({stats['perimeter_header_samples']:,} on their perimeter, "
+                  f"{stats['matching_corner']:,} near their corresponding corners, "
                   f"{stats['opposite_corner']:,} near their opposite corners)")
         nonzero, exact, near, far = (stats["nonzero_header_samples"], stats["exact_corner"],
                                      stats["matching_corner"], stats["corner_far"])
@@ -244,10 +248,10 @@ def check(data_dir, decode):
         print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
         return int((files, groups, members, stats[1], stats["vertex_unit"], stats["vertex_zero"], stats[0],
                     stats["face_repeated"], stats["members_with_header_samples"], stats["nonzero_header_samples"],
-                    stats["matching_corner"], stats["opposite_corner"],
+                    stats["perimeter_header_samples"], stats["matching_corner"], stats["opposite_corner"],
                     stats["exact_corner"], stats["inset_corner"], stats["mean_corner"], stats["corner_far"],
                     quarters, best_point)
-                   != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071, 209545, 610325, 340718, 107136,
+                   != (18, 5256, 424288, 131217, 524865, 3, 293071, 293071, 209545, 610325, 599684, 340718, 107136,
                        108537, 287177, 307470, 130568, (46912, 171206, 182804, 154018), 58260))
     print(f"CHECK lmf: {files} LMF entries, {groups:,} stored groups, {members:,} light-map members{extra}")
     return int((files, groups, members) != (18, 5256, 424288))

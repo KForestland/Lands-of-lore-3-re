@@ -134,6 +134,15 @@ rounded to a texel, matches at most 58,260 for any one of the four
 words. `walk_lmf_leaves.py --check --decode` (which `check_all.py`
 runs when liblzo2 is installed) rechecks all of these counts.
 
+The two outer rows and two outer columns contain a matching texel for
+599,684 of the 610,325 words (98.3%). The other 10,641 match only inside
+the grid. The same check recounts this. Trying all 24 fixed orders for the
+four inward corner squares still gives the best count of 340,718 in the
+order above. Picking the sample nearest the separate red, green and blue
+means in each 2 × 2 square matches 307,561 words, with ties going to the
+smaller stored word. An edge-only rule or a different fixed corner order
+does not recover all four positions.
+
 **UNCONFIRMED.** The exact sample selection rule and any consumer that
 interprets these words. The corner texel, the inward texel, the 2 × 2
 mean and the quadrant summaries above do not reproduce the words. The `0x474D85` and `0x47596D` render paths call
