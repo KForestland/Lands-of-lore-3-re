@@ -5,8 +5,8 @@
   lol3_map_writer.py --data DAT --list CKEEP    # copied spans: offsets, sizes, SHA-256
 
 The check regenerates the typed header, geometry, event and placement
-fields described in docs/lol3-map-odf-readers.md. It also verifies every
-retained range and changes a few fields in memory to test read-back.
+fields described in docs/lol3-map-odf-readers.md. It also counts every
+retained byte by class and changes a few fields in memory to test read-back.
 --list reports four named copied spans. --coverage reports every copied
 byte by range, using offsets in both the MAP and the containing WSX.
 Neither option prints stored bytes or writes files.
@@ -85,6 +85,25 @@ EVENT_FORMATS = {
     0: "", 1: "H2sHHB1sb1sbB", 2: "HBB2sH", 3: "HB", 4: "HB",
     5: "HBB", 6: "HBB", 7: "HBB", 8: "HH", 9: "HHHBB", 10: "HBBH",
     11: "HHB", 12: "HHBB", 15: "HHBBH", 19: "H", 21: "HB", 22: "H",
+}
+
+RETAINED_COUNTS = {
+    "surface fields": 1_665_314,
+    "editor tails": 606_420,
+    "placement fields": 323_621,
+    "shared block": 206_928,
+    "region descriptor fields": 157_956,
+    "command fields": 99_314,
+    "waypoint labels": 61_984,
+    "event record fields": 33_830,
+    "type-16 adjuncts": 15_545,
+    "settings and auxiliary row fields": 11_673,
+    "level-byte names": 8_651,
+    "header fields": 7_128,
+    "arrival labels": 2_310,
+    "mover adjuncts": 2_016,
+    "surface-to-script gap": 1_784,
+    "path labels": 1_116,
 }
 
 
@@ -290,6 +309,82 @@ def retained_ranges(total, fields):
         yield at, total
 
 
+def check_label_slots(raw, width, count):
+    if len(raw) != width * count:
+        raise ValueError(f"label array is not {count} slots of {width} bytes")
+    for (slot,) in struct.iter_unpack(f"<{width}s", raw):
+        label, terminator, _ = slot.partition(b"\0")
+        if not terminator or not all(32 <= value < 127 for value in label):
+            raise ValueError("label slot lacks a terminated printable prefix")
+
+
+def check_placement_adjunct(raw):
+    if len(raw) < 8:
+        raise ValueError("missing placement adjunct counts")
+    size_at = 4 + 4 * u32(raw, 0)
+    if size_at + 4 > len(raw) or size_at + 4 + u32(raw, size_at) != len(raw):
+        raise ValueError("placement adjunct rows and byte payload do not reach the next table")
+
+
+def retained_class_sizes(raw, fields):
+    """Intersect the retained ranges with non-overlapping on-disk extents."""
+    extents = [(0, 0x244, "header fields"), (u32(raw, 0xC0), len(raw), "editor tails")]
+    extents.extend((start, start + len(body), name) for name, start, body in retained_spans(raw))
+    table_classes = {
+        "surfaces": "surface fields",
+        "region descriptors": "region descriptor fields",
+        "section +0x28": "settings and auxiliary row fields",
+        "section +0x2C": "settings and auxiliary row fields",
+        "section +0x48": "settings and auxiliary row fields",
+    }
+    for table, label in table_classes.items():
+        if table in fields["tables"]:
+            start, layout, rows = fields["tables"][table]
+            extents.append((start, start + struct.calcsize("<" + layout) * len(rows), label))
+    for name, _, _, stride, _ in PLACEMENTS:
+        start, rows = fields["placements"][name]
+        extents.append((start, start + stride * len(rows), "placement fields"))
+    for seek, length, events, event_size in STREAMS.values():
+        for offset, size, label in ((seek, length, "command fields"), (events, event_size, "event record fields")):
+            start = u32(raw, offset)
+            extents.append((start, start + u32(raw, size), label))
+    for label, offset, count, stride, next_offset in (
+        ("type-16 adjuncts", 0x18, 0x64, 33, 0x1C),
+        ("mover adjuncts", 0x24, 0x70, 41, 0x28),
+    ):
+        start, end = u32(raw, offset) + stride * u32(raw, count), u32(raw, next_offset)
+        check_placement_adjunct(raw[start:end])
+        extents.append((start, end, label))
+    for label, offset, count, stride, next_offset, label_width, label_count in (
+        ("arrival labels", 0x48, 0x90, 12, 0x3C, 30, u32(raw, 0x90) - 1),
+        ("level-byte names", 0xB4, 0xB0, 1, 0xBC, 41, u32(raw, 0xB0)),
+    ):
+        start, end = u32(raw, offset) + stride * u32(raw, count), u32(raw, next_offset)
+        check_label_slots(raw[start:end], label_width, label_count)
+        extents.append((start, end, label))
+
+    previous_end = 0
+    ordered = sorted(span for span in extents if span[0] != span[1])
+    for start, end, label in ordered:
+        if not previous_end <= start < end <= len(raw):
+            raise ValueError(f"overlapping or invalid {label} extent at MAP+{start:#x}")
+        previous_end = end
+
+    counts = Counter()
+    index = 0
+    for start, end in retained_ranges(len(raw), fields):
+        while start < end:
+            while index < len(ordered) and ordered[index][1] <= start:
+                index += 1
+            if index == len(ordered) or start < ordered[index][0]:
+                raise ValueError(f"unclassified retained byte at MAP+{start:#x}")
+            _, limit, label = ordered[index]
+            stop = min(end, limit)
+            counts[label] += stop - start
+            start = stop
+    return counts
+
+
 def read_fields(raw, lengths):
     """Parse typed fields and retain the remaining storage at its source offset."""
     fields = {"commands": {}, "placements": {}, "events": {}, "tables": {},
@@ -433,7 +528,7 @@ def check(data):
         opcode(image, address, encoding)
     counts, seen, maps, total, edited = Counter(), set(), 0, 0, False
     labels, annotations = 0, 0
-    surface_bytes = Counter()
+    surface_bytes, classes = Counter(), Counter()
     for stem, _, raw in level_map_entries(data):
         label_count, note_count = check_tail_layout(raw)
         labels += label_count
@@ -441,6 +536,7 @@ def check(data):
         rebuilt, totals, opcodes = rebuild(raw, sizes)
         check_region_surfaces(raw)
         surface_bytes.update(surface_storage_counts(raw))
+        classes.update(retained_class_sizes(raw, read_fields(raw, sizes)))
         if rebuilt != raw:
             raise ValueError(f"{stem}: rebuilt MAP differs")
         counts.update(totals)
@@ -461,6 +557,10 @@ def check(data):
             or surface_bytes[True, 0] != 103783 or surface_bytes[False, 0] != 13986):
         raise ValueError("stored surface +0x30 census or its relation to flag 0x200 differs")
     regenerated = counts.pop("field bytes")
+    if classes != RETAINED_COUNTS or sum(classes.values()) != total - regenerated:
+        raise ValueError(f"retained MAP class census differs: {dict(classes)}")
+    for label, value in RETAINED_COUNTS.items():
+        print(f"Retained {label}: {value:,} bytes")
     print(f"CHECK MAP write: {maps} byte-identical MAPs, {len(seen)}/{len(sizes)} opcodes stored; " +
           ", ".join(f"{value:,} {name}" for name, value in counts.items()) +
           f"; {regenerated:,} of {total:,} bytes from parsed fields, {total - regenerated:,} copied; "
