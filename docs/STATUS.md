@@ -1,24 +1,29 @@
 # LoL3 reverse-engineering status
 
+<!-- suite-counts:begin -->
+- **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
+- **Synthetic data.** 113 unit tests.
+<!-- suite-counts:end -->
+
 **As of:** 2026-11-21. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
 
-Run the checks: `python3 tools/check_all.py --data <DAT>` (41 checks; all 41 pass on a GOG copy that has run once and has a saved game; on a never-run copy 37 pass and 4 report SKIP).
+Run the checks: `python3 tools/check_all.py --data <DAT>`. Missing cache or saves are reported as skips.
 
 **Rating** (counted by `tools/rating.py`; see [how we rate](HOW_WE_RATE.md)):
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 479 statements CONFIRMED (proved from the program code or the files) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 479 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 54/8,341 candidate literals registered with byte witnesses. The other literals are inventoried as prose-only.
+- **Page facts:** 54/8,342 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
 ## Where things stand (21 November 2026)
 
 A dated snapshot; the work continues and the table below is kept current.
 
-- **Known.** 51 of 56 files in `DAT` have their whole layout read by a tool here; the other five are one repeated block (the four PHT files are a seeded `rand()` stream matched to the last byte) ([how we rate](HOW_WE_RATE.md)). 84.9% of the map bytes come from fields the program reads, and every portal command is listed with its conditions in the order the game checks them ([progression](PROGRESSION.md)).
+- **Known.** 51 of 56 files in `DAT` have their whole layout read by a tool here; the other five are one repeated block (the four PHT files are a seeded `rand()` stream matched to the last byte) ([how we rate](HOW_WE_RATE.md)). 84.9% of the map bytes come from fields the program reads. Some of those fields have uses still open. Separately, every portal command is listed with its conditions in the order the game checks them ([progression](PROGRESSION.md)).
 - **Open.** 10 of 13 numbered questions are not fully answered ([open questions](OPEN_QUESTIONS.md)).
 - **Tests a reader with the game can run.** Each open point that needs the running game has its test and what the runs of 20 November did and did not show, including how to avoid the cache crash marker before a run ([running-game probes](NEEDS_A_RUNNING_GAME.md)).
 - **Tools for your own copy.** Change text or numbers with the mod kit, make and undo patches, edit a saved game, open interactive level plans and export a level as a 3D model: start with the [first ten minutes](FIRST_TEN_MINUTES.md) page or `python3 tools/lol.py`. Known original faults: [patches](../patches/README.md). What these pages got wrong: [corrections](CORRECTIONS.md).
@@ -41,4 +46,4 @@ A dated snapshot; the work continues and the table below is kept current.
 | Game logic: script dispatch, objects, items, spells, dialogue, combat | [script opcodes and framing](lol3-script-opcodes.md), [object and script dispatch](lol3-object-dispatch.md), [items](lol3-item-dispatch.md), [spells](lol3-spell-dispatch.md), [dialogue](lol3-dialogue-dispatch.md), [combat](lol3-combat-dispatch.md), [events, predicates and timers](lol3-script-events.md), [progression](PROGRESSION.md), [level script summaries](levels/notes/README.md) | measured: all 18 MAP command streams (54,966 offsets) frame exactly with the native size decoder; native entry points traced; `lol3_script_notes`: 18 summaries, 54,940 object and 4,040 region records, 16,876/2,201 direct references; 2,641 of 2,642 dialogue commands join a dialogue tag | Q11, Q12 |
 | Saves | [native saves](lol3-native-saves.md) | Native slot directories measured in 47 original saves with 416 level blocks (`lol3_save_header.py` counts them). `lol3_save_selectors.py` checks the 61 global, 75 level and 90 nested dispatch rows and 136 flags, with full instruction decoding when optional Capstone is installed. Four further autosaves isolate the first position group's heading and Z coordinate and one item transfer from the quick slot to the cursor. [Writer traces and offsets](lol3-native-saves.md#controlled-saves-with-a-null-sink) | Q13 |
 
-A row is done when it has a page, a working reader, a passing check and no open point. Today none of the rows meets that; WSX archives, LMF light maps, MAPs, PHT files, executable layouts and textures have readers with checks, but each still has an open point.
+A row is done when it has a page, a working reader, a passing check and no open point. On 21 November 2026 none of the rows met that; WSX archives, LMF light maps, MAPs, PHT files, executable layouts and textures have readers with checks, but each still has an open point.

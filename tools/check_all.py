@@ -20,6 +20,12 @@ QUICK_SKIP = {"walk_lmf_leaves", "lol3_lzo_writer",
               "lol3_name_hash", "lol3_wsx_writer"}
 
 
+def check_counts():
+    """Configured full and quick check counts, before data-dependent skips."""
+    full = len(TOOLS)
+    return full, full - len(QUICK_SKIP)
+
+
 def main():
     ap = ReaderArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", default=os.environ.get("LOL3_DAT"), help="the game's DAT folder (default: $LOL3_DAT)")
@@ -61,9 +67,10 @@ def main():
             skipped.append(t)
         elif t == "lol3_save_writer" and line.startswith("CHECK save_write: SKIP:"):
             skipped.append(t)
+    full, _ = check_counts()
     print(f"Total elapsed: {monotonic() - started:.2f}s")
     if failed:
-        print(f"{len(failed)} of {len(TOOLS) - len(quick_skipped)} attempted checks FAILED: {', '.join(failed)}")
+        print(f"{len(failed)} of {full - len(quick_skipped)} attempted checks FAILED: {', '.join(failed)}")
     elif skipped or quick_skipped:
         reasons = ["quick mode"] if quick_skipped else []
         if CACHE_CHECKS.intersection(skipped):
@@ -73,10 +80,10 @@ def main():
         if "lol3_save_writer" in skipped:
             reasons.append("no liblzo2" if "no liblzo2" in last_line["lol3_save_writer"] else "no game-written saves")
         skipped += sorted(quick_skipped)
-        print(f"{len(TOOLS) - len(skipped)} CHECKS PASSED, {len(skipped)} SKIPPED "
+        print(f"{full - len(skipped)} CHECKS PASSED, {len(skipped)} SKIPPED "
               f"({', '.join(dict.fromkeys(reasons))}): {', '.join(skipped)}")
     else:
-        print(f"ALL {len(TOOLS)} CHECKS PASSED")
+        print(f"ALL {full} CHECKS PASSED")
     return 0 if not failed else 1
 
 

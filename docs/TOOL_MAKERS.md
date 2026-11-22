@@ -22,6 +22,6 @@ script streams, surfaces, regions, waypoints, placement indices and
 the file's byte offsets. The LMF writer can re-encode groups. Editing
 light maps or textures in place still needs a mapping from the changed
 geometry to the associated resources and their indices. The mod kit
-currently exposes ODF numbers and TRR fields.
+exposes ODF numbers and TRR fields.
 [MAP fields and retained ranges](lol3-map-odf-readers.md#writing-the-stored-fields) ·
 [LMF writer](formats/lmf.md#writing) · [Writer checks](ROUND_TRIP.md)

@@ -132,3 +132,17 @@ These words mean the same thing in the notes for all three Lands of Lore games.
 | Edition fingerprint | A group of file names, byte counts and full SHA-256 checksums used to identify a measured release. See [Editions](EDITIONS.md). |
 
 In the schematic, **edge used once** means one surface has that edge. A **shared edge** belongs to several surfaces. **1-based table rows** means the first stored placement has label 1. See [the map schematic](formats/map-odf.md#overhead-schematic).
+
+
+## Script and map terms
+
+| Term | Meaning |
+|---|---|
+| Identity | A value the program uses to identify one definition even if it has a different row number in another table. |
+| Kind 19 | A record that requires a separate condition to pass before an event runs. |
+| Mode 9 | An object request that tests the request subtype, operand and whether the object state is zero. |
+| Shared byte | One byte of state shared across levels. |
+| Level byte | One byte of state stored for one level. |
+| SMD | Compressed sprite or texture frame data arranged in slices. |
+| Typed field | A value read with a known size and representation, such as a signed 16-bit coordinate. |
+| Retained bytes | Original bytes the writer preserves as a span so a rewrite keeps data whose fields it does not rebuild. |

@@ -15,7 +15,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **Using git?** The [quick start with git](#quick-start-with-git-for-people-who-use-git) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **Recipes:** [cookbook](docs/COOKBOOK.md), short recipes with the command and the first lines it prints.
 - **Change the game, safely:** [change a number in your own copy](#change-a-number-in-your-own-copy) with the mod kit, share it as a small [patch](docs/formats/patch.md) that can be undone, or change a field in a copy of a save; your game folder is only read.
-- **Patches:** [original faults, with no patch file in this tree](patches/README.md).
+- **Patches:** [original faults, and their evidence](patches/README.md).
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md), counted in the [rating](#rating). Open points include some item effects, how the second spell counter is filled in ordinary play, and final screen composition; two answers were checked on one display setting only. Some questions can only be settled by watching the original game run. Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](docs/NEEDS_A_RUNNING_GAME.md#answered-probes). Some probes were also tried on [edited saves](docs/EDITED_SAVES.md), copies of a game-written save with a few bytes changed.
 - **What changed lately:** [what's new](docs/WHATS_NEW.md), newest first.
 - **What we got wrong:** [corrections](docs/CORRECTIONS.md), each published error with how it was caught and the commit that fixed it.
@@ -27,10 +27,10 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 479 statements CONFIRMED (proved from the program code or the files) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 479 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 54/8,341 candidate literals registered with byte witnesses. The other literals are inventoried as prose-only.
+- **Page facts:** 54/8,342 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
 ![Overhead QWOD0 schematic from MAP edges, waypoints and placements](docs/images/qwod0-schematic.svg)
@@ -107,7 +107,7 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
 - **Format pages** in `docs/formats/` ([docs index](docs/README.md)): [WSX](docs/formats/wsx.md), [LMF](docs/formats/lmf.md), [MAP and ODF](docs/formats/map-odf.md), [textures](docs/formats/textures.md), [movies (VQA)](docs/formats/vqa.md), [music and sound](docs/formats/audio.md), [PHT](docs/formats/pht.md), [PE images](docs/formats/executable.md), each with a worked example from the game files.
 - **Level sheets** in [`docs/levels/`](docs/levels/README.md): one per level, generated from the archives.
 - **Program pages** in [`docs/`](docs/README.md): how the game program `LOL3.DAT` itself reads archives, light maps, textures, maps, scripts, items, spells, dialogue, combat and saves.
-- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs all 41 checks.
+- **Tools** in [`tools/`](tools/README.md): readers and checks for every format above, directory and table listings, a texture-to-PNG exporter, a level drawer, a save inspector and the level-sheet and script-notes writers; `check_all.py` runs the corpus checks.
 - **Script summaries** in [`docs/levels/notes/`](docs/levels/notes/README.md): per level, counts of triggers, effects and targets, with one worked excerpt.
 - **Guides:**
   - [Start here, by goal](docs/START_HERE.md)
@@ -116,11 +116,16 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
 
 ## Quick start with git (for people who use git)
 
+<!-- suite-counts:begin -->
+- **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
+- **Synthetic data.** 113 unit tests.
+<!-- suite-counts:end -->
+
 Use Python 3.10 or later and your own copy of the English GOG release (`LOL3.DAT`, SHA-256 starting `9a9eb04c8f404ebf`; the tools that read the program check it by its hash). The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu). The save-selector check reads the dispatch tables and stored flags with the standard library and also decodes the instruction bodies when Capstone is installed (`python3 -m pip install 'capstone>=5,<6'`).
 
 The tools read the `DAT/` folder and two files in the game folder above it:
 - `LOL3.DAT`, the game program (a 1.6 MB Windows PE file; `LOL3.EXE` is only a small launcher);
-- `cdcache.wsx`, a large cache the game writes there when it runs. Three cache texture checks report SKIP if it is missing, and the save check skips when there is no saved game (37 pass, 4 skip on a never-run copy).
+- `cdcache.wsx`, a large cache the game writes there when it runs. Three cache texture checks report SKIP if it is missing, and the save check skips when there is no saved game.
 
 Do not confuse it with the 3 MB `DAT/cdcache.wsx` the game ships (the seed the cache starts from), which `lol3_cache_seed.py` reads. The archive writer and text checks also read the shipped duplicate archives beside `DAT/`.
 
@@ -129,14 +134,14 @@ git clone https://github.com/KForestland/Lands-of-lore-3-re.git
 cd Lands-of-lore-3-re
 export LOL3_DAT="/path/to/your/LoL3/DAT"
 python3 tools/check_all.py --quick              # lists the checks it skips
-python3 tools/check_all.py                      # full suite of 41 checks with a matching cache and saves
+python3 tools/check_all.py
 python3 -m unittest discover -s tests
 python3 tools/extract_wsx_entries.py --data "$LOL3_DAT" --check
 python3 tools/lol3_script_notes.py --data "$LOL3_DAT" --out ../lol3-notes   # full script listings, outside the repository
 python3 tools/full_report.py --out "../lol3-out/report"
 ```
 
-On the reference installation with liblzo2, an existing cache and saves, the full suite took about 93 seconds and `--quick` took about 21. Quick mode skips the LMF member walk, LZO writer, name-hash scan and WSX writer and prints each skip. Each run prints the time per check and the total. [Check audit](docs/CHECK_AUDIT.md)
+On the reference installation with liblzo2, an existing cache and saves, the full suite took about one to two minutes and `--quick` finished in under a minute. Quick mode skips the LMF member walk, LZO writer, name-hash scan and WSX writer and prints each skip. Each run prints the time per check and the total. [Check audit](docs/CHECK_AUDIT.md)
 
 The `check_all` line prints `51/52 WSX files parse … failing: cdcache.wsx`. That file is a cache, not an archive ([Q1](docs/OPEN_QUESTIONS.md)), and `unexpected failures: none` means the check passed.
 
@@ -158,10 +163,10 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md). "Q11" and the like
 | Loose PHT files | Four files match a generated byte cycle through EOF, listed separately in the rating ([PHT](docs/formats/pht.md)). Which program wrote them and whether the game reads them is open |
 | LMF light maps | The native directory yields 5,256 stored groups and 424,288 members in 18 entries ([LMF](docs/formats/lmf.md), Q3). |
 | MAP, ODF | Header, section 1, waypoints, paths, surfaces and the ODF type-tagged definitions (334) read through the native readers. Section-1 bytes each have a reader; waypoint byte +6, the label spans and the bytes before field 16 are measured (Q4, Q5 mostly) |
-| Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values are still open. All 18 `.TE_` wrappers decode (Q1, Q6, Q7). |
+| Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values are still open. All 18 `.TE_` wrappers frame (Q1, Q6, Q7). |
 | Movies, music | Movie files (VQA) decoded; on a 16-bit display under Wine the intro's colours are converted from 15-bit to 16-bit (Q9); the 38 music tracks are MP3 inside WAV files, played through the Miles sound library (Q10) |
 | Level sounds | WAV files using IMA ADPCM compression, in the 18 per-level sound archives ([level sheets](docs/levels/README.md)) |
-| Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (only the on-screen look of effect objects is open); per-level summaries (Q11) |
+| Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (some producers, targets and displayed effects remain open); per-level summaries (Q11) |
 | Items, spells, dialogue, combat | Traced in the program: 343 item rows, all 113 nonzero regular item handlers read one by one, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: what the objects the handlers build do on screen, and mitigation names (Q12) |
 | Saves | Header, directories and compression mapped from 47 of our own saved games, written by the original program (not included; `lol3_save_writer.py --check` rebuilds your own byte for byte); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
 

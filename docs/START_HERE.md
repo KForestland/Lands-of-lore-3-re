@@ -1,12 +1,17 @@
 # Start here, by goal
 
+<!-- suite-counts:begin -->
+- **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
+- **Synthetic data.** 113 unit tests.
+<!-- suite-counts:end -->
+
 [Format quick reference](QUICK_REFERENCE.md) pairs each documented game format with a command and its evidence.
 
 You need Python 3.10 or later (optional: the system LZO library, `apt install liblzo2-2`) and your own copy of *Lands of Lore III* (the English GOG release). Point the tools at its `DAT` folder once; some tools also read the program `LOL3.DAT` and the game-written `cdcache.wsx` from the folder above it:
 
 ```bash
 export LOL3_DAT=/path/to/your/LoL3/DAT
-python3 tools/check_all.py         # 41 checks; the last line should read ALL 41 CHECKS PASSED (or 37 passed, 4 skipped if the game has never run)
+python3 tools/check_all.py
 ```
 
 Words you do not know are in the [glossary](GLOSSARY.md). Short worked commands, with the first lines they print, are in the [cookbook](COOKBOOK.md). What is known and what is open: [STATUS](STATUS.md) and [open questions](OPEN_QUESTIONS.md). Write tool output outside the repository.
