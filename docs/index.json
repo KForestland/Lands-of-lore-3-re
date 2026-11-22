@@ -1371,6 +1371,7 @@
       ],
       "tools": [
         "tools/check_all.py",
+        "tools/cli_errors.py",
         "tools/doc_format_offsets.py",
         "tools/doc_index.py",
         "tools/doc_links.py",
@@ -1413,6 +1414,7 @@
         "tools/lol3_texture_png.py",
         "tools/lol3_texture_spans.py",
         "tools/lol3_wsx_writer.py",
+        "tools/media_convert.py",
         "tools/modkit.py",
         "tools/modkit_core.py",
         "tools/patch.py",
@@ -1420,6 +1422,7 @@
         "tools/repo_guard.py",
         "tools/save_edit.py",
         "tools/save_page.py",
+        "tools/suite_counts.py",
         "tools/translate.py",
         "tools/translate_data.py",
         "tools/translate_fonts.py",

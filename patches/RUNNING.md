@@ -1,6 +1,6 @@
 # Running the Windows 1.07a game on a current machine
 
-Read this against your own copy. The English 1.07a run in folder 0054 reached the menu, loaded an autosave and displayed the world and HUD with `Video_3D_Driver=SoFtWaRe`. The separate settings below say where the evidence came from.
+Read this against your own copy. The first software-renderer run on 21 November reached the menu, loaded an autosave and displayed the world and HUD with `Video_3D_Driver=SoFtWaRe`. The separate settings below say where the evidence came from.
 
 The program stores `Win95/NT 1.07a` at `LOL3.DAT+0x14DEAC`. The date `May  7 1999` is at `+0x14DE74`.
 
@@ -15,9 +15,9 @@ The program stores `Win95/NT 1.07a` at `LOL3.DAT+0x14DEAC`. The date `May  7 199
 
 ## Display and the 3D driver
 
-`options.ini` is named at `LOL3.DAT+0x14FA28`. The video keys in the program, and the value this tree's `options.ini` stores:
+`options.ini` is named at `LOL3.DAT+0x14FA28`. The video keys in the program, and the value the test installation's `options.ini` stores:
 
-| Key | File offset | Value in this tree's `options.ini` |
+| Key | File offset | Value in the test installation's `options.ini` |
 | --- | --- | --- |
 | `Video_Resolution` | `0x14F8F0` | `640x480x8` |
 | `Video_3D_Driver` | `0x14F904` | `SoFtWaRe` |
@@ -37,7 +37,7 @@ The resolution text is built with the format `%dx%dx%d` at `LOL3.DAT+0x144238`. 
 
 The audio keys are in the same options block:
 
-| Key | File offset | Value in this tree's `options.ini` |
+| Key | File offset | Value in the test installation's `options.ini` |
 | --- | --- | --- |
 | `Audio_Channels` | `0x14F9C8` | `16` |
 | `Audio_Reverse` | `0x14F9AC` | `Off` |
@@ -46,16 +46,16 @@ The audio keys are in the same options block:
 | `Volume_Music` | `0x14F9EC` | `8` |
 | `Volume_Conversation` | `0x14F9D8` | `8` |
 
-`LOLSETUP.INI` in this tree records a CD rate and a swap size. It does not name a sound card.
+`LOLSETUP.INI` in the test installation records a CD rate and a swap size. It does not name a sound card.
 
-**Tried here.** Folder 0054 and the later software runs used a null audio sink. These were silent runs. The audio values above are readings of the setup file.
+**Tried here.** The first and later software runs on 21 November used a null audio sink. These were silent runs. The audio values above are readings of the setup file.
 
 ## Cache and the crash marker
 
 The program names `cdcache.lst` at `+0x14DF48`, `cdcache.ls_` at `+0x14DFF0`, `cdcache.wsx` at `+0x14DFE4`, `cdcache.hdr` at `+0x14DFD8`, and `cdcache2.smf` at `+0x14DFFC`. The switch `-NOCDCACHE` is at `+0x147F88`.
 
-**Tried here.** The disposable copy in folder 0054 gained a nine-byte `cdcache2.smf` containing `The game ` when the run was stopped. The [native cache path](../docs/lol3-wsx-reader.md#cache-index-lifecycle) explains how the marker selects the rebuild branch.
+**Tried here.** The first software-renderer test copy on 21 November gained a nine-byte `cdcache2.smf` containing `The game ` when the run was stopped. The [native cache path](../docs/lol3-wsx-reader.md#cache-index-lifecycle) explains how the marker selects the rebuild branch.
 
-**Tried here.** Folder 0066 started from a disposable copy after removing its marker. The cache question did not appear and the world loaded. Restoration after a genuine crash and the `-NOCDCACHE` switch remain untried in this setup.
+**Tried here.** A later software-renderer run on 21 November started from a disposable copy after removing its marker. The cache question did not appear and the world loaded. Restoration after a genuine crash and the `-NOCDCACHE` switch remain untried in this setup.
 
 `LOL3.EXE` is the program to start. The video driver it will use is the `Video_3D_Driver` line in `options.ini`.

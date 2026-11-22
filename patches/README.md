@@ -6,7 +6,7 @@ The format is `lol-patch-3`. Each change lists its file, entry, offset, old span
 
 How to start the game on a current machine is [Running](RUNNING.md).
 
-These pages read English retail 1.07a. The program stores `Win95/NT 1.07a` at `LOL3.DAT+0x14DEAC` and `May  7 1999` at `+0x14DE74`. It does not store a second version string, and it does not store the changelog. Official updates v1.06J (7 May 1999) and v1.07a (9 May 1999) are already in that build. The 1.07a note covers display and driver crashes, a rebuilt cache, several quests that did not start, infinite experience in the Frozen Wastes, a second shard, a Lower Gladstone room that could not be left, the sigil teleport, and a crash on the White Tower case. Those are program and data fixes already shipped by Westwood. They are not repeated here. A search of this `LOL3.DAT` for the report names (Sioned, the scarf, the Draracle, the White Tower, a grate) found none of those words. Nearby bytes that look similar are level and movie stems (`uhfrozen`, `mfrozen`) and the key name `COMMENTS_JOURNAL`, not these reports.
+The English GOG release checked here stores `Win95/NT 1.07a` at `LOL3.DAT+0x14DEAC` and `May  7 1999` at `+0x14DE74`. The version string matches Westwood's 1.07a update notes. Those notes cover display and driver crashes, cache rebuilding and several quest fixes. The version string alone does not verify each fix.
 
 ## Where each reported fault sits
 
@@ -33,7 +33,7 @@ Bolle also reports that entering the woods can ask for another disc. His workaro
 
 ### Retail script and data checks
 
-The checks below use English retail 1.07a. Quest and dialogue IDs come from the original TRR directory. Placement event lists and their guards are traced through the native matcher. The stuck states are from the reports. The original maps establish the gates and actions listed here. [Dialogue lookup](../docs/lol3-dialogue-dispatch.md) · [Event matcher](../docs/lol3-script-events.md) · [Community reports](https://lands-of-lore.fandom.com/wiki/Bugs) · [Bolle's reports, section XI](https://gamefaqs.gamespot.com/pc/197755-lands-of-lore-iii/faqs/2527)
+The checks below use English GOG release (1.07a). Quest and dialogue IDs come from the original TRR directory. Placement event lists and their guards are traced through the native matcher. The stuck states are from the reports. The original maps establish the gates and actions listed here. [Dialogue lookup](../docs/lol3-dialogue-dispatch.md) · [Event matcher](../docs/lol3-script-events.md) · [Community reports](https://lands-of-lore.fandom.com/wiki/Bugs) · [Bolle's reports, section XI](https://gamefaqs.gamespot.com/pc/197755-lands-of-lore-iii/faqs/2527)
 
 #### Rescuing Sioned
 
@@ -41,7 +41,7 @@ Copper frees Sioned in Ruloi World and returns to the guild without getting the 
 
 #### Orcish Retribution
 
-Copper can hear Leina acknowledge the defeated orcs and still leave without Backbiter. The acknowledgement at `MLOW2.WSX+0x14DA083` requires creature 87's state to be 8 and leads to dialogue 3612. That exchange stops. Leina has a separate mode-3 request at `+0x14DA0AB` that requires the King's Pardon (identity `0x5ABDFC25`). NWOD2 has a placement bearing that identity. Giving her the item starts dialogue 3613. The completion of the last Pardon line at `+0x14DA0D1` runs the shipped Backbiter grant at `+0x14D26F1`. **No few-byte patch.** The acknowledgement alone does not enter the grant branch. The report does not show the Pardon was offered or that its grant failed afterward. Removing the item requirement would change the quest.
+Copper can hear Leina acknowledge the defeated orcs and still leave without Backbiter. The acknowledgement at `MLOW2.WSX+0x14DA083` requires creature 87's state to be 8 and leads to dialogue 3612. That exchange stops. Leina has a separate mode-3 request at `+0x14DA0AB` that requires the King's Pardon (identity `0x5ABDFC25`). NWOD2 has a placement bearing that identity. Giving her the item starts dialogue 3613. The completion of the last Pardon line at `+0x14DA0D1` runs the shipped Backbiter grant at `+0x14D26F1`. **No few-byte patch found in these records.** The acknowledgement alone does not enter the grant branch. The report does not show the Pardon was offered or that its grant failed afterward. Removing the item requirement would change the quest.
 
 #### Perfumed Scarf
 
@@ -57,7 +57,7 @@ Copper moves near a wall in the lower lair and is drawn into it. Bolle reports b
 
 #### Rhynn
 
-Copper meets Rhynn by the Talamari library, then meets him in Upper Gladstone and gets the unfamiliar greeting. BUPP1 creature 40's library exchange includes dialogue 674 at `+0x18D5568`. In LUPP2, creature 39's mode-9 request at `+0x1444A47` tests its local state and request operand 5 or 6. The matching group plays dialogue 4240. The request has no kind-19 guard, and the group has no cross-level meeting check. **No few-byte patch.** A byte edit would need a demonstrated recognition branch for the later encounter. The local request and the library exchange do not point to one.
+Copper meets Rhynn by the Talamari library, then meets him in Upper Gladstone and gets the unfamiliar greeting. BUPP1 creature 40's library exchange includes dialogue 674 at `+0x18D5568`. In LUPP2, creature 39's mode-9 request at `+0x1444A47` tests its local state and request operand 5 or 6. The matching group plays dialogue 4240. The request has no kind-19 guard, and the group has no cross-level meeting check. **No few-byte patch found in these records.** A byte edit would need a demonstrated recognition branch for the later encounter. The local request and the library exchange do not point to one.
 
 #### Blue Deer inn room
 
@@ -65,7 +65,15 @@ Copper reaches the room with belongings inside, yet the innkeeper makes no rent 
 
 #### Blue Gem
 
-The reported sequence is taking other gems or killing the mutant chickens before claiming the Blue Gem. HWHIT contains a placed Blue Gem (item 3 at `+0x1125724`, identity `0x38501FA4`) and a direct grant at `+0x1110007`. That grant is on object 540's mode-9 request at `+0x111A64D`. The request expects its state to be zero, request subkind 8 and operand 5 or 6. The tower socket's mode-3 event at `+0x111AB07` compares the same identity and tests the socket's state against zero. The separate grant with unresolved identity at `+0x1110029` belongs to object 541, which has its own event at `+0x111A659`. **Patch not located yet.** Neither item order nor the last chicken is tied to a proved write disabling object 540 or the placed gem. Compare those two objects on a first visit and after the reported order before changing any grant or gate.
+The report describes taking other gems or killing the mutant chickens before claiming the Blue Gem. The placed item 3 at `HWHIT.WSX+0x1125724` has identity `0x38501FA4`. Three opcode-3 records also grant that identity to the player:
+
+| Grant in HWHIT.WSX | Event and conditions |
+|---|---|
+| `+0x1110007` | Type-3 object 540's mode-9 request at `+0x111A64D` expects state 0, subkind 8 and operand 5 or 6. The grant group then sets property 40 on object 540 at `+0x1110017`. |
+| `+0x111059F` | Type-3 object 565 receives kind-5 event 19 at `+0x111A899`. There is no predicate trailer. The group grants a set of items that includes this gem. The sender of event 19 is open. |
+| `+0x1110B15` | Type-16 socket 2 has the empty-hand request at `+0x111AB15` with predicate 207 (state 1). At `+0x1110B0F` the group resets the socket to state 0 before returning the gem. Its separate held-item event at `+0x111AB07` matches this identity and tests state 0. |
+
+**Patch not located yet.** The socket can return a gem already inserted, and the multi-item grant needs a different event from the stand-alone grant. The records do not identify which route the report attempted or a write that disables it. Compare the placed item's presence, object 540's state and the socket state before and after the reported sequence.
 
 #### Victoria's shop
 
@@ -89,4 +97,6 @@ Copper's five-herb quest is crossed out, yet the next Cleric quest does not arri
 
 #### Rix's Plasma Staff
 
-Copper takes the staff after killing Rix in the Woods and loses it while it is unequipped. `EWOD1.WSX+0x189BDE0` is a value-30 event on object 968 whose group supplies creature 76 with the Plasma Staff identity `0xDA2CD58E` at `+0x1894E4E`. The post-Rix familiar event on object 140 at `+0x189A40A` needs state zero and queues a sequence. It has no pack operation. Regular handler 36 has the distance and effect allocation path for operations 5 and 6 at `0x4A0F60`. **Patch not located yet.** No disappearance event has been joined to the unequipped instance. Capture the first inventory change after obtaining the staff, including its definition key and instance count.
+The report describes losing an unequipped staff after taking it from Rix. In the Woods, object 968's value-30 event at `EWOD1.WSX+0x189BDE0` grants staff identity `0xDA2CD58E` to creature 76 at `+0x1894E4E`. The post-Rix familiar event on object 140 at `+0x189A40A` needs state 0 and queues a sequence without a pack operation.
+
+The White Tower has a second grant of the same identity at `HWHIT.WSX+0x11134B1`. Kind-6 value 11 at `+0x111B9CD` belongs to creature 64. Its group also grants that creature three items of identity `0xCE4B4DE6`. This is a grant to a creature in a separate level, with no command in that group to change Copper's pack. Regular handler 36 has the distance and effect allocation path for operations 5 and 6 at `0x4A0F60`. **Patch not located yet.** Neither grant identifies a disappearance from Copper's inventory. Capture the first inventory change after obtaining the staff, including its definition key and instance count.

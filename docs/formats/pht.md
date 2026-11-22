@@ -57,8 +57,7 @@ and its use by the game remain open.
 **CONFIRMED.** `LOL3.DAT` has four direct calls to the generator
 (`0x4FF4D7`, `0x507890`, `0x50B5E4`, `0x50B5F1`) and one direct call to
 the seed setter `0x51B640`, at `0x50787B`. That setter stores the value
-returned by `0x51B830(0)` (`0x507870–0x50787B`). A stream that starts
-at state 1 is the one produced before any seed is set.
+returned by `0x51B830(0)` (`0x507870–0x50787B`). An initial state of 1 and a seed of 1 yield the same stream. The bytes alone do not distinguish the two.
 
 **CONFIRMED.** The byte-store candidate at `0x4FF4D7` fills temporary
 storage on the stack (`ESP+0xF18` before arguments are pushed). Its

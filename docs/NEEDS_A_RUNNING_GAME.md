@@ -5,9 +5,7 @@ Use a disposable copy of your own English retail installation
 `LOL3.DAT` as a child process, so enable child-process debugging
 (WinDbg `.childdbg 1`) or attach x32dbg to the `LOL3.DAT` process
 after launch. Record the renderer, display mode and whether a
-compatibility wrapper is in use. `LOL3.DAT` has no relocations and
-always loads at `0x400000`, so the addresses here are used as they
-are; if the module base differs, you are in the wrong process.
+compatibility wrapper is in use. Both the engine and launcher prefer base `0x400000` and lack a relocation table. Check the module name and read the expected bytes at the instruction before using these addresses.
 
 Some probes were also tried on edited saves: copies of a game-written save with a few bytes changed. [Edited saves](EDITED_SAVES.md) lists those runs and what a game-written save would still add.
 
@@ -30,18 +28,16 @@ coefficients, the predicted indexed output rows. The
 first-pixel predictions for the two unresolved row flags. Use those tests to
 identify the source buffer and output words before testing display conversion.
 
-**21 November, partial runs (0066 and 0067).** The logged renderer was
-`SoFtWaRe`. At (120, 80), the presented RGB565 sample was `0xCDB2` in both
-runs. The software table inspected in 0067 supplied no filled bake tied to
-that pixel. The [software span](lol3-texture-bake.md#software-wall-span)
+**21 November, two software-renderer captures under Wine.** At (120, 80) on the left stone wall, both 24-bit XWD captures store `B2 CD 00` in their byte order, RGB (0, 205, 178). Their low word `0xCDB2` does not establish the renderer's pixel format. The table inspected in the second run supplied no filled bake tied to that pixel. The [software span](lol3-texture-bake.md#software-wall-span)
 gives the exact byte capture before remapping and the indexed destination
 to follow through presentation. The final-colour pair remains open. The Direct3D upload has
 an exact source-word collection point at `0x495635` just as the caller
 returns from filling staging. Use a matched draw and presentation on that
 renderer if following that route. [Final wall colour](OPEN_QUESTIONS.md#final-wall-colour)
 
-In folder 0111, the mapping lookup found the engine header page and the instruction bytes were unread. In folder 0113, WineDbg identified the engine process and its command list did not open, so the memory read at the texel instruction could not be made. The later spell and item runs located live values in the `LOL3.DAT` process. [Process readings](#on-screen-spell-and-item-coverage)
-Folders 0119–0123 all read the expected nine bytes at `0x49D0A1` in the live `LOL3.DAT` process at base `0x400000`. At client pixel (120, 80), 0119 logged `0xCDB2` at load, and 0120 logged `0xE6B3` at load and `0xCDB2` later. In 0123, WineDbg armed the hardware breakpoint at the world draw call `0x46D677` and then reported `Cannot continue on 01a0 (00010002)`. The source texel, remap byte and stored colour remain unread. To settle the final wall colour, use a debugger that can resume a thread after a hardware stop under Wine, or a native Windows debugger on a Windows laptop, and follow those values through presentation for the same pixel and frame.
+On 21 November one debugger run found only the engine header page. A later run identified the engine process but its command list did not open, so the memory read at the texel instruction could not be made. The later spell and item runs located live values in the `LOL3.DAT` process. [Process readings](#on-screen-spell-and-item-coverage)
+
+Five software-renderer runs under Wine on 22 November all read the expected nine bytes at `0x49D0A1` in the live `LOL3.DAT` process at base `0x400000`. At (120, 80), the 24-bit window captures have RGB (0, 205, 178), low word `0xCDB2`, except that the second run gives RGB (0, 230, 179), low word `0xE6B3`, just after loading. Its later sample returns to `0xCDB2`. The reason for the difference is open. In the last run, WineDbg armed the hardware breakpoint at the world draw call `0x46D677` and then reported `Cannot continue on 01a0 (00010002)`. The source texel, remap byte and stored colour remain unread. To settle the final wall colour, use a debugger that can resume a thread after a hardware stop under Wine, or a native Windows debugger, and follow those values through presentation for the same pixel and frame.
 
 ### Q12. Which live cast consumes an alternate resource?
 
@@ -104,7 +100,7 @@ charged cast. A native acquisition control and exact HUD indicator
 remain open.
 [Exact bytes and native debit trace](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
 
-**21 November, folder 0068.** Key 1 left mana at 165 and showed no cast
+**Spell test on 21 November.** Key 1 left mana at 165 and showed no cast
 effect. The item click drew a hand and left the quick slots unchanged.
 This run did not exercise the successful cast and item-use paths above.
 
@@ -116,8 +112,8 @@ Wine and used read-only memory checks. The source save was unchanged.
 
 | Action | Before and after on screen | Before and after in `LOL3.DAT` |
 |---|---|---|
-| Greater Light (`0x7A`), key **3**, folder 0117 | A light appears and brightens the wall. The mana oval looks the same in the two pictures. | Mana at `0x5D5098` fell from 437 to 420. |
-| Vel's Fruit (`0x44`), key **6**, folder 0118 | The fruit stays in pocket 1 and its count falls from 3 to 2. | The pocket count at `0x546A5C` fell from 3 to 2. |
+| Greater Light (`0x7A`), key **3**, first run on 22 November | A light appears and brightens the wall. The mana oval looks the same in the two pictures. | Mana at `0x5D5098` fell from 437 to 420. |
+| Vel's Fruit (`0x44`), key **6**, second run on 22 November | The fruit stays in pocket 1 and its count falls from 3 to 2. | The pocket count at `0x546A5C` fell from 3 to 2. |
 
 The `LOL3.DAT` child process held both live values. Reading the same
 addresses in the `LOL3.EXE` launcher returned zero before and after

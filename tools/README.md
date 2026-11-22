@@ -1,5 +1,12 @@
 # Tools
 
+<!-- suite-counts:begin -->
+- **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
+- **Synthetic data.** 113 unit tests.
+<!-- suite-counts:end -->
+
+Run `python tools/suite_counts.py --write` to refresh these counts after changing either suite.
+
 Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
 
 [Translation guide](../docs/TRANSLATION.md) covers `translate.py` , the FNT reader `translate_fonts.py`, and its game-specific `translate_data.py`.
@@ -40,6 +47,8 @@ The commands also exercise these Python modules through their user-facing tools.
 |---|---|---|
 | `level_html.py` | Interactive map | Searchable entries and drawing in one offline page |
 | `level_edit_data.py` reads placement fields for the editor, and `level_move_ui.py` supplies the move controls | Level copy editor | Controls in the offline map and placement data for the editor |
+| `media_convert.py` | Movie and sound | Writes a selected movie to MKV or sound to WAV |
+| `cli_errors.py` | File tools | Formats errors and resolves user-supplied paths |
 | `save_edit.py`, `save_page.py` | Fields from a save | An offline field page with one command per editable field |
 | `modkit_core.py` | Archive workspace | Manifest, editable entries and verified archive copies |
 | `translate_data.py`, `translate_fonts.py` | Translation tables | Counts for the rebuilt text tables and indexed fonts |
@@ -71,7 +80,7 @@ Run examples outside the repository.
 
 | Tool | Reads | `--check` |
 |---|---|---|
-| `check_all.py` | all checks below | prints each line, then `ALL 41 CHECKS PASSED`, or `37 CHECKS PASSED, 4 SKIPPED` on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
+| `check_all.py` | all checks below | prints each result and a summary, including skips on a never-run copy (no game-written cache: 3 SKIP; no game-written saves: `lol3_save_writer` SKIP). Without liblzo2, `lol3_lzo_writer` and `lol3_save_writer` also SKIP |
 | `doc_links.py` | `README.md`, `tools/README.md`, `CONTRIBUTING.md`, `docs/`, and `examples/`/`evidence/` when present | checks links and anchors only (runs no command): every relative link, image link, `<a href>` and GitHub heading anchor resolves; fenced examples are skipped |
 | `modkit.py` | the game folder (see [`modkit.py`](#modkitpy)) | unpacks, rebuilds and verifies every supported table in a temporary folder; unchanged files must match byte for byte |
 | `repo_guard.py` | the repository | no game files, media, stray images, machine paths, words from the optional local word list; with `--release` also foreign commit identities |
