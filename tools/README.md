@@ -5,6 +5,8 @@
 - **Synthetic data.** 113 unit tests.
 <!-- suite-counts:end -->
 
+The `game_names.py` job reads labels from the original files. Map markers use a stored creature tag where there is a confirmed definition link.
+
 Run `python tools/suite_counts.py --write` to refresh these counts after changing either suite.
 
 Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
