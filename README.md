@@ -8,9 +8,18 @@
 
 It contains documentation, tools and small diagrams. It contains no game files and no extracted game pictures, sounds, movies or text.
 
+## Where this stands
+
+- **In progress.** Tools read the layout of [51 of 56 files in the English GOG DAT folder](#rating), and check the [MAP and ODF records for 18 levels](docs/formats/map-odf.md).
+- In the running game, [Greater Light and Vel’s Fruit](docs/NEEDS_A_RUNNING_GAME.md#on-screen-spell-and-item-coverage) each had an on-screen result that matched a change read from the running program.
+- Field meanings in [all 16 retained map classes](docs/lol3-map-odf-readers.md#retained-span-classes), the [final colour calculation for one wall pixel](docs/OPEN_QUESTIONS.md#final-wall-colour), and [11 reported player faults](patches/README.md#where-each-reported-fault-sits) still need evidence.
+- The [rating](docs/HOW_WE_RATE.md) keeps separate counts for files, rules and tests in play. An overall percentage would combine measures of different things.
+
+Status of the other games: [Lands of Lore I](https://github.com/KForestland/lands-of-lore-1-re#where-this-stands) · [Lands of Lore II](https://github.com/KForestland/lands-of-lore-2-re#where-this-stands).
+
 ## At a glance
 
-- **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`. It is less complete than the LoL1 and LoL2 repositories.
+- **What this is:** documentation of the original 1999 Windows game's data files and engine, checked against the game files and the original program `LOL3.DAT`.
 - **What you can do today:** unpack every archive the game ships with, read level geometry, light maps and scripts, export textures to PNG (after running the game once, which writes its texture cache), check movies, music and sounds, draw a level plan with waypoints and placements, and follow one level event from entry to effect.
 - **Using git?** The [quick start with git](#quick-start-with-git-for-people-who-use-git) below, then [Start here, by goal](docs/START_HERE.md), [How the game works](docs/HOW_THE_GAME_WORKS.md) or the [worked example](docs/tutorial-one-event.md).
 - **Recipes:** [cookbook](docs/COOKBOOK.md), short recipes with the command and the first lines it prints.
@@ -19,7 +28,7 @@ It contains documentation, tools and small diagrams. It contains no game files a
 - **What is still unknown:** the [open questions](docs/OPEN_QUESTIONS.md), counted in the [rating](#rating). Open points include some item effects, how the second spell counter is filled in ordinary play, and final screen composition; two answers were checked on one display setting only. Some questions can only be settled by watching the original game run. Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](docs/NEEDS_A_RUNNING_GAME.md#answered-probes). Some probes were also tried on [edited saves](docs/EDITED_SAVES.md), copies of a game-written save with a few bytes changed.
 - **What changed lately:** [what's new](docs/WHATS_NEW.md), newest first.
 - **What we got wrong:** [corrections](docs/CORRECTIONS.md), each published error with how it was caught and the commit that fixed it.
-- **The three games:** [LoL1](https://github.com/KForestland/lands-of-lore-1-re) · [LoL2](https://github.com/KForestland/lands-of-lore-2-re) · [LoL3](https://github.com/KForestland/Lands-of-lore-3-re) ([what they share](docs/series-formats.md), [how the engine changed](docs/engine-evolution.md), [how they gate progress and scale numbers](docs/series-progress-and-numbers.md)).
+- **Across the series:** [shared formats](docs/series-formats.md) · [engine changes](docs/engine-evolution.md) · [progression and numbers](docs/series-progress-and-numbers.md).
 
 ## Rating
 
