@@ -213,7 +213,7 @@ def main():
     try:
         image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
-            raise ValueError("LOL3.DAT does not match the documented English retail executable")
+            raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
         text = code_section(image)
         counts = {}
         for address, expected in FLAG_ADDRESSES.items():

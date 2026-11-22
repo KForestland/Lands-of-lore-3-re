@@ -1,6 +1,6 @@
 # Native Light Map reader
 
-Addresses refer to the English retail `LOL3.DAT` PE32. Its SHA-256 is
+Addresses refer to the `LOL3.DAT` PE32 from the English GOG release (1.07a). Its SHA-256 is
 `9a9eb04c8f404ebf68f439df4ec7dc6ad5cc230235d0f853059f636ff720ccea`.
 The PE header at file `0xC8` gives image base `0x400000`. The code
 section in the table at `0x1C0` begins at RVA `0x1000`, file `0x400`,

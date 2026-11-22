@@ -219,7 +219,7 @@ are separate measurements.
 
 **CONFIRMED, original playback with a null sink.** Wine 9.0 used
 a private PulseAudio 16.1 server exposing only `module-null-sink`.
-The English retail executable opened the archive clip with status
+The executable from the English GOG release (1.07a) opened the archive clip with status
 −1 and a populated decoder at `0x470048`. It presented the
 640 × 480 movie through Direct3D. The locked movie surface,
 intermediate DirectDraw surface and primary surface all had depth 16

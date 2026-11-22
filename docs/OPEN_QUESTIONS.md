@@ -44,6 +44,8 @@ One line per question: its state and what would settle what is left. Device colo
 
 ## Final wall colour
 
+At (120, 80) on the left stone wall, software-renderer captures under Wine store RGB (0, 205, 178), low word `0xCDB2`. One load gave `0xE6B3` for a reason that remains open. The colour the renderer itself produces remains open.
+
 For software rendering, a debugger must first verify the loaded bytes at the texel instruction, then follow the texel, shade lookup and indexed write for the same pixel through presentation. [Failed setup attempts](NEEDS_A_RUNNING_GAME.md#q6-which-bytes-does-the-texture-renderer-consume) · [Software span](lol3-texture-bake.md#software-wall-span)
 
 ### Direct3D comparison

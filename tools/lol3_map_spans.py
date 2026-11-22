@@ -59,7 +59,7 @@ def u32(buf, at):
 def census(data_dir):
     image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
-        raise ValueError("LOL3.DAT does not match the documented English retail executable")
+        raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
     wp6, wp7 = Counter(), Counter()
     names = Counter()
     bad_at = set()

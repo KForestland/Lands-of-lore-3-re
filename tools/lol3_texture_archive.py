@@ -206,7 +206,7 @@ def main():
             if not args.check:
                 print(f"{name}: {len(sections)} chunks")
         if (files, blocks) != (18, 465) or (decode and cache is not None and matches != 4):
-            raise ValueError("texture aggregate counts do not match the English retail corpus")
+            raise ValueError("texture aggregate counts do not match the English GOG release (1.07a) corpus")
         detail = ""
         if decode:
             if descriptors != 44357:

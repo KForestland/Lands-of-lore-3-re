@@ -59,7 +59,7 @@ Newest first. Each statement below was on GitHub before it was corrected.
 **Hygiene.**
 
 - 2026-11-19: a commit the reviewer prepared from a writer's work carried conflict markers; it was amended before it was posted or pushed, and the release guard now reports them (`bdc0f01`).
-- 2026-11-19: a commit subject named an internal lane (as in the other two repositories); the lead held it, it was reworded before the push, and the guard now checks commit messages (`c9bef4a`).
+- 2026-11-19: a commit subject used a working-branch name (as in the other two repositories); the lead held it, it was reworded before the push, and the guard now checks commit messages (`c9bef4a`).
 
 ## Process
 

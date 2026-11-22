@@ -1,6 +1,6 @@
 # LoL3 MAP script opcodes and framing
 
-Addresses use the [English retail PE convention](lol3-lmf-reader.md).
+Addresses use the [PE convention for the English GOG release (1.07a)](lol3-lmf-reader.md).
 The [object and script reader](lol3-object-dispatch.md) gives the MAP
 header offsets, predicate reader and route from an object event to
 a script command.
@@ -349,7 +349,7 @@ record C is then skipped the same way. A C runs only from its own
 event; the C of 1883, 1905, 1934 and 2153 has none.
 
 Run `python3 tools/lol3_script_framing.py --data DAT --check` on
-the English retail files. The tool reads the size table directly
+the files from the English GOG release (1.07a). The tool reads the size table directly
 from the supplied executable and reports aggregate counts.
 
 **CONFIRMED.** The indirect object commands are resolved per class

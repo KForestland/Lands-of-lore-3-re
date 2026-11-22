@@ -1,6 +1,6 @@
 # Check audit
 
-The 19 November 2026 audit used reviewed commit `2d8cd64` and the English retail originals with the existing cache and saves.
+The 19 November 2026 audit used reviewed commit `2d8cd64` and the original files from the English GOG release (1.07a) with the existing cache and saves.
 An untouched local clone passed the corpus checks and unit tests. In scratch clones
 each case changed one value or deleted one file, ran the full `check_all.py`
 and `python3 -m unittest`, then restored the file. The source installations

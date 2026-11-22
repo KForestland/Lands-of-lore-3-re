@@ -1,6 +1,6 @@
 # Native LoL3 save slots
 
-VAs refer to the [English retail PE](lol3-lmf-reader.md). The
+VAs refer to the [PE from the English GOG release (1.07a)](lol3-lmf-reader.md). The
 witnesses are 47 slots written by the original program, including the autosave: a player's own saves in the game's `SAVEGAME` folder (2024–2026), not shipped game data. Another player's saves reproduce the layout, not these exact counts.
 
 Run [`lol3_save_header.py`](../tools/lol3_save_header.py) on a slot file to print the named header fields, both directories and the other header bytes as hex with offsets. A level block long enough for its header also lists that block's 75 section starts and lengths. The report is written to a file only when `--out` is given.
@@ -505,7 +505,7 @@ verifies the vtable, writer selection, calls and store anchors.
 
 ### Controlled floor pickup in BUPP1
 
-**CONFIRMED.** The original English retail game restored a copied
+**CONFIRMED.** The English GOG release (1.07a) restored a copied
 original player slot (SHA-256 prefix `802f83893758`)
 in one instance from a disposable game copy. Level ID 2 selects
 BUPP1: the second 27-byte entry of the level table, after AGLOB,
@@ -553,7 +553,7 @@ changes above. The new-game route was not needed for this comparison.
 
 ## Editing a copy of an original slot
 
-**CONFIRMED, edited-save run.** English retail 1.07a loaded a
+**CONFIRMED, edited-save run.** The English GOG release (1.07a) loaded a
 copy of the BUPP1 slot `5ae559b2cabe` with two new item rows
 and two reassigned quick-cast references. The file grew from
 1,807,734 to 1,807,771 bytes. The original loader reached

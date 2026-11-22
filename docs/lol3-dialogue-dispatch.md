@@ -1,6 +1,6 @@
 # Native dialogue and message tables
 
-Addresses refer to the [English retail image](lol3-lmf-reader.md).
+Addresses refer to the [image from the English GOG release (1.07a)](lol3-lmf-reader.md).
 
 **CONFIRMED.** At `0x433CD3–0x433D1B` the journal-related
 initializer probes then loads `qevent.trr` through `0x4092A0`.

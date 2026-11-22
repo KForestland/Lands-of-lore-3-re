@@ -38,7 +38,7 @@ Run these from the repository folder. Set the data variable as shown under Setup
 | Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
 | Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
 | Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |
-| Edition fingerprints | `python tools/edition.py --data "$LOL3_DAT" --check` | English GOG release, 1.07a, all 6 fingerprints match |
+| Edition fingerprints | `python tools/edition.py --data "$LOL3_DAT" --check` | English GOG release (1.07a), all 6 fingerprints match |
 | Fields from a save | `python tools/lol.py save page "$LOL3_SLOT" --out ../lol3-out/save.html` | Writes save.html with stored values and commands for making an edited copy |
 | Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
 | Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |

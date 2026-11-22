@@ -1,6 +1,6 @@
 # LoL3 numbers at a glance
 
-Generated from the English retail program and archives by `tools/lol3_numbers.py`. Numeric identifiers and byte offsets identify each record.
+Generated from the program and archives of the English GOG release (1.07a) by `tools/lol3_numbers.py`. Numeric identifiers and byte offsets identify each record.
 
 ## Item definitions
 

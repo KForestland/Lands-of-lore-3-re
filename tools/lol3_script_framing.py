@@ -15,7 +15,7 @@ from struct import error as struct_error, iter_unpack, unpack_from
 import lol3_cli
 from extract_wsx_entries import wsx_name_hash
 
-# English retail PE, docs/lol3-lmf-reader.md.
+# PE from the English GOG release (1.07a), docs/lol3-lmf-reader.md.
 RETAIL_PE = "9a9eb04c8f404ebf68f439df4ec7dc6ad5cc230235d0f853059f636ff720ccea"
 CODE_BIAS = 0x400C00
 GROUP_HEADER = 0xF0
@@ -33,7 +33,7 @@ def u32(data, at):
 
 def native_sizes(image):
     if sha256(image).hexdigest() != RETAIL_PE:
-        raise ValueError("LOL3.DAT does not match the documented English retail executable")
+        raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
     sizes = {}
     for opcode in range(1, 0xF1):
         index = image[0x4E5790 - CODE_BIAS + opcode - 1]
@@ -200,7 +200,7 @@ def main():
             image = game_path(data_dir.parent, "LOL3.DAT").read_bytes()
             if args.dispatch:
                 if sha256(image).hexdigest() != RETAIL_PE:
-                    raise ValueError("LOL3.DAT does not match the documented English retail executable")
+                    raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
                 print(object_slot_lines(image), end="")
                 return 0
             sizes = native_sizes(image)

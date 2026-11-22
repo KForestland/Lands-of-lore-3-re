@@ -1,6 +1,6 @@
 # Native item definitions and use entry points
 
-Addresses refer to the [English retail image](lol3-lmf-reader.md).
+Addresses refer to the [image from the English GOG release (1.07a)](lol3-lmf-reader.md).
 
 **CONFIRMED.** In the input-name table at `LOL3.DAT+0x14EA08`,
 indexes 32–41 name the two bindings for each of five item slots.

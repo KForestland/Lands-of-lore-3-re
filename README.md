@@ -39,7 +39,7 @@ These are counts of work done, not a percentage of how complete the project is. 
 - **Rules traced:** the pages mark 481 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 54/8,375 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
+- **Page facts:** 54/8,381 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
 ![Overhead QWOD0 schematic from MAP edges, waypoints and placements](docs/images/qwod0-schematic.svg)
@@ -75,7 +75,7 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 | Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
 | Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
 | Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |
-| Edition fingerprints | `python tools/edition.py --data "$LOL3_DAT" --check` | English GOG release, 1.07a, all 6 fingerprints match |
+| Edition fingerprints | `python tools/edition.py --data "$LOL3_DAT" --check` | English GOG release (1.07a), all 6 fingerprints match |
 | Fields from a save | `python tools/lol.py save page "$LOL3_SLOT" --out ../lol3-out/save.html` | Writes save.html with stored values and commands for making an edited copy |
 | Archive workspace | `python tools/modkit.py --data "$LOL3_DAT" --check` | Byte-identical rebuild of 22 files from 73 editable entries |
 | Patch maker | `python tools/patch.py make --data "$LOL3_DAT" "my mod output" --title "My edit" --out ../lol3-out/edit.json` | Writes a version 3 patch and reports the changed files |
@@ -130,7 +130,7 @@ Sign in to GitHub and open the [Windows build](https://github.com/KForestland/La
 
 The app saves **LoL3 My Game.html** in Documents and shows its full path. The level plans are stored in the page and open offline in a current browser with JavaScript enabled. With Python with Tk, you can also run `python tools/lol.py mygame`.
 
-Choose **Open a saved game**, select an original save and point to your English 1.07a installation. **Report a fault** lets you choose one of the 11 open reports and preview the documented game values before saving a plain-text copy in Documents. The text contains no save name, path or other personal data. If you run My Game from Python, decoding the compressed values uses `lzokay` or the system `liblzo2`.
+Choose **Open a saved game**, select an original save and point to your installation of the English GOG release (1.07a). **Report a fault** lets you choose one of the 11 open reports and preview the documented game values before saving a plain-text copy in Documents. The text contains no save name, path or other personal data. If you run My Game from Python, decoding the compressed values uses `lzokay` or the system `liblzo2`.
 
 ## Quick start with git (for people who use git)
 
@@ -184,7 +184,7 @@ Full table with evidence: [`docs/STATUS.md`](docs/STATUS.md). "Q11" and the like
 | Textures | [Cache to PNG](docs/lol3-texture-bake.md#cache-record-to-png): 10,669 of 15,118 mip records in the game-written cache decode using native palette sources; six flag values are still open. All 18 `.TE_` wrappers frame (Q1, Q6, Q7). |
 | Movies, music | Movie files (VQA) decoded; on a 16-bit display under Wine the intro's colours are converted from 15-bit to 16-bit (Q9); the 38 music tracks are MP3 inside WAV files, played through the Miles sound library (Q10) |
 | Level sounds | WAV files using IMA ADPCM compression, in the 18 per-level sound archives ([level sheets](docs/levels/README.md)) |
-| Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (some producers, targets and displayed effects remain open); per-level summaries (Q11) |
+| Scripts | All 18 levels' scripts frame exactly with the 39 native opcode lengths; every opcode, event pool, predicate and timer formula traced, the object commands resolved per target class (some producers, targets and displayed effects remain open, along with [what two globals mean in play](docs/lol3-script-events.md#predicates-and-global-bytes)); per-level summaries (Q11) |
 | Items, spells, dialogue, combat | Traced in the program: 343 item rows, all 113 nonzero regular item handlers read one by one, 28 spell definitions, the dialogue and quest tag lookup (2,641 of 2,642 commands join), the creature hit resolver, cast cost and mana debit. Open: what the objects the handlers build do on screen, and mitigation names (Q12) |
 | Saves | Header, directories and compression mapped from 47 of our own saved games, written by the original program (not included; `lol3_save_writer.py --check` rebuilds your own byte for byte); a running-game comparison isolates the fields of a turn, a step and an item move; other payload meanings open (Q13) |
 

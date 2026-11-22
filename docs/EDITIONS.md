@@ -14,7 +14,7 @@ Set `$LOL3_DAT` to the same folder to omit `--data`. Add `--check` to verify the
 
 **CONFIRMED.** Byte counts and SHA-256 cover every byte from file offset `+0x00` to EOF. File names start in the installation folder. `DAT/` marks files inside that subfolder.
 
-### English GOG release, 1.07a
+### English GOG release (1.07a)
 
 | File | Bytes | SHA-256 |
 |---|---:|---|

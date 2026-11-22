@@ -24,7 +24,7 @@ def cstring(image, at):
 
 def movie_names(image):
     if hashlib.sha256(image).hexdigest() != RETAIL_PE:
-        raise ValueError("LOL3.DAT differs from the documented English retail executable")
+        raise ValueError("LOL3.DAT differs from the executable from the English GOG release (1.07a)")
     name_format = cstring(image, MOVIE_NAME_FMT)
     path_format = cstring(image, MOVIE_PATH_FMT)
     names = {}
@@ -338,7 +338,7 @@ def check(data, summary):
                     else:
                         level_formats[result] += 1
     if found != names.keys() or music_count != 38 or sum(level_formats.values()) != 6696 or len(level_sounds) != 18:
-        raise ValueError("archive counts disagree with the English retail corpus")
+        raise ValueError("archive counts disagree with the English GOG release (1.07a) corpus")
     if summary:
         print(f"Movie chunk counts {dict(chunks_seen)}, SND2 byte sizes {dict(samples_seen)}, FINF targets {dict(seek_counts)}")
         print(f"Level WAVE families (channels, block align, byte rate) {dict(level_formats)}")

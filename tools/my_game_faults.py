@@ -125,7 +125,7 @@ def saved_report(source, folder, selection):
         if sha256(image).hexdigest() != RETAIL_PE:
             raise ValueError("unknown executable layout")
     except DATA_ERRORS as error:
-        raise ValueError("Choose the game folder for the documented Lands of Lore III English 1.07a edition.") from error
+        raise ValueError("Choose the game folder for the Lands of Lore III English GOG release (1.07a).") from error
 
     lines = [f"Lands of Lore III fault report — {fault.title}", f"Saved level: {level}"]
     if fault.position:

@@ -1,7 +1,7 @@
 # Script and event dispatch in the native image
 
-The addresses in this page refer to the English retail `LOL3.DAT`
-PE32. Subtract `0x400C00` for an instruction's file offset. The
+The addresses in this page refer to the `LOL3.DAT`
+PE32 from the English GOG release (1.07a). Subtract `0x400C00` for an instruction's file offset. The
 [PE identification](lol3-lmf-reader.md) gives the executable hash.
 
 The search resumed from the MAP and object readers. The

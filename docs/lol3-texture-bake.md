@@ -1,6 +1,6 @@
 # Native texture colour bake
 
-Addresses are English retail `LOL3.DAT` PE32 VAs. Subtract `0x400C00`
+Addresses are PE32 VAs in `LOL3.DAT` from the English GOG release (1.07a). Subtract `0x400C00`
 for the file offset of an instruction. The [PE and image identification](lol3-lmf-reader.md)
 applies here.
 
@@ -160,7 +160,7 @@ indexed destination to a measured display pixel remains **UNCONFIRMED**.
 ## Live Direct3D texture format
 
 **CONFIRMED.** On Wine 9.0 with the built-in DirectDraw library and a
-`1024x768` Xvfb display at 16-bit depth, the English retail `LOL3.DAT` (SHA-256 prefix
+`1024x768` Xvfb display at 16-bit depth, `LOL3.DAT` from the English GOG release (1.07a) (SHA-256 prefix
 `9a9eb04c8f40`) reached its menu with the native `-WINDOW -MIJAS`
 options. `-WINDOW` sets the flag at `0x4083CE`. `-MIJAS` skips the
 logo call at `0x407574`. In Video Controls, the run chose `Direct3D: display`
@@ -204,7 +204,7 @@ and read `[0x661640]` and `[0x66163C]` after `0x4951BA`.
 
 ### Live level-5 indexed row and upload
 
-**CONFIRMED.** On the same English retail executable and Direct3D
+**CONFIRMED.** On the same executable from the English GOG release (1.07a) and Direct3D
 device choice, one null-sink instance ran from a disposable
 copy on private 16-bit Xvfb. Before launch, the copied autosave
 was `df50eda48c27` (+0x498 = 5). The trace did not log a
