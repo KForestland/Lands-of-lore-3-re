@@ -40,7 +40,7 @@ an exact source-word collection point at `0x495635` just as the caller
 returns from filling staging. Use a matched draw and presentation on that
 renderer if following that route. [Final wall colour](OPEN_QUESTIONS.md#final-wall-colour)
 
-In folder 0111, the mapping lookup found the engine header page and the instruction bytes were unread. In folder 0113, WineDbg identified the engine process and its command list did not open, so the memory read at the texel instruction could not be made. The final software wall colour stays open. This needs a debugger setup we do not have, with an in-process read of known engine bytes and a trace from the texel read through the indexed write to the presented pixel.
+In folder 0111, the mapping lookup found the engine header page and the instruction bytes were unread. In folder 0113, WineDbg identified the engine process and its command list did not open, so the memory read at the texel instruction could not be made. The final software wall colour stays open. One more thing to try is reading from the `LOL3.DAT` process. The spell and item runs found live values there and read zeros at the same addresses in the launcher. Verify the loaded texel instruction in the engine process, then trace the texel read through the indexed write to the presented pixel. [Process readings](#on-screen-spell-and-item-coverage)
 
 ### Q12. Which live cast consumes an alternate resource?
 
@@ -109,20 +109,33 @@ This run did not exercise the successful cast and item-use paths above.
 
 ## On-screen spell and item coverage
 
+On 22 November, run 149 loaded the game-written `dsaf` save in Upper
+Gladstone separately for each action. Both runs logged `SoFtWaRe` under
+Wine and used read-only memory checks. The source save was unchanged.
+
+| Action | Before and after on screen | Before and after in `LOL3.DAT` |
+|---|---|---|
+| Greater Light (`0x7A`), key **3**, folder 0117 | A light appears and brightens the wall. The mana oval looks the same in the two pictures. | Mana at `0x5D5098` fell from 437 to 420. |
+| Vel's Fruit (`0x44`), key **6**, folder 0118 | The fruit stays in pocket 1 and its count falls from 3 to 2. | The pocket count at `0x546A5C` fell from 3 to 2. |
+
+The `LOL3.DAT` child process held both live values. Reading the same
+addresses in the `LOL3.EXE` launcher returned zero before and after
+each action.
+
 Spell `0x57` has a viewport effect in the charged-cast run on the edited
 quick-slot setup. The charged HUD indication is still unseen. The key-3
 `0x54` request showed the no-enemy message, so its cast effect is unseen.
-The `0x59` trace records the native debit. The viewport effect for `0x59`
-and all the other rows in the [spell tables](lol3-spell-dispatch.md#definition-tables)
-remains unseen in a matched launch record.
+The `0x59` trace records the native debit. Outside Greater Light and the
+charged `0x57` trial, the [spell tables](lol3-spell-dispatch.md#definition-tables)
+still lack matched launch records of the viewport effects.
 
 The edited-slot trials followed Ancient's Stone (handler 6) and Mana
 Cluster (handler 112) through their native counter writes and checked
 consumption against a new save. No separate on-screen effect was isolated
-for those uses. The [item-handler tables](lol3-item-dispatch.md#use-effects)
-describe the file and code evidence. Each handler row remains unseen
-on-screen as an isolated use effect. The floor pickup in Q13 is an
-inventory transfer witness.
+for those uses. Vel's Fruit gives an on-screen use witness for handler 20.
+The remaining [item-handler rows](lol3-item-dispatch.md#use-effects)
+still lack an isolated on-screen use witness. The floor pickup in Q13
+is an inventory transfer witness.
 
 ## Probes not yet run
 
