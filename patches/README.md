@@ -37,6 +37,8 @@ The checks below use English GOG release (1.07a). Quest and dialogue IDs come fr
 
 #### Rescuing Sioned
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 Copper frees Sioned in Ruloi World and returns to the guild without getting the return scene. In `GRULO.WSX`, object 239's value-20 event at `+0xCC8C36` checks off quest 36 and starts a sequence on creature 75. At the guild, `BUPP1.WSX+0x18E764E` requires shared byte 8 equal to 6 to set up Dawn, creature 26. Her event at `+0x18E7730` starts the report-back exchange, and its last group writes shared byte 8 to 7 at `+0x18D3184`. The journal write in GRULO and the Dawn scene are separate steps. **Patch not located yet.** The reported state has no event or save trace identifying which step failed. Check the rescue sequence, shared byte 8 and Dawn's event on the first return.
 
 #### Orcish Retribution
@@ -45,13 +47,19 @@ Copper can hear Leina acknowledge the defeated orcs and still leave without Back
 
 #### Perfumed Scarf
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 The reported failure is reaching the Solan and Mauri sequence without being able to start the scarf exchange. DLOW1 creature 100 has two mode-9 requests with operand 27. Starting from stored level byte 6 equal to 0, the request at `+0x154EB06` writes 1. The earlier guarded request at `+0x154EAF8` writes 2 when the byte is 1. The native matcher keeps the first admitted mode-9/10 row, with mode 1 taking priority if it matches. A separate request at `+0x154EB8C` needs byte 6 equal to 2 to play dialogue 2475. Offering the scarf itself uses mode 3, compares identity `0x87EFED07` at `+0x154EB6C` and sets shared byte 17 to 1 at `+0x1544880`. The item definition is present. Its identity appears once in the 18 MAPs, in this request. **Patch not located yet.** A first acquisition path is still missing from the trace. Changing the request would invent an exchange before the player acquires the scarf.
 
 #### Left sewer grate
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 Copper clicks the grate left of Gladstone Keep with sufficient lockpicking reported and it stays shut. Native guards in the range 7000–7399 test a skill flag and whether the corresponding level exceeds the encoded threshold at `0x4F0540–0x4F05CE`. A placement needs an event and guard tied to this particular click before those checks can explain the fault. The CKEEP and adjacent city MAP event lists and editor notes give no unique left-grate match from the report. **Patch not located yet.** A position, facing and failed request would identify whether the gate has a script threshold or uses the native lock path.
 
 #### Draracle wall
+
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
 
 Copper moves near a wall in the lower lair and is drawn into it. Bolle reports backing away in steps as a way out. FLAIR has stored surface neighbors, heights and region runs read through `0x4A663C` and `0x4E7934`. There is no square or heading in the report to join to those rows. **Patch not located yet.** A saved position at the wall and the first unintended move would distinguish a surface-neighbor fault from a movement calculation.
 
@@ -61,9 +69,13 @@ Copper meets Rhynn by the Talamari library, then meets him in Upper Gladstone an
 
 #### Blue Deer inn room
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 Copper reaches the room with belongings inside, yet the innkeeper makes no rent request and the room stays locked. In DLOW1, controller 285's event at `+0x154BDAA` requires state zero and starts the room conversation. Hearing the rent line continue to its final cue at `+0x154BDFA` sets object 284's state to 1 and sets property 40 on innkeeper 105 with argument 27. The separate confirmation at `+0x154EE7C` uses mode 9 with operand 27 and requires the innkeeper's state to be zero. It checks off quest 12 and sends property 21, argument 2, to controller 286. The paid line in the controller's separate branch sets level byte 4 to 1 at `+0x153F28D`. **Patch not located yet.** The first missing action could be the start of the dialogue or the transition to payment. Compare controller 285, the final cue and the live request on the locked visit.
 
 #### Blue Gem
+
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
 
 The report describes taking other gems or killing the mutant chickens before claiming the Blue Gem. The placed item 3 at `HWHIT.WSX+0x1125724` has identity `0x38501FA4`. Three opcode-3 records also grant that identity to the player:
 
@@ -77,6 +89,8 @@ The report describes taking other gems or killing the mutant chickens before cla
 
 #### Victoria's shop
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 Copper returns after the second portal and the audience, picks up goods and cannot pay for or leave with them. CKEEP object 24's value-20 event at `+0xD0913C` leads to Victoria's shop-opening dialogue 3328. The transaction conversation on creature 14 has a kind-21 event 5 at `+0xD0A4AC`, followed by the sale line at `+0xD0720A` through a named audio completion. Dialogue 5303 in BUPP1 belongs to the Mage Librarian. **Patch not located yet.** The second visit's shop and currency state at the producer of the CKEEP event is still missing. A dialogue change would leave that admission path alone.
 
 #### Scavenger eyes
@@ -85,17 +99,25 @@ Copper has scavenger eyes in the pack and a right-click produces no throw. The s
 
 #### Volcano elevator
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 Copper has taken the Heart of Sunrise and removes the statue while below. The platform rises without Copper. `KVOLC.WSX+0x15D137B` requires shared byte 25 equal to 1, sets object 474's state and starts a timer. The writer of that byte at `+0x15CA6CB` is on the Draracle's Sigil request, so this raising annotation alone does not identify the urn. Object 382's two timer expirations at `+0x15D0C2B` and `+0x15D0C3B` drive opposite height changes on region 5858. The mover 27 event at `+0x15D4F19` issues eleven region flag changes. **Patch not located yet.** The urn-removal request and a failed carry test on the rider are still missing. Track the player surface and the platform's moving region together from the instant of removal.
 
 #### Solved quests in the journal
+
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
 
 The report describes completion with an entry still visible, without identifying which entry or whether it remains active or is crossed out. The retail completion commands for rows 12, 35, 36 and 37 all send argument 5 through `0x434560`. After the quest lookups, `0x4345A9` selects journal category 12 for marker `0x32` and category 5 otherwise. The state setter at `0x434180` admits a nonzero update only when it exceeds the stored state, then calls `0x45AC30` to store it. **Patch not located yet.** Capture one affected row's category, state and rendering after its actual completion event. Removing a row or changing the common setter would also affect completed entries that the journal records correctly.
 
 #### Five herbs
 
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
+
 Copper's five-herb quest is crossed out, yet the next Cleric quest does not arrive. BUPP1 object 260's event at `+0x18E3EDA` needs its state to be at least 5 and writes quest 35 state 5 and level byte 22 to 1. Boris's separate event at `+0x18E9CA0` tests level byte 22 equal to 1, then sets it to 2, sets Boris's state to 11 and starts the hand-in conversation. The final cue from that conversation reaches `+0x18E9D88` and writes shared byte 6 to 5 at `+0x18D9D2C`. **Patch not located yet.** The crossed-out row alone says nothing about the second chain. Compare level byte 22, Boris's state and shared byte 6 at the failed visit to locate the stall.
 
 #### Rix's Plasma Staff
+
+[You can help: open your save in the program and send us the report](https://github.com/KForestland/Lands-of-lore-3-re/issues/new?template=bug_report.md).
 
 The report describes losing an unequipped staff after taking it from Rix. In the Woods, object 968's value-30 event at `EWOD1.WSX+0x189BDE0` grants staff identity `0xDA2CD58E` to creature 76 at `+0x1894E4E`. The post-Rix familiar event on object 140 at `+0x189A40A` needs state 0 and queues a sequence without a pack operation.
 

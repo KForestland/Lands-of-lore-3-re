@@ -16,8 +16,7 @@ def localized_names(data, name):
     return dict(read_trr(blob, name)) if blob is not None else {}
 
 
-@lru_cache(maxsize=1)
-def level_names(data):
+def level_stems(data):
     path = game_path(data.parent, "LOL3.DAT")
     if not path.is_file():
         return {}
@@ -25,8 +24,7 @@ def level_names(data):
     start = 0x147138
     if len(image) < start + 27 * 20 or image[:2] != b"MZ":
         return {}
-    titles = localized_names(data, "f_automp.trr")
-    names = {}
+    stems = {}
     for index in range(2, 20):
         pointer, = unpack_from("<I", image, start + 27 * index)
         at = pointer - 0x545000 + 0x143800
@@ -35,12 +33,16 @@ def level_names(data):
         parts = image[at:at + 27].partition(b"\0")[0].split(b"\\")
         if len(parts) != 3 or parts[0] != b"levels" or parts[1] != parts[2] or not parts[1].isalnum():
             continue
-        # The automap uses the names of the corresponding earlier areas
-        # for the two final rows (0x40571B–0x40573B).
-        title = titles.get(10000 + {18: 11, 19: 5}.get(index, index))
-        if title:
-            names[parts[1].decode("ascii").upper()] = title.decode("cp437")
-    return names
+        stems[index] = parts[1].decode("ascii").upper()
+    return stems
+
+
+@lru_cache(maxsize=1)
+def level_names(data):
+    titles = localized_names(data, "f_automp.trr")
+    # The final two automap rows share the titles of earlier areas (0x40571B–0x40573B).
+    return {stem: title.decode("cp437") for index, stem in level_stems(data).items()
+            if (title := titles.get(10000 + {18: 11, 19: 5}.get(index, index)))}
 
 
 def creature_tags(data, stem):

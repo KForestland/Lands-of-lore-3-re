@@ -594,6 +594,12 @@ occupancy bits and stored the remaining pointers against its new
 bases.
 [Exact byte changes and original item use](lol3-spell-dispatch.md#casts-with-edited-quick-slots)
 
+## Save values for fault reports
+
+**CONFIRMED.** The shared-byte initializer reads the length and offset from GLOBAL.ODF +0x60 and +0x64 (header read `0x440505–0x440512`, seek and load `0x4405AE–0x4405CB`, copy `0x440A70–0x440AB6`). Level initialization reads the length and offset from MAP +0xB0 and +0xB4 (`0x43E91D–0x43E93A`, copy `0x440A20–0x440A63`). These byte arrays are global selector 1 and level selector 24, respectively. Each is stored compressed and XORed with the initialized bytes. Restoring the matching original bytes gives the shared and level values used in the fault reports.
+
+**CONFIRMED.** A quest update passes its row ID and state to journal category 5 or 12 (`0x4482B9–0x4482C6`, `0x434560–0x4345D3`). The journal at `0x57095C` uses 24-byte category records starting at +4 (`0x4341B4–0x4341BE`). The parallel ID and state arrays are at category +4 and +0xC (`0x45AC7C–0x45ACA0`). Their save selectors are 23 and 36 for category 5 and 29 and 42 for category 12. The initializer fills the ID baseline with -1 and the state baseline with 0 (`0x45ABA4–0x45ABBB`, `0x45ABD6–0x45ABEE`). Decode the stored ID by complementing it and read the state from the matching row. A zero stored ID denotes an unused row.
+
 ## Close-out
 
 ### Q13

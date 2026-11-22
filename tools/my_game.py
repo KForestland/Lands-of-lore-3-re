@@ -8,6 +8,7 @@ from level_edit_data import item_catalogue
 from level_html import find_data
 from lol3_level_schematic import PLACEMENTS, map_geometry, schematic_svg
 from lol3_script_framing import level_maps, map_range
+from my_game_faults import FAULT_NAMES, saved_report
 from my_game_ui import MyGame, catalogue, edition_label, report
 
 
@@ -83,7 +84,8 @@ def game_page(folder):
     return report(TITLE, edition, maps, tables, extras=(("where", heading, found),))
 
 
-app = MyGame("LoL3 My Game", TITLE, "Lands of Lore III", "DAT", game_page)
+app = MyGame("LoL3 My Game", TITLE, "Lands of Lore III", "DAT", game_page,
+             read_saved=saved_report, faults=FAULT_NAMES)
 
 
 if __name__ == "__main__":

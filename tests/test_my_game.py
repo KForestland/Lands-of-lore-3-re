@@ -1,15 +1,19 @@
 """Use invented names and records to exercise the LoL3 guide."""
 from base64 import b64decode
+from dataclasses import replace
 from gzip import decompress
+from hashlib import sha256
 from pathlib import Path
 import re
 import struct
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from tests.kit_fixture import geometry, make_fixture
 from extract_wsx_entries import wsx_name_hash
 from lol3_text_writer import write_trr
+from lol3_save_writer import Packed, synthetic_slot, write_slot
 from lol3_wsx_writer import write_wsx
 from my_game import app
 from my_game_ui import GameFolderError
@@ -75,6 +79,30 @@ def check_page(page):
 
 
 class MyGame(unittest.TestCase):
+    def test_fault_report_includes_only_requested_save_values(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            game = root / "fixture"
+            make_my_game_fixture(game)
+            slot = synthetic_slot()
+            sections = list(slot.sections)
+            sections[23] = Packed(((8, struct.pack("<ii", ~35, ~1)),))
+            sections[36] = Packed(((8, struct.pack("<II", 5, 2)),))
+            source = root / "Do not include this filename.000"
+            raw = write_slot(replace(slot, sections=tuple(sections)))
+            source.write_bytes(raw)
+            index = app.faults.index("Solved quests in the journal")
+            digest = sha256((game / "LOL3.DAT").read_bytes()).hexdigest()
+            with patch("my_game_faults.RETAIL_PE", digest), patch("my_game_faults.decompressor", return_value=lambda packet, size: packet):
+                text, omitted = app.read_saved(source, game, index)
+            self.assertIn("Saved level: 2", text)
+            self.assertIn("Quest 35, journal category 5: 5", text)
+            self.assertIn("The save has no journal entry for quest 12.", omitted)
+            self.assertNotIn("Quest 1,", text)
+            self.assertNotIn("Fixture", text)
+            self.assertNotIn(source.name, text)
+            self.assertEqual(source.read_bytes(), raw)
+
     def test_page_shows_placements_and_eligible_grants(self):
         with TemporaryDirectory() as temp:
             root = Path(temp)
