@@ -2,10 +2,12 @@
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 115 unit tests.
+- **Synthetic data.** 116 unit tests.
 <!-- suite-counts:end -->
 
 The `game_names.py` job reads labels from the original files. Map markers use a stored creature tag where there is a confirmed definition link.
+
+`my_game.py` opens the guide. `my_game_ui.py` supplies the shared desktop window and Documents output. `my_game_faults.py` reads the documented save values for the fault report preview.
 
 Run `python tools/suite_counts.py --write` to refresh these counts after changing either suite.
 

@@ -43,6 +43,7 @@ jobs:
           git apply --directory=$source .github/pyinstaller-windowed-stdio.patch
           if ($LASTEXITCODE -ne 0) { throw 'Could not apply the Windows launcher patch.' }
           python -m pip install "./$source"
+          python -m pip install --only-binary=:all: lzokay==2.1.0
       - name: Build the standalone app
         run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name LoL3-MyGame tools/my_game.py
       - name: Verify the packaged file on synthetic data

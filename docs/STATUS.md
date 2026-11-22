@@ -9,7 +9,7 @@
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 115 unit tests.
+- **Synthetic data.** 116 unit tests.
 <!-- suite-counts:end -->
 
 **As of:** 2026-11-21. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.
@@ -20,10 +20,10 @@ Run the checks: `python3 tools/check_all.py --data <DAT>`. Missing cache or save
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 479 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 481 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 54/8,342 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
+- **Page facts:** 54/8,375 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

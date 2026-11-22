@@ -36,10 +36,10 @@ These are counts of work done, not a percentage of how complete the project is. 
 
 <!-- rating:begin -->
 - **Files read:** 51 of 56 files in `DAT` (2,306.1 of 2,574.4 MiB) have their whole layout read by a tool here: every byte belongs to a known header, directory or entry (what is inside an entry may still be only partly understood). 5 more (268.3 MiB: the four `.PHT` files and the shipped `cdcache.wsx`) are shown byte for byte to be one block repeated (not counted as read); what those bytes mean and what reads them is unknown.
-- **Rules traced:** the pages mark 479 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
+- **Rules traced:** the pages mark 481 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 54/8,342 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
+- **Page facts:** 54/8,375 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
 ![Overhead QWOD0 schematic from MAP edges, waypoints and placements](docs/images/qwod0-schematic.svg)
@@ -130,11 +130,13 @@ Sign in to GitHub and open the [Windows build](https://github.com/KForestland/La
 
 The app saves **LoL3 My Game.html** in Documents and shows its full path. The level plans are stored in the page and open offline in a current browser with JavaScript enabled. With Python with Tk, you can also run `python tools/lol.py mygame`.
 
+Choose **Open a saved game**, select an original save and point to your English 1.07a installation. **Report a fault** lets you choose one of the 11 open reports and preview the documented game values before saving a plain-text copy in Documents. The text contains no save name, path or other personal data. If you run My Game from Python, decoding the compressed values uses `lzokay` or the system `liblzo2`.
+
 ## Quick start with git (for people who use git)
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 115 unit tests.
+- **Synthetic data.** 116 unit tests.
 <!-- suite-counts:end -->
 
 Use Python 3.10 or later and your own copy of the English GOG release (`LOL3.DAT`, SHA-256 starting `9a9eb04c8f404ebf`; the tools that read the program check it by its hash). The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu). The save-selector check reads the dispatch tables and stored flags with the standard library and also decodes the instruction bodies when Capstone is installed (`python3 -m pip install 'capstone>=5,<6'`).
