@@ -5,6 +5,7 @@ from functools import lru_cache
 import struct
 
 from cli_errors import run_cli
+from game_names import creature_tags, level_names
 from level_html import Plan, main
 from level_move_ui import sections
 from level_edit_data import placement_name
@@ -50,7 +51,9 @@ def source_event(row):
 def view(data, stem, gates):
     base, payload = maps(data)[stem]
     vertices, surfaces, waypoints, routes, placed = map_geometry(payload)
-    plan = Plan(f"{stem} level plan", vertices,
+    titles = level_names(data)
+    tags = creature_tags(data, stem)
+    plan = Plan(f"{titles.get(stem, stem)} level plan", vertices,
                 f"The map comes from {stem}.WSX. Source offsets show where records start in the archive. "
                 "Exit conditions come from the stored scripts.")
     plan.legend.update({"Surface": "#587888", "Exit surface": "var(--exit)", "Waypoint path": "#83a6ff"})
@@ -77,7 +80,10 @@ def view(data, stem, gates):
     for name, i, x, z, _ in placed:
         kind, color, prefix = MARKS[name]
         start, stride = tables[name]
-        title = placement_name(data, payload, name, i, start + stride * (i - 1))
+        at = start + stride * (i - 1)
+        title = placement_name(data, payload, name, i, at)
+        if name == "creature" and (tag := tags.get(payload[at + 0x20])):
+            title = f"{tag} · creature {i}"
         plan.dot((x, z), f"{prefix}-{i}", title or f"{name.capitalize()} {i}", kind,
                  {"Row (starts at 1)": i, "X / Z": f"{x >> 16} / {z >> 16}",
                   "Source": f"{stem}.WSX +{base + start + stride * (i - 1):#x}"}, color, f"{prefix}{i}")
@@ -85,7 +91,7 @@ def view(data, stem, gates):
         _, dest, arm, arg, stream, group, command, event, predicate, earlier, guard = row
         surface = source_event(row)
         target = f"surface-{surface}" if surface is not None and 0 <= surface < len(surfaces) else None
-        plan.note(f"exit-{i}", f"Exit {i} to {dest}", "Exits",
+        plan.note(f"exit-{i}", f"Exit {i} to {titles.get(dest, dest)}", "Exits",
                   {"Gate": guard, "Event": event, "Predicate": predicate, "Tried first": earlier,
                    "Script": f"{stream} group {group}, command {command}, subcommand {arm}, arg {arg}"}, target)
     plan.edit_controls, plan.edit_script = sections(plan, stem, payload)
