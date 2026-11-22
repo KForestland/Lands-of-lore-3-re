@@ -41,6 +41,7 @@ returns from filling staging. Use a matched draw and presentation on that
 renderer if following that route. [Final wall colour](OPEN_QUESTIONS.md#final-wall-colour)
 
 In folder 0111, the mapping lookup found the engine header page and the instruction bytes were unread. In folder 0113, WineDbg identified the engine process and its command list did not open, so the memory read at the texel instruction could not be made. The final software wall colour stays open. One more thing to try is reading from the `LOL3.DAT` process. The spell and item runs found live values there and read zeros at the same addresses in the launcher. Verify the loaded texel instruction in the engine process, then trace the texel read through the indexed write to the presented pixel. [Process readings](#on-screen-spell-and-item-coverage)
+Folders 0119 and 0120 read the expected nine bytes at `0x49D0A1` from the live `LOL3.DAT` process at base `0x400000` and both logged client word `0xCDB2` at (120, 80). Folder 0119 missed the debugger prompt. In 0120 WineDbg listed a hardware-assisted breakpoint, and the driver stopped before the colour trace. The source texel, remap byte and stored colour for that pixel remain unread.
 
 ### Q12. Which live cast consumes an alternate resource?
 
