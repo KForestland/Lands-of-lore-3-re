@@ -124,11 +124,17 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
   - [glossary](docs/GLOSSARY.md)
   - [open questions](docs/OPEN_QUESTIONS.md)
 
+## My Game
+
+Sign in to GitHub and open the [Windows build](https://github.com/KForestland/Lands-of-lore-3-re/actions/workflows/windows-mygame.yml). Download and unzip **LoL3-MyGame-Windows**, then double-click **LoL3-MyGame.exe**. Choose your Lands of Lore III installation or its DAT folder. The offline page shows the edition, level plans and tables of items, spells and creatures from your game. **Where is it?** lists the areas and records that place or grant each named item.
+
+The app saves **LoL3 My Game.html** in Documents and shows its full path. With Python with Tk, you can also run `python tools/lol.py mygame`.
+
 ## Quick start with git (for people who use git)
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 113 unit tests.
+- **Synthetic data.** 115 unit tests.
 <!-- suite-counts:end -->
 
 Use Python 3.10 or later and your own copy of the English GOG release (`LOL3.DAT`, SHA-256 starting `9a9eb04c8f404ebf`; the tools that read the program check it by its hash). The quick start and synthetic tests use the Python standard library. The optional `--decode` checks use the system LZO library (`apt install liblzo2-2` on Debian or Ubuntu). The save-selector check reads the dispatch tables and stored flags with the standard library and also decodes the instruction bodies when Capstone is installed (`python3 -m pip install 'capstone>=5,<6'`).

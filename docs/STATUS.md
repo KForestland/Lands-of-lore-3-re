@@ -9,7 +9,7 @@
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 113 unit tests.
+- **Synthetic data.** 115 unit tests.
 <!-- suite-counts:end -->
 
 **As of:** 2026-11-21. What is documented about the original game, which tool reads it, what the tools check on the game files, and what is open. Older pages are kept as history.

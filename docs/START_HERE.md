@@ -2,7 +2,7 @@
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 113 unit tests.
+- **Synthetic data.** 115 unit tests.
 <!-- suite-counts:end -->
 
 [Format quick reference](QUICK_REFERENCE.md) pairs each documented game format with a command and its evidence.
