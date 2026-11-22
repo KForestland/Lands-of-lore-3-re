@@ -78,7 +78,7 @@ def creature_rows(data):
 def render(data):
     program = game_path(data.parent, "LOL3.DAT").read_bytes()
     if sha256(program).hexdigest() != RETAIL_PE:
-        raise ValueError("the report requires the documented English retail LOL3.DAT")
+        raise ValueError("the report requires LOL3.DAT from the English GOG release (1.07a)")
     archive = global_wsx(data)
     items = list(item_rows(archive))
     spells = list(spell_rows(archive))
@@ -90,7 +90,7 @@ def render(data):
                  for i, value in enumerate(unpack_from("<9b", program, effect))]
     return "\n\n".join([
         "# LoL3 numbers at a glance",
-        "Generated from the English retail program and archives by `tools/lol3_numbers.py`. Numeric identifiers and byte offsets identify each record.",
+        "Generated from the program and archives of the English GOG release (1.07a) by `tools/lol3_numbers.py`. Numeric identifiers and byte offsets identify each record.",
         "## Item definitions",
         "The loader reads the 343 item rows of 139 bytes through `0x44057A–0x44059F` and `0x4ACCCE–0x4ACD17`. Fields +0x73 and +0x18 are distinct lookup columns ([definition fields](lol3-item-dispatch.md#definition-directory)). Bit 1 of +0x3F sends a definition to the special cast arm instead of the regular handler index at +0x4B ([use effects](lol3-item-dispatch.md#use-effects)). On the special cast path, `0x4A4547–0x4A4564` reads +0x5B as the base cost, before cast gates and discounts ([cast cost](lol3-spell-dispatch.md#player-cast-and-cost)). The last column is the disk u16 at +0x7D; for a nonzero value v the loader stores max(1, floor(256/v)) (`0x4ACE1B–0x4ACE3E`, [definition fields](lol3-item-dispatch.md#definition-directory)). **UNCONFIRMED.** What the +0x7D value counts in play. Test: break at `0x492319` and note the player action. **UNCONFIRMED.** No per-item scalar damage or armour is proven for the full table. Test: follow the regular handler and the equipment cases into a resolved hit packet before assigning those values.",
         table(("Row", "GLOBAL.WSX", "Key +73", "Identity +18", "Flags +3F", "Regular handler", "Special +5B", "Disk +7D"), items),

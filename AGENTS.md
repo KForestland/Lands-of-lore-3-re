@@ -4,7 +4,7 @@ This page is for a person or a program that takes over this repository without t
 
 ## What this is
 
-Documentation and Python tools for *Lands of Lore III* (Westwood, 1999, Windows): how its data files and rules work, checked against the game files and the original program. The reference copy is the English GOG release, 1.07a. The tools read a person's own copy; the repository holds no game files. Start with README.md, then docs/START_HERE.md and docs/STATUS.md.
+Documentation and Python tools for *Lands of Lore III* (Westwood, 1999, Windows): how its data files and rules work, checked against the game files and the original program. The reference copy is the English GOG release (1.07a). The tools read a person's own copy; the repository holds no game files. Start with README.md, then docs/START_HERE.md and docs/STATUS.md.
 
 ## The rules
 
@@ -36,7 +36,9 @@ python3 tools/doc_index.py --check   # after adding a page: python3 tools/doc_in
 python3 tools/repo_guard.py --check --release
 ```
 
-Without game files, the unit tests, doc_index, page_facts and repo_guard still run; GitHub Actions runs those on Linux, Windows and macOS with Python 3.10 and 3.12. (four checks need files the game writes itself (the texture cache `cdcache.wsx` beside `DAT`, and a save); on a copy that has never run they report SKIP) Run the full list on the exact commit you are about to hand over, not on an earlier one. The tools write only where you point them (`--out`); the tree must be clean after the checks.
+Without game files, the unit tests, doc_index, page_facts and repo_guard still run; GitHub Actions runs those on Linux, Windows and macOS with Python 3.10 and 3.12.
+
+Four checks need the texture cache `cdcache.wsx` beside `DAT` or a saved game. They report SKIP on a copy that has never run. Run the full list on the exact commit you are about to hand over, not on an earlier one. The tools write only where you point them (`--out`); the tree must be clean after the checks.
 
 ## Where the open work is
 
@@ -56,7 +58,7 @@ Here, "done" has a definition: docs/STATUS.md: a row is done when it has a page,
 2. **Counts typed by hand went stale** (check counts, question counts, file counts on several pages). Caught by fresh readers more than once. Counts are now generated (`tools/suite_counts.py`); when you add a check, run its `--write`.
 3. **A byte layout misread** (a field read as little-endian that holds a big-endian value). Caught when an independent reader of the same bytes disagreed. Re-derive a layout with a second program before you build on it.
 4. **Statements labelled as proved that only restated other pages,** or whose expected values were taken from the pages instead of the bytes. Caught in review. The reviewer re-derives from the original files only.
-5. **A claim scoped to the wrong edition or program** (a filename named by the floppy programs only, written as true for the CD). Caught by an independent reviewer. Name the edition and program for every address.
+5. **A claim scoped to the wrong edition or program** (a claim checked on one program and written as true for another). Caught by an independent reviewer. Name the edition and program for every address.
 6. **A breakpoint at code that does not run on the path in question** (a setup routine instead of the per-frame routine). Caught by a static second reading after runs failed to stop. List the callers before choosing a stop.
 7. **A pixel colour decoded with the wrong format** (a 24-bit capture read as 16-bit). Caught by the writer's own audit of the raw capture. Read the capture's header and bytes, not a derived picture.
 8. **A batch handed over without running the full checks on its exact commit;** one word of prose changed a counted label and the rating check failed. Caught by the final reviewer. Always run everything on the exact head.

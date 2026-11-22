@@ -2,7 +2,7 @@
 """Read LoL3 creature mitigation rows and item handler indexes.
 
   lol3_combat_census.py --data DAT          # print the two census tables
-  lol3_combat_census.py --data DAT --check  # check the English retail counts
+  lol3_combat_census.py --data DAT --check  # check the counts for the English GOG release (1.07a)
   lol3_combat_census.py --data DAT --mitigation
   lol3_combat_census.py --data DAT --items
   lol3_combat_census.py --data DAT --modes

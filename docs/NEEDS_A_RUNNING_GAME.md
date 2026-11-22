@@ -1,6 +1,6 @@
 # LoL3 questions to test in the original Windows game
 
-Use a disposable copy of your own English retail installation
+Use a disposable copy of your own installation of the English GOG release (1.07a)
 (`LOL3.DAT` is 1,643,520 bytes). `LOL3.EXE` is a launcher that starts
 `LOL3.DAT` as a child process, so enable child-process debugging
 (WinDbg `.childdbg 1`) or attach x32dbg to the `LOL3.DAT` process
@@ -37,7 +37,7 @@ renderer if following that route. [Final wall colour](OPEN_QUESTIONS.md#final-wa
 
 On 21 November one debugger run found only the engine header page. A later run identified the engine process but its command list did not open, so the memory read at the texel instruction could not be made. The later spell and item runs located live values in the `LOL3.DAT` process. [Process readings](#on-screen-spell-and-item-coverage)
 
-Five software-renderer runs under Wine on 22 November all read the expected nine bytes at `0x49D0A1` in the live `LOL3.DAT` process at base `0x400000`. At (120, 80), the 24-bit window captures have RGB (0, 205, 178), low word `0xCDB2`, except that the second run gives RGB (0, 230, 179), low word `0xE6B3`, just after loading. Its later sample returns to `0xCDB2`. The reason for the difference is open. In the last run, WineDbg armed the hardware breakpoint at the world draw call `0x46D677` and then reported `Cannot continue on 01a0 (00010002)`. The source texel, remap byte and stored colour remain unread. To settle the final wall colour, use a debugger that can resume a thread after a hardware stop under Wine, or a native Windows debugger, and follow those values through presentation for the same pixel and frame.
+Five software-renderer runs under Wine on 22 November all read `8A 04 1A 8B 55 F0 8B 5D E4` at `0x49D0A1` in the live `LOL3.DAT` process (base `0x400000`). The nine bytes match file offset `0x9C4A1`. At (120, 80), the 24-bit window captures have RGB (0, 205, 178), low word `0xCDB2`, except that the second run gives RGB (0, 230, 179), low word `0xE6B3`, just after loading. Its later sample returns to `0xCDB2`. The reason for the difference is open. In the last run, WineDbg armed the hardware breakpoint at the world draw call `0x46D677` and then reported `Cannot continue on 01a0 (00010002)`. The source texel, remap byte and stored colour remain unread. To settle the final wall colour, use a debugger that can resume a thread after a hardware stop under Wine, or a native Windows debugger, and follow those values through presentation for the same pixel and frame.
 
 ### Q12. Which live cast consumes an alternate resource?
 
@@ -164,7 +164,7 @@ notice and skips the fill (`0x4E4DD9` jumps to `0x4E4EAF`).
 
 ### Run of 2026-11-20: DLOW1 autosave with two live edits
 
-One instance of the English retail game under Wine, on a private
+One instance of the English GOG release (1.07a) under Wine, on a private
 16-bit Xvfb display with no audio driver, loaded a copy of the
 game-written DLOW1 autosave `f88f201e77d4` (written during the
 [DLOW1 approach](lol3-spell-dispatch.md#dlow1-approach-with-the-native-placement-live);

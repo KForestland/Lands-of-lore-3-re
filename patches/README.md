@@ -10,7 +10,7 @@ The English GOG release checked here stores `Win95/NT 1.07a` at `LOL3.DAT+0x14DE
 
 ## Where each reported fault sits
 
-**A — explained by the shipped files.** The recorded script or item behaviour explains the report. There is no few-byte repair to restore an existing path.
+**A — no record found that would restore a path.**
 
 **B — failing state still needed.** The check found related code or data. A few-byte patch has not been located yet. A save at the failure, with the action that leads to it, would let us check which step goes wrong.
 

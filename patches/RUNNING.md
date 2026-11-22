@@ -29,7 +29,7 @@ The program stores `Win95/NT 1.07a` at `LOL3.DAT+0x14DEAC`. The date `May  7 199
 
 The resolution text is built with the format `%dx%dx%d` at `LOL3.DAT+0x144238`. One complete example stored in the program is `640x480x8` at `+0x144250`. Another file beside the game, `options_safe.ini`, stores `1024x768x32` and the driver `Glide/3Dfx: Voodoo Graphics`. That Glide sentence is in the program at `+0x149564`. The other Glide names there are `Glide/3Dfx: Banshee/Voodoo 3` (`+0x149514`), `Glide/3Dfx: Voodoo Rush` (`+0x149534`) and `Glide/3Dfx: Voodoo 2` (`+0x14954C`).
 
-**Tried here.** `SoFtWaRe` (`+0x144244`) reached the world in 0054 and again in the colour attempts 0066/0067. Those attempts measured the displayed `0xCDB2` pixel. The source texel for that pixel is still open. The other software settings in the table are readings of the shipped setup. Their individual effect was not tested.
+**Tried here.** `SoFtWaRe` (`+0x144244`) reached the world on 21 November, first in the software-renderer test and again in two colour captures. Both captures have low word `0xCDB2`. The presented colour and the source texel are open. The other software settings in the table are readings of the shipped setup. Their individual effect was not tested.
 
 **Read from files.** Direct3D is the prefix `Direct3D: ` at `+0x149354`. The switches that follow it in the program are `-D3DUSEARGB4444`, `-D3DTBLENDADD`, `-D3DPERMEDIA2`, `-D3DNONSQUARE`, `-D3DFUZZYEDGES`, `-D3DNOVERTEXCOLOR` and `-D3DMONOLIGHTMAPS`. A separate [Direct3D run](../docs/lol3-texture-bake.md#live-direct3d-texture-format) observed the format and texture upload. The Glide names and the resolution from `options_safe.ini` are stored options.
 

@@ -23,7 +23,7 @@ Run the checks: `python3 tools/check_all.py --data <DAT>`. Missing cache or save
 - **Rules traced:** the pages mark 481 statements CONFIRMED (labelled as proved with a cited address or offset) and 80 UNCONFIRMED (a reading not yet proved), on 92 current pages; old notes kept as history are not counted.
 - **Seen in the running game:** 3 of 5 probes that need the original game running are answered (a question can have more than one probe); 0 of them rest on edited saves only.
 - **Open questions:** 13 numbered questions: 3 answered, 7 mostly answered, 3 partly answered.
-- **Page facts:** 54/8,375 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
+- **Page facts:** 54/8,381 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

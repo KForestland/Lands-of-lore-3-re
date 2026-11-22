@@ -1,6 +1,6 @@
 # Native hit requests and resolution
 
-Addresses refer to the [English retail image](lol3-lmf-reader.md).
+Addresses refer to the [image from the English GOG release (1.07a)](lol3-lmf-reader.md).
 
 **CONFIRMED.** Script opcode 19 jumps through the object dispatcher
 to `0x449905`, which calls `0x4E7290`. That helper clears a

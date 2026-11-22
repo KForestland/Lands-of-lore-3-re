@@ -275,7 +275,7 @@ def main():
         data_dir = Path(args.data).resolve()
         image = game_path(data_dir.parent, "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
-            raise ValueError("LOL3.DAT does not match the documented English retail executable")
+            raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
         if args.spells:
             print(spell_lines(global_wsx(data_dir)), end="")
             return 0

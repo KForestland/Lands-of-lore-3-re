@@ -1,6 +1,6 @@
 # Native object and script dispatch
 
-Addresses refer to the [English retail PE](lol3-lmf-reader.md).
+Addresses refer to the [PE from the English GOG release (1.07a)](lol3-lmf-reader.md).
 
 **CONFIRMED.** The MAP loader installs the command stream from header
 u32 +0x44 and byte size +0x8C at `0x43EA72–0x43EA9A`. It reads a

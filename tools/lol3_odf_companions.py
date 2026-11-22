@@ -146,7 +146,7 @@ def main():
     try:
         image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
-            raise ValueError("LOL3.DAT does not match the documented English retail executable")
+            raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
         if image[0x4AB42E - CODE_BIAS:0x4AB42E - CODE_BIAS + 6] != bytes.fromhex("8d347fc1e603"):
             raise ValueError("section-0 size is not count times 24")
         if image[0x4AB682 - CODE_BIAS:0x4AB682 - CODE_BIAS + 3] != bytes.fromhex("83c618"):

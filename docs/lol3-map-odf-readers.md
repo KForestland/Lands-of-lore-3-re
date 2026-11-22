@@ -1,6 +1,6 @@
 # Native MAP and ODF readers
 
-VAs are for the English retail [LOL3.DAT image](lol3-lmf-reader.md).
+VAs are for the [LOL3.DAT image](lol3-lmf-reader.md) from the English GOG release (1.07a).
 Header fields are numbered from zero after the leading u32 38.
 
 ## Shared block before the vertices
@@ -427,8 +427,8 @@ names, the joins and these bytes.
 
 **CONFIRMED.** `lol3_map_writer.py --check --data /path/to/DAT` reads each
 of the 18 MAPs into fields, writes it again in memory and gets the same
-bytes. Command lengths are the 39 opcode sizes that the English retail
-image returns at `0x4E56F0/0x4E5790`. The region stream (MAP +0x3C/+0x84)
+bytes. Command lengths are the 39 opcode sizes that the executable from the English GOG release (1.07a)
+returns at `0x4E56F0/0x4E5790`. The region stream (MAP +0x3C/+0x84)
 holds 4,040 command records and the object stream (+0x44/+0x8C) holds
 54,940, group headers included; these are the counts on the
 [opcode page](lol3-script-opcodes.md). 33 of the 39 opcodes occur. The

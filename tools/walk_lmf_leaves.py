@@ -196,7 +196,7 @@ def check_header_copy(data_dir):
     """The 44-byte header copy and the 15 calls of the member loader."""
     image = game_path(Path(data_dir).resolve().parent, "LOL3.DAT").read_bytes()
     if sha256(image).hexdigest() != RETAIL_PE:
-        raise ValueError("LOL3.DAT does not match the documented English retail executable")
+        raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
     if image[0x44ED0A - CODE_BIAS:0x44ED30 - CODE_BIAS] != HEADER_COPY:
         raise ValueError("light-map header copy is not 11 dwords ending at the grid")
     found = []

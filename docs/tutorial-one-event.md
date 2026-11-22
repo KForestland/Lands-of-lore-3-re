@@ -4,7 +4,7 @@ This example follows a change to the floor when the player enters
 surface 2833 in KVOLC with the entry condition described below.
 A surface is a row of the [MAP surface table](lol3-map-odf-readers.md#map-sections-1-and-2);
 its event records and commands sit in separate [MAP ranges](lol3-script-events.md#two-event-pools). The steps use the
-original `KVOLC.WSX` (stored as `kvolc.wsx`; archive names are case-insensitive in the game but not on Linux) and the English retail `LOL3.DAT` ([address conversion](GLOSSARY.md)). The script listing calls a surface a "region"; both mean the same 56-byte row.
+original `KVOLC.WSX` (stored as `kvolc.wsx`; archive names are case-insensitive in the game but not on Linux) and `LOL3.DAT` from the English GOG release (1.07a) ([address conversion](GLOSSARY.md)). The script listing calls a surface a "region"; both mean the same 56-byte row.
 
 ## Entering the surface
 

@@ -1,6 +1,6 @@
 # Native spell inputs and resource selection
 
-Addresses refer to the [English retail image](lol3-lmf-reader.md).
+Addresses refer to the [image from the English GOG release (1.07a)](lol3-lmf-reader.md).
 
 **CONFIRMED.** The input-name table starts at
 `LOL3.DAT+0x14EA08` (VA `0x550208`). Indexes 46–55 are
@@ -387,8 +387,7 @@ a valid target and record its −1 debit and mana balance at
 ### Casts with edited quick slots
 
 **CONFIRMED, edited-save run.** The BUPP1 source slot
-`5ae559b2cabe` was copied and loaded by the English retail
-original under Wine with a private software renderer and
+`5ae559b2cabe` was copied and loaded by the English GOG release (1.07a) under Wine with a private software renderer and
 null sink. The copied slot (`90099b161497`) kept both counters
 as written by the game. The recipe changes the following
 bytes. Offsets in each row are relative to that selector's

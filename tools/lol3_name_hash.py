@@ -106,7 +106,7 @@ def main():
         try:
             image = game_path(Path(args.data).resolve().parent, "LOL3.DAT").read_bytes()
             if sha256(image).hexdigest() != RETAIL_PE:
-                raise ValueError("LOL3.DAT does not match the documented English retail executable")
+                raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
             if image[FORMAT_AT:FORMAT_AT + 12] != b"MUSIC\\%s.aud":
                 raise ValueError("music format string changed")
             print(stem_lines(c_strings(image, STEMS_AT, 40)), end="")
@@ -120,7 +120,7 @@ def main():
         image = game_path(data.resolve().parent, "LOL3.DAT").read_bytes()
         exe = game_path(data.resolve().parent, "LOL3.EXE").read_bytes()
         if sha256(image).hexdigest() != RETAIL_PE:
-            raise ValueError("LOL3.DAT does not match the documented English retail executable")
+            raise ValueError("LOL3.DAT does not match the executable from the English GOG release (1.07a)")
         if len(exe) != 77824:
             raise ValueError(f"LOL3.EXE is {len(exe)} bytes")
         if image[0x44A290 - CODE_BIAS:0x44A290 - CODE_BIAS + 5] != STEM_LOAD:

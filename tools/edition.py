@@ -7,7 +7,7 @@ from pathlib import Path
 from cli_errors import ReaderArgumentParser, game_path, run_cli
 
 
-WITNESSES = {'English GOG release, 1.07a': {'LOL3.DAT': (1643520, '9a9eb04c8f404ebf68f439df4ec7dc6ad5cc230235d0f853059f636ff720ccea'),
+WITNESSES = {'English GOG release (1.07a)': {'LOL3.DAT': (1643520, '9a9eb04c8f404ebf68f439df4ec7dc6ad5cc230235d0f853059f636ff720ccea'),
                            'LOL3.EXE': (77824, '47653b3971fd623cde6c15bc29ec063d3b3ce26d500887f1c6c60abedcc81bc6'),
                            'LOCAL.WSX': (39557829, 'ee7d077af31aad4e3180562ae1be73a6b1c7d18be7ffc67556b24399ddfcca8c'),
                            'DAT/LOCAL.WSX': (39557829,
