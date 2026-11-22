@@ -5,6 +5,8 @@
 - **Synthetic data.** 113 unit tests.
 <!-- suite-counts:end -->
 
+The `game_names.py` job reads labels from the original files. Map markers use a stored creature tag where there is a confirmed definition link.
+
 Run `python tools/suite_counts.py --write` to refresh these counts after changing either suite.
 
 Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
@@ -29,7 +31,8 @@ Run these from the repository folder. Set the data variable as shown under Setup
 
 | Tool | Example | Output |
 |---|---|---|
-| Job menu | `python tools/lol.py --help` | level, text, translate, music, model, movie, sound, save, patch, mod |
+| Job menu | `python tools/lol.py --help` | names, level, text, translate, music, model, movie, sound, save, patch, mod |
+| Game names | `python tools/lol.py names --data "$LOL3_DAT"` | Map titles, item and spell names and creature labels read from your files |
 | Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
 | Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
 | Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |

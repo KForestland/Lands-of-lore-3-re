@@ -56,23 +56,26 @@ def entry(data, archive_name, *, key):
     return None
 
 
-@lru_cache(maxsize=1)
-def item_names(data):
+def item_catalogue(data):
     odf = entry(data, "GLOBAL.WSX", key=wsx_name_hash("GLOBAL\\GLOBAL.ODF"))
-    trr = entry(data, "LOCALLNG.WSX", key=0x5FB4088C)
+    trr = entry(data, "LOCALLNG.WSX", key=wsx_name_hash("itemjt.trr"))
     if odf is None:
-        return {}
+        return
     names = {key: value[4:].split(b"\x02", 1)[0].decode("cp437").strip()
              for key, value in read_trr(trr)} if trr is not None else {}
     start, = unpack_from("<I", odf, 4)
     count, = unpack_from("<I", odf, 0x34)
-    out = {}
     for index in range(count):
         at = start + 139 * index
         identity, = unpack_from("<I", odf, at + 0x18)
         text_key, = unpack_from("<I", odf, at + 0x73)
-        out[identity] = names.get(text_key) or f"Item definition {index}"
-    return out
+        yield identity, text_key, names.get(text_key), odf[at + 0x3F]
+
+
+@lru_cache(maxsize=1)
+def item_names(data):
+    return {identity: title or f"Item definition {index}"
+            for index, (identity, _, title, _) in enumerate(item_catalogue(data))}
 
 
 def placement_name(data, raw, kind, row, at):

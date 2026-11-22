@@ -70,7 +70,8 @@ What you can look at with your own copy of the game. Run from the clone with `ex
 
 | Tool | Command | Example result |
 |---|---|---|
-| Job menu | `python tools/lol.py --help` | level, text, translate, music, model, movie, sound, save, patch, mod |
+| Job menu | `python tools/lol.py --help` | names, level, text, translate, music, model, movie, sound, save, patch, mod |
+| Game names | `python tools/lol.py names --data "$LOL3_DAT"` | Reads the stored names and creature tags from your copy |
 | Interactive map | `python tools/level_viewer.py --data "$LOL3_DAT" --check` | QWOD0 page with 1,965 entries |
 | Level copy editor | `python tools/level_edit.py --data "$LOL3_DAT" --check` | 18 original archives copied byte-identically and 3 placement kinds verified |
 | Translation tables | `python tools/translate.py --data "$LOL3_DAT" --check` | 27 tables, 13,105 rows, 6 indexed fonts |

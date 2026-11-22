@@ -10,6 +10,7 @@ import cli_errors
 from cli_errors import ReaderArgumentParser, run_cli
 
 JOBS = {
+    "names": ("game_names.py", (), "Read the names of levels, items, spells and creatures"),
     "level": ("level_viewer.py", (), "Look at an interactive level plan"),
     "text": ("lol3_media_check.py", (), "Read original game text"),
     "translate": ("translate.py", (), "Export, build and verify translations"),
