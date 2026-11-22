@@ -82,7 +82,7 @@ HEADER_WORDS = tuple(sorted({
 # The matching reference at +2 is a stream offset for regions and index
 # for objects. Kind 19 uses this word as a guard index.
 EVENT_FORMATS = {
-    0: "", 1: "H2sHHB1sb1sbB", 2: "HBB2sH", 3: "HB", 4: "HB",
+    0: "", 1: "H2sHHB1sb1sbB", 2: "HBB2sH", 3: "HB", 4: "HBB",
     5: "HBB", 6: "HBB", 7: "HBB", 8: "HH", 9: "HHHBB", 10: "HBBH",
     11: "HHB", 12: "HHBB", 15: "HHBBH", 19: "H", 21: "HB", 22: "H",
 }
@@ -95,7 +95,7 @@ RETAINED_COUNTS = {
     "region descriptor fields": 157_956,
     "command fields": 99_314,
     "waypoint labels": 61_984,
-    "event record fields": 33_830,
+    "event record fields": 25_379,
     "type-16 adjuncts": 15_545,
     "settings and auxiliary row fields": 11_673,
     "level-byte names": 8_651,
@@ -230,6 +230,9 @@ def event_fields(raw, start, end):
         if kind not in EVENT_FORMATS or at + length > end:
             raise ValueError(f"invalid event at MAP+{at:#x}")
         fmt = "BB" + EVENT_FORMATS[kind]
+        if kind == 4 and length >= 6 and raw[at + 4] in (3, 4, 5, 6, 7, 9, 10):
+            # These request modes use the dword loaded at 0x4A8503.
+            fmt += "I"
         if kind == 22:
             stop = raw.find(b"\0", at + 4, at + length)
             if stop < 0:
@@ -524,6 +527,8 @@ def check(data):
         (0x4A66CF, "66 89 59 04 66 89 59 06"),
         (0x4E7934, "66 8b 41 04"), (0x4E794C, "8a 41 1a"),
         (0x4E7787, "66 8b 4c 95 10 8b 54 24 2c 3b ca"),
+        (0x4A8503, "8b 47 06"), (0x4A861F, "8a 47 05 84 c0"),
+        (0x4A8573, "39 42 18"), (0x4A8604, "3b c8 74 09 40 3b c8"),
     ):
         opcode(image, address, encoding)
     counts, seen, maps, total, edited = Counter(), set(), 0, 0, False

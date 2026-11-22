@@ -41,7 +41,7 @@ The terminator rows and the kind-1 rows have separate uses. **CONFIRMED.** Every
 | Object | 1 | 16 | 4,516 | `CKEEP.WSX+0xD0962C`. **CONFIRMED** consumer: the row after a terminator, fetched by `0x4F21B0` with kind 1 from `0x445F80` and `0x4466B0` (see above). Field meanings open. |
 | Object | 2 | 10 | 768 | Periodic timer, `0x4F1AD0–0x4F1B84` |
 | Object | 3 | 6 | 1,010 | Compare event u8 +4, `0x4A8255–0x4A8290` |
-| Object | 4 | 10 | 1,999 | Request mode at +4 through 11 slots, `0x4A84FB–0x4A8516` |
+| Object | 4 | 10 | 1,999 | Request mode at +4, inversion byte at +5 and a mode-dependent u32 at +6. See [object requests](#object-requests). |
 | Object | 5 | 6 | 605 | Compare event u8 +4 and value u8 +5. Input 0xFF matches any value; record value 0xFF matches any nonzero input (`0x4A82DE–0x4A8300`, `0x4A82F0–0x4A82FB`). |
 | Object | 6 | 6 | 7,917 | Compare u8 +4, with specific variants that also test +5, e.g. `0x4A8900–0x4A8925`. |
 | Object | 7 | 6 | 3 | **CONFIRMED.** Quantity threshold in `0x4A8AC0`, mode u8 +4 through table `0x4A8BC4`, value V = u8 +5. Inputs are hit-request +0x28 (before) and +0x2C (after) from resolver `0x4E2270`; `0x4465E0` runs it when object +0x18 bit 0x400 is set, e.g. after `0x4B98D0`. Mode 0: while +5 is nonzero, subtract before−after from +5; fire and zero +5 when the drop reaches it. Mode 1: before ≥ V > after. Mode 2: before ≤ V < after. Mode 3: after = V. Above 3 never fires (`0x4A8AFC–0x4A8B5A`). All 3 stored rows are mode 1 with V 200 or 100, e.g. `DLOW1.WSX+0x154DFA0`. |
@@ -60,6 +60,28 @@ input ≥ u8 +7 (`0x4AC287–0x4AC290`). Events 2 and 3 give true on input
 Other inputs retain the caller flag. Events 5 and 6 use that
 flag directly (`0x4AC27B–0x4AC2E4`). The following predicate
 can still reject the event (`0x4AC2E9`).
+
+### Object requests
+
+**CONFIRMED.** The kind-4 matcher loads the dword at +6 at
+`0x4A8503` and uses row +4 to select one of 11 slots at
+`0x4A86E8`. Mode 3 compares the dword with the supplied item's
+definition identity (`0x4A8566–0x4A857B`). Modes 4, 5 and 6 test
+the dword as a mask against definition +0x3F, +0x3D and +0x4F.
+Mode 7 compares it to definition +0x57 (`0x4A8580–0x4A85E0`).
+Modes 9 and 10 require subkind 8 and check whether the target state
+byte is zero or nonzero respectively. They accept the request
+operand when it equals the row's dword or that dword plus one
+(`0x4A85E2–0x4A8611`). A nonzero byte at +5 inverts the result
+at `0x4A861F–0x4A862D`, before the kind-19 guard runs.
+
+**CONFIRMED.** The 18 MAPs have 1,999 kind-4 rows. The writer
+regenerates all 1,999 inversion bytes and the operand dwords in
+1,613 rows. The latter are 68 mode-3 rows, one mode-6 row and
+1,544 mode-9 rows. The total gain is 8,451 bytes from native reads.
+In the remaining 386 rows, modes 0, 1 and 2 leave the loaded dword
+unused. Their dwords stay retained.
+[Retained MAP classes](lol3-map-odf-readers.md#retained-span-classes)
 
 ## Predicates and global bytes
 
