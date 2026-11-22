@@ -632,8 +632,9 @@ surface and item values.
 | Event pools | 233,398 | 33,830 |
 | Region and object commands | 359,668 | 99,314 |
 | Waypoint and path rows, placements | 595,146 | 323,621 |
-| Shared block, both label arrays and surface-to-script gap | 0 | 271,812 |
-| Other sections and gaps | 0 | 634,942 |
+| Shared block, waypoint labels, path labels and surface-to-script gap | 0 | 271,812 |
+| Editor tails | 0 | 606,420 |
+| Placement adjuncts, arrival labels and level-byte names | 0 | 28,522 |
 | **Total** | **18,027,090** | **3,205,590** |
 
 `--coverage STEM` lists every retained range with end-exclusive MAP and
@@ -641,12 +642,52 @@ WSX offsets. In CKEEP it reports 108,520 retained bytes, starting with
 MAP +0x10..+0x14 at `CKEEP.WSX+0xCBB192..+0xCBB196`. `--list STEM`
 continues to give the hashes and offsets of the four named ranges.
 
-**UNCONFIRMED.** The full meanings of the stored region and surface
-fields and the retained subfields. The exact-row reads at `0x4E737A`
-and `0x4A663C` established their record extents. The coverage walk
-separates the remaining bytes by range. Tracing each retained offset
-to the first typed read or write would extend the table. The shared
-block still requires a reader witness, as described in [Q8](#q8).
+### Retained span classes
+
+**CONFIRMED (stored framing).** The 16 classes account for all
+3,205,590 bytes copied by the writer. `lol3_map_writer.py --check`
+checks the class counts, their disjoint extents and the byte-identical
+rebuild. Row offsets in the table are inclusive. Loader addresses
+identify the row reads or the seeks on either side of the span.
+
+| Retained class | Bytes | Fields or boundaries | Retail code |
+|---|---:|---|---|
+| Surface fields | 1,665,314 | 14 per 56-byte row at +0..+3, +0x24..+0x29 and +0x2D..+0x30 | Bulk read `0x4A663C`, setup clears `0x4A66CF–0x4A66D3`, live list head `0x4E5590` |
+| Editor tails | 606,420 | Header +0xC0 to end of MAP. See the [45- and 116-byte rows](#layout-of-the-retained-0xc0-tails) | Loader `0x43E6B0` skips it |
+| Placement fields | 323,621 | +8..+9, +0x14..+0x1B, +0x1D and +0x1F in every row, plus +0x21..+0x37 in creatures | Row loaders above and common constructor `0x4411F0`. Creature selector at `0x4B4579` keeps only the low byte |
+| Shared block | 206,928 | Header +0xCC to +0x04. Per map, a count of 2,873 followed by that many 4-byte rows | Header read `0x43E7E7`, first subsequent seek `0x43E884`. See [Q8](#q8) |
+| Region descriptor fields | 157,956 | 12 per 28-byte row at +0x0A..+0x0D and +0x12..+0x19 | Row read `0x4E737A`, +0x16 clear at `0x4F5A8C` |
+| Command fields | 99,314 | Operand bytes outside the widths recorded in `COMMAND_FORMATS`, including internal slots for 0x12 and 0x16. 95,293 object bytes and 4,021 region bytes | Seeks `0x43EA79` and `0x43E9BD`, length resolvers `0x4E56F0/0x4E5790` |
+| Waypoint labels | 61,984 | 2,384 slots of 26 bytes after the 8-byte rows at seek +0xC8 | `0x43EBD9–0x43EC45` reads rows, seek at `0x43EC5C` passes the labels |
+| Event record fields | 33,830 | Slots outside the length, kind and matched operands in `EVENT_FORMATS`. Audio-name bytes after the first NUL are retained. 33,781 object bytes and 49 region bytes | Object and region iteration at `0x4A8255–0x4A82B2` and `0x4A8DE9–0x4A8E13` |
+| Type-16 adjuncts | 15,545 | From the end of the 33-byte rows at seek +0x18 to seek +0x1C | `0x43EEF1 → 0x469980` reads placements, `0x43EF0A` seeks to the creature table |
+| Settings and auxiliary row fields | 11,673 | At +0x28, row offsets +0..+0x0B, +0x1C..+0x1A7 and +0x1AA..+0x217. At +0x2C, +0..+3, +6 and +9..+0x0B. At +0x48, +0..+7 and +9..+0x0B | `0x43E87B–0x43E8E6`, `0x43EBA9 → 0x4EFA90`, `0x46C5E3` |
+| Level-byte names | 8,651 | 211 slots of 41 bytes between the end of the +0xB4 level bytes and seek +0xBC. There are as many slots as level bytes in each map | Byte read loop `0x440A20–0x440A5E`, predicate seek `0x43E953` |
+| Header fields | 7,128 | Dwords at +0x10, +0x5C, +0x94, +0x9C, +0xA0, +0xA8, +0xC0, +0xCC, +0xD0, +0xD4 and +0xE0 through +0x240 | Full header read at `0x43E7E7`, seek callers listed above |
+| Arrival labels | 2,310 | 77 slots of 30 bytes between the end of the +0x48 12-byte rows and seek +0x3C. Each map has one fewer slot than +0x48 rows | Seek `0x43EF9A`, row reader `0x46C5B0`, separate region command seek `0x43E9BD` |
+| Mover adjuncts | 2,016 | From the end of the 41-byte rows at seek +0x24 to settings seek +0x28 | `0x43EF45 → 0x4D59F0` reads placements, `0x43E884` seeks to settings |
+| Surface-to-script gap | 1,784 | End of the 56-byte surface rows to seek +0x44. Lengths fit 223 eight-byte groups | Surface read `0x4A6604–0x4A663C`, command seek `0x43EA79`. See [Q4](#q4) |
+| Path labels | 1,116 | 36 slots of 31 bytes after the 4-byte rows at seek +0xDC | `0x43EC4D–0x43EC92` reads rows. See [Q4](#q4) |
+| **Total** | **3,205,590** | | |
+
+Both placement adjuncts have a u32 row count, that many 4-byte rows,
+a u32 byte count and a packed payload of that size. The type-16
+adjuncts have 1,205 rows and 10,581 payload bytes. The mover adjuncts
+have 51 rows and 1,668 payload bytes. Each class also has 144 bytes
+of counts. The label check verifies that each arrival and level-byte
+name slot has a printable, NUL-terminated prefix. The writer preserves
+every byte after the NUL.
+
+**UNCONFIRMED.** The meanings of the remaining fields and how an
+original tool used the skipped spans. For row subfields, the bulk
+read and a separate consumer pass delimit the bytes that still
+need a typed read of the stored value. For skipped spans, the
+boundary census and the loader's read and seek sequence establish
+the stored extent. A caller that reads through an adjunct, a label
+slot, the shared block or an editor tail would identify its reader.
+For an arrival label or a level-byte name, an index calculation
+joining the name slot to its neighboring table would establish the
+association.
 
 ## Close-out
 
