@@ -2,7 +2,7 @@
 
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
-- **Synthetic data.** 113 unit tests.
+- **Synthetic data.** 115 unit tests.
 <!-- suite-counts:end -->
 
 The `game_names.py` job reads labels from the original files. Map markers use a stored creature tag where there is a confirmed definition link.
