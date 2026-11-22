@@ -1,5 +1,8 @@
 """Use invented names and records to exercise the LoL3 guide."""
+from base64 import b64decode
+from gzip import decompress
 from pathlib import Path
+import re
 import struct
 from tempfile import TemporaryDirectory
 import unittest
@@ -60,8 +63,12 @@ def make_my_game_fixture(game):
 
 
 def check_page(page):
-    assert page.count("data:image/svg+xml;base64,") == 1
-    for label in ("Test Cavern", "Test Compass", "Test Flash", "Test Drake", "Placed item 1",
+    plans = re.findall(r'data-svg-gzip="([^"]+)"', page)
+    assert len(plans) == 1
+    svg = decompress(b64decode(plans[0])).decode("utf-8")
+    assert "<svg" in svg and "Test Cavern (QWOD0)" in svg
+    for label in ("<h3>Test Cavern (QWOD0)</h3>", "Test Compass", "Test Flash", "Test Drake", "Placed item 1",
+                  "count placed items from 1",
                   "Grant to the player, script record 1"):
         assert label in page, label
     assert "script record 2" not in page

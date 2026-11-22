@@ -51,7 +51,7 @@ def game_page(folder):
 
     maps, locations = [], defaultdict(list)
     for stem, raw in level_maps(data):
-        name = names.get(stem, stem)
+        name = f"{names[stem]} ({stem})" if stem in names else stem
         image = schematic_svg(name, *map_geometry(raw)).encode("utf-8")
         maps.append((stem, name, image, "svg+xml"))
         for identity, label in item_records(raw):
@@ -77,7 +77,9 @@ def game_page(folder):
     rows = ((name, area, record) for key, name in sorted(items.items(), key=lambda row: row[1].casefold())
             for area, record in (locations[key] or [("—", "No placement or grant recorded in these levels.")]))
     found = catalogue("where", heading, ("Item", "Area", "Record"), rows,
-                      "Placed item numbers match the numbers on the plans. Script grants can depend on what you do in the game.")
+                      "This table and the plans count placed items from 1. The research notes count them "
+                      "from 0, so placed item 4 here is item 3 in the notes. "
+                      "Script grants can depend on what you do in the game.")
     return report(TITLE, edition, maps, tables, extras=(("where", heading, found),))
 
 

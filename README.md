@@ -128,7 +128,7 @@ A saved game can be changed in a copy too: `python3 tools/save_edit.py set '/pat
 
 Sign in to GitHub and open the [Windows build](https://github.com/KForestland/Lands-of-lore-3-re/actions/workflows/windows-mygame.yml). Download and unzip **LoL3-MyGame-Windows**, then double-click **LoL3-MyGame.exe**. Choose your Lands of Lore III installation or its DAT folder. The offline page shows the edition, level plans and tables of items, spells and creatures from your game. **Where is it?** lists the areas and records that place or grant each named item.
 
-The app saves **LoL3 My Game.html** in Documents and shows its full path. With Python with Tk, you can also run `python tools/lol.py mygame`.
+The app saves **LoL3 My Game.html** in Documents and shows its full path. The level plans are stored in the page and open offline in a current browser with JavaScript enabled. With Python with Tk, you can also run `python tools/lol.py mygame`.
 
 ## Quick start with git (for people who use git)
 
