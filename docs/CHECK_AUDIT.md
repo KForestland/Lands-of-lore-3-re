@@ -66,3 +66,39 @@ Capstone also verified the decoded instruction bodies against the
 page. The clone reproduced the documentation index and QWOD0
 schematic byte for byte. The reader report and all 36 script listings
 went to folders outside the clone, which stayed clean.
+
+## Trust round 2 on 21 November 2026
+
+Independent readers re-derived sampled statements from the original files.
+Across the three games, 30 of 30 rows held where checked, including one
+texture row checked for its layout only. [Confirmed sample](CONFIRMED_SAMPLE.md#trust-round-2-on-21-november-2026)
+
+The original exercise planted five wrong facts per game in scratch copies.
+Readers had those pages and the game files. They found 11 of 15.
+The checks alone caught 0 of 15.
+
+| Game | Readers on the original plants | Checks on the original plants | Page gate on fresh plants |
+|---|---:|---:|---:|
+| Lands of Lore | 4 of 5 | 0 of 5 | 4 of 5 |
+| Lands of Lore II | 3 of 5 | 0 of 5 | 5 of 5 |
+| Lands of Lore III | 4 of 5 | 0 of 5 | 5 of 5 |
+| Total | 11 of 15 | 0 of 15 | 14 of 15 |
+
+The last column is a later blind set on the page gate. It flags changed
+proved lines for review. The missed line had both a proved and an open
+label, so the inventory skipped it. After the inventory was renewed,
+the byte checks independently caught 1 of those 15 changes.
+
+The project added `page_facts.py --check` to the usual checks and CI.
+The inventory exposes changed proved lines so reviewers can re-derive
+them before merging. Six common citation forms now get byte checks,
+including quoted values at file offsets, loose-file sizes, named tool
+counts and instruction operands. A scored round caught 12 of 13 changes
+written in those forms and 0 of 15 changes drawn from proved literals
+across the pages. The missed supported citation had a broken hex byte
+that dropped out of the parser. A malformed quoted byte now fails the
+check. The coverage count is on the rating page. [How we rate](HOW_WE_RATE.md#the-five-lines)
+
+Readers found wrong values for the RemapTab size, the first light-map
+row, the WSX row count and a MAP field meaning. The mistyped texture
+suffix escaped the original exercise.

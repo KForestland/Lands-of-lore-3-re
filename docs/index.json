@@ -195,7 +195,8 @@
         "tools/lol3_save_selectors.py",
         "tools/lol3_save_writer.py",
         "tools/lol3_script_framing.py",
-        "tools/lol3_wsx_writer.py"
+        "tools/lol3_wsx_writer.py",
+        "tools/page_facts.py"
       ]
     },
     {
