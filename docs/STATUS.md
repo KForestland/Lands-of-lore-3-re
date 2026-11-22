@@ -1,5 +1,12 @@
 # LoL3 reverse-engineering status
 
+## Where this stands
+
+- **In progress.** Tools read the layout of [51 of 56 files in the English GOG DAT folder](../README.md#rating), and check the [MAP and ODF records for 18 levels](formats/map-odf.md).
+- In the running game, [Greater Light and Vel’s Fruit](NEEDS_A_RUNNING_GAME.md#on-screen-spell-and-item-coverage) each had an on-screen result that matched a change read from the running program.
+- Field meanings in [all 16 retained map classes](lol3-map-odf-readers.md#retained-span-classes), the [final colour calculation for one wall pixel](OPEN_QUESTIONS.md#final-wall-colour), and [11 reported player faults](../patches/README.md#where-each-reported-fault-sits) still need evidence.
+- The [rating](HOW_WE_RATE.md) keeps separate counts for files, rules and tests in play. An overall percentage would combine measures of different things.
+
 <!-- suite-counts:begin -->
 - **Original game files.** 42 checks with the required files and dependencies. Quick mode selects 38.
 - **Synthetic data.** 113 unit tests.
@@ -19,15 +26,6 @@ Run the checks: `python3 tools/check_all.py --data <DAT>`. Missing cache or save
 - **Page facts:** 54/8,342 candidate literals registered with byte witnesses. The rest are inventoried so changes can be reviewed.
 <!-- rating:end -->
 
-## Where things stand (21 November 2026)
-
-A dated snapshot; the work continues and the table below is kept current.
-
-- **Known.** 51 of 56 files in `DAT` have their whole layout read by a tool here; the other five are one repeated block (the four PHT files are a seeded `rand()` stream matched to the last byte) ([how we rate](HOW_WE_RATE.md)). 84.9% of the map bytes come from fields the program reads. Some of those fields have uses still open. Separately, every portal command is listed with its conditions in the order the game checks them ([progression](PROGRESSION.md)).
-- **Open.** 10 of 13 numbered questions are not fully answered ([open questions](OPEN_QUESTIONS.md)).
-- **Tests a reader with the game can run.** Each open point that needs the running game has its test and what the runs of 20 November did and did not show, including how to avoid the cache crash marker before a run ([running-game probes](NEEDS_A_RUNNING_GAME.md)).
-- **Tools for your own copy.** Change text or numbers with the mod kit, make and undo patches, edit a saved game, open interactive level plans and export a level as a 3D model: start with the [first ten minutes](FIRST_TEN_MINUTES.md) page or `python3 tools/lol.py`. Known original faults: [patches](../patches/README.md). What these pages got wrong: [corrections](CORRECTIONS.md).
-
 **Columns:** *Pages* = where it is described. *Tool check* = what `--check` measures on the game files. *Open* = numbered in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
 **Running-game results.** Answered probes are counted in the rating; which ones and how: [NEEDS_A_RUNNING_GAME](NEEDS_A_RUNNING_GAME.md#answered-probes). Runs on hand-edited copies of a game-written save: [edited saves](EDITED_SAVES.md).
@@ -37,7 +35,7 @@ A dated snapshot; the work continues and the table below is kept current.
 | WSX archives | [format page](formats/wsx.md), [wsx-extraction](wsx-extraction.md) (history), [container inventory](container-inventory.md) (history) | `extract_wsx_entries`: 51 of 52 `DAT/*.WSX` parse (count, 12-byte records, payload sizes sum to the file), 7,549 entries and 76 native names match their keys. Both cache copies fail the ordinary exact-size check (`check_all` tests the shipped `DAT/` copy). `lol3_cache_seed`: the shipped file is 114 bytes plus 51 copies of one 64,000-byte block (listed separately in the rating), and allocator byte +0x17 has no code address | Q1 |
 | Loose PHT files | [format page](formats/pht.md) | `lol3_pht`: four files, each shown byte for byte through EOF to be a prefix of one pinned 0x1010000-byte cycle (listed separately in the rating). That cycle is the low byte of the seed-1 generator at `LOL3.DAT` `0x51B655` with LF written as CR LF. `LOL3.DAT` and `LOL3.EXE` do not contain the names in any case | Which program wrote the files and whether the game reads them (UNCONFIRMED; file-open trace on the [page](formats/pht.md)) |
 | LMF light maps | [format page](formats/lmf.md), [native reader](lol3-lmf-reader.md) | 18 LMF entries, 5,256 stored LZO1X groups, 424,288 decoded member lengths and the header-word counts (610,325 nonzero words; 340,718 / 107,136 corner matches) checked with `--decode` | Q3 |
-| MAP and ODF level files | [format page](formats/map-odf.md), [native readers](lol3-map-odf-readers.md), [map-format](map-format.md) (history), [level catalog notes](level-catalog-notes.md) (history), [level file types](level-file-types.md) (history) | measured: 18 MAP and 18 ODF entries; MAP section 1 = 8 × field 20 in all 18. `lol3_level_report` checks the surface and waypoint joins (118,951 surfaces, 2,384 waypoints, 36 paths). `lol3_map_spans` re-counts waypoint byte +6, the name classes, the path labels, the 1,784 bytes before field 16 and the 167,942 section-1 rows. `lol3_odf_companions` re-counts the 630 section-0 names and the five AI-file calls. | Q4, Q5 |
+| MAP and ODF level files | [format page](formats/map-odf.md), [native readers](lol3-map-odf-readers.md), [map-format](map-format.md) (history), [level catalog notes](level-catalog-notes.md) (history), [level file types](level-file-types.md) (history) | measured: 18 MAP and 18 ODF entries; MAP section 1 = 8 × field 20 in all 18. Fields read by the program account for 84.9% of the stored MAP bytes ([measured coverage](lol3-map-odf-readers.md#writing-the-stored-fields)). `lol3_level_report` checks the surface and waypoint joins (118,951 surfaces, 2,384 waypoints, 36 paths). `lol3_map_spans` re-counts waypoint byte +6, the name classes, the path labels, the 1,784 bytes before field 16 and the 167,942 section-1 rows. `lol3_odf_companions` re-counts the 630 section-0 names and the five AI-file calls. | Q4, Q5 |
 | Textures | [Texture formats](formats/textures.md), [texture bake and PNG](lol3-texture-bake.md#cache-record-to-png), [tex-format](tex-format.md) (history), [texture 028E evidence](texture-028e-evidence.md) (history) | The census of the game-folder `cdcache.wsx` (written by the game when it runs) joins all 15,118 mip records to arm-3 palettes. The PNG tool decodes 10,669 and verifies 4,429 records as SMD frame references and reports the 20 unconfirmed ones by flag. All 18 level wrappers frame. With liblzo2, `lol3_native_checks --decode-copy` reads the five flag-0x02AC/0x82AC mips of every shipped bank (90 in 18) as full-width index-3 rows; which bytes the live game draws stays UNCONFIRMED ([test](lol3-texture-bake.md#two-ambiguous-row-flags)). Optional LZO expansion checks all 49,684 palette joins and matches the four installed banks. | Q1, Q6, Q7 |
 | Byte-pattern labels (QWOD0, SWOD4) | [structural phase](lol3-structural-phase.md) (history), [semantic phase](lol3-semantic-phase.md), [witness map](../evidence/lol3-witness-map.md) | `lol3_claimed_edges`: QWOD0 `C5 A5` counts 195/2/1/0, no MAP column steps from `C5` to `A5`, SWOD4 surface byte +4 is 0/2/6/`0x0B` on 2,393/14/29/0 rows. `--decode` checks the light-map sample high bytes | Q8 |
 | Level sheets | [levels/](levels/README.md) | `lol3_level_report`: 18 level archives, each with its four named entries (.LMF .MAP .ODF .TE_ by hash); 6,696 sidecar sounds, all RIFF WAVE format 17 (IMA ADPCM) | Q4, Q10 |

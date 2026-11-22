@@ -1,10 +1,10 @@
-# Final Closure Memo
+# September 2026 Research Memo
 
 > **History (September 2026).** Kept as a record of an earlier pass. The current state, with the check behind each claim, is in [STATUS.md](STATUS.md); open points are in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
-This repo captures the current public LoL3 semantic checkpoint.
+This September note records byte patterns seen on two maps. See [current status](STATUS.md#where-this-stands) for the work still open.
 
-The strongest current results are:
+The September results were:
 
 - LoL3 runtime is clearly `WSX`-driven.
 - `QWOD0` and `SWOD4` are the two true semantic anchors.
@@ -27,4 +27,4 @@ What this means:
 
 - the LoL3 work is no longer “just structurally constrained”
 - it now has durable byte-level semantic footholds
-- the remaining work is mostly meaning refinement above those footholds
+- the [current questions](OPEN_QUESTIONS.md) include map field meanings, textures and save behaviour

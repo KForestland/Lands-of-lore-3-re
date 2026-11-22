@@ -499,7 +499,6 @@
       ],
       "tools": [
         "tools/check_all.py",
-        "tools/lol.py",
         "tools/lol3_save_header.py",
         "tools/lol3_save_selectors.py",
         "tools/rating.py"
@@ -600,7 +599,7 @@
     },
     {
       "path": "docs/closure-summary.md",
-      "title": "Closure Summary",
+      "title": "September 2026 Research Summary",
       "answers": [],
       "question_references": [],
       "tools": []
@@ -623,7 +622,7 @@
     },
     {
       "path": "docs/final-closure-memo.md",
-      "title": "Final Closure Memo",
+      "title": "September 2026 Research Memo",
       "answers": [],
       "question_references": [],
       "tools": []
