@@ -5,6 +5,8 @@
 - **Synthetic data.** 113 unit tests.
 <!-- suite-counts:end -->
 
+Run `python tools/suite_counts.py --write` to refresh these counts after changing either suite.
+
 Read the original LoL3 data files and replay the checks cited in the reference pages. Format pages are listed in the [docs index](../docs/README.md); terms: [glossary](../docs/GLOSSARY.md).
 
 [Translation guide](../docs/TRANSLATION.md) covers `translate.py` , the FNT reader `translate_fonts.py`, and its game-specific `translate_data.py`.
