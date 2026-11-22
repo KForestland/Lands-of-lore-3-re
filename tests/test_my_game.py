@@ -85,6 +85,7 @@ class MyGame(unittest.TestCase):
             game = root / "fixture"
             make_my_game_fixture(game)
             slot = synthetic_slot()
+            slot = replace(slot, positions=(slot.positions[0], 98377, -144470, *slot.positions[3:]))
             sections = list(slot.sections)
             sections[23] = Packed(((8, struct.pack("<ii", ~35, ~1)),))
             sections[36] = Packed(((8, struct.pack("<II", 5, 2)),))
@@ -95,9 +96,11 @@ class MyGame(unittest.TestCase):
             digest = sha256((game / "LOL3.DAT").read_bytes()).hexdigest()
             with patch("my_game_faults.RETAIL_PE", digest), patch("my_game_faults.decompressor", return_value=lambda packet, size: packet):
                 text, omitted = app.read_saved(source, game, index)
+                position, _ = app.read_saved(source, game, app.faults.index("Draracle wall"))
             self.assertIn("Saved level: 2", text)
             self.assertIn("Quest 35, journal category 5: 5", text)
-            self.assertIn("The save has no journal entry for quest 12.", omitted)
+            self.assertIn("The save has no entry for quest 12 in journal categories 5 or 12.", omitted)
+            self.assertIn("\nX: 1.50\nY: -2.20\n", position)
             self.assertNotIn("Quest 1,", text)
             self.assertNotIn("Fixture", text)
             self.assertNotIn(source.name, text)
