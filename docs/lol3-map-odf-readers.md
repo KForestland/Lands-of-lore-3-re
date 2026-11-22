@@ -436,11 +436,11 @@ other rows are 2,384 waypoints (`0x43EBD9–0x43EC45`), 36 paths
 (`0x43EC4D–0x43EC92`) and 23,850 placements (`0x43EEB6–0x43EF6F`; the
 common fields, X/Z included, are taken by `0x4411F0`).
 
-**CONFIRMED.** The writer regenerates 18,027,090 of 21,232,680
+**CONFIRMED.** The writer regenerates 18,035,541 of 21,232,680
 bytes (84.9%) from typed fields. Here, a typed field is one whose
 stored value is read by native code at the listed address with that
 width. Some of those fields have uses whose game meaning is still open.
-The check also matches the 3,205,590 bytes carried at their original
+The check also matches the 3,197,139 bytes carried at their original
 offsets. Three fields with a known width but no read of the stored
 value stay retained: header +0xCC (the shared-block start, which the
 loader never seeks; 72 bytes), region descriptor u8 +0x16 (only
@@ -513,6 +513,21 @@ neither. `lol3_map_writer.py --check` verifies the +0x30 count and
 flag relation. The correlation leaves +0x30 retained. The next
 reader witness must follow a loaded surface with a nonzero +0x30
 through a typed read of that byte.
+
+**CONFIRMED (stored grouping and save deltas).** The 1,182 nonzero
+bytes occur in 88 region runs. Each run has a single nonzero value.
+In 72 of the runs every surface has that value. BUPP1 surface 315
+belongs to region 11 and stores value 4 at `BUPP1.WSX+0x183CD31`.
+The saved surface table is selector 12 (`0x438B15`), with 56-byte
+rows and baseline XOR. Across 368 nonempty selector-12 payloads in
+47 existing slots, all 2,696,475 decoded row bytes at +0x30 were
+zero. The row counts join uniquely to the 18 MAPs and include all
+1,182 nonzero source rows. Slot SHA-256 prefix `704994e52a84`,
+level block 0, has a zero delta for surface 315 at decoded +0x4518.
+This shows no saved change from the baseline at +0x30 in those
+slots. Its gameplay consumer remains **UNCONFIRMED**. A read watch on
+that byte in BUPP1 after the bulk load would separate a field read from
+a save-table copy. [Level save selectors](lol3-native-saves.md#selector-payloads)
 
 #### Surface texture references
 
@@ -629,23 +644,23 @@ surface and item values.
 | +0x34 and +0x30 tables | 9,125,520 | 0 |
 | +0x28, +0x2C and +0x48 tables | 1,071 | 11,673 |
 | Object command index, predicates and level bytes | 243,025 | 0 |
-| Event pools | 233,398 | 33,830 |
+| Event pools | 241,849 | 25,379 |
 | Region and object commands | 359,668 | 99,314 |
 | Waypoint and path rows, placements | 595,146 | 323,621 |
 | Shared block, waypoint labels, path labels and surface-to-script gap | 0 | 271,812 |
 | Editor tails | 0 | 606,420 |
 | Placement adjuncts, arrival labels and level-byte names | 0 | 28,522 |
-| **Total** | **18,027,090** | **3,205,590** |
+| **Total** | **18,035,541** | **3,197,139** |
 
 `--coverage STEM` lists every retained range with end-exclusive MAP and
-WSX offsets. In CKEEP it reports 108,520 retained bytes, starting with
+WSX offsets. In CKEEP it reports 108,331 retained bytes, starting with
 MAP +0x10..+0x14 at `CKEEP.WSX+0xCBB192..+0xCBB196`. `--list STEM`
 continues to give the hashes and offsets of the four named ranges.
 
 ### Retained span classes
 
 **CONFIRMED (stored framing).** The 16 classes account for all
-3,205,590 bytes copied by the writer. `lol3_map_writer.py --check`
+3,197,139 bytes copied by the writer. `lol3_map_writer.py --check`
 checks the class counts, their disjoint extents and the byte-identical
 rebuild. Row offsets in the table are inclusive. Loader addresses
 identify the row reads or the seeks on either side of the span.
@@ -659,7 +674,7 @@ identify the row reads or the seeks on either side of the span.
 | Region descriptor fields | 157,956 | 12 per 28-byte row at +0x0A..+0x0D and +0x12..+0x19 | Row read `0x4E737A`, +0x16 clear at `0x4F5A8C` |
 | Command fields | 99,314 | Operand bytes outside the widths recorded in `COMMAND_FORMATS`, including internal slots for 0x12 and 0x16. 95,293 object bytes and 4,021 region bytes | Seeks `0x43EA79` and `0x43E9BD`, length resolvers `0x4E56F0/0x4E5790` |
 | Waypoint labels | 61,984 | 2,384 slots of 26 bytes after the 8-byte rows at seek +0xC8 | `0x43EBD9–0x43EC45` reads rows, seek at `0x43EC5C` passes the labels |
-| Event record fields | 33,830 | Slots outside the length, kind and matched operands in `EVENT_FORMATS`. Audio-name bytes after the first NUL are retained. 33,781 object bytes and 49 region bytes | Object and region iteration at `0x4A8255–0x4A82B2` and `0x4A8DE9–0x4A8E13` |
+| Event record fields | 25,379 | Slots outside the length, kind and matched operands in `event_fields`. Audio-name bytes after the first NUL are retained. 25,330 object bytes and 49 region bytes | Object and region iteration at `0x4A8255–0x4A82B2` and `0x4A8DE9–0x4A8E13` |
 | Type-16 adjuncts | 15,545 | From the end of the 33-byte rows at seek +0x18 to seek +0x1C | `0x43EEF1 → 0x469980` reads placements, `0x43EF0A` seeks to the creature table |
 | Settings and auxiliary row fields | 11,673 | At +0x28, row offsets +0..+0x0B, +0x1C..+0x1A7 and +0x1AA..+0x217. At +0x2C, +0..+3, +6 and +9..+0x0B. At +0x48, +0..+7 and +9..+0x0B | `0x43E87B–0x43E8E6`, `0x43EBA9 → 0x4EFA90`, `0x46C5E3` |
 | Level-byte names | 8,651 | 211 slots of 41 bytes between the end of the +0xB4 level bytes and seek +0xBC. There are as many slots as level bytes in each map | Byte read loop `0x440A20–0x440A5E`, predicate seek `0x43E953` |
@@ -668,7 +683,7 @@ identify the row reads or the seeks on either side of the span.
 | Mover adjuncts | 2,016 | From the end of the 41-byte rows at seek +0x24 to settings seek +0x28 | `0x43EF45 → 0x4D59F0` reads placements, `0x43E884` seeks to settings |
 | Surface-to-script gap | 1,784 | End of the 56-byte surface rows to seek +0x44. Lengths fit 223 eight-byte groups | Surface read `0x4A6604–0x4A663C`, command seek `0x43EA79`. See [Q4](#q4) |
 | Path labels | 1,116 | 36 slots of 31 bytes after the 4-byte rows at seek +0xDC | `0x43EC4D–0x43EC92` reads rows. See [Q4](#q4) |
-| **Total** | **3,205,590** | | |
+| **Total** | **3,197,139** | | |
 
 Both placement adjuncts have a u32 row count, that many 4-byte rows,
 a u32 byte count and a packed payload of that size. The type-16
