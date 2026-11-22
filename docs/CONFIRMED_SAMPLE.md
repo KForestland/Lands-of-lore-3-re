@@ -1,6 +1,6 @@
 # Re-deriving a sample of confirmed statements
 
-Two samples of 30 statements labelled confirmed were taken from the current
+The two 19–20 November samples of 30 statements labelled confirmed were taken from the current
 pages, each by its own rule, and checked again from the original bytes: the archives in `DAT/`
 and beside the game, `LOL3.DAT` disassembled at code address = file offset
 plus `0x400C00` (data at file offset plus `0x401800`), the game-written
@@ -173,3 +173,17 @@ replacements with its own readers: the portal commands
 `music4.wsx+0x11FD49A` with only `fmt `, `fact` and `data` bodies at
 +0x14, +0x3A and +0x46, the `data` chunk ending the RIFF). Both gave the
 result above.
+
+## Trust round 2 on 21 November 2026
+
+Independent readers took ten randomly sampled proved table rows from each
+game's pages and checked the original files with their own readers. Across
+the three games, 30 of 30 rows held within the scope checked. The full
+statement was checked in 29 rows. On one Lands of Lore III texture row,
+the layout held and the palette-source clause was outside the check.
+
+On release `fbf972e`, nine Lands of Lore III rows held in full. The
+tenth held on its layout. The event page now includes the kind-9 guard.
+
+A separate set of deliberately wrong statements tested what readers and
+checks could catch. [Check audit](CHECK_AUDIT.md#trust-round-2-on-21-november-2026)
