@@ -129,7 +129,7 @@ def saved_report(source, folder, selection):
 
     lines = [f"Lands of Lore III fault report — {fault.title}", f"Saved level: {level}"]
     if fault.position:
-        lines.extend((f"X: {x / 65536}", f"Y: {y / 65536}", f"Facing (game units): {heading & 0xFFFF}"))
+        lines.extend((f"X: {x / 65536:.2f}", f"Y: {y / 65536:.2f}", f"Facing (game units): {heading & 0xFFFF}"))
         if region != 0xFFFF:
             lines.append(f"Region: {region}")
     omissions = [fault.omitted] if fault.omitted else []
@@ -156,7 +156,7 @@ def saved_report(source, folder, selection):
                 if states:
                     lines.extend(f"Quest {quest}, journal category {category}: {state}" for category, state in states)
                 else:
-                    omissions.append(f"The save has no journal entry for quest {quest}.")
+                    omissions.append(f"The save has no entry for quest {quest} in journal categories 5 or 12.")
     except DATA_ERRORS as error:
         raise ValueError("This saved game and game folder could not provide the required report values.") from error
 
