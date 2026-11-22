@@ -664,6 +664,10 @@ continues to give the hashes and offsets of the four named ranges.
 checks the class counts, their disjoint extents and the byte-identical
 rebuild. Row offsets in the table are inclusive. Loader addresses
 identify the row reads or the seeks on either side of the span.
+Naming a class locates its bytes relative to those reads or seeks.
+All 16 classes contain fields or spans whose purpose remains open.
+An exact count of individual fields needs boundaries for the opaque
+payloads.
 
 | Retained class | Bytes | Fields or boundaries | Retail code |
 |---|---:|---|---|
